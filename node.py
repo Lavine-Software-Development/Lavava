@@ -4,12 +4,13 @@ ATTACK_PERCENTAGE = 0.5
 
 class Node:
 
-    def __init__(self, id):
+    def __init__(self, id, pos):
         self.value = 0
         self.owner = None
         self.clicker = None
         self.edges = []
         self.id = id
+        self.pos = pos
 
     def grow(self):
         self.value += GROWTH_RATE
