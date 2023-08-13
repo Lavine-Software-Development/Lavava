@@ -20,12 +20,14 @@ class Node:
         if self.owner == None:
             if not clicker.begun:
                 self.owner = clicker
+                return True
             else:
-                self.expand()
+                return self.expand()
         elif self.owner == clicker:
             self.absorb()
         else:
             self.capture()
+        return False
 
     def absorb(self):
         for edge in self.edges:
@@ -36,11 +38,17 @@ class Node:
         return edge.opposing_nodes[self.id]
 
     def expand(self):
+        success = False
         for edge in self.edges:
             if self.neighbor(edge).owner == self.clicker:
                 edge.owned = True
-                self.owner = self.clicker
+                success = True
                 self.share(edge)
+        
+        if success:
+            self.owner = self.clicker
+
+        return success
 
     def capture(self):
         attack_edges = []
@@ -58,6 +66,7 @@ class Node:
 
         if attack_strength > self.value:
             self.handover(attack_edges, broken_edges)
+
 
     def handover(self, attack_edges, broken_edges):
         self.owner = self.clicker
