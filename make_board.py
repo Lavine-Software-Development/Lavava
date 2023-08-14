@@ -4,6 +4,7 @@ import random
 from collections import defaultdict
 from node import Node
 from edge import Edge
+from player import Player
  
 
 NODE_COUNT = 60
@@ -226,7 +227,7 @@ def blit_nodes():
 
     for spot in nodes:
 
-        p.draw.circle(screen, BLACK, spot.pos, 13)
+        p.draw.circle(screen, BLACK, spot.pos, spot.value + 5)
 
     p.display.update()
 
@@ -242,7 +243,15 @@ running=True
 
 blit_edges()
 
-blit_nodes()
+
+player = Player()
+owned = []
+
+for spot in nodes:
+    if spot.click(player):
+        owned.append(spot)
+
+print(len(owned))
 
 while running:
 
@@ -257,5 +266,8 @@ while running:
             position=event.pos
 
         # p.draw.circle(screen, BLACK, (position[0],position[1]), 20, 0)
+    for spot in owned:
+        spot.grow()
 
-    p.display.update()
+    # p.display.update()
+    blit_nodes()

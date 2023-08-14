@@ -1,4 +1,4 @@
-GROWTH_RATE = 1
+GROWTH_RATE = 0.001
 TRANSFER_RATE = 0.01
 ATTACK_PERCENTAGE = 0.5
 
@@ -12,15 +12,20 @@ class Node:
         self.id = id
         self.pos = pos
 
+    def __str__(self):
+        return str(self.id)
+
     def grow(self):
         self.value += GROWTH_RATE
-        self.player.score += GROWTH_RATE
+        self.owner.score += GROWTH_RATE
 
     def click(self, clicker):
         self.clicker = clicker
         if self.owner == None:
             if not clicker.begun:
                 self.owner = clicker
+                clicker.begun = True
+                print("First node owned: " + str(self))
                 return True
             else:
                 return self.expand()
@@ -40,8 +45,10 @@ class Node:
 
     def expand(self):
         success = False
+        print("ATTEMPT: " + str(self) + "------------------")
         for edge in self.edges:
             if self.neighbor(edge).owner == self.clicker:
+                print("EXPANDED from: " + str(self.neighbor(edge)))
                 edge.owned = True
                 success = True
                 self.share(edge)
