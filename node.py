@@ -1,6 +1,7 @@
-GROWTH_RATE = 0.001
+GROWTH_RATE = 0.0001
 TRANSFER_RATE = 0.01
 ATTACK_PERCENTAGE = 0.5
+BLACK = (0, 0, 0)
 
 class Node:
 
@@ -95,6 +96,12 @@ class Node:
     def transfer(self, neighbor, amount):
         self.value += amount
         neighbor.value -= amount
+
+    @property
+    def color(self):
+        if self.owner:
+            return self.owner.color
+        return BLACK
 
         
         

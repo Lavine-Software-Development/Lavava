@@ -227,7 +227,7 @@ def blit_nodes():
 
     for spot in nodes:
 
-        p.draw.circle(screen, BLACK, spot.pos, spot.value + 5)
+        p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
 
     p.display.update()
 
@@ -243,8 +243,9 @@ running=True
 
 blit_edges()
 
-
-player = Player()
+# This is a demonstration of clicking. First node can be selected, others only work if they're neighbor has
+# been selected. \/
+player = Player(BLUE)
 owned = []
 
 for spot in nodes:
@@ -264,6 +265,8 @@ while running:
         elif event.type == p.MOUSEBUTTONDOWN:
 
             position=event.pos
+
+            # call click on the node which is in the range
 
         # p.draw.circle(screen, BLACK, (position[0],position[1]), 20, 0)
     for spot in owned:
