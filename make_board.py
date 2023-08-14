@@ -1,11 +1,9 @@
 import pygame as p
-
 import numpy as np
-
 import random
-
 from collections import defaultdict
-
+from node import Node
+from edge import Edge
  
 
 NODE_COUNT = 60
@@ -48,20 +46,19 @@ RED = (255, 0, 0)
 
 YELLOW = (255,255,51)
 
- 
 
 screen.fill(WHITE)
-
 p.display.update()
 
- 
+nodes = []
+edges = []
 
 #####################
 
 nodeSpots = []
-
-while len(nodeSpots) < NODE_COUNT:
-
+count = 0
+while count < NODE_COUNT:
+    
     spot = [random.randint(int(SCREEN_WIDTH/10),int(9*SCREEN_WIDTH/10)),random.randint(int(SCREEN_HEIGHT/10),int(9*SCREEN_HEIGHT/10))]
 
     works=True
@@ -73,9 +70,9 @@ while len(nodeSpots) < NODE_COUNT:
             works=False
 
     if works:
-
         nodeSpots.append(spot)
-
+        nodes.append(Node(count, spot))
+        count += 1
  
 
 edge_set = set()
@@ -188,22 +185,16 @@ def make_edges():
 
     edge_set = set()
 
- 
-
     count = 0
-
- 
 
     while count < EDGE_COUNT:
 
         num1 = random.randint(0, NODE_COUNT-1)
-
         num2 = random.randint(0, NODE_COUNT-1)
 
         while num2 == num1:
 
             num2 = random.randint(0, NODE_COUNT-1)
-
  
 
         combo = (min(num1, num2), max(num1, num2))
@@ -211,10 +202,9 @@ def make_edges():
         if combo not in edge_set and nearby(combo) and check_all_overlaps(combo):
 
             edge_set.add(combo)
-
             edgeDict[num1].add(num2)
-
             edgeDict[num2].add(num1)
+            edges.append(Edge(nodes[num1], nodes[num2]))
 
             count += 1
 
@@ -222,13 +212,11 @@ def make_edges():
 
 def blit_edges():
 
-    for key in edgeDict:
+    for edge in edges:
 
-        for val in edgeDict[key]:
+        # linelength = np.sqrt((edge.nodes[0].pos[0]-edge.nodes[1].pos[0])**2+(edge.nodes[0].pos[1]-edge.nodes[1].pos[1])**2)
 
-            linelength = np.sqrt((nodeSpots[val][0]-nodeSpots[key][0])**2+(nodeSpots[val][1]-nodeSpots[key][1])**2)
-
-            p.draw.line(screen,(50,50,50), nodeSpots[val], nodeSpots[key],2)
+        p.draw.line(screen,(50,50,50), edge.nodes[0].pos, edge.nodes[1].pos,2)
 
             #int(min(SCREEN_HEIGHT,SCREEN_WIDTH)/(linelength))
 
@@ -236,9 +224,9 @@ def blit_edges():
 
 def blit_nodes():
 
-    for spot in nodeSpots:
+    for spot in nodes:
 
-        p.draw.circle(screen, BLACK, [spot[0],spot[1]], 13)
+        p.draw.circle(screen, BLACK, spot.pos, 13)
 
     p.display.update()
 
