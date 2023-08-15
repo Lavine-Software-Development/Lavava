@@ -6,8 +6,8 @@ class Edge:
         self.nodes = (node1, node2)
         self.opposing_nodes = {node1.id: node2, node2.id: node1}
         self.flow = 1
-        # node1.neighbors.append(self)
-        # node2.neighbors.append(self)
+        node1.edges.append(self)
+        node2.edges.append(self)
         self.owned = False
 
     def widen(self):

@@ -4,6 +4,7 @@ import random
 from collections import defaultdict
 from node import Node
 from edge import Edge
+from player import Player
  
 
 NODE_COUNT = 80
@@ -223,7 +224,7 @@ def blit_nodes():
 
     for spot in nodes:
 
-        p.draw.circle(screen, BLACK, spot.pos, 13)
+        p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
 
     p.display.update()
 
@@ -239,7 +240,16 @@ running=True
 
 blit_edges()
 
-blit_nodes()
+# This is a demonstration of clicking. First node can be selected, others only work if they're neighbor has
+# been selected. \/
+player = Player(BLUE)
+owned = []
+
+for spot in nodes:
+    if spot.click(player):
+        owned.append(spot)
+
+print(len(owned))
 
 while running:
 
@@ -262,6 +272,11 @@ while running:
             blit_edges()
             blit_nodes()
 
-        # p.draw.circle(screen, BLACK, (position[0],position[1]), 20, 0)
+            # call click on the node which is in the range
 
-    p.display.update()
+        # p.draw.circle(screen, BLACK, (position[0],position[1]), 20, 0)
+    for spot in owned:
+        spot.grow()
+
+    # p.display.update()
+    blit_nodes()
