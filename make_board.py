@@ -206,6 +206,11 @@ def make_edges():   #assumes global list edges is empty
 
             count += 1
 
+def remove_excess_nodes():
+    for node in nodes:
+        if len(node.edges) == 0:
+            nodes.remove(node)
+
 ##########################
 
 def blit_edges():
@@ -235,21 +240,13 @@ def blit_nodes():
 
 make_nodes()
 make_edges()
+remove_excess_nodes()
 
 running=True
 
 blit_edges()
 
-# This is a demonstration of clicking. First node can be selected, others only work if they're neighbor has
-# been selected. \/
-player = Player(BLUE)
-owned = []
-
-for spot in nodes:
-    if spot.click(player):
-        owned.append(spot)
-
-print(len(owned))
+blit_nodes()
 
 while running:
 
@@ -269,14 +266,10 @@ while running:
             screen.fill(WHITE)
             make_nodes()
             make_edges()
+            remove_excess_nodes()
             blit_edges()
             blit_nodes()
 
             # call click on the node which is in the range
 
-        # p.draw.circle(screen, BLACK, (position[0],position[1]), 20, 0)
-    for spot in owned:
-        spot.grow()
-
-    # p.display.update()
-    blit_nodes()
+    p.display.update()
