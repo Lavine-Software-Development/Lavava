@@ -6,7 +6,7 @@ from node import Node
 from edge import Edge
  
 
-NODE_COUNT = 60
+NODE_COUNT = 80
 
 EDGE_COUNT = 100
 
@@ -53,26 +53,7 @@ p.display.update()
 nodes = []
 edges = []
 
-#####################
-
-nodeSpots = []
-count = 0
-while count < NODE_COUNT:
-    
-    spot = [random.randint(int(SCREEN_WIDTH/10),int(9*SCREEN_WIDTH/10)),random.randint(int(SCREEN_HEIGHT/10),int(9*SCREEN_HEIGHT/10))]
-
-    works=True
-
-    for node in nodeSpots:
-
-        if np.sqrt((spot[0]-node[0])**2+(spot[1]-node[1])**2) < 3*min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5):
-
-            works=False
-
-    if works:
-        nodeSpots.append(spot)
-        nodes.append(Node(count, spot))
-        count += 1
+####################
  
 
 edge_set = set()
@@ -153,7 +134,7 @@ def do_intersect(p1, q1, p2, q2):
 
 def overlap(edge1,edge2):
 
-    return do_intersect(nodeSpots[edge1[0]],nodeSpots[edge1[1]],nodeSpots[edge2[0]],nodeSpots[edge2[1]])
+    return do_intersect(nodes[edge1[0]].pos,nodes[edge1[1]].pos,nodes[edge2[0]].pos,nodes[edge2[1]].pos)
 
    
 
@@ -177,11 +158,27 @@ def check_all_overlaps(edge):
 
 def nearby(edge):
 
-    return np.sqrt((nodeSpots[edge[0]][0]-nodeSpots[edge[1]][0])**2+(nodeSpots[edge[0]][1]-nodeSpots[edge[1]][1])**2) < 6 * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)
+    return np.sqrt((nodes[edge[0]].pos[0]-nodes[edge[1]].pos[0])**2+(nodes[edge[0]].pos[1]-nodes[edge[1]].pos[1])**2) < 6 * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)
 
- 
+def make_nodes():  #assumes global list nodes is empty
+    count = 0
+    while count < NODE_COUNT:
+        
+        spot = [random.randint(int(SCREEN_WIDTH/10),int(9*SCREEN_WIDTH/10)),random.randint(int(SCREEN_HEIGHT/10),int(9*SCREEN_HEIGHT/10))]
 
-def make_edges():
+        works=True
+
+        for node in nodes:
+
+            if np.sqrt((spot[0]-node.pos[0])**2+(spot[1]-node.pos[1])**2) < 3*min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5):
+
+                works=False
+
+        if works:
+            nodes.append(Node(count, spot))
+            count += 1
+
+def make_edges():   #assumes global list edges is empty
 
     edge_set = set()
 
@@ -235,7 +232,7 @@ def blit_nodes():
 
 
 
-
+make_nodes()
 make_edges()
 
 running=True
@@ -253,8 +250,17 @@ while running:
             running= False
 
         elif event.type == p.MOUSEBUTTONDOWN:
+            nodes = [] #reset
+            edges = [] #reset
+            edge_set = set()
 
+            edgeDict = defaultdict(set)
             position=event.pos
+            screen.fill(WHITE)
+            make_nodes()
+            make_edges()
+            blit_edges()
+            blit_nodes()
 
         # p.draw.circle(screen, BLACK, (position[0],position[1]), 20, 0)
 
