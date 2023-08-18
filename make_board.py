@@ -1,4 +1,3 @@
-import pygame as p
 import numpy as np
 import random
 from collections import defaultdict
@@ -9,57 +8,21 @@ from player import Player
 
 NODE_COUNT = 80
 
-EDGE_COUNT = 50
+EDGE_COUNT = 100
 
 SCREEN_WIDTH = 1000
 
 SCREEN_HEIGHT = 1000
 
 
-
-
-
-p.init()
-
- 
-
-size = (SCREEN_WIDTH, SCREEN_HEIGHT)
-
- 
-
-screen = p.display.set_mode(size)
-
- 
-
-p.display.set_caption("Lavava")
-
- 
-
-BLACK = (0, 0, 0)
-
-WHITE = (255, 255, 255)
-
-BLUE = (0, 0, 255)
-
-GREEN = (0, 255, 0)
-
-RED = (255, 0, 0)
-
-YELLOW = (255,255,51)
-
-
-screen.fill(WHITE)
-p.display.update()
-
 nodes = []
 edges = []
-
-####################
+edgeDict = defaultdict(set)
  
 
-edge_set = set()
 
-edgeDict = defaultdict(set)
+
+####################
 
  
 
@@ -206,70 +169,48 @@ def make_edges():   #assumes global list edges is empty
 
             count += 1
 
+    return edges
+
 def remove_excess_nodes():
-    global nodes
-    new_nodes = [node for node in nodes if len(node.edges) > 0]
-    nodes = new_nodes
+    return [node for node in nodes if len(node.edges) > 0]
 
 ##########################
 
-def blit_edges():
-
-    for edge in edges:
-
-        # linelength = np.sqrt((edge.nodes[0].pos[0]-edge.nodes[1].pos[0])**2+(edge.nodes[0].pos[1]-edge.nodes[1].pos[1])**2)
-
-        p.draw.line(screen,(50,50,50), edge.nodes[0].pos, edge.nodes[1].pos,2)
-
-            #int(min(SCREEN_HEIGHT,SCREEN_WIDTH)/(linelength))
-
- 
-
-def blit_nodes():
-
-    for spot in nodes:
-
-        p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
-
-    p.display.update()
-
-######################
 
 
+def board():
 
+    make_nodes()
+    make_edges()
+    nodes = remove_excess_nodes()
+    return nodes, edges
 
-make_nodes()
-make_edges()
-remove_excess_nodes()
 
 running=True
 
-blit_edges()
 
-blit_nodes()
+# while running:
 
-while running:
+#     for event in p.event.get():
 
-    for event in p.event.get():
+#         if event.type == p.QUIT:
 
-        if event.type == p.QUIT:
+#             running= False
 
-            running= False
+#         elif event.type == p.MOUSEBUTTONDOWN:
+#             nodes = [] #reset
+#             edges = [] #reset
+#             edge_set = set()
 
-        elif event.type == p.MOUSEBUTTONDOWN:
-            nodes = [] #reset
-            edges = [] #reset
-            edge_set = set()
+#             edgeDict = defaultdict(set)
+#             position=event.pos
+#             screen.fill(WHITE)
+#             make_nodes()
+#             make_edges()
+#             remove_excess_nodes()
+#             blit_edges()
+#             blit_nodes()
 
-            edgeDict = defaultdict(set)
-            position=event.pos
-            screen.fill(WHITE)
-            make_nodes()
-            make_edges()
-            remove_excess_nodes()
-            blit_edges()
-            blit_nodes()
+#             # call click on the node which is in the range
 
-            # call click on the node which is in the range
-
-    p.display.update()
+#     p.display.update()
