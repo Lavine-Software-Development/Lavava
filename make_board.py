@@ -9,7 +9,7 @@ from player import Player
 
 NODE_COUNT = 80
 
-EDGE_COUNT = 100
+EDGE_COUNT = 50
 
 SCREEN_WIDTH = 1000
 
@@ -207,9 +207,9 @@ def make_edges():   #assumes global list edges is empty
             count += 1
 
 def remove_excess_nodes():
-    for node in nodes:
-        if len(node.edges) == 0:
-            nodes.remove(node)
+    global nodes
+    new_nodes = [node for node in nodes if len(node.edges) > 0]
+    nodes = new_nodes
 
 ##########################
 
