@@ -5,7 +5,7 @@ from make_board import board
 import pygame as p
 
 
-nodes, edges = board()
+nodes, edges , player = board()
 
 p.init()
 
@@ -52,14 +52,20 @@ def blit_edges():
 def blit_nodes():
 
     for spot in nodes:
-
         p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
+        # if spot.owner==None:
+        #     p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
+        # else:
+        #     p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
 
     p.display.update()
 
-
+font = p.font.Font(None, 60)
+def blit_score():
+    p.draw.rect(screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
+    screen.blit(font.render(str(player.score),True,BLACK),(20,20))
 running=True
-
+shitcount = 0
 
 while running:
 
@@ -69,12 +75,25 @@ while running:
 
             running = False
 
-        # if a click is detected, check if it's on a node. If it is, call click() on that node.
+        elif event.type == p.MOUSEBUTTONDOWN:
+             position=event.pos
+             for i in range(len(nodes)):
+                 if ((position[0] - nodes[i].pos[0])**2 + (position[1] - nodes[i].pos[1])**2) < 10:
+                     nodes[i].click(player)
+                     player.score-=1000
 
+        # if a click is detected, check if it's on a node. If it is, call click() on that node.
     blit_edges()
     blit_nodes()
+    blit_score()
     p.display.update()
-    clock.tick(40)
+    clock.tick()
+    shitcount+=1
+    if shitcount  %60==0:
+        for spot in nodes:
+            if spot.owner == player:
+                spot.value+=1
+                player.score+=1
 
 
 

@@ -183,7 +183,8 @@ def board():
     make_nodes()
     make_edges()
     nodes = remove_excess_nodes()
-    return nodes, edges
+    player = Player((255,0,0))
+    return nodes, edges, player
 
 
 running=True
