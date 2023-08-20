@@ -44,7 +44,7 @@ def blit_edges():
 
         # linelength = np.sqrt((edge.nodes[0].pos[0]-edge.nodes[1].pos[0])**2+(edge.nodes[0].pos[1]-edge.nodes[1].pos[1])**2)
 
-        p.draw.line(screen,(50,50,50), edge.nodes[0].pos, edge.nodes[1].pos,2)
+        p.draw.line(screen,(50,50,50), edge.to_node.pos, edge.from_node.pos,2)
 
             #int(min(SCREEN_HEIGHT,SCREEN_WIDTH)/(linelength))
  
