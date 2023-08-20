@@ -5,7 +5,6 @@ from make_board import board
 import pygame as p
 import math
 
-
 nodes, edges , player = board()
 
 p.init()
@@ -39,15 +38,45 @@ screen.fill(WHITE)
 p.display.update()
 clock = p.time.Clock()
 
+def draw_arrow(color, start, end, triangle_size=4, spacing=10):
+    
+    # Calculate the direction vector and its magnitude
+    dx = end[0] - start[0]
+    dy = end[1] - start[1]
+    magnitude = math.sqrt(dx*dx + dy*dy)
+    
+    # Normalize the direction vector
+    dx /= magnitude
+    dy /= magnitude
+    
+    # Calculate the number of triangles based on the spacing
+    num_triangles = int(magnitude / spacing)
+    
+    # Length factor for the two longer edges of the triangle
+    length_factor = 1.5
+    
+    for i in range(1, num_triangles + 1):
+        # Calculate the position along the line for each triangle
+        pos = (start[0] + i * spacing * dx, start[1] + i * spacing * dy)
+        
+        # Calculate the points of the triangle
+        point1 = pos
+        point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
+        point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
+    
+    # Draw the triangle
+        p.draw.lines(screen, color, True, [point1, point2, point3])
+
 def blit_edges():
 
     for edge in edges:
 
         # linelength = np.sqrt((edge.nodes[0].pos[0]-edge.nodes[1].pos[0])**2+(edge.nodes[0].pos[1]-edge.nodes[1].pos[1])**2)
 
-        p.draw.line(screen,(50,50,50), edge.to_node.pos, edge.from_node.pos,2)
-
-            #int(min(SCREEN_HEIGHT,SCREEN_WIDTH)/(linelength))
+        # p.draw.line(screen,(50,50,50), edge.to_node.pos, edge.from_node.pos,2)
+        # make a perpendicular line to the edge
+        draw_arrow((50,50,50), edge.to_node.pos, edge.from_node.pos)
+        
  
 
 def blit_nodes():
