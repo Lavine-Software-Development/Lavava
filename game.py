@@ -3,6 +3,7 @@ from edge import Edge
 import time
 from make_board import board
 import pygame as p
+import math
 
 
 nodes, edges , player = board()
@@ -44,7 +45,7 @@ def blit_edges():
 
         # linelength = np.sqrt((edge.nodes[0].pos[0]-edge.nodes[1].pos[0])**2+(edge.nodes[0].pos[1]-edge.nodes[1].pos[1])**2)
 
-        p.draw.line(screen,(50,50,50), edge.nodes[0].pos, edge.nodes[1].pos,2)
+        p.draw.line(screen,(50,50,50), edge.to_node.pos, edge.from_node.pos,2)
 
             #int(min(SCREEN_HEIGHT,SCREEN_WIDTH)/(linelength))
  
@@ -52,7 +53,7 @@ def blit_edges():
 def blit_nodes():
 
     for spot in nodes:
-        p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
+        p.draw.circle(screen, spot.color, spot.pos, max(5,min(23,int(3*math.log(spot.value+1)))))
         # if spot.owner==None:
         #     p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
         # else:
@@ -89,7 +90,7 @@ while running:
     p.display.update()
     clock.tick()
     shitcount+=1
-    if shitcount  %60==0:
+    if shitcount %10==0:
         for spot in nodes:
             if spot.owner == player:
                 spot.value+=1
