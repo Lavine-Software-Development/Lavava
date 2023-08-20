@@ -172,7 +172,7 @@ def make_edges():   #assumes global list edges is empty
     return edges
 
 def remove_excess_nodes():
-    return [node for node in nodes if len(node.edges) > 0]
+    return [node for node in nodes if len(node.incoming) + len(node.outgoing) > 0]
 
 ##########################
 

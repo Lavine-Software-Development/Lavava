@@ -9,7 +9,8 @@ class Node:
         self.value = 0
         self.owner = None
         self.clicker = None
-        self.edges = []
+        self.incoming = []
+        self.outgoing = []
         self.id = id
         self.pos = pos
 
@@ -37,7 +38,7 @@ class Node:
         return False
 
     def absorb(self):
-        for edge in self.edges:
+        for edge in self.incoming:
             if edge.owned:
                 self.share(edge)
 
@@ -46,10 +47,8 @@ class Node:
 
     def expand(self):
         success = False
-        print("ATTEMPT: " + str(self) + "------------------")
-        for edge in self.edges:
+        for edge in self.incoming:
             if self.neighbor(edge).owner == self.clicker:
-                print("EXPANDED from: " + str(self.neighbor(edge)))
                 edge.owned = True
                 success = True
                 self.share(edge)
@@ -64,7 +63,7 @@ class Node:
         broken_edges = []
         attack_strength = 0
 
-        for edge in self.edges:
+        for edge in self.incoming:
             neighbor = self.neighbor(edge)
             if neighbor.owner == self.clicker:
                 attack_add_on = ATTACK_PERCENTAGE * self.value
