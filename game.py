@@ -1,6 +1,3 @@
-from node import Node 
-from edge import Edge
-import time
 from make_board import board
 import pygame as p
 import math
@@ -38,66 +35,128 @@ screen.fill(WHITE)
 p.display.update()
 clock = p.time.Clock()
 
-def draw_arrow(color, start, end, triangle_size=4, spacing=10):
+def size_factor(x):
+    if x<5:
+        return 0
+    if x>=200:
+        return 1
+    return max(min(math.log10(x/10)/2+x/1000+0.15,1),0)
+
+def distance_point_to_segment(px, py, x1, y1, x2, y2):
+    segment_length_sq = (x2 - x1)**2 + (y2 - y1)**2
     
-    # Calculate the direction vector and its magnitude
+    if segment_length_sq < 1e-6:
+        return math.sqrt((px - x1)**2 + (py - y1)**2)
+    
+    t = max(0, min(1, ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / segment_length_sq))
+    
+    closest_x = x1 + t * (x2 - x1)
+    closest_y = y1 + t * (y2 - y1)
+    
+    distance = math.sqrt((px - closest_x)**2 + (py - closest_y)**2)
+    
+    return distance
+
+def draw_arrow(edge, color, start, end, triangle_size=5, spacing=9):
+    
     dx = end[0] - start[0]
     dy = end[1] - start[1]
     magnitude = math.sqrt(dx*dx + dy*dy)
     
-    # Normalize the direction vector
     dx /= magnitude
     dy /= magnitude
     
-    # Calculate the number of triangles based on the spacing
-    num_triangles = int(magnitude / spacing)
+    num_triangles = int((magnitude-10) / spacing)
     
-    # Length factor for the two longer edges of the triangle
     length_factor = 1.5
     
     for i in range(1, num_triangles + 1):
-        # Calculate the position along the line for each triangle
-        pos = (start[0] + i * spacing * dx, start[1] + i * spacing * dy)
+        pos = (start[0] + i * spacing * dx +5*dx, start[1] + i * spacing * dy+5*dy)
         
-        # Calculate the points of the triangle
         point1 = pos
         point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
         point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
-    
-    # Draw the triangle
-        p.draw.lines(screen, color, True, [point1, point2, point3])
 
+        if edge.flowing:
+            p.draw.lines(screen, color, True, [point1, point2, point3])
+        else:
+            p.draw.polygon(screen, (120,120,120), [point1, point2, point3])
+
+def draw_circle(edge, color, start, end, circle_radius=3, spacing=6):
+    
+    dx = end[0] - start[0]
+    dy = end[1] - start[1]
+    magnitude = math.sqrt(dx*dx + dy*dy)
+    
+    dx /= magnitude
+    dy /= magnitude
+    
+    num_circles = int((magnitude-10) / spacing)
+    
+    for i in range(1, num_circles + 1):
+        pos = (start[0] + i * spacing * dx+5*dx, start[1] + i * spacing * dy+5*dy)
+        if edge.flowing:
+            p.draw.circle(screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
+        else:
+            p.draw.circle(screen, (120,120,120), (int(pos[0]), int(pos[1])), circle_radius)
+            
 def blit_edges():
 
     for edge in edges:
-
+        
+        # dx = edge.to_node.pos[0] - edge.from_node.pos[0]
+        # dy = edge.to_node.pos[1] - edge.from_node.pos[1]
+        # magnitude = math.sqrt(dx*dx + dy*dy)
+        
+        # dx /= magnitude
+        # dy /= magnitude
         # linelength = np.sqrt((edge.nodes[0].pos[0]-edge.nodes[1].pos[0])**2+(edge.nodes[0].pos[1]-edge.nodes[1].pos[1])**2)
 
         # p.draw.line(screen,(50,50,50), edge.to_node.pos, edge.from_node.pos,2)
         # make a perpendicular line to the edge
-        draw_arrow((50,50,50), edge.to_node.pos, edge.from_node.pos)
+        # if edge.directed:
+        #     draw_arrow(edge,(50,50,50),
+        #                 (edge.from_node.pos[0]+dx*(max(5,min(23,int(3*math.log(edge.from_node.value+1))))-5),edge.from_node.pos[1]+dy*(max(5,min(23,int(3*math.log(edge.from_node.value+1))))-5)),
+        #                 (edge.to_node.pos[0]-dx*(max(5,min(23,int(3*math.log(edge.to_node.value+1))))-5),edge.to_node.pos[1]-dy*(max(5,min(23,int(3*math.log(edge.to_node.value+1))))-5)))
+        # else:
+        #     draw_circle(edge,(50,50,50), (edge.to_node.pos[0]-dx*(max(5,min(23,int(3*math.log(edge.to_node.value+1))))-5),edge.to_node.pos[1]-dy*(max(5,min(23,int(3*math.log(edge.to_node.value+1))))-5)),
+        #                 (edge.from_node.pos[0]+dx*(max(5,min(23,int(3*math.log(edge.from_node.value+1))))-5),edge.from_node.pos[1]+dy*(max(5,min(23,int(3*math.log(edge.from_node.value+1))))-5)))
+        if edge.directed:
+            draw_arrow(edge,(50,50,50),edge.from_node.pos,edge.to_node.pos)
+                        
+        else:
+            draw_circle(edge,(50,50,50),edge.from_node.pos,edge.to_node.pos)
         
  
 
 def blit_nodes():
 
     for spot in nodes:
-        p.draw.circle(screen, spot.color, spot.pos, max(5,min(23,int(3*math.log(spot.value+1)))))
+        p.draw.circle(screen, spot.color, spot.pos, int(5+size_factor(spot.value)*18))
         # if spot.owner==None:
         #     p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
         # else:
         #     p.draw.circle(screen, spot.color, spot.pos, spot.value + 5)
 
-    p.display.update()
 
 font = p.font.Font(None, 60)
 def blit_score():
     p.draw.rect(screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
-    screen.blit(font.render(str(player.score),True,BLACK),(20,20))
+    screen.blit(font.render(str(int(player.score)),True,BLACK),(20,20))
 running=True
 shitcount = 0
 
+holding_down = [False, False]
+holding_timer = 0
+clicked_node = None
+
 while running:
+
+    if holding_down[0] and not holding_down[1]:
+        if shitcount-holding_timer >=200:
+            print("AbSorbing should occur")
+            holding_down[1]=True
+            clicked_node.absorbing = True
 
     for event in p.event.get():
 
@@ -107,12 +166,46 @@ while running:
 
         elif event.type == p.MOUSEBUTTONDOWN:
              position=event.pos
+             button = event.button
+             passed=False
              for i in range(len(nodes)):
                  if ((position[0] - nodes[i].pos[0])**2 + (position[1] - nodes[i].pos[1])**2) < 10:
-                     nodes[i].click(player)
-                     player.score-=1000
+                    passed=True
+                    clicked_node = nodes[i]
+                    if clicked_node.owner == player:
+                        holding_down[0] = True
+                        holding_timer = shitcount
+                    else:
+                        clicked_node.click(player)
+             if not passed:
+                holding_down = [False,False]
+                if clicked_node:
+                    clicked_node.absorbing = False
+                    clicked_node = None
 
+                for j in range(len(edges)):
+                    dist = distance_point_to_segment(position[0],position[1],edges[j].from_node.pos[0],edges[j].from_node.pos[1],edges[j].to_node.pos[0],edges[j].to_node.pos[1])
+                    if dist < 5:
+                        if button==3:
+                            edges[j].change_flow()
+                        elif button==1:
+                            edges[j].flow()
+        elif event.type == p.MOUSEMOTION:
+             position=event.pos
+             if clicked_node:
+                 if math.sqrt((position[0]-clicked_node.pos[0])**2 + (position[1]-clicked_node.pos[1])**2) >= int(5+size_factor(clicked_node.value)*18)+1:
+                     holding_down = [False,False]
+                     clicked_node.absorbing = False
+                     clicked_node = None
+                     
+        elif event.type == p.MOUSEBUTTONUP:
+            holding_down=[False,False]
+            print("AbSorbing stopped")
+            if clicked_node:
+                clicked_node.absorbing = False
+                clicked_node = None
         # if a click is detected, check if it's on a node. If it is, call click() on that node.
+    screen.fill(WHITE)
     blit_edges()
     blit_nodes()
     blit_score()
@@ -121,9 +214,10 @@ while running:
     shitcount+=1
     if shitcount %10==0:
         for spot in nodes:
-            if spot.owner == player:
-                spot.value+=1
-                player.score+=1
+            if spot.owner:
+                spot.grow()
+            if spot.absorbing:
+                spot.absorb()
 
 
 

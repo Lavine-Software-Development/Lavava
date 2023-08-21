@@ -1,5 +1,5 @@
-GROWTH_RATE = 0.0001
-TRANSFER_RATE = 0.01
+GROWTH_RATE = 0.1
+TRANSFER_RATE = 2
 ATTACK_PERCENTAGE = 0.5
 BLACK = (0, 0, 0)
 
@@ -9,6 +9,7 @@ class Node:
         self.value = 0
         self.owner = None
         self.clicker = None
+        self.absorbing = False
         self.incoming = []
         self.outgoing = []
         self.id = id
@@ -24,22 +25,17 @@ class Node:
     def click(self, clicker):
         self.clicker = clicker
         if self.owner == None:
-            if not clicker.begun:
-                self.owner = clicker
-                clicker.begun = True
-                print("First node owned: " + str(self))
+            if self.expand():
                 return True
             else:
-                return self.expand()
-        elif self.owner == clicker:
-            self.absorb()
-        else:
-            self.capture()
+                return clicker.buy_node(self)
+        elif self.owner != clicker:
+            return self.capture()
         return False
 
     def absorb(self):
         for edge in self.incoming:
-            if edge.owned:
+            if edge.owned and edge.flowing:
                 self.share(edge)
 
     def neighbor(self, edge):
@@ -89,7 +85,7 @@ class Node:
 
     def share(self, edge):
         neighbor = self.neighbor(edge)
-        transfer_amount = neighbor.value * TRANSFER_RATE * edge.flow 
+        transfer_amount = neighbor.value * TRANSFER_RATE
         self.transfer(neighbor, transfer_amount)
 
     def transfer(self, neighbor, amount):

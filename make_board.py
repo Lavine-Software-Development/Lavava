@@ -165,7 +165,10 @@ def make_edges():   #assumes global list edges is empty
             edge_set.add(combo)
             edgeDict[num1].add(num2)
             edgeDict[num2].add(num1)
-            edges.append(Edge(nodes[num1], nodes[num2]))
+            myedge = Edge(nodes[num1], nodes[num2])
+            if count%3==0:
+                myedge = Edge(nodes[num1], nodes[num2], False)
+            edges.append(myedge)
 
             count += 1
 
