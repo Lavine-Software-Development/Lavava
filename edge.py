@@ -1,4 +1,4 @@
-FLOW = 2
+TRANSFER_RATE = 0.02
 
 class Edge:
 
@@ -19,9 +19,17 @@ class Edge:
         self.owned = False
         self.flowing = True
 
+    def click(self, button, clicker):
+        if self.owned and clicker == self.to_node.owner:
+            if button == 1:
+                return self
+            elif button == 3:
+                self.change_flow()
+        return None
+
     def flow(self):
         if self.directed:
-            amount_transferred = self.from_node.value * FLOW
+            amount_transferred = self.from_node.value * TRANSFER_RATE
             self.to_node.value += amount_transferred
             self.from_node.value -= amount_transferred
 

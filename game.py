@@ -149,6 +149,7 @@ shitcount = 0
 holding_down = [False, False]
 holding_timer = 0
 clicked_node = None
+held_edge = None
 
 while running:
 
@@ -167,29 +168,24 @@ while running:
         elif event.type == p.MOUSEBUTTONDOWN:
              position=event.pos
              button = event.button
-             passed=False
              for i in range(len(nodes)):
                  if ((position[0] - nodes[i].pos[0])**2 + (position[1] - nodes[i].pos[1])**2) < 10:
-                    passed=True
                     clicked_node = nodes[i]
                     if clicked_node.owner == player:
                         holding_down[0] = True
                         holding_timer = shitcount
                     else:
                         clicked_node.click(player)
-             if not passed:
-                holding_down = [False,False]
-                if clicked_node:
-                    clicked_node.absorbing = False
-                    clicked_node = None
+                    break
+
+             if not clicked_node:
 
                 for j in range(len(edges)):
                     dist = distance_point_to_segment(position[0],position[1],edges[j].from_node.pos[0],edges[j].from_node.pos[1],edges[j].to_node.pos[0],edges[j].to_node.pos[1])
                     if dist < 5:
-                        if button==3:
-                            edges[j].change_flow()
-                        elif button==1:
-                            edges[j].flow()
+                        held_edge = edges[j].click(button, player)
+                        break
+
         elif event.type == p.MOUSEMOTION:
              position=event.pos
              if clicked_node:
@@ -197,10 +193,11 @@ while running:
                      holding_down = [False,False]
                      clicked_node.absorbing = False
                      clicked_node = None
+            # equivalent for held edge
                      
         elif event.type == p.MOUSEBUTTONUP:
             holding_down=[False,False]
-            print("AbSorbing stopped")
+            held_edge = None
             if clicked_node:
                 clicked_node.absorbing = False
                 clicked_node = None
@@ -218,6 +215,8 @@ while running:
                 spot.grow()
             if spot.absorbing:
                 spot.absorb()
+        if held_edge:
+            held_edge.flow()
 
 
 
