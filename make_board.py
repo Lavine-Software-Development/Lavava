@@ -3,8 +3,6 @@ import random
 from collections import defaultdict
 from node import Node
 from edge import Edge
-from player import Player
- 
 
 NODE_COUNT = 80
 
@@ -186,8 +184,7 @@ def board():
     make_nodes()
     make_edges()
     nodes = remove_excess_nodes()
-    player = Player((255,0,0))
-    return nodes, edges, player
+    return nodes, edges
 
 
 running=True
