@@ -1,8 +1,13 @@
 from make_board import board
 import pygame as p
 import math
+from player import Player
+ 
 
-nodes, edges , player = board()
+nodes, edges = board()
+player1 = Player((255,0,0))
+player2 = Player((0,0,255))
+player = player1
 
 p.init()
 
@@ -140,9 +145,11 @@ def blit_nodes():
 
 
 font = p.font.Font(None, 60)
+
 def blit_score():
     p.draw.rect(screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
-    screen.blit(font.render(str(int(player.score)),True,BLACK),(20,20))
+    screen.blit(font.render(str(int(player.score)),True,player.color),(20,20))
+
 running=True
 shitcount = 0
 
@@ -155,15 +162,20 @@ while running:
 
     if holding_down[0] and not holding_down[1]:
         if shitcount-holding_timer >=200:
-            print("AbSorbing should occur")
             holding_down[1]=True
             clicked_node.absorbing = True
 
     for event in p.event.get():
 
         if event.type == p.QUIT:
-
             running = False
+
+        if event.type == p.KEYDOWN:
+            if event.key == p.K_a:
+                if player == player1:
+                    player = player2
+                else:
+                    player = player1
 
         elif event.type == p.MOUSEBUTTONDOWN:
              position=event.pos

@@ -55,6 +55,7 @@ class Node:
         return success
 
     def capture(self):
+        print("Attack")
         attack_edges = []
         broken_edges = []
         attack_strength = 0
@@ -62,15 +63,19 @@ class Node:
         for edge in self.incoming:
             neighbor = self.neighbor(edge)
             if neighbor.owner == self.clicker:
-                attack_add_on = ATTACK_PERCENTAGE * self.value
+                attack_add_on = ATTACK_PERCENTAGE * neighbor.value
                 attack_edges.append((edge, attack_add_on))
                 attack_strength += attack_add_on
             elif edge.owned:
                 broken_edges.append(edge)
 
+        print("attack_strength: ", attack_strength)
+        print("value: ", self.value)
         if attack_strength > self.value:
             self.handover(attack_edges, broken_edges)
-
+            print("Attack Successful")
+        else:
+            print("Attack Failed")
 
     def handover(self, attack_edges, broken_edges):
         self.owner = self.clicker
