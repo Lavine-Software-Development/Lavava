@@ -163,7 +163,7 @@ while running:
     if holding_down[0] and not holding_down[1]:
         if shitcount-holding_timer >=200:
             holding_down[1]=True
-            clicked_node.absorbing = True
+            clicked_node.pressed = holding_down[0]
 
     for event in p.event.get():
 
@@ -184,7 +184,7 @@ while running:
                  if ((position[0] - nodes[i].pos[0])**2 + (position[1] - nodes[i].pos[1])**2) < 10:
                     clicked_node = nodes[i]
                     if clicked_node.owner == player:
-                        holding_down[0] = True
+                        holding_down[0] = button
                         holding_timer = shitcount
                     else:
                         clicked_node.click(player)
@@ -203,7 +203,7 @@ while running:
              if clicked_node:
                  if math.sqrt((position[0]-clicked_node.pos[0])**2 + (position[1]-clicked_node.pos[1])**2) >= int(5+size_factor(clicked_node.value)*18)+1:
                      holding_down = [False,False]
-                     clicked_node.absorbing = False
+                     clicked_node.pressed = False
                      clicked_node = None
             # equivalent for held edge
                      
@@ -211,7 +211,7 @@ while running:
             holding_down=[False,False]
             held_edge = None
             if clicked_node:
-                clicked_node.absorbing = False
+                clicked_node.pressed = False
                 clicked_node = None
         # if a click is detected, check if it's on a node. If it is, call click() on that node.
     screen.fill(WHITE)
@@ -225,8 +225,10 @@ while running:
         for spot in nodes:
             if spot.owner:
                 spot.grow()
-            if spot.absorbing:
+            if spot.pressed == 1:
                 spot.absorb()
+            elif spot.pressed == 3:
+                spot.expel()
         if held_edge:
             held_edge.flow()
 

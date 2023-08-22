@@ -9,7 +9,7 @@ class Node:
         self.value = 0
         self.owner = None
         self.clicker = None
-        self.absorbing = False
+        self.pressed = False
         self.incoming = []
         self.outgoing = []
         self.id = id
@@ -37,6 +37,12 @@ class Node:
         for edge in self.incoming:
             if edge.owned and edge.flowing:
                 self.share(edge)
+
+    def expel(self):
+        transfer_amount = self.value * TRANSFER_RATE * -1
+        for edge in self.outgoing:
+            if edge.owned and edge.flowing:
+                self.transfer(self.neighbor(edge), transfer_amount)
 
     def neighbor(self, edge):
         return edge.opposing_nodes[self.id]
