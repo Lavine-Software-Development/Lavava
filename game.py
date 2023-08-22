@@ -223,6 +223,7 @@ while running:
     shitcount+=1
     if shitcount %10==0:
         for spot in nodes:
+            spot.calculate_threatened_score()
             if spot.owner:
                 spot.grow()
             if spot.pressed == 1:
