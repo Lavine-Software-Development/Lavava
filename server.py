@@ -24,6 +24,8 @@ def create_game(conns):
     board = new_board()
     player1 = Player((255,0,0))
     player2 = Player((0,0,255))
+    board.nodes[0].click(player1)
+    board.nodes[5].click(player2)
 
     start_new_thread(threaded_client, (conns[0], player1, board))
     start_new_thread(threaded_client, (conns[1], player2, board))

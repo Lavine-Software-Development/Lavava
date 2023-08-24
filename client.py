@@ -16,6 +16,7 @@ player = n.getPlayer()
 board = n.getBoard()
 nodes = board.nodes
 edges = board.edges
+clock = p.time.Clock()
 
 def size_factor(x):
     if x<5:
@@ -68,22 +69,23 @@ def draw_circle(edge, color, start, end, circle_radius=3, spacing=6):
             p.draw.circle(screen, (120,120,120), (int(pos[0]), int(pos[1])), circle_radius)
             
 def blit_edges():
-
     for edge in edges:
         if edge.directed:
-            draw_arrow(edge,(50,50,50),edge.from_node.pos,edge.to_node.pos)
-                        
+            draw_arrow(edge,(50,50,50),edge.from_node.pos,edge.to_node.pos)         
         else:
             draw_circle(edge,(50,50,50),edge.from_node.pos,edge.to_node.pos)
-        
- 
 
 def blit_nodes():
-
     for spot in nodes:
         p.draw.circle(screen, spot.color, spot.pos, int(5+size_factor(spot.value)*18))
 
+font = p.font.Font(None, 60)
+def blit_score():
+    p.draw.rect(screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
+    screen.blit(font.render(str(int(player.score)),True,player.color),(20,20))
+
 running = True
+shitcount = 0
 
 while running:
 
@@ -95,4 +97,16 @@ while running:
     screen.fill(WHITE)
     blit_edges()
     blit_nodes()
-    p.display.update()
+    blit_score()
+    p.display.update()    
+    clock.tick()
+    shitcount+=1
+    if shitcount %10==0:
+        for spot in nodes:
+            if spot.owner:
+                spot.grow()
+                spot.calculate_threatened_score()
+            if spot.pressed == 1:
+                spot.absorb()
+            elif spot.pressed == 3:
+                spot.expel()
