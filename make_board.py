@@ -177,17 +177,17 @@ def remove_excess_nodes():
 
 ##########################
 
+class Board:
 
+    def __init__(self):
+        make_nodes()
+        make_edges()
+        self.nodes = remove_excess_nodes()
+        self.edges = edges
 
-def board():
-
-    make_nodes()
-    make_edges()
-    nodes = remove_excess_nodes()
-    return nodes, edges
-
-
-running=True
+def new_board():
+    new_board = Board()
+    return new_board
 
 
 # while running:

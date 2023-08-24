@@ -2,7 +2,6 @@ from make_board import board
 import pygame as p
 import math
 from player import Player
- 
 
 nodes, edges = board()
 player1 = Player((255,0,0))
@@ -10,7 +9,6 @@ player2 = Player((0,0,255))
 player = player1
 
 p.init()
-
 
 SCREEN_WIDTH = 1000
 
