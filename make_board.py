@@ -3,6 +3,8 @@ import random
 from collections import defaultdict
 from node import Node
 from edge import Edge
+from player import Player
+from board import Board
 
 NODE_COUNT = 80
 
@@ -163,9 +165,9 @@ def make_edges():   #assumes global list edges is empty
             edge_set.add(combo)
             edgeDict[num1].add(num2)
             edgeDict[num2].add(num1)
-            myedge = Edge(nodes[num1], nodes[num2])
+            myedge = Edge(nodes[num1], nodes[num2], len(edges) + NODE_COUNT)
             if count%3==0:
-                myedge = Edge(nodes[num1], nodes[num2], False)
+                myedge = Edge(nodes[num1], nodes[num2], len(edges) + NODE_COUNT, False)
             edges.append(myedge)
 
             count += 1
@@ -177,41 +179,10 @@ def remove_excess_nodes():
 
 ##########################
 
-
-
-def board():
-
+def new_board():
     make_nodes()
     make_edges()
     nodes = remove_excess_nodes()
-    return nodes, edges
-
-
-running=True
-
-
-# while running:
-
-#     for event in p.event.get():
-
-#         if event.type == p.QUIT:
-
-#             running= False
-
-#         elif event.type == p.MOUSEBUTTONDOWN:
-#             nodes = [] #reset
-#             edges = [] #reset
-#             edge_set = set()
-
-#             edgeDict = defaultdict(set)
-#             position=event.pos
-#             screen.fill(WHITE)
-#             make_nodes()
-#             make_edges()
-#             remove_excess_nodes()
-#             blit_edges()
-#             blit_nodes()
-
-#             # call click on the node which is in the range
-
-#     p.display.update()
+    players = [Player((255,0,0), 0), Player((0,0,255), 1)]
+    new_board = Board(nodes, edges, players)
+    return new_board

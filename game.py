@@ -2,7 +2,6 @@ from make_board import board
 import pygame as p
 import math
 from player import Player
- 
 
 nodes, edges = board()
 player1 = Player((255,0,0))
@@ -10,7 +9,6 @@ player2 = Player((0,0,255))
 player = player1
 
 p.init()
-
 
 SCREEN_WIDTH = 1000
 
@@ -232,22 +230,3 @@ while running:
                 spot.expel()
         if held_edge:
             held_edge.flow()
-
-
-
-
-# This is a demonstration of clicking. First node can be selected, others only work if they're neighbor has
-# been selected. \/
-# player = Player(BLUE)
-# owned = []
-
-# for spot in nodes:
-#     if spot.click(player):
-#         owned.append(spot)
-
-# print(len(owned))
-
-
-#         # p.draw.circle(screen, BLACK, (position[0],position[1]), 20, 0)
-# for spot in owned:
-#     spot.grow()

@@ -15,6 +15,7 @@ class Node:
         self.outgoing = []
         self.id = id
         self.pos = pos
+        self.pressed = False
 
     def __str__(self):
         return str(self.id)
@@ -23,15 +24,16 @@ class Node:
         self.value += GROWTH_RATE
         self.owner.score += GROWTH_RATE
 
-    def click(self, clicker):
+    def click(self, clicker, press):
         self.clicker = clicker
         if self.owner == None:
-            if self.expand():
-                return True
-            else:
-                return clicker.buy_node(self)
+            if not self.expand():
+                clicker.buy_node(self)
+        elif self.owner == clicker:
+            self.pressed = press
+            return True
         elif self.owner != clicker:
-            return self.capture()
+            self.capture()
         return False
 
     def absorb(self):
@@ -76,7 +78,6 @@ class Node:
             self.attack_loss()
             self.own()
             self.value = 1
-            self.pressed = 1
 
     def attack_loss(self):
         threatened_difference = 1 - self.value / self.threaten_score
