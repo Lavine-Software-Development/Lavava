@@ -23,10 +23,11 @@ def size_factor(x):
 
 class Board:
 
-    def __init__(self, nodes, edges):
+    def __init__(self, nodes, edges, players):
         self.nodes = nodes
         self.edges = edges
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
+        self.player_dict = {player.id: player for player in players}
 
     def update(self):
         for spot in self.nodes:

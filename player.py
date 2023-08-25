@@ -1,9 +1,11 @@
 class Player:
 
-    def __init__(self, color):
+    def __init__(self, color, id):
         self.score = 1000
         self.begun = False
         self.color = color
+        self.id = id
+        self.auto_hold = False
 
     def buy_node(self, node):
         if self.score >= 1000:
@@ -12,3 +14,6 @@ class Player:
             node.check_edge_stati()
             return True
         return False
+
+    def switch_auto_hold(self):
+        self.auto_hold = not self.auto_hold

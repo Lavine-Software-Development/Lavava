@@ -27,14 +27,13 @@ class Node:
     def click(self, clicker, press):
         self.clicker = clicker
         if self.owner == None:
-            if self.expand():
-                return True
-            else:
-                return clicker.buy_node(self)
+            if not self.expand():
+                clicker.buy_node(self)
         elif self.owner == clicker:
             self.pressed = press
+            return True
         elif self.owner != clicker:
-            return self.capture()
+            self.capture()
         return False
 
     def absorb(self):

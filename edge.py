@@ -25,8 +25,10 @@ class Edge:
     def click(self, clicker, press):
         if press == 1 and clicker == self.owner:
             self.pressed = True
+            return True
         elif press == 3 and clicker == self.directional_owner:
             self.change_flow()
+        return False
 
     def flow(self):
         if self.directed:

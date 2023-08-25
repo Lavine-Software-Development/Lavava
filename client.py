@@ -7,15 +7,24 @@ p.init()
 
 WHITE = (255, 255, 255)
 
-n = Network()
-player = n.getPlayer()
-board = n.getBoard()
-clock = p.time.Clock()
-d = Draw(board.edges, board.nodes, player)
-
 running = True
 counter = 0
 clicked_node = None
+
+def action(id, acting_player, button):
+    if button:
+        if board.id_dict[id].click(players[acting_player], button):
+            global clicked_node
+            clicked_node = id
+    else:
+        board.id_dict[id].pressed = False
+
+n = Network(action)
+player = n.getPlayer()
+board = n.getBoard()
+players = board.player_dict
+clock = p.time.Clock()
+d = Draw(board.edges, board.nodes, players[player])
 
 while running:
 
@@ -28,19 +37,19 @@ while running:
             position=event.pos
             button = event.button
             if id := board.find_node(position):
-                n.send(id, player, button)
+                n.send((id, player, button))
             elif id := board.find_edge(position):
-                n.send(id, player, button)
+                n.send((id, player, button))
 
         elif event.type == p.MOUSEMOTION:
             position=event.pos
             if clicked_node:
                 if board.stray_from_node(clicked_node, position):
-                    n.send(clicked_node, player, None)
+                    n.send((clicked_node, player, 0))
                     
         elif event.type == p.MOUSEBUTTONUP:
             if clicked_node:
-                n.send(clicked_node, player, None)
+                n.send((clicked_node, player, 0))
 
     d.blit()
     clock.tick()
