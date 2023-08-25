@@ -15,6 +15,7 @@ class Node:
         self.outgoing = []
         self.id = id
         self.pos = pos
+        self.pressed = False
 
     def __str__(self):
         return str(self.id)
@@ -23,13 +24,15 @@ class Node:
         self.value += GROWTH_RATE
         self.owner.score += GROWTH_RATE
 
-    def click(self, clicker):
+    def click(self, clicker, press):
         self.clicker = clicker
         if self.owner == None:
             if self.expand():
                 return True
             else:
                 return clicker.buy_node(self)
+        elif self.owner == clicker:
+            self.pressed = press
         elif self.owner != clicker:
             return self.capture()
         return False

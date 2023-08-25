@@ -10,13 +10,12 @@ WHITE = (255, 255, 255)
 n = Network()
 player = n.getPlayer()
 board = n.getBoard()
-nodes = board.nodes
-edges = board.edges
 clock = p.time.Clock()
-d = Draw(edges, nodes, player)
+d = Draw(board.edges, board.nodes, player)
 
 running = True
-shitcount = 0
+counter = 0
+clicked_node = None
 
 while running:
 
@@ -25,15 +24,28 @@ while running:
         if event.type == p.QUIT:
             running = False
 
+        if event.type == p.MOUSEBUTTONDOWN:
+            position=event.pos
+            button = event.button
+            if id := board.find_node(position):
+                n.send(id, player, button)
+            elif id := board.find_edge(position):
+                n.send(id, player, button)
+
+        elif event.type == p.MOUSEMOTION:
+            position=event.pos
+            if clicked_node:
+                if board.stray_from_node(clicked_node, position):
+                    n.send(clicked_node, player, None)
+                    
+        elif event.type == p.MOUSEBUTTONUP:
+            if clicked_node:
+                n.send(clicked_node, player, None)
+
     d.blit()
     clock.tick()
-    shitcount+=1
-    if shitcount %10==0:
-        for spot in nodes:
-            if spot.owner:
-                spot.grow()
-                spot.calculate_threatened_score()
-            if spot.pressed == 1:
-                spot.absorb()
-            elif spot.pressed == 3:
-                spot.expel()
+
+    counter += 1
+    if counter % 10 == 0:
+
+        board.update()

@@ -2,10 +2,11 @@ TRANSFER_RATE = 0.02
 
 class Edge:
 
-    def __init__(self, to_node, from_node, directed=True):
+    def __init__(self, to_node, from_node, id, directed=True):
         self.directed = directed
         self.to_node = to_node
         self.from_node = from_node
+        self.id = id
         self.opposing_nodes = {to_node.id: from_node, from_node.id: to_node}
         self.flowing = True
         to_node.incoming.append(self)
@@ -15,17 +16,17 @@ class Edge:
             to_node.outgoing.append(self)
         self.owned = False
         self.contested = False
+        self.pressed = False
 
     def lose_ownership(self):
         self.owned = False
         self.flowing = True
 
-    def click(self, button, clicker):
-        if button == 1 and clicker == self.owner:
-            return self
-        elif button == 3 and clicker == self.directional_owner:
+    def click(self, clicker, press):
+        if press == 1 and clicker == self.owner:
+            self.pressed = True
+        elif press == 3 and clicker == self.directional_owner:
             self.change_flow()
-        return None
 
     def flow(self):
         if self.directed:

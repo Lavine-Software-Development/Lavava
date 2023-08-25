@@ -3,6 +3,7 @@ import random
 from collections import defaultdict
 from node import Node
 from edge import Edge
+from board import Board
 
 NODE_COUNT = 80
 
@@ -163,9 +164,9 @@ def make_edges():   #assumes global list edges is empty
             edge_set.add(combo)
             edgeDict[num1].add(num2)
             edgeDict[num2].add(num1)
-            myedge = Edge(nodes[num1], nodes[num2])
+            myedge = Edge(nodes[num1], nodes[num2], len(edges) + NODE_COUNT)
             if count%3==0:
-                myedge = Edge(nodes[num1], nodes[num2], False)
+                myedge = Edge(nodes[num1], nodes[num2], len(edges) + NODE_COUNT, False)
             edges.append(myedge)
 
             count += 1
@@ -177,41 +178,9 @@ def remove_excess_nodes():
 
 ##########################
 
-class Board:
-
-    def __init__(self):
-        make_nodes()
-        make_edges()
-        self.nodes = remove_excess_nodes()
-        self.edges = edges
-
 def new_board():
-    new_board = Board()
+    make_nodes()
+    make_edges()
+    nodes = remove_excess_nodes()
+    new_board = Board(nodes, edges)
     return new_board
-
-
-# while running:
-
-#     for event in p.event.get():
-
-#         if event.type == p.QUIT:
-
-#             running= False
-
-#         elif event.type == p.MOUSEBUTTONDOWN:
-#             nodes = [] #reset
-#             edges = [] #reset
-#             edge_set = set()
-
-#             edgeDict = defaultdict(set)
-#             position=event.pos
-#             screen.fill(WHITE)
-#             make_nodes()
-#             make_edges()
-#             remove_excess_nodes()
-#             blit_edges()
-#             blit_nodes()
-
-#             # call click on the node which is in the range
-
-#     p.display.update()
