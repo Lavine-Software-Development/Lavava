@@ -78,7 +78,6 @@ class Node:
             self.attack_loss()
             self.own()
             self.value = 1
-            self.pressed = 1
 
     def attack_loss(self):
         threatened_difference = 1 - self.value / self.threaten_score

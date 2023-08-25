@@ -6,7 +6,7 @@ class Network:
 
     def __init__(self, action_callback):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "192.168.9.109"
+        self.server = "100.71.29.117"
         self.port = 5555
         self.addr = (self.server, self.port)
         printed = self.connect()
@@ -41,7 +41,10 @@ class Network:
                 response = self.client.recv(32).decode()
                 if response:
                     data_tuple = tuple(map(int, response.split(',')))
-                    self.action_callback(*data_tuple)
+                    if len(data_tuple) == 3:
+                        self.action_callback(*data_tuple)
+                    else:
+                        print(f"Unexpected data format: {data_tuple}")
             except socket.error as e:
                 print(e)
                 break

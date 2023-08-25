@@ -1,7 +1,7 @@
 class Player:
 
     def __init__(self, color, id):
-        self.score = 1000
+        self.score = 2000
         self.begun = False
         self.color = color
         self.id = id
