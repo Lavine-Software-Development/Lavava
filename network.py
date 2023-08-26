@@ -6,7 +6,7 @@ class Network:
 
     def __init__(self, action_callback):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "192.168.9.109"
+        self.server = "CHANGE TO INTERNET SERVER"
         self.port = 5555
         self.addr = (self.server, self.port)
         print(self.addr)
@@ -18,11 +18,8 @@ class Network:
 
     def connect(self):
         try:
-            print("connecting 1")
             self.client.connect(self.addr)
-            print("connecting 2")
             data = self.client.recv(10*1024*1024)
-            print("connecting 3")
             return pickle.loads(data)
         except:
             return "Connection failed"

@@ -22,9 +22,7 @@ class Server:
         print("Waiting for a connection, Server Started")
 
     def threaded_client(self, player, game):
-        print("threading")
         game.connections[player].send(pickle.dumps((player, game.board)))
-        print("sent game data")
         while True:
             try:
                 data = game.connections[player].recv(32)
@@ -48,17 +46,12 @@ class Server:
             
             self.waiting_players.put(conn)
             if self.waiting_players.qsize() == 2:
-                print("creating game")
                 game = Game()
-                print("game created")
                 game.add_player(self.waiting_players.get())
                 game.add_player(self.waiting_players.get())
-                print("players added")
                 start_new_thread(self.threaded_client, (0, game))
-                print("thread 1 started")
                 start_new_thread(self.threaded_client, (1, game))
-                print("thread 2 started")
 
 if __name__ == "__main__":
-    server = Server("192.168.9.109", 5555)
+    server = Server("CHANGE TO LOCAL SERVER", 5555)
     server.run()
