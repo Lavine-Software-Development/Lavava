@@ -20,6 +20,7 @@ def action(id, acting_player, button):
         board.id_dict[id].pressed = False
 
 n = Network(action)
+print("network done")
 player = n.getPlayer()
 board = n.getBoard()
 players = board.player_dict
