@@ -6,9 +6,10 @@ class Network:
 
     def __init__(self, action_callback):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "100.71.29.117"
+        self.server = "192.168.9.109"
         self.port = 5555
         self.addr = (self.server, self.port)
+        print(self.addr)
         printed = self.connect()
         self.player, self.board = printed
         self.action_callback = action_callback
@@ -17,8 +18,12 @@ class Network:
 
     def connect(self):
         try:
+            print("connecting 1")
             self.client.connect(self.addr)
-            return pickle.loads(self.client.recv(10*1024*1024))
+            print("connecting 2")
+            data = self.client.recv(10*1024*1024)
+            print("connecting 3")
+            return pickle.loads(data)
         except:
             return "Connection failed"
 

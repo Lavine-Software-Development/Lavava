@@ -1,52 +1,64 @@
 import socket
-from _thread import *
-import sys
-from make_board import new_board
+from _thread import start_new_thread
 import pickle
+from queue import Queue
+from game import Game
+import sys
 
-server = "100.71.29.117"
-port = 5555
+class Server:
+    def __init__(self, ip, port):
+        self.server = ip
+        self.port = port
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.waiting_players = Queue()
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-try:
-    s.bind((server, port))
-except socket.error as e:
-    print(str(e))
-    sys.exit()
-
-s.listen(2)
-print("Waiting for a connection, Server Started")
-
-
-def create_game(conns):
-    board = new_board()
-
-    start_new_thread(threaded_client, (conns, 0, board))
-    start_new_thread(threaded_client, (conns, 1, board))
-
-def threaded_client(conns, player, board):
-    conns[player].send(pickle.dumps((player, board)))
-    while True:
         try:
-            data = conns[player].recv(32)
-            if not data:
-                print("Disconnected")
-                break
-            else:
-                print("Received: ", data.decode())
-                for conn in conns:
-                    conn.sendall(data)
+            self.s.bind((self.server, self.port))
         except socket.error as e:
-            print(e)
+            print(str(e))
+            sys.exit()
 
-    print("Lost connection")
-    conn.close()
+        self.s.listen(10)
+        print("Waiting for a connection, Server Started")
 
-conns = []
-while True:
-    conn, addr = s.accept()
-    conns.append(conn)
-    print("Connected to:", addr)
-    if len(conns) % 2 == 0 and len(conns) > 0:
-        create_game(conns)
+    def threaded_client(self, player, game):
+        print("threading")
+        game.connections[player].send(pickle.dumps((player, game.board)))
+        print("sent game data")
+        while True:
+            try:
+                data = game.connections[player].recv(32)
+                if not data:
+                    print("Disconnected")
+                    break
+                else:
+                    print("Received: ", data.decode())
+                    for connection in game.connections:
+                        connection.sendall(data)
+            except socket.error as e:
+                print(e)
+
+        print("Lost connection")
+        game.connections[player].close()
+
+    def run(self):
+        while True:
+            conn, addr = self.s.accept()
+            print("Connected to:", addr)
+            
+            self.waiting_players.put(conn)
+            if self.waiting_players.qsize() == 2:
+                print("creating game")
+                game = Game()
+                print("game created")
+                game.add_player(self.waiting_players.get())
+                game.add_player(self.waiting_players.get())
+                print("players added")
+                start_new_thread(self.threaded_client, (0, game))
+                print("thread 1 started")
+                start_new_thread(self.threaded_client, (1, game))
+                print("thread 2 started")
+
+if __name__ == "__main__":
+    server = Server("192.168.9.109", 5555)
+    server.run()
