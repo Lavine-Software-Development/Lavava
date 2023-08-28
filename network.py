@@ -1,6 +1,6 @@
 import socket
 import threading
-from helpers.helpers import unwrap_board
+from helpers import unwrap_board
 
 class Network:
 

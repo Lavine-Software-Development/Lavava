@@ -1,7 +1,7 @@
 import pygame as p
 import math
-from network.network import Network
-from objects.board import Board
+from network import Network
+from board import Board
 from draw import Draw
 
 p.init()

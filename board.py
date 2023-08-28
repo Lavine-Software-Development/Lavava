@@ -1,9 +1,9 @@
 import math
 from collections import defaultdict
 from player import Player
-from helpers.constants import COLOR_DICT
+from constants import COLOR_DICT
 import re
-from helpers.helpers import *
+from helpers import *
 
 class Board:
 
