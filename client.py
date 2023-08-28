@@ -47,7 +47,7 @@ while running:
         #     if clicked_node:
         #         if board.stray_from_node(clicked_node, position):
         #             n.send((clicked_node, player, 0))
-                    
+     
         elif event.type == p.MOUSEBUTTONUP:
             if clicked_node:
                 n.send((clicked_node, player, 0))
