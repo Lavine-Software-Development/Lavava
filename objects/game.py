@@ -1,5 +1,4 @@
 from map_builder import MapBuilder
-from player import Player
 
 class Game:
     def __init__(self, game_size=2):

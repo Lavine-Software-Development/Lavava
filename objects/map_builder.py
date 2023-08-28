@@ -1,8 +1,8 @@
 from collections import defaultdict
 import random
 import numpy as np
-from constants import *
-from helpers import *
+from helpers.constants import *
+from helpers.helpers import *
 
 class MapBuilder:
 

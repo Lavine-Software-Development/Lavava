@@ -1,20 +1,9 @@
 import socket
 from _thread import start_new_thread
-import pickle
 from queue import Queue
-from game import Game
+from ..objects.game import Game
 import sys
 
-def board_repr(num, board):
-    node_strs = []
-    for node in board.nodes:
-        node_strs.append(f"Node({node.id}, {node.pos[0]}, {node.pos[1]})")
-
-    edge_strs = []
-    for edge in board.edges:
-        edge_strs.append(f"Edge({edge.to_node}, {edge.from_node}, {edge.id}, {edge.directed})")
-
-    return f"{num}Board(Nodes: [{', '.join(node_strs)}], Edges: [{', '.join(edge_strs)}])"
 
 
 class Server:
@@ -34,10 +23,7 @@ class Server:
         print("Waiting for a connection, Server Started")
 
     def threaded_client(self, player, game):
-        print("made it to threaded client")
-        # game.connections[player].send(pickle.dumps((player, game.board)))
-        game.connections[player].send(board_repr(player, game.board).encode())
-        print("sent pickle data")
+        game.connections[player].send(game.graph.repr(player).encode())
         while True:
             try:
                 data = game.connections[player].recv(32)

@@ -1,6 +1,6 @@
 import math
-from node import Node
-from edge import Edge
+from objects.node import Node
+from objects.edge import Edge
 import re
 
 def distance_point_to_segment(px, py, x1, y1, x2, y2):
