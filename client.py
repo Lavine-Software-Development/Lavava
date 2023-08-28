@@ -42,13 +42,12 @@ while running:
             elif id := board.find_edge(position):
                 n.send((id, player, button))
 
-        elif event.type == p.MOUSEMOTION:
-            position=event.pos
-            if clicked_node:
-                if clicked_node < len(board.nodes):
-                    if board.stray_from_node(clicked_node, position):
-                        n.send((clicked_node, player, 0))
-                    
+        # elif event.type == p.MOUSEMOTION:
+        #     position=event.pos
+        #     if clicked_node:
+        #         if board.stray_from_node(clicked_node, position):
+        #             n.send((clicked_node, player, 0))
+     
         elif event.type == p.MOUSEBUTTONUP:
             if clicked_node:
                 n.send((clicked_node, player, 0))
