@@ -3,26 +3,20 @@ TRANSFER_RATE = 0.02
 class Edge:
 
     def __init__(self, to_node, from_node, id, directed=True):
-        print("making")
         self.directed = directed
         self.to_node = to_node
         self.from_node = from_node
         self.id = id
-        print("still making")
         self.opposing_nodes = {to_node.id: from_node, from_node.id: to_node}
         self.flowing = True
-        print("stilllll making")
         to_node.incoming.append(self)
         from_node.outgoing.append(self)
-        print("lists")
         if not directed:
             from_node.incoming.append(self)
             to_node.outgoing.append(self)
-        print("come onnn")
         self.owned = False
         self.contested = False
         self.pressed = False
-        print("done")
 
     def lose_ownership(self):
         self.owned = False

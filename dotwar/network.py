@@ -5,44 +5,7 @@ from board import Board
 from node import Node
 from edge import Edge
 import re
-
-node_dict = {}
-
-def board_unrepr(s):
-
-    print("began")
-    num = int(s[0])
-    s = s[1:] 
-
-    print("got num")
-
-    # Extract nodes
-    nodes = []
-    node_matches = re.findall(r"Node\((\d+), (-?\d+\.?\d*), (-?\d+\.?\d*)\)", s)
-    print(len(node_matches))
-    for match in node_matches:
-        print(match)
-        id, x, y = int(match[0]), int(match[1]), int(match[2])
-        abe = Node(id, (x, y))
-        node_dict[id] = abe
-        nodes.append(abe)
-
-    print("got nodes")
-
-    # Extract edges
-    edges = []
-    edge_matches = re.findall(r"Edge\((\d+), (\d+), (\d+), (True|False)\)", s)
-    print(len(edge_matches))
-    for match in edge_matches:
-        print(match)
-        id1, id2, id3 = int(match[0]), int(match[1]), int(match[2])
-        boolean = True if match[3] == "True" else False
-        print(boolean)
-        edges.append(Edge(node_dict[id1], node_dict[id2], id3, boolean))
-
-    print("got edges")
-
-    return (num, Board(2, nodes, edges))
+from helpers import unwrap_board
 
 class Network:
 
@@ -51,31 +14,22 @@ class Network:
         self.server = "192.168.9.109"
         self.port = 5555
         self.addr = (self.server, self.port)
-        print(self.addr)
-        printed = self.connect()
-        self.player, self.board = printed
+        self.player, self.board = self.connect()
         self.action_callback = action_callback
 
         threading.Thread(target=self.listen_for_data).start()
 
     def connect(self):
         try:
-            print("connecting")
+            print("Connecting...")
             self.client.connect(self.addr)
-            print("connected")
+            print("Connected")
             data = self.client.recv(100*1024*1024)
+            print("Received")
             print(data)
-            print("received")
-            # return pickle.loads(data)
-            return board_unrepr(data.decode())
+            return unwrap_board(data.decode())
         except:
             return "Connection failed"
-
-    def getPlayer(self):
-        return self.player
-    
-    def getBoard(self):
-        return self.board
 
     def send(self, data):
         try:

@@ -65,15 +65,19 @@ def do_intersect(p1, q1, p2, q2):
 
 class Board:
 
-    def __init__(self, player_count):
-        self.nodes = []
-        self.edges = []
+    def __init__(self, player_count, nodes=None, edges=None):
+        if not nodes:
+            self.nodes = []
+            self.edges = []
 
-        self.edgeDict = defaultdict(set)
+            self.edgeDict = defaultdict(set)
 
-        self.make_nodes()
-        self.make_edges()
-        self.nodes = self.remove_excess_nodes()
+            self.make_nodes()
+            self.make_edges()
+            self.nodes = self.remove_excess_nodes()
+        else:
+            self.nodes = nodes
+            self.edges = edges
 
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.player_dict = {i: Player(color_dict[i], i) for i in range(player_count)}
@@ -156,6 +160,12 @@ class Board:
         for edge in self.edges:
             if edge.pressed:
                 edge.flow()
+
+    def find_node_surround(self, position):
+        for node in self.nodes:
+            if 10 <= ((position[0] - node.pos[0])**2 + (position[1] - node.pos[1])**2) < int(35+size_factor(node.value)*18):
+                return node.id
+        return None
 
     def find_node(self, position):
         for node in self.nodes:

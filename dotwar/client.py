@@ -1,6 +1,7 @@
 import pygame as p
 import math
 from network import Network
+from board import Board
 from draw import Draw
 
 p.init()
@@ -28,8 +29,8 @@ def action(id, acting_player, button):
 
 n = Network(action)
 print("network done")
-player = n.getPlayer()
-board = n.getBoard()
+player = n.player
+board = Board(*(n.board))
 players = board.player_dict
 clock = p.time.Clock()
 d = Draw(board.edges, board.nodes, players[player])
@@ -49,15 +50,15 @@ while running:
             elif id := board.find_edge(position):
                 n.send((id, player, button))
 
-        elif event.type == p.MOUSEMOTION:
-            position=event.pos
-            if id:= board.find_node_surround(position):
-                hovered_node = id
-                board.id_dict[id].hover(True)
-            else:
-                if hovered_node:
-                    board.id_dict[hovered_node].hover(False)
-                    hovered_node = None
+        # elif event.type == p.MOUSEMOTION:
+        #     position=event.pos
+        #     if id:= board.find_node_surround(position):
+        #         hovered_node = id
+        #         board.id_dict[id].hover(True)
+        #     else:
+        #         if hovered_node:
+        #             board.id_dict[hovered_node].hover(False)
+        #             hovered_node = None
                 
         #     position=event.pos
         #     if clicked_node:
