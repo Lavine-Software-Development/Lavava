@@ -24,8 +24,9 @@ class Node:
         return str(self.id)
 
     def grow(self):
-        self.value += GROWTH_RATE
-        self.owner.score += GROWTH_RATE
+        if self.value < 250:
+            self.value += GROWTH_RATE
+            self.owner.score += GROWTH_RATE
 
     def click(self, clicker, press):
         self.clicker = clicker
@@ -114,7 +115,7 @@ class Node:
     @property
     def color(self):
         if self.owner:
-            if self.hovered:
+            if self.value >= 250:
                 return (self.owner.color[0], 150, self.owner.color[2])
             return self.owner.color
         return BLACK
