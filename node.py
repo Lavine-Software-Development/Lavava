@@ -1,3 +1,5 @@
+import math
+
 GROWTH_RATE = 0.1
 TRANSFER_RATE = 0.02
 ATTACK_LOSS = 0.25
@@ -16,6 +18,7 @@ class Node:
         self.id = id
         self.pos = pos
         self.pressed = False
+        self.hovered = False
 
     def __str__(self):
         return str(self.id)
@@ -28,13 +31,15 @@ class Node:
         self.clicker = clicker
         if self.owner == None:
             if not self.expand():
-                clicker.buy_node(self)
+                print("buying clicker")
+                return (clicker.buy_node(self), False)
+            return (True, False)
         elif self.owner == clicker:
             self.pressed = press
-            return True
+            return (True, True)
         elif self.owner != clicker:
-            self.capture()
-        return False
+            return (self.capture(), False)
+        return (False, False)
 
     def absorb(self):
         for edge in self.incoming:
@@ -78,6 +83,8 @@ class Node:
             self.attack_loss()
             self.own()
             self.value = 1
+            return True
+        return False
 
     def attack_loss(self):
         threatened_difference = 1 - self.value / self.threaten_score
@@ -101,9 +108,14 @@ class Node:
         self.value += amount
         neighbor.value -= amount
 
+    def hover(self, status):
+        self.hovered = status
+
     @property
     def color(self):
         if self.owner:
+            if self.hovered:
+                return (self.owner.color[0], 150, self.owner.color[2])
             return self.owner.color
         return BLACK
 
