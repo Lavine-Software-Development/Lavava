@@ -39,9 +39,3 @@ class Board:
             if distance_point_to_segment(position[0],position[1],edge.from_node.pos[0],edge.from_node.pos[1],edge.to_node.pos[0],edge.to_node.pos[1]) < 5:
                 return edge.id
         return None
-
-    def stray_from_node(self, node_id, position):
-        node = self.id_dict[node_id]
-        if math.sqrt((position[0]-node.pos[0])**2 + (position[1]-node.pos[1])**2) >= int(5+size_factor(node.value)*18)+1:
-            return True
-        return False
