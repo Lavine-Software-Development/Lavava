@@ -4,12 +4,10 @@ BEGIN_TRANSFER_VALUE = 50
 
 class Edge:
 
-    def __init__(self, to_node, from_node, id, directed=True):
-        self.directed = directed
+    def __init__(self, to_node, from_node, id):
         self.to_node = to_node
         self.from_node = from_node
         self.id = id
-        self.opposing_nodes = {to_node.id: from_node, from_node.id: to_node}
         self.on = False
         self.flowing = False
         self.owned = False
@@ -20,13 +18,6 @@ class Edge:
     def update_nodes(self):
         self.to_node.incoming.append(self)
         self.from_node.outgoing.append(self)
-        if not self.directed:
-            self.from_node.incoming.append(self)
-            self.to_node.outgoing.append(self)
-
-    def lose_ownership(self):
-        self.owned = False
-        self.flowing = True
 
     def click(self, clicker, button):
         if button == 1 and self.owned_by(clicker):
@@ -73,9 +64,6 @@ class Edge:
 
     def capture(self):
         self.to_node.capture(self.from_node.owner)
-
-    def change_flow(self):
-        self.flowing = not self.flowing
 
     def check_status(self):
         self.owned = False
