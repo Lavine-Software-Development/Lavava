@@ -50,6 +50,9 @@ class Draw:
                 py.draw.lines(self.screen, color, True, [point1, point2, point3])
 
     def draw_circle(self, edge, color, start, end, circle_radius=3, spacing=6):
+
+        length_factor = 1.5
+        triangle_size = 7
         
         dx = end[0] - start[0]
         dy = end[1] - start[1]
@@ -60,12 +63,18 @@ class Draw:
         
         num_circles = int((magnitude-10) / spacing)
         
-        for i in range(1, num_circles + 1):
+        for i in range(1, num_circles):
             pos = (start[0] + i * spacing * dx+5*dx, start[1] + i * spacing * dy+5*dy)
             if edge.flowing:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius)
             else:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
+
+        point1 = pos
+        point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
+        point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
+        py.draw.polygon(self.screen, (153, 255, 51), [point1, point2, point3])
+        py.draw.lines(self.screen, color, True, [point1, point2, point3])               
                 
     def blit_edges(self):
         for edge in self.edges:

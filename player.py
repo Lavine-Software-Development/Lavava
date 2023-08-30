@@ -7,7 +7,7 @@ class Player:
         self.color = color
         self.id = id
         self.autoplay = True
-        self.auto_attack = True
+        self.auto_attack = False
 
     def buy_node(self, node):
         if self.score >= 1000:

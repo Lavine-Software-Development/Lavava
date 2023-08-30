@@ -70,7 +70,7 @@ class Node:
 
     def expand(self):
         for edge in self.outgoing:
-            if not edge.owned:
+            if not edge.owned and not edge.contested:
                 edge.switch(True)
 
     def enemy(self, player=None):
