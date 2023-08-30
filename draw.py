@@ -1,5 +1,6 @@
 import math
 import pygame as py
+from dynamicEdge import DynamicEdge
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
@@ -43,9 +44,9 @@ class Draw:
             point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
 
             if edge.flowing:
-                py.draw.lines(self.screen, color, True, [point1, point2, point3])
+                py.draw.polygon(self.screen, color, [point1, point2, point3])               
             else:
-                py.draw.polygon(self.screen, (120,120,120), [point1, point2, point3])
+                py.draw.lines(self.screen, color, True, [point1, point2, point3])
 
     def draw_circle(self, edge, color, start, end, circle_radius=3, spacing=6):
         
@@ -61,16 +62,16 @@ class Draw:
         for i in range(1, num_circles + 1):
             pos = (start[0] + i * spacing * dx+5*dx, start[1] + i * spacing * dy+5*dy)
             if edge.flowing:
-                py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
+                py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius)
             else:
-                py.draw.circle(self.screen, (120,120,120), (int(pos[0]), int(pos[1])), circle_radius)
+                py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
                 
     def blit_edges(self):
         for edge in self.edges:
-            if edge.directed:
-                self.draw_arrow(edge,(50,50,50),edge.from_node.pos,edge.to_node.pos)         
+            if not isinstance(edge, DynamicEdge):
+                self.draw_arrow(edge,edge.color,edge.from_node.pos,edge.to_node.pos)         
             else:
-                self.draw_circle(edge,(50,50,50),edge.from_node.pos,edge.to_node.pos)
+                self.draw_circle(edge,edge.color,edge.from_node.pos,edge.to_node.pos)
 
     def blit_nodes(self):
         for spot in self.nodes:

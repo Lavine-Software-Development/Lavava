@@ -1,8 +1,9 @@
 import pygame as p
-import math
-from network import Network
 from board import Board
 from draw import Draw
+from map_builder import MapBuilder
+from helpers import unwrap_board
+from player import Player
 
 p.init()
 
@@ -10,27 +11,18 @@ WHITE = (255, 255, 255)
 
 running = True
 counter = 0
-clicked_node = None
 hovered_node = None
 
-def action(id, acting_player, button):
-    if button:
-        x = board.id_dict[id].click(players[acting_player], button)
-        print(x)
-        success, pressed = x
-        if not success:
-            print("Invalid move")
-        if pressed:
-            global clicked_node
-            clicked_node = id
-        
-    else:
-        board.id_dict[id].pressed = False
+player_swap = {1: 0, 0: 1}
 
-n = Network(action)
-print("network done")
-player = n.player
-board = Board(*(n.board))
+def action(id, acting_player, button):
+    board.id_dict[id].click(players[acting_player], button)     
+
+graph = MapBuilder()
+str_graph = graph.repr(0)
+player, board_un = unwrap_board(str_graph)
+board = Board(*board_un)
+
 players = board.player_dict
 clock = p.time.Clock()
 d = Draw(board.edges, board.nodes, players[player])
@@ -46,9 +38,15 @@ while running:
             position=event.pos
             button = event.button
             if id := board.find_node(position):
-                n.send((id, player, button))
+                action(id, player, button)
             elif id := board.find_edge(position):
-                n.send((id, player, button))
+                action(id, player, button)
+
+        # if a is pressed
+        if event.type == p.KEYDOWN:
+            if event.key == p.K_a:
+                player = player_swap[player]
+                d.player = players[player]
 
         # elif event.type == p.MOUSEMOTION:
         #     position=event.pos
@@ -64,11 +62,6 @@ while running:
         #     if clicked_node:
         #         if board.stray_from_node(clicked_node, position):
         #             n.send((clicked_node, player, 0))
-     
-        elif event.type == p.MOUSEBUTTONUP:
-            if clicked_node:
-                n.send((clicked_node, player, 0))
-                clicked_node = None
 
     d.blit()
     clock.tick()
