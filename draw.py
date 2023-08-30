@@ -13,6 +13,7 @@ class Draw:
         self.nodes = nodes
         self.screen = py.display.set_mode(size)
         self.font = py.font.Font(None, 60)
+        self.small_font = py.font.Font(None, 45)
         py.display.set_caption("Lavava")
         self.player = player
 
@@ -80,6 +81,7 @@ class Draw:
     def blit_score(self):
         py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
         self.screen.blit(self.font.render(str(int(self.player.score)),True,self.player.color),(20,20))
+        self.screen.blit(self.small_font.render(str(int(self.player.score)),True,self.player.color),(SCREEN_WIDTH - 60,20))
 
     def blit(self):
         self.screen.fill(WHITE)

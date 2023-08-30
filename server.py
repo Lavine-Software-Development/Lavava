@@ -8,7 +8,7 @@ import sys
 
 class Server:
     def __init__(self, ip, port):
-        self.server = '0.0.0.0'
+        self.server = ip
         self.port = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.waiting_players = Queue()

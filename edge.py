@@ -45,7 +45,8 @@ class Edge:
 
     def pop(self):
         self.popped = True
-        self.on = False
+        if not self.contested or not self.from_node.owner.auto_attack: 
+            self.on = False
 
     def flow(self):
         amount_transferred = TRANSFER_RATE * self.from_node.value
