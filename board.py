@@ -25,18 +25,12 @@ class Board:
         for spot in self.nodes:
             if spot.owner:
                 spot.grow()
-                spot.calculate_threatened_score()
-            if spot.pressed == 1:
-                spot.absorb()
-            elif spot.pressed == 3:
-                spot.expel()
         for edge in self.edges:
-            if edge.pressed:
-                edge.flow()
+            edge.update()
 
     def find_node(self, position):
         for node in self.nodes:
-            if ((position[0] - node.pos[0])**2 + (position[1] - node.pos[1])**2) < 10:
+            if ((position[0] - node.pos[0])**2 + (position[1] - node.pos[1])**2) < 14:
                 return node.id
         return None
 
@@ -48,8 +42,6 @@ class Board:
 
     def stray_from_node(self, node_id, position):
         node = self.id_dict[node_id]
-        print(node_id)
-        print(node)
         if math.sqrt((position[0]-node.pos[0])**2 + (position[1]-node.pos[1])**2) >= int(5+size_factor(node.value)*18)+1:
             return True
         return False

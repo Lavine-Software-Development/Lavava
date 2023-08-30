@@ -55,7 +55,8 @@ class MapBuilder:
                 edge_set.add(combo)
                 self.edgeDict[num1].add(num2)
                 self.edgeDict[num2].add(num1)
-                myedge = (self.nodes[num1][0], self.nodes[num2][0], len(self.edges) + NODE_COUNT, count%3!=0)
+                # myedge = (self.nodes[num1][0], self.nodes[num2][0], len(self.edges) + NODE_COUNT, count%3!=0)
+                myedge = (self.nodes[num1][0], self.nodes[num2][0], len(self.edges) + NODE_COUNT, True)
                 self.edges.append(myedge)
 
                 count += 1

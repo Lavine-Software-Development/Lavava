@@ -1,5 +1,4 @@
 import pygame as p
-import math
 from network import Network
 from board import Board
 from draw import Draw
@@ -10,22 +9,10 @@ WHITE = (255, 255, 255)
 
 running = True
 counter = 0
-clicked_node = None
 hovered_node = None
 
 def action(id, acting_player, button):
-    if button:
-        x = board.id_dict[id].click(players[acting_player], button)
-        print(x)
-        success, pressed = x
-        if not success:
-            print("Invalid move")
-        if pressed:
-            global clicked_node
-            clicked_node = id
-        
-    else:
-        board.id_dict[id].pressed = False
+    board.id_dict[id].click(players[acting_player], button)     
 
 n = Network(action)
 print("network done")
@@ -64,11 +51,6 @@ while running:
         #     if clicked_node:
         #         if board.stray_from_node(clicked_node, position):
         #             n.send((clicked_node, player, 0))
-     
-        elif event.type == p.MOUSEBUTTONUP:
-            if clicked_node:
-                n.send((clicked_node, player, 0))
-                clicked_node = None
 
     d.blit()
     clock.tick()

@@ -5,7 +5,7 @@ class Player:
         self.begun = False
         self.color = color
         self.id = id
-        self.auto_hold = False
+        self.autoplay = True
 
     def buy_node(self, node):
         if self.score >= 1000:
@@ -15,5 +15,5 @@ class Player:
             return True
         return False
 
-    def switch_auto_hold(self):
-        self.auto_hold = not self.auto_hold
+    def switch_autoplay(self):
+        self.autoplay = not self.autoplay
