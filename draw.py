@@ -8,7 +8,7 @@ size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 WHITE = (255, 255, 255)
 
 class Draw:
-    def __init__(self, edges, nodes, player):
+    def __init__(self, edges, nodes, player, players):
         self.edges = edges
         self.nodes = nodes
         self.screen = py.display.set_mode(size)
@@ -16,6 +16,7 @@ class Draw:
         self.small_font = py.font.Font(None, 45)
         py.display.set_caption("Lavava")
         self.player = player
+        self.players = players
 
     def size_factor(self, x):
         if x<5:
@@ -87,14 +88,16 @@ class Draw:
         for spot in self.nodes:
             py.draw.circle(self.screen, spot.color, spot.pos, int(5+self.size_factor(spot.value)*18))
 
-    def blit_score(self):
+    def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
-        self.screen.blit(self.font.render(str(int(self.player.score)),True,self.player.color),(20,20))
-        self.screen.blit(self.small_font.render(str(int(self.player.count)),True,self.player.color),(SCREEN_WIDTH - 60,20))
+        self.screen.blit(self.font.render(str(int(self.player.money)),True,(205, 204, 0)),(20,20))
+        self.screen.blit(self.small_font.render(str(int(self.players[0].count)),True,self.players[0].color),(SCREEN_WIDTH/2 - 30,20))
+        self.screen.blit(self.small_font.render("/",True,(0,0,0)),(SCREEN_WIDTH/2 ,20))
+        self.screen.blit(self.small_font.render(str(int(self.players[1].count)),True,self.players[1].color),(SCREEN_WIDTH/2 + 20,20))
 
     def blit(self):
         self.screen.fill(WHITE)
         self.blit_nodes()
         self.blit_edges()
-        self.blit_score()
+        self.blit_numbers()
         py.display.update() 

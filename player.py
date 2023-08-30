@@ -1,7 +1,7 @@
 class Player:
 
     def __init__(self, color, id):
-        self.score = 2000
+        self.money = 1000
         self.count = 0
         self.begun = False
         self.color = color
@@ -9,9 +9,9 @@ class Player:
         self.autoplay = True
         self.auto_attack = False
 
-    def buy_node(self, node):
-        if self.score >= 1000:
-            self.score -= 1000
+    def buy_node(self):
+        if self.money >= 1000:
+            self.money -= 1000
             return True
         return False
 

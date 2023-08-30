@@ -23,7 +23,7 @@ player = n.player
 board = Board(*(n.board))
 players = board.player_dict
 clock = p.time.Clock()
-d = Draw(board.edges, board.nodes, players[player])
+d = Draw(board.edges, board.nodes, players[player], [players[0], players[1]])
 
 while running:
 

@@ -1,4 +1,4 @@
-GROWTH_RATE = 0.5
+GROWTH_RATE = 0.3
 BLACK = (0, 0, 0)
 
 class Node:
@@ -20,7 +20,7 @@ class Node:
     def grow(self):
         if self.value < 250:
             self.value += GROWTH_RATE
-            self.owner.score += GROWTH_RATE
+            self.owner.money += GROWTH_RATE
 
     def click(self, clicker, button):
         self.clicker = clicker
@@ -42,7 +42,7 @@ class Node:
         if self.enemy():
             self.attack()
         elif self.owner == None:
-            if self.clicker.buy_node(self):
+            if self.clicker.buy_node():
                 self.capture()
         else:
             if self.status == "expelling":
