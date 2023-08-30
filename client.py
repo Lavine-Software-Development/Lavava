@@ -1,7 +1,9 @@
 import pygame as p
-from network import Network
 from board import Board
 from draw import Draw
+from map_builder import MapBuilder
+from helpers import unwrap_board
+from player import Player
 
 p.init()
 
@@ -11,13 +13,16 @@ running = True
 counter = 0
 hovered_node = None
 
+player_swap = {1: 0, 0: 1}
+
 def action(id, acting_player, button):
     board.id_dict[id].click(players[acting_player], button)     
 
-n = Network(action)
-print("network done")
-player = n.player
-board = Board(*(n.board))
+graph = MapBuilder()
+str_graph = graph.repr(0)
+player, board_un = unwrap_board(str_graph)
+board = Board(*board_un)
+
 players = board.player_dict
 clock = p.time.Clock()
 d = Draw(board.edges, board.nodes, players[player])
@@ -33,9 +38,15 @@ while running:
             position=event.pos
             button = event.button
             if id := board.find_node(position):
-                n.send((id, player, button))
+                action(id, player, button)
             elif id := board.find_edge(position):
-                n.send((id, player, button))
+                action(id, player, button)
+
+        # if a is pressed
+        if event.type == p.KEYDOWN:
+            if event.key == p.K_a:
+                player = player_swap[player]
+                d.player = players[player]
 
         # elif event.type == p.MOUSEMOTION:
         #     position=event.pos
