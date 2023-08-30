@@ -12,9 +12,12 @@ counter = 0
 hovered_node = None
 
 def action(id, acting_player, button):
-    board.id_dict[id].click(players[acting_player], button)     
+    board.id_dict[id].click(players[acting_player], button)
 
-n = Network(action)
+def tick():
+    board.update()
+
+n = Network(action, tick)
 print("network done")
 player = n.player
 board = Board(*(n.board))

@@ -79,7 +79,6 @@ class Node:
         return self.owner != None and self.owner != player
 
     def check_edge_stati(self):
-        print(len(self.incoming), len(self.outgoing))
         for edge in self.incoming:
             edge.check_status()
         for edge in self.outgoing:
@@ -89,6 +88,7 @@ class Node:
         if clicker is None:
             clicker = self.clicker
         self.owner = clicker
+        print("Captured by", clicker)
         clicker.count += 1
         self.check_edge_stati()
         if self.owner.autoplay:
