@@ -10,8 +10,6 @@ class Player:
     def buy_node(self, node):
         if self.score >= 1000:
             self.score -= 1000
-            node.owner = self
-            node.check_edge_stati()
             return True
         return False
 

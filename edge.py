@@ -4,12 +4,10 @@ BEGIN_TRANSFER_VALUE = 50
 
 class Edge:
 
-    def __init__(self, to_node, from_node, id, directed=True):
-        self.directed = directed
+    def __init__(self, to_node, from_node, id):
         self.to_node = to_node
         self.from_node = from_node
         self.id = id
-        self.opposing_nodes = {to_node.id: from_node, from_node.id: to_node}
         self.on = False
         self.flowing = False
         self.owned = False
@@ -20,13 +18,6 @@ class Edge:
     def update_nodes(self):
         self.to_node.incoming.append(self)
         self.from_node.outgoing.append(self)
-        if not self.directed:
-            self.from_node.incoming.append(self)
-            self.to_node.outgoing.append(self)
-
-    def lose_ownership(self):
-        self.owned = False
-        self.flowing = True
 
     def click(self, clicker, button):
         if button == 1 and self.owned_by(clicker):
@@ -39,12 +30,12 @@ class Edge:
             self.on = specified
 
     def update(self):
-        if self.from_node.value > BEGIN_TRANSFER_VALUE:
+        if self.from_node.value > BEGIN_TRANSFER_VALUE and self.on:
             self.flowing = True
-        elif self.from_node.value < MINIMUM_TRANSFER_VALUE:
+        elif self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.on:
             self.flowing = False
 
-        if self.on and self.sharing() and self.flowing:
+        if self.sharing() and self.flowing:
             self.flow()
             if not self.popped:
                 self.pop()
@@ -74,9 +65,6 @@ class Edge:
     def capture(self):
         self.to_node.capture(self.from_node.owner)
 
-    def change_flow(self):
-        self.flowing = not self.flowing
-
     def check_status(self):
         self.owned = False
         self.contested = False
@@ -89,6 +77,10 @@ class Edge:
 
     def owned_by(self, player):
         return self.from_node.owner == player
+
+    @property
+    def duo_owned(self):
+        return self.contested or self.owned
 
     @property
     def color(self):
