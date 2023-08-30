@@ -33,7 +33,7 @@ class Server:
                     print(f"Error on connection {i}: {e}")
                     # Remove the bad connection if needed
                     del game.connections[i]
-            time.sleep(0.25)
+            time.sleep(0.08)
 
     def threaded_client(self, player, game):
         game.connections[player].send(game.graph.repr(player).encode())
