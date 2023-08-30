@@ -1,4 +1,4 @@
-GROWTH_RATE = 0.1
+GROWTH_RATE = 0.5
 BLACK = (0, 0, 0)
 
 class Node:

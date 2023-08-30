@@ -24,16 +24,17 @@ class Server:
 
     def send_ticks(self, game):
         time.sleep(1)  # Wait for 1 second before starting
+        tick_message = "0,0,0"
         while True:
-            tick_message = b'\x01'  # A single byte with value 1
             for i, connection in enumerate(game.connections):
                 try:
-                    connection.sendall(tick_message)
+                    connection.sendall(tick_message.encode())
                 except OSError as e:
                     print(f"Error on connection {i}: {e}")
                     # Remove the bad connection if needed
                     del game.connections[i]
-            time.sleep(0.08)
+            time.sleep(0.1)
+
 
     def threaded_client(self, player, game):
         game.connections[player].send(game.graph.repr(player).encode())

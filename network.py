@@ -35,17 +35,16 @@ class Network:
     def listen_for_data(self):
         while True:
             try:
-                response = self.client.recv(32)
-                if response == b'\x01':  # Check for tick
-                    self.tick_callback()
-                else:
-                    decoded_response = response.decode()
-                    if decoded_response:
-                        data_tuple = tuple(map(int, decoded_response.split(',')))
-                        if len(data_tuple) == 3:
-                            self.action_callback(*data_tuple)
+                response = self.client.recv(32).decode()
+                if response:
+                    data_tuple = tuple(map(int, response.split(',')))
+                    if len(data_tuple) == 3:
+                        if data_tuple == (0, 0, 0):
+                            self.tick_callback()
                         else:
-                            print(f"Unexpected data format: {data_tuple}")
+                            self.action_callback(*data_tuple)
+                    else:
+                        print(f"Unexpected data format: {data_tuple}")
             except socket.error as e:
                 print(e)
                 break
