@@ -1,6 +1,7 @@
 import math
 from node import Node
 from edge import Edge
+from dynamicEdge import DynamicEdge
 import re
 
 def distance_point_to_segment(px, py, x1, y1, x2, y2):
@@ -66,11 +67,15 @@ def unwrap_board(s):
         node_dict[id] = abe
         nodes.append(abe)
 
+
     edges = []
     edge_matches = re.findall(r"Edge\((\d+), (\d+), (\d+), (True|False)\)", s)
     for match in edge_matches:
         id1, id2, id3 = int(match[0]), int(match[1]), int(match[2])
-        boolean = True if match[3] == "True" else False
-        edges.append(Edge(node_dict[id1], node_dict[id2], id3, boolean))
+        if match[3] == "True":
+            edges.append(Edge(node_dict[id1], node_dict[id2], id3))
+        else:
+            edges.append(DynamicEdge(node_dict[id1], node_dict[id2], id3))
+
 
     return (num, (2, nodes, edges))

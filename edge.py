@@ -30,12 +30,12 @@ class Edge:
             self.on = specified
 
     def update(self):
-        if self.from_node.value > BEGIN_TRANSFER_VALUE:
+        if self.from_node.value > BEGIN_TRANSFER_VALUE and self.on:
             self.flowing = True
-        elif self.from_node.value < MINIMUM_TRANSFER_VALUE:
+        elif self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.on:
             self.flowing = False
 
-        if self.on and self.sharing() and self.flowing:
+        if self.sharing() and self.flowing:
             self.flow()
             if not self.popped:
                 self.pop()
@@ -77,6 +77,10 @@ class Edge:
 
     def owned_by(self, player):
         return self.from_node.owner == player
+
+    @property
+    def duo_owned(self):
+        return self.contested or self.owned
 
     @property
     def color(self):

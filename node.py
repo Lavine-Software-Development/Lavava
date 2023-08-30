@@ -70,7 +70,7 @@ class Node:
 
     def expand(self):
         for edge in self.outgoing:
-            if not edge.to_node.owner:
+            if not edge.duo_owned:
                 edge.switch(True)
 
     def enemy(self, player=None):
@@ -79,6 +79,7 @@ class Node:
         return self.owner != None and self.owner != player
 
     def check_edge_stati(self):
+        print(len(self.incoming), len(self.outgoing))
         for edge in self.incoming:
             edge.check_status()
         for edge in self.outgoing:
