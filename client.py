@@ -56,9 +56,3 @@ while running:
         #             n.send((clicked_node, player, 0))
 
     d.blit()
-    clock.tick()
-
-    counter += 1
-    if counter % 10 == 0:
-
-        board.update()
