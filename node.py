@@ -81,7 +81,6 @@ class Node:
         return self.owner != None and self.owner != player
 
     def check_edge_stati(self):
-        print(len(self.incoming), len(self.outgoing))
         for edge in self.incoming:
             edge.check_status()
         for edge in self.outgoing:

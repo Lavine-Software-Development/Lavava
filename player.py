@@ -13,5 +13,8 @@ class Player:
             return True
         return False
 
+    def build_edge(self):
+        self.score -= 500
+
     def switch_autoplay(self):
         self.autoplay = not self.autoplay

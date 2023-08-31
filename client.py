@@ -41,7 +41,8 @@ while running:
             if edge_build:
                 if id := board.find_node(position):
                     
-                    board.add_edge(closest,board.id_dict[id])
+                    if board.add_edge(id, closest.id):
+                        players[player].build_edge()
                     d.edges=board.edges
                     edge_build=False
                     closest=None
