@@ -4,14 +4,13 @@ from player import Player
 from constants import *
 import re
 from helpers import *
+from map_builder import MapBuilder
 
 class Board:
 
     def __init__(self, player_count, nodes, edges):
         self.nodes = nodes
         self.edges = edges
-
-        self.edgeDict = defaultdict(set)
 
         self.nodes = self.remove_excess_nodes()
 
@@ -39,16 +38,13 @@ class Board:
             if distance_point_to_segment(position[0],position[1],edge.from_node.pos[0],edge.from_node.pos[1],edge.to_node.pos[0],edge.to_node.pos[1]) < 5:
                 return edge.id
         return None
-    def add_edge(self,nodefrom,nodeto):
-        edge_set = set()
-        combo = (nodefrom.id,nodeto.id)
-        #if combo not in edge_set and self.nearby(combo) and self.check_all_overlaps(combo):
-        edge_set.add(combo)
-        self.edgeDict[nodefrom.id].add(nodeto.id)
-        self.edgeDict[nodeto.id].add(nodefrom.id)
-        nodefrom.outgoing.append(nodeto.id)
-        nodeto.incoming.append(nodefrom.id)
-        myedge = Edge(nodefrom, nodeto, len(self.edges) + NODE_COUNT)
-        self.id_dict[len(self.edges) + NODE_COUNT]=myedge
-        self.edges.append(myedge)
+
+    def add_edge(self, nodeto, nodefrom):
+        tempMap = MapBuilder(self.nodes, self.edges, (nodeto, nodefrom))
+        if id := tempMap.new_edge():
+            newEdge = Edge(self.id_dict[nodeto], self.id_dict[nodefrom], id)
+            self.edges.append(newEdge)
+            self.id_dict[newEdge.id] = newEdge
+            return True
+        return False
 
