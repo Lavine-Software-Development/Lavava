@@ -40,11 +40,13 @@ while running:
             button = event.button
             if edge_build:
                 if id := board.find_node(position):
-                    board.add_edge(closest,board.nodes[id])
+                    
+                    board.add_edge(closest,board.id_dict[id])
                     d.edges=board.edges
                     edge_build=False
                     closest=None
                     active=False
+
             elif button==1 and not edge_build and active:
                 if closest.owner == d.player:
                     edge_build=True
@@ -75,28 +77,28 @@ while running:
         #         if board.stray_from_node(clicked_node, position):
         #             n.send((clicked_node, player, 0))
         elif event.type == p.MOUSEMOTION:
+            hovering = False
             position=event.pos
             active=False
             if not edge_build:
                 closest=None
-                if board.player_dict[0].score >=1000:
+                if board.player_dict[player].score >=1000:
                     distc = 1000000
                     for n in board.nodes:
                         dist = (position[0]-n.pos[0])**2 + (position[1]-n.pos[1])**2
-                        if n.owner == d.player:
-                            if dist> n.value**2 and dist< (n.value+30)**2:
-                                if dist<distc:
-                                    distc=dist
-                                    closest=n
-                        else:
-                            if dist < (n.value+10)**2:
+                        if dist < (n.size+60) ** 2:
+                            if dist<distc:
+                                distc=dist
                                 closest=n
+                            if dist < (n.size+10) ** 2:
+                                hovering = True
+
                     if closest:
-                        if closest.owner== d.player:
+                        if hovering:
+                            d.highlight_node(closest)
+                        elif closest.owner == players[player]:
                             d.blit_close(closest,position)
                             active=True
-                        elif closest.owner==None:
-                            d.highlight_node(closest)
             else:
                 d.edge_build(closest,position)
     d.blit()

@@ -39,16 +39,17 @@ class Board:
             if distance_point_to_segment(position[0],position[1],edge.from_node.pos[0],edge.from_node.pos[1],edge.to_node.pos[0],edge.to_node.pos[1]) < 5:
                 return edge.id
         return None
-    def add_edge(self,nodefrom,nodeto):
+
+    def add_edge(self,nodeto,nodefrom):
         edge_set = set()
         combo = (nodefrom.id,nodeto.id)
-        #if combo not in edge_set and self.nearby(combo) and self.check_all_overlaps(combo):
-        edge_set.add(combo)
-        self.edgeDict[nodefrom.id].add(nodeto.id)
-        self.edgeDict[nodeto.id].add(nodefrom.id)
-        nodefrom.outgoing.append(nodeto.id)
-        nodeto.incoming.append(nodefrom.id)
-        myedge = Edge(nodefrom, nodeto, len(self.edges) + NODE_COUNT)
-        self.id_dict[len(self.edges) + NODE_COUNT]=myedge
-        self.edges.append(myedge)
+        if combo not in edge_set and self.nearby(combo) and self.check_all_overlaps(combo):
+            edge_set.add(combo)
+            self.edgeDict[nodefrom.id].add(nodeto.id)
+            self.edgeDict[nodeto.id].add(nodefrom.id)
+            nodefrom.outgoing.append(nodeto.id)
+            nodeto.incoming.append(nodefrom.id)
+            myedge = Edge(nodefrom, nodeto, len(self.edges) + NODE_COUNT)
+            self.id_dict[len(self.edges) + NODE_COUNT]=myedge
+            self.edges.append(myedge)
 

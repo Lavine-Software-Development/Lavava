@@ -1,3 +1,5 @@
+import math
+
 GROWTH_RATE = 0.1
 BLACK = (0, 0, 0)
 
@@ -98,6 +100,17 @@ class Node:
             self.value *= -1
             return True
         return False
+
+    def size_factor(self):
+        if self.value < 5:
+            return 0
+        if self.value >= 200:
+            return 1
+        return max(min(math.log10(self.value/10)/2+self.value/1000+0.15,1),0)
+
+    @property
+    def size(self):
+        return int(5+self.size_factor()*18)
 
     @property
     def color(self):
