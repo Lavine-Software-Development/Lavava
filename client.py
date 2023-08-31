@@ -26,21 +26,33 @@ board = Board(*board_un)
 players = board.player_dict
 clock = p.time.Clock()
 d = Draw(board.edges, board.nodes, players[player])
-
+edge_build=False
+active=False
+closest=None
 while running:
-
     for event in p.event.get():
-
+        d.wipe()
         if event.type == p.QUIT:
             running = False
 
         if event.type == p.MOUSEBUTTONDOWN:
             position=event.pos
             button = event.button
-            if id := board.find_node(position):
-                action(id, player, button)
-            elif id := board.find_edge(position):
-                action(id, player, button)
+            if edge_build:
+                if id := board.find_node(position):
+                    board.add_edge(closest,board.nodes[id])
+                    d.edges=board.edges
+                    edge_build=False
+                    closest=None
+                    active=False
+            elif button==1 and not edge_build and active:
+                if closest.owner == d.player:
+                    edge_build=True
+            else:
+                if id := board.find_node(position):
+                    action(id, player, button)
+                elif id := board.find_edge(position):
+                    action(id, player, button)
 
         # if a is pressed
         if event.type == p.KEYDOWN:
@@ -62,11 +74,35 @@ while running:
         #     if clicked_node:
         #         if board.stray_from_node(clicked_node, position):
         #             n.send((clicked_node, player, 0))
-
+        elif event.type == p.MOUSEMOTION:
+            position=event.pos
+            active=False
+            if not edge_build:
+                closest=None
+                if board.player_dict[0].score >=1000:
+                    distc = 1000000
+                    for n in board.nodes:
+                        dist = (position[0]-n.pos[0])**2 + (position[1]-n.pos[1])**2
+                        if n.owner == d.player:
+                            if dist> n.value**2 and dist< (n.value+30)**2:
+                                if dist<distc:
+                                    distc=dist
+                                    closest=n
+                        else:
+                            if dist < (n.value+10)**2:
+                                closest=n
+                    if closest:
+                        if closest.owner== d.player:
+                            d.blit_close(closest,position)
+                            active=True
+                        elif closest.owner==None:
+                            d.highlight_node(closest)
+            else:
+                d.edge_build(closest,position)
     d.blit()
     clock.tick()
 
     counter += 1
-    if counter % 10 == 0:
+    if counter % 5 == 0:
 
         board.update()
