@@ -32,7 +32,7 @@ class Board:
 
     def find_node(self, position):
         for node in self.nodes:
-            if ((position[0] - node.pos[0])**2 + (position[1] - node.pos[1])**2) < (node.size + 10) ** 2:
+            if ((position[0] - node.pos[0])**2 + (position[1] - node.pos[1])**2) < (node.size) ** 2:
                 return node.id
         return None
 

@@ -24,7 +24,7 @@ class Server:
 
     def send_ticks(self, game):
         time.sleep(1)  # Wait for 1 second before starting
-        tick_message = "0,0,0"
+        tick_message = "0,0,0,"
         while True:
             for i, connection in enumerate(game.connections):
                 try:

@@ -26,7 +26,7 @@ class Network:
 
     def send(self, data):
         try:
-            message = ','.join(map(str, data))
+            message = ','.join(map(str, data)) + ','
             self.client.send(message.encode())
         except socket.error as e:
             print(e)
@@ -37,14 +37,16 @@ class Network:
             try:
                 response = self.client.recv(32).decode()
                 if response:
-                    data_tuple = tuple(map(int, response.split(',')))
-                    if len(data_tuple) == 3:
-                        if data_tuple == (0, 0, 0):
+                    data_list = list(filter(None, response.split(',')))
+                    data_tuple = tuple(map(int, data_list))
+                    while len(data_tuple) >= 3:
+                        sub = (data_tuple[0], data_tuple[1], data_tuple[2])
+                        new_data = tuple(data_tuple[x] for x in range(3, len(data_tuple)))
+                        data_tuple = new_data
+                        if sub == (0, 0, 0):
                             self.tick_callback()
                         else:
-                            self.action_callback(*data_tuple)
-                    else:
-                        print(f"Unexpected data format: {data_tuple}")
+                            self.action_callback(*sub)
             except socket.error as e:
                 print(e)
                 break
