@@ -73,5 +73,5 @@ class Server:
                 start_new_thread(self.threaded_client, (1, game))
 
 if __name__ == "__main__":
-    server = Server("192.168.9.109", 5555)
+    server = Server("192.168.2.160", 5555)
     server.run()

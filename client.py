@@ -15,7 +15,7 @@ def action(id, acting_player, button):
     if id in board.id_dict:
         board.id_dict[id].click(players[acting_player], button)
     else:
-        board.check_new_edge(id, acting_player, button)
+        board.buy_new_edge(id, acting_player, button)
 
 def tick():
     board.update()
@@ -26,9 +26,8 @@ player = n.player
 board = Board(*(n.board))
 players = board.player_dict
 clock = p.time.Clock()
-d = Draw(board.edges, board.nodes, players[player], [players[0], players[1]])
+d = Draw(board, players[player], [players[0], players[1]])
 
-edge_build=False
 active=False
 closest=None
 
@@ -43,19 +42,19 @@ while running:
         if event.type == p.MOUSEBUTTONDOWN:
             position=event.pos
             button = event.button
-            if edge_build:
+            if players[player].drawing:
                 if id := board.find_node(position):
                     
                     if edge_id := board.check_new_edge(id, closest.id):
                         n.send((edge_id, id, closest.id))
                     d.edges=board.edges
-                    edge_build=False
+                    players[player].drawing=False
                     closest=None
                     active=False
 
-            elif button==1 and not edge_build and active:
-                if closest.owner == d.player:
-                    edge_build=True
+            elif button==1 and not players[player].drawing and active:
+                if closest.owner == players[player]:
+                    players[player].drawing=True
             else:
                 if id := board.find_node(position):
                     n.send((id, player, button))
@@ -66,27 +65,27 @@ while running:
             hovering = False
             position=event.pos
             active=False
-            if not edge_build:
+            d.set_highlight(None)
+            d.set_close(None)
+            if not players[player].drawing:
                 closest=None
-                if players[player].money >= 500:
-                    distc = 1000000
-                    for node in board.nodes:
-                        dist = (position[0]-node.pos[0])**2 + (position[1]-node.pos[1])**2
-                        if dist < (node.size+60) ** 2:
-                            if dist<distc:
-                                distc=dist
-                                closest=node
-                            if dist < (node.size+10) ** 2:
-                                hovering = True
+                distc = 1000000
+                for node in board.nodes:
+                    dist = (position[0]-node.pos[0])**2 + (position[1]-node.pos[1])**2
+                    if dist < (node.size+60) ** 2:
+                        if dist<distc:
+                            distc=dist
+                            closest=node
+                        if dist < (node.size+10) ** 2:
+                            hovering = True
 
-                    if closest:
-                        if hovering:
-                            d.highlight_node(closest)
-                            print("hovering")
-                        elif closest.owner == players[player]:
-                            d.blit_close(closest,position)
-                            active=True
+                if closest:
+                    if hovering:
+                        d.set_highlight(closest)
+                    elif closest.owner == players[player] and players[player].money >= 500:
+                        d.set_close((closest.pos,position))
+                        active=True
             else:
-                d.edge_build(closest,position)
+                d.set_close((closest.pos,position))
 
     d.blit()

@@ -8,15 +8,17 @@ size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 WHITE = (255, 255, 255)
 
 class Draw:
-    def __init__(self, edges, nodes, player, players):
-        self.edges = edges
-        self.nodes = nodes
+    def __init__(self, board, player, players):
+        self.edges = board.edges
+        self.nodes = board.nodes
         self.screen = py.display.set_mode(size)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         py.display.set_caption("Lavava")
         self.player = player
         self.players = players
+        self.highlighted_node = None
+        self.temp_line = None
 
     def size_factor(self, x):
         if x<5:
@@ -95,19 +97,25 @@ class Draw:
         self.screen.blit(self.small_font.render("/",True,(0,0,0)),(SCREEN_WIDTH/2 ,20))
         self.screen.blit(self.small_font.render(str(int(self.players[1].count)),True,self.players[1].color),(SCREEN_WIDTH/2 + 20,20))
 
-    def blit_close(self, node, pos):
-        py.draw.line(self.screen,(80,80,80),node.pos,pos,2)
+    def blit_close(self):
+        py.draw.line(self.screen,(80,80,80),self.temp_line[0],self.temp_line[1],2)
+
+    def set_close(self, poss):
+        self.temp_line = poss
 
     def wipe(self):
         self.screen.fill(WHITE)
 
-    def highlight_node(self,node):
-        print(node.pos)
-        py.draw.circle(self.screen, (0,0,200), node.pos, node.size + 5,2)
+    def highlight_node(self):
+        if self.highlighted_node:
+            py.draw.circle(self.screen, (0,0,200), self.highlighted_node.pos, self.highlighted_node.size + 5,2)
 
-    def edge_build(self,node,position):
-        start=node.pos
-        end=position
+    def set_highlight(self, node):
+        self.highlighted_node = node
+
+    def edge_build(self):
+        start=self.temp_line[0]
+        end=self.temp_line[1]
         triangle_size=5
         spacing=9
         color = (80, 80, 80)
@@ -136,4 +144,10 @@ class Draw:
         self.blit_nodes()
         self.blit_edges()
         self.blit_numbers()
+        self.highlight_node()
+        if self.temp_line:
+            if self.player.drawing:
+                self.edge_build()
+            else:
+                self.blit_close()
         py.display.update() 
