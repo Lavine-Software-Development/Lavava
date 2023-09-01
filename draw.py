@@ -86,7 +86,7 @@ class Draw:
 
     def blit_nodes(self):
         for spot in self.nodes:
-            py.draw.circle(self.screen, spot.color, spot.pos, int(5+self.size_factor(spot.value)*18))
+            py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
@@ -94,6 +94,42 @@ class Draw:
         self.screen.blit(self.small_font.render(str(int(self.players[0].count)),True,self.players[0].color),(SCREEN_WIDTH/2 - 30,20))
         self.screen.blit(self.small_font.render("/",True,(0,0,0)),(SCREEN_WIDTH/2 ,20))
         self.screen.blit(self.small_font.render(str(int(self.players[1].count)),True,self.players[1].color),(SCREEN_WIDTH/2 + 20,20))
+
+    def blit_close(self, node, pos):
+        py.draw.line(self.screen,(80,80,80),node.pos,pos,2)
+
+    def wipe(self):
+        self.screen.fill(WHITE)
+
+    def highlight_node(self,node):
+        print(node.pos)
+        py.draw.circle(self.screen, (0,0,200), node.pos, node.size + 5,2)
+
+    def edge_build(self,node,position):
+        start=node.pos
+        end=position
+        triangle_size=5
+        spacing=9
+        color = (80, 80, 80)
+        dx = end[0] - start[0]
+        dy = end[1] - start[1]
+        magnitude = math.sqrt(dx*dx + dy*dy)
+        
+        dx /= magnitude
+        dy /= magnitude
+        
+        num_triangles = int((magnitude-10) / spacing)
+        
+        length_factor = 1.5
+        
+        for i in range(1, num_triangles + 1):
+            pos = (start[0] + i * spacing * dx +5*dx, start[1] + i * spacing * dy+5*dy)
+            
+            point1 = pos
+            point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
+            point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
+
+            py.draw.polygon(self.screen, color, [point1, point2, point3])
 
     def blit(self):
         self.screen.fill(WHITE)

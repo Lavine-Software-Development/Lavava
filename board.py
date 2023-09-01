@@ -39,3 +39,15 @@ class Board:
             if distance_point_to_segment(position[0],position[1],edge.from_node.pos[0],edge.from_node.pos[1],edge.to_node.pos[0],edge.to_node.pos[1]) < 5:
                 return edge.id
         return None
+
+    def check_new_edge(self, node_to, node_from):
+        edge_set = {(edge.from_node.id, edge.to_node.id) for edge in self.edges}
+        if (node_to, node_from) in edge_set or (node_from, node_to) in edge_set:
+            return False
+        return len(self.nodes) + len(self.edges)
+        
+    def buy_new_edge(self, id, node_to, node_from):
+        if self.from_node.owner.buy_edge():
+            newEdge = Edge(node_to, node_from, id)
+            self.edges.append(newEdge)
+            self.id_dict[newEdge.id].add(newEdge)

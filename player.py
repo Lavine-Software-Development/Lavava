@@ -15,5 +15,11 @@ class Player:
             return True
         return False
 
+    def buy_edge(self):
+        if self.money >= 500:
+            self.money -= 500
+            return True
+        return False
+
     def switch_autoplay(self):
         self.autoplay = not self.autoplay

@@ -1,3 +1,5 @@
+import math
+
 GROWTH_RATE = 0.3
 BLACK = (0, 0, 0)
 
@@ -88,7 +90,6 @@ class Node:
         if clicker is None:
             clicker = self.clicker
         self.owner = clicker
-        print("Captured by", clicker)
         clicker.count += 1
         self.check_edge_stati()
         if self.owner.autoplay:
@@ -101,6 +102,18 @@ class Node:
                 self.owner.count -= 1
             return True
         return False
+
+    def size_factor(self):
+        if self.value < 5:
+            return 0
+        if self.value >= 200:
+            return 1
+        return max(min(math.log10(self.value/10)/2+self.value/1000+0.15,1),0)
+
+    @property
+    def size(self):
+        return int(5+self.size_factor()*18)
+
 
     @property
     def color(self):
