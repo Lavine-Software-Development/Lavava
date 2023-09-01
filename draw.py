@@ -2,8 +2,8 @@ import math
 import pygame as py
 from dynamicEdge import DynamicEdge
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT =800
 size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 WHITE = (255, 255, 255)
 
@@ -25,7 +25,7 @@ class Draw:
             return 0
         if x>=200:
             return 1
-        return max(min(math.log10(x/10)/2+x/1000+0.15,1),0)
+        return max(min(math.log10(x/10)/2+x/800+0.15,1),0)
 
     def draw_arrow(self, edge, color, start, end, triangle_size=5, spacing=9):
         

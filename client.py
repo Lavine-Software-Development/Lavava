@@ -28,6 +28,7 @@ players = board.player_dict
 clock = p.time.Clock()
 d = Draw(board, players[player], [players[0], players[1]])
 
+in_draw= False
 active=False
 closest=None
 
@@ -43,6 +44,13 @@ while running:
             position=event.pos
             button = event.button
             if players[player].drawing:
+                if button == 3:
+                    in_draw = not in_draw
+                    d.set_highlight(None)
+                    d.set_close(None)
+                    active=False
+                    closest=None
+                    players[player].drawing=False
                 if id := board.find_node(position):
                     
                     if edge_id := board.check_new_edge(id, closest.id):
@@ -55,13 +63,20 @@ while running:
             elif button==1 and not players[player].drawing and active:
                 if closest.owner == players[player]:
                     players[player].drawing=True
+            elif id := board.find_node(position):
+                n.send((id, player, button))
+            elif id := board.find_edge(position):
+                n.send((id, player, button))
             else:
-                if id := board.find_node(position):
-                    n.send((id, player, button))
-                elif id := board.find_edge(position):
-                    n.send((id, player, button))
+                in_draw = not in_draw
+                d.set_highlight(None)
+                d.set_close(None)
+                active=False
+                closest=None
+                players[player].drawing=False
 
-        elif event.type == p.MOUSEMOTION:
+
+        elif event.type == p.MOUSEMOTION and in_draw:
             hovering = False
             position=event.pos
             active=False

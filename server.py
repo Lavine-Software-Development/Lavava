@@ -8,7 +8,7 @@ from threading import Thread
 
 class Server:
     def __init__(self, ip, port):
-        self.server = ip
+        self.server = '0.0.0.0'
         self.port = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.waiting_players = Queue()
