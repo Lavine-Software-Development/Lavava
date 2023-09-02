@@ -33,13 +33,10 @@ class Edge:
         elif self.from_node.value > BEGIN_TRANSFER_VALUE:
             self.flowing = True
 
-        if self.sharing() and self.flowing:
+        if self.flowing:
             self.flow()
             if not self.popped:
                 self.pop()
-
-    def sharing(self):
-        return self.from_node.status != 'absorbing' and self.to_node.status != 'expelling'
 
     def pop(self):
         self.popped = True

@@ -11,7 +11,9 @@ class Board:
 
         self.edgeDict = defaultdict(set)
 
-        # self.nodes = self.remove_excess_nodes()
+        self.nodes = self.remove_excess_nodes()
+
+        self.expand_nodes()
 
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
@@ -20,6 +22,23 @@ class Board:
 
     def remove_excess_nodes(self):
         return [node for node in self.nodes if len(node.incoming) + len(node.outgoing) > 0]
+
+    def expand_nodes(self):
+
+        far_left_node = min(self.nodes, key=lambda node: node.pos[0])
+        far_right_node = max(self.nodes, key=lambda node: node.pos[0])
+
+        far_left_x = far_left_node.pos[0]
+        far_right_x = far_right_node.pos[0]
+
+        original_width = far_right_x - far_left_x
+        new_width = SCREEN_WIDTH - 50
+        scaling_factor = new_width / original_width if original_width != 0 else 1
+
+        for node in self.nodes:
+            x, y = node.pos
+            new_x = 25 + (x - far_left_x) * scaling_factor
+            node.pos = (new_x, y)
 
     def update(self):
         for spot in self.nodes:
@@ -41,6 +60,8 @@ class Board:
         return None
 
     def check_new_edge(self, node_to, node_from):
+        if node_to == node_from:
+            return False
         edge_set = {(edge.from_node.id, edge.to_node.id) for edge in self.edges}
         if (node_to, node_from) in edge_set or (node_from, node_to) in edge_set:
             return False

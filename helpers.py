@@ -54,6 +54,22 @@ def do_intersect(p1, q1, p2, q2):
         return True
     return False
 
+def angle_between_edges(edge1, edge2):
+    dx1 = edge1[1][0] - edge1[0][0]
+    dy1 = edge1[1][1] - edge1[0][1]
+    dx2 = edge2[1][0] - edge2[0][0]
+    dy2 = edge2[1][1] - edge2[0][1]
+    
+    dot_product = dx1 * dx2 + dy1 * dy2
+    magnitude1 = math.sqrt(dx1 ** 2 + dy1 ** 2)
+    magnitude2 = math.sqrt(dx2 ** 2 + dy2 ** 2)
+    
+    if magnitude1 == 0 or magnitude2 == 0:
+        return 0
+    
+    angle = math.acos(dot_product / (magnitude1 * magnitude2))
+    return math.degrees(angle)
+
 def unwrap_board(s):
     node_dict = {}
     num = int(s[0])
@@ -79,3 +95,4 @@ def unwrap_board(s):
 
 
     return (num, (2, nodes, edges))
+    

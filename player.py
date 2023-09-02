@@ -8,7 +8,7 @@ class Player:
         self.begun = False
         self.color = color
         self.id = id
-        self.autoplay = True
+        self.auto_expand = True
         self.auto_attack = False
         self.considering_edge = False
         self.new_edge_start = None

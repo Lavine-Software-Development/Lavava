@@ -69,8 +69,13 @@ class Node:
 
     def expand(self):
         for edge in self.outgoing:
-            if not edge.owned and not edge.contested:
+            if edge.contested:
+                if self.owner.auto_attack:
+                    edge.switch(True)
+                    edge.popped = True
+            elif not edge.owned and self.owner.auto_expand:
                 edge.switch(True)
+                edge.popped = False
 
     def enemy(self, player=None):
         if player == None:
@@ -89,8 +94,7 @@ class Node:
         self.owner = clicker
         clicker.count += 1
         self.check_edge_stati()
-        if self.owner.autoplay:
-            self.expand()
+        self.expand()
 
     def killed(self):
         if self.value < 0:
