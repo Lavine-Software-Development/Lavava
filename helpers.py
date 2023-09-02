@@ -18,13 +18,6 @@ def distance_point_to_segment(px, py, x1, y1, x2, y2):
     distance = math.sqrt((px - closest_x)**2 + (py - closest_y)**2)
     return distance
 
-def size_factor(x):
-    if x<5:
-        return 0
-    if x>=200:
-        return 1
-    return max(min(math.log10(x/10)/2+x/1000+0.15,1),0)
-
 def orientation(p, q, r):
     val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
     if val == 0:

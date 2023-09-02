@@ -79,6 +79,8 @@ class Draw:
     def blit_nodes(self):
         for spot in self.nodes:
             py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+            if spot.full:
+                py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
