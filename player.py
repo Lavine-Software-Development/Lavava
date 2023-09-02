@@ -31,6 +31,8 @@ class Player:
 
     def switch_considering(self):
         self.considering_edge = not self.considering_edge
+        if self.money < BUILD_EDGE_COST:
+            self.considering_edge = False
         self.new_edge_start = None
 
     def new_edge_started(self):
