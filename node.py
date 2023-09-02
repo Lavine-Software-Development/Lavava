@@ -11,7 +11,6 @@ class Node:
         self.outgoing = []
         self.id = id
         self.pos = pos
-        self.status = 'neutral'
 
     def __str__(self):
         return str(self.id)
@@ -29,27 +28,12 @@ class Node:
             self.right_click()
 
     def right_click(self):
-        if self.clicker == self.owner:
-            if self.status == "absorbing":
-                self.status = "neutral"
-                self.absorb(False)
-            else:
-                self.status = "expelling"
-                self.expel(True)
+        pass
 
     def left_click(self):
-        if self.enemy():
-            self.attack()
-        elif self.owner == None:
+        if self.owner == None:
             if self.clicker.buy_node():
                 self.capture()
-        else:
-            if self.status == "expelling":
-                self.status = "neutral"
-                self.expel(False)
-            else:
-                self.status = "absorbing"
-                self.absorb(True)
 
     def attack(self):
         pass

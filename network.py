@@ -46,6 +46,7 @@ class Network:
                         if sub == (0, 0, 0):
                             self.tick_callback()
                         else:
+                            print(sub)
                             self.action_callback(*sub)
             except socket.error as e:
                 print(e)

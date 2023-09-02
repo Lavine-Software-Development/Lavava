@@ -68,8 +68,11 @@ class Board:
         return NODE_COUNT + EDGE_COUNT + self.extra_edges
         
     def buy_new_edge(self, id, node_from, node_to):
-        if self.id_dict[node_from].owner.buy_edge():
+        if self.id_dict[node_from].owner is None:
+            print("ERROR: node_from has no owner", node_from.id, node_from.pos)
+        elif self.id_dict[node_from].owner.buy_edge():
             newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
+            newEdge.check_status()
             self.edges.append(newEdge)
             self.id_dict[newEdge.id] = newEdge
             self.extra_edges += 1
