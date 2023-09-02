@@ -1,7 +1,5 @@
 import math
-
-GROWTH_RATE = 0.3
-BLACK = (0, 0, 0)
+from constants import *
 
 class Node:
 
@@ -14,13 +12,12 @@ class Node:
         self.id = id
         self.pos = pos
         self.status = 'neutral'
-        self.hovered = False
 
     def __str__(self):
         return str(self.id)
 
     def grow(self):
-        if self.value < 250:
+        if not self.full:
             self.value += GROWTH_RATE
             self.owner.money += GROWTH_RATE
 
@@ -122,3 +119,7 @@ class Node:
                 return self.owner.color
             return self.owner.color
         return BLACK
+
+    @property
+    def full(self):
+        return self.value >= GROWTH_STOP

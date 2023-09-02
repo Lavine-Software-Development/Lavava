@@ -1,6 +1,4 @@
-TRANSFER_RATE = 0.02
-MINIMUM_TRANSFER_VALUE = 12
-BEGIN_TRANSFER_VALUE = 50
+from constants import *
 
 class Edge:
 
@@ -30,10 +28,10 @@ class Edge:
             self.on = specified
 
     def update(self):
-        if self.from_node.value > BEGIN_TRANSFER_VALUE and self.on:
-            self.flowing = True
-        elif self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.on:
+        if self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.on or (self.to_node.full and not self.contested):
             self.flowing = False
+        elif self.from_node.value > BEGIN_TRANSFER_VALUE:
+            self.flowing = True
 
         if self.sharing() and self.flowing:
             self.flow()

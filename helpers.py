@@ -23,7 +23,7 @@ def size_factor(x):
         return 0
     if x>=200:
         return 1
-    return max(min(math.log10(x/10)/2+x/800+0.15,1),0)
+    return max(min(math.log10(x/10)/2+x/1000+0.15,1),0)
 
 def orientation(p, q, r):
     val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])

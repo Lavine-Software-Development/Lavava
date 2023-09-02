@@ -1,8 +1,6 @@
-import math
 from collections import defaultdict
 from player import Player
 from constants import *
-import re
 from helpers import *
 
 class Board:
@@ -13,7 +11,7 @@ class Board:
 
         self.edgeDict = defaultdict(set)
 
-        self.nodes = self.remove_excess_nodes()
+        # self.nodes = self.remove_excess_nodes()
 
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
@@ -48,7 +46,7 @@ class Board:
             return False
         return NODE_COUNT + EDGE_COUNT + self.extra_edges
         
-    def buy_new_edge(self, id, node_to, node_from):
+    def buy_new_edge(self, id, node_from, node_to):
         if self.id_dict[node_from].owner.buy_edge():
             newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
             self.edges.append(newEdge)
