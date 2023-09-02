@@ -5,6 +5,7 @@ from game import Game
 import sys
 import time
 from threading import Thread
+from constants import *
 
 class Server:
     def __init__(self, ip, port):
@@ -73,5 +74,5 @@ class Server:
                 start_new_thread(self.threaded_client, (1, game))
 
 if __name__ == "__main__":
-    server = Server("192.168.2.160", 5555)
+    server = Server(NETWORK, 5555)
     server.run()
