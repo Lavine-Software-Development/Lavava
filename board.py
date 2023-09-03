@@ -59,7 +59,7 @@ class Board:
                 return edge.id
         return None
 
-    def check_new_edge(self, node_to, node_from):
+    def check_new_edge(self, node_from, node_to):
         if node_to == node_from:
             return False
         edge_set = {(edge.from_node.id, edge.to_node.id) for edge in self.edges}
