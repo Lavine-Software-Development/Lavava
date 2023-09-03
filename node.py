@@ -18,38 +18,16 @@ class Node:
     def grow(self):
         if not self.full:
             self.value += GROWTH_RATE
-            self.owner.money += GROWTH_RATE
 
     def click(self, clicker, button):
         self.clicker = clicker
         if button == 1:
             self.left_click()
-        elif button == 3:
-            self.right_click()
-
-    def right_click(self):
-        pass
 
     def left_click(self):
         if self.owner == None:
             if self.clicker.buy_node():
                 self.capture()
-
-    def attack(self):
-        pass
-        # self.absorb(True)
-
-    def absorb(self, on):
-        pass
-        # for edge in self.incoming:
-        #     if edge.owned_by(self.clicker):
-        #         edge.switch(on)
-
-    def expel(self, on):
-        pass
-        # for edge in self.outgoing:
-        #     if not on or not edge.contested:
-        #         edge.switch(on)
 
     def expand(self):
         for edge in self.outgoing:
@@ -60,11 +38,6 @@ class Node:
             elif not edge.owned and self.owner.auto_expand:
                 edge.switch(True)
                 edge.popped = False
-
-    def enemy(self, player=None):
-        if player == None:
-            player = self.clicker
-        return self.owner != None and self.owner != player
 
     def check_edge_stati(self):
         for edge in self.incoming:

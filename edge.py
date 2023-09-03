@@ -75,10 +75,6 @@ class Edge:
         return self.from_node.owner == player
 
     @property
-    def duo_owned(self):
-        return self.contested or self.owned
-
-    @property
     def color(self):
         if self.on:
             if self.flowing:

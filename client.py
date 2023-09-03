@@ -17,6 +17,7 @@ def action(id, acting_player, button):
 
 def tick():
     board.update()
+    player.money += player.tick_production
 
 n = Network(action, tick)
 print("network done")
@@ -42,7 +43,7 @@ while running:
 
         if event.type == p.KEYDOWN:
             if event.key == p.K_a:
-                player.switch_considering()
+                player.switch_considering()       
 
         if event.type == p.MOUSEBUTTONDOWN:
             position = event.pos
@@ -51,15 +52,15 @@ while running:
                 if player.considering_edge:
                     if player.new_edge_started():
                         if new_edge_id := board.check_new_edge(player.new_edge_start.id, id):
-                            n.send((new_edge_id, player.new_edge_start.id, id))
+                            board.buy_new_edge(new_edge_id, player.new_edge_start.id, id)
                             player.switch_considering()
                     else:
                         if board.id_dict[id].owner == player:
                             player.new_edge_start = board.id_dict[id]
                 else:
-                    n.send((id, player_num, button))
+                    board.id_dict[id].click(players[player_num], button)
             elif id := board.find_edge(position):
-                n.send((id, player_num, button))
+                board.id_dict[id].click(players[player_num], button)
             elif player.considering_edge:
                 player.new_edge_start = None
 
