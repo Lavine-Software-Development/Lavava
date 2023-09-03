@@ -18,7 +18,7 @@ class Board:
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
 
-        self.extra_edges = 1
+        self.extra_edges = 2
 
     def remove_excess_nodes(self):
         return [node for node in self.nodes if len(node.incoming) + len(node.outgoing) > 0]
@@ -65,7 +65,7 @@ class Board:
         edge_set = {(edge.from_node.id, edge.to_node.id) for edge in self.edges}
         if (node_to, node_from) in edge_set or (node_from, node_to) in edge_set:
             return False
-        return NODE_COUNT + EDGE_COUNT + self.extra_edges
+        return NODE_COUNT + EDGE_COUNT + self.extra_edges + self.id_dict[node_from].owner.id
         
     def buy_new_edge(self, id, node_from, node_to):
         if self.id_dict[node_from].owner is None:
@@ -75,4 +75,4 @@ class Board:
             newEdge.check_status()
             self.edges.append(newEdge)
             self.id_dict[newEdge.id] = newEdge
-            self.extra_edges += 1
+            self.extra_edges += 2
