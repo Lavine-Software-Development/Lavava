@@ -92,6 +92,7 @@ class Board:
         if self.id_dict[node_from].owner is None:
             print("ERROR: node_from has no owner", node_from.id, node_to.pos)
         elif self.id_dict[node_from].owner.buy_edge():
+            print("edge building with id: ", id)
             newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
             newEdge.check_status()
             self.edges.append(newEdge)
