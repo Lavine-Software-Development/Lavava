@@ -18,7 +18,6 @@ class Node:
     def grow(self):
         if not self.full:
             self.value += GROWTH_RATE
-            self.owner.money += GROWTH_RATE
 
     def click(self, clicker, button):
         self.clicker = clicker
@@ -60,11 +59,6 @@ class Node:
             elif not edge.owned and self.owner.auto_expand:
                 edge.switch(True)
                 edge.popped = False
-
-    def enemy(self, player=None):
-        if player == None:
-            player = self.clicker
-        return self.owner != None and self.owner != player
 
     def check_edge_stati(self):
         for edge in self.incoming:

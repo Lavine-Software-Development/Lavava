@@ -1,4 +1,5 @@
 from constants import *
+from math import sqrt
 
 class Player:
 
@@ -26,9 +27,6 @@ class Player:
             return True
         return False
 
-    def switch_autoplay(self):
-        self.autoplay = not self.autoplay
-
     def switch_considering(self):
         self.considering_edge = not self.considering_edge
         if self.money < BUILD_EDGE_COST:
@@ -37,3 +35,11 @@ class Player:
 
     def new_edge_started(self):
         return self.new_edge_start is not None
+
+    @property
+    def tick_production(self):
+        return round((1 + sqrt(self.count)) * MONEY_RATE, 2)
+
+    @property
+    def production_per_second(self):
+        return self.tick_production * 4

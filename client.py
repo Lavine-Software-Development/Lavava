@@ -17,6 +17,7 @@ def action(id, acting_player, button):
 
 def tick():
     board.update()
+    player.money += player.tick_production
 
 n = Network(action, tick)
 print("network done")

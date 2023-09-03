@@ -85,6 +85,7 @@ class Draw:
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
         self.screen.blit(self.font.render(str(int(self.player.money)),True,(205, 204, 0)),(20,20))
+        self.screen.blit(self.small_font.render(f"{self.player.production_per_second:.1f}", True, (205, 204, 0)), (23, 60))
         self.screen.blit(self.small_font.render(str(int(self.players[0].count)),True,self.players[0].color),(SCREEN_WIDTH/2 - 30,20))
         self.screen.blit(self.small_font.render("/",True,(0,0,0)),(SCREEN_WIDTH/2 ,20))
         self.screen.blit(self.small_font.render(str(int(self.players[1].count)),True,self.players[1].color),(SCREEN_WIDTH/2 + 20,20))
