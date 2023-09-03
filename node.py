@@ -22,16 +22,16 @@ class Node:
     def click(self, clicker, button):
         self.clicker = clicker
         if button == 1:
-            self.left_click()
+            self.left_click(clicker)
         elif button == 3:
             self.right_click()
 
     def right_click(self):
         pass
 
-    def left_click(self):
+    def left_click(self, clicker):
         if self.owner == None:
-            if self.clicker.buy_node():
+            if clicker.buy_node():
                 self.capture()
 
     def attack(self):
