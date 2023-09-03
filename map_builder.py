@@ -6,28 +6,10 @@ from helpers import *
 
 class MapBuilder:
 
-    def __init__(self, nodes=None, edges=None, newEdge=None):
-        if nodes is None:
-            self.new_map()
-        else:
-            self.nodes = [(node.id, node.pos) for node in nodes]
-            self.edges = [(edge.from_node.id, edge.to_node.id, edge.id) for edge in edges]
-            self.edge_set = [(min(edge[0], edge[1]), max(edge[0], edge[1])) for edge in self.edges]
-            self.recreate_edge_dict()
-            self.possibleEdge = newEdge
-
-
-    def recreate_edge_dict(self):
-        self.edgeDict = defaultdict(set)
-        for edge in self.edges:
-            self.edgeDict[edge[0]].add(edge[1])
-            self.edgeDict[edge[1]].add(edge[0])
-
-    def new_map(self):
+    def __init__(self):
         self.nodes = []
         self.edges = []
         self.edgeDict = defaultdict(set)
-        self.edge_set = set()
 
         self.make_nodes()
         self.make_edges()
@@ -52,6 +34,8 @@ class MapBuilder:
 
     def make_edges(self):
 
+        edge_set = set()
+
         count = 0
 
         while count < EDGE_COUNT:
@@ -66,9 +50,9 @@ class MapBuilder:
 
             combo = (min(num1, num2), max(num1, num2))
 
-            if combo not in self.edge_set and self.nearby(combo) and self.check_all_overlaps(combo):
+            if combo not in edge_set and self.nearby(combo) and self.check_all_overlaps(combo) and self.check_angle_constraints(combo):
 
-                self.edge_set.add(combo)
+                edge_set.add(combo)
                 self.edgeDict[num1].add(num2)
                 self.edgeDict[num2].add(num1)
                 myedge = (self.nodes[num1][0], self.nodes[num2][0], len(self.edges) + NODE_COUNT, count%3!=0)
@@ -77,14 +61,6 @@ class MapBuilder:
                 count += 1
 
     def overlap(self, edge1,edge2):
-        print("edge 10")
-        print(self.nodes[edge1[0]][1])
-        print("edge 11")
-        print(self.nodes[edge1[1]][1])
-        print("edge 20")   
-        print(self.nodes[edge2[0]][1])
-        print("edge 21")
-        print(self.nodes[edge2[1]][1])
         return do_intersect(self.nodes[edge1[0]][1],self.nodes[edge1[1]][1],self.nodes[edge2[0]][1],self.nodes[edge2[1]][1])
 
     def check_all_overlaps(self, edge):
@@ -96,8 +72,28 @@ class MapBuilder:
                         return False
         return True
 
+    def check_angle_constraints(self, new_edge):
+        p1 = self.nodes[new_edge[0]][1]
+        p2 = self.nodes[new_edge[1]][1]
+        
+        for key in self.edgeDict:
+            for val in self.edgeDict[key]:
+                if new_edge[0] == key or new_edge[0] == val:
+                    q1 = self.nodes[key][1]
+                    q2 = self.nodes[val][1]
+                    angle = angle_between_edges((p1, p2), (q1, q2))
+                    if angle < MIN_ANGLE:
+                        return False
+                if new_edge[1] == key or new_edge[1] == val:
+                    q1 = self.nodes[key][1]
+                    q2 = self.nodes[val][1]
+                    angle = angle_between_edges((p1, p2), (q1, q2))
+                    if angle < MIN_ANGLE:
+                        return False
+        return True
+
     def nearby(self, edge):
-        return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < 6 * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)
+        return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)
 
     def repr(self, num) -> str:
         node_strs = []
@@ -109,14 +105,3 @@ class MapBuilder:
             edge_strs.append(f"Edge({edge[0]}, {edge[1]}, {edge[2]}, {edge[3]})")
 
         return f"{num}Board(Nodes: [{', '.join(node_strs)}], Edges: [{', '.join(edge_strs)}])"
-
-    def new_edge(self):
-        combo = (min(self.possibleEdge[0], self.possibleEdge[1]), max(self.possibleEdge[0], self.possibleEdge[1]))
-        if combo not in self.edge_set:
-            # print("not in edge set")
-            # if self.nearby(combo):
-            #     print("not nearby anything")
-            #     if self.check_all_overlaps(combo):
-            #         print("no overlap")
-            return len(self.edges) + NODE_COUNT
-        return False

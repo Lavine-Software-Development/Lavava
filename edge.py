@@ -1,6 +1,4 @@
-TRANSFER_RATE = 0.005
-MINIMUM_TRANSFER_VALUE = 20
-BEGIN_TRANSFER_VALUE = 50
+from constants import *
 
 class Edge:
 
@@ -30,22 +28,20 @@ class Edge:
             self.on = specified
 
     def update(self):
-        if self.from_node.value > BEGIN_TRANSFER_VALUE and self.on:
-            self.flowing = True
-        elif self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.on:
+        if self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.on or (self.to_node.full and not self.contested):
             self.flowing = False
+        elif self.from_node.value > BEGIN_TRANSFER_VALUE:
+            self.flowing = True
 
-        if self.sharing() and self.flowing:
+        if self.flowing:
             self.flow()
             if not self.popped:
                 self.pop()
 
-    def sharing(self):
-        return self.from_node.status != 'absorbing' and self.to_node.status != 'expelling'
-
     def pop(self):
         self.popped = True
-        self.on = False
+        if not self.contested or not self.from_node.owner.auto_attack: 
+            self.on = False
 
     def flow(self):
         amount_transferred = TRANSFER_RATE * self.from_node.value
@@ -77,10 +73,6 @@ class Edge:
 
     def owned_by(self, player):
         return self.from_node.owner == player
-
-    @property
-    def duo_owned(self):
-        return self.contested or self.owned
 
     @property
     def color(self):

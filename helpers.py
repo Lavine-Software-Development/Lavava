@@ -18,13 +18,6 @@ def distance_point_to_segment(px, py, x1, y1, x2, y2):
     distance = math.sqrt((px - closest_x)**2 + (py - closest_y)**2)
     return distance
 
-def size_factor(x):
-    if x<5:
-        return 0
-    if x>=200:
-        return 1
-    return max(min(math.log10(x/10)/2+x/1000+0.15,1),0)
-
 def orientation(p, q, r):
     val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
     if val == 0:
@@ -54,6 +47,22 @@ def do_intersect(p1, q1, p2, q2):
         return True
     return False
 
+def angle_between_edges(edge1, edge2):
+    dx1 = edge1[1][0] - edge1[0][0]
+    dy1 = edge1[1][1] - edge1[0][1]
+    dx2 = edge2[1][0] - edge2[0][0]
+    dy2 = edge2[1][1] - edge2[0][1]
+    
+    dot_product = dx1 * dx2 + dy1 * dy2
+    magnitude1 = math.sqrt(dx1 ** 2 + dy1 ** 2)
+    magnitude2 = math.sqrt(dx2 ** 2 + dy2 ** 2)
+    
+    if magnitude1 == 0 or magnitude2 == 0:
+        return 0
+    
+    angle = math.acos(dot_product / (magnitude1 * magnitude2))
+    return math.degrees(angle)
+
 def unwrap_board(s):
     node_dict = {}
     num = int(s[0])
@@ -79,3 +88,4 @@ def unwrap_board(s):
 
 
     return (num, (2, nodes, edges))
+    

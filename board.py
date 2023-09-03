@@ -1,10 +1,7 @@
-import math
 from collections import defaultdict
 from player import Player
 from constants import *
-import re
 from helpers import *
-from map_builder import MapBuilder
 
 class Board:
 
@@ -12,13 +9,36 @@ class Board:
         self.nodes = nodes
         self.edges = edges
 
+        self.edgeDict = defaultdict(set)
+
         self.nodes = self.remove_excess_nodes()
+
+        self.expand_nodes()
 
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
 
+        self.extra_edges = 2
+
     def remove_excess_nodes(self):
         return [node for node in self.nodes if len(node.incoming) + len(node.outgoing) > 0]
+
+    def expand_nodes(self):
+
+        far_left_node = min(self.nodes, key=lambda node: node.pos[0])
+        far_right_node = max(self.nodes, key=lambda node: node.pos[0])
+
+        far_left_x = far_left_node.pos[0]
+        far_right_x = far_right_node.pos[0]
+
+        original_width = far_right_x - far_left_x
+        new_width = SCREEN_WIDTH - 50
+        scaling_factor = new_width / original_width if original_width != 0 else 1
+
+        for node in self.nodes:
+            x, y = node.pos
+            new_x = 25 + (x - far_left_x) * scaling_factor
+            node.pos = (new_x, y)
 
     def update(self):
         for spot in self.nodes:
@@ -29,7 +49,7 @@ class Board:
 
     def find_node(self, position):
         for node in self.nodes:
-            if ((position[0] - node.pos[0])**2 + (position[1] - node.pos[1])**2) < 14:
+            if ((position[0] - node.pos[0])**2 + (position[1] - node.pos[1])**2) < (node.size) ** 2:
                 return node.id
         return None
 
@@ -39,12 +59,20 @@ class Board:
                 return edge.id
         return None
 
-    def add_edge(self, nodeto, nodefrom):
-        tempMap = MapBuilder(self.nodes, self.edges, (nodeto, nodefrom))
-        if id := tempMap.new_edge():
-            newEdge = Edge(self.id_dict[nodeto], self.id_dict[nodefrom], id)
+    def check_new_edge(self, node_from, node_to):
+        if node_to == node_from:
+            return False
+        edge_set = {(edge.from_node.id, edge.to_node.id) for edge in self.edges}
+        if (node_to, node_from) in edge_set or (node_from, node_to) in edge_set:
+            return False
+        return NODE_COUNT + EDGE_COUNT + self.extra_edges + self.id_dict[node_from].owner.id
+        
+    def buy_new_edge(self, id, node_from, node_to):
+        if self.id_dict[node_from].owner is None:
+            print("ERROR: node_from has no owner", node_from.id, node_to.pos)
+        elif self.id_dict[node_from].owner.buy_edge():
+            newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
+            newEdge.check_status()
             self.edges.append(newEdge)
             self.id_dict[newEdge.id] = newEdge
-            return True
-        return False
-
+            self.extra_edges += 2

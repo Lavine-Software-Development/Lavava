@@ -3,8 +3,9 @@ from _thread import start_new_thread
 from queue import Queue
 from game import Game
 import sys
-
-
+import time
+from threading import Thread
+from constants import *
 
 class Server:
     def __init__(self, ip, port):
@@ -21,6 +22,20 @@ class Server:
 
         self.s.listen(10)
         print("Waiting for a connection, Server Started")
+
+    def send_ticks(self, game):
+        time.sleep(1)  # Wait for 1 second before starting
+        tick_message = "0,0,0,"
+        while True:
+            for i, connection in enumerate(game.connections):
+                try:
+                    connection.sendall(tick_message.encode())
+                except OSError as e:
+                    print(f"Error on connection {i}: {e}")
+                    # Remove the bad connection if needed
+                    del game.connections[i]
+            time.sleep(0.1)
+
 
     def threaded_client(self, player, game):
         game.connections[player].send(game.graph.repr(player).encode())
@@ -50,9 +65,14 @@ class Server:
                 game = Game()
                 game.add_player(self.waiting_players.get())
                 game.add_player(self.waiting_players.get())
+
+                tick_thread = Thread(target=self.send_ticks, args=(game,))
+                tick_thread.daemon = True
+                tick_thread.start()
+
                 start_new_thread(self.threaded_client, (0, game))
                 start_new_thread(self.threaded_client, (1, game))
 
 if __name__ == "__main__":
-    server = Server("192.168.9.109", 5555)
+    server = Server(NETWORK, 5555)
     server.run()

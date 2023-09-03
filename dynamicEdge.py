@@ -18,7 +18,7 @@ class DynamicEdge(Edge):
     def click(self, clicker, button):
         super().click(clicker, button)
         if button == 3:
-            if not (self.contested and self.flowing):
+            if not self.contested and self.owned_by(clicker):
                 self.swap_direction()
 
     def check_status(self):
@@ -32,6 +32,12 @@ class DynamicEdge(Edge):
             self.owned = True
         else:
             self.contested = True
+
+    def update(self):
+        super().update()
+        if self.contested:
+            if self.to_node.value > self.from_node.value:
+                self.swap_direction()
     
 
 

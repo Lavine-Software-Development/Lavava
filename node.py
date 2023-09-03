@@ -1,7 +1,5 @@
 import math
-
-GROWTH_RATE = 0.1
-BLACK = (0, 0, 0)
+from constants import *
 
 class Node:
 
@@ -13,16 +11,13 @@ class Node:
         self.outgoing = []
         self.id = id
         self.pos = pos
-        self.status = 'neutral'
-        self.hovered = False
 
     def __str__(self):
         return str(self.id)
 
     def grow(self):
-        if self.value < 250:
+        if not self.full:
             self.value += GROWTH_RATE
-            self.owner.score += GROWTH_RATE
 
     def click(self, clicker, button):
         self.clicker = clicker
@@ -32,27 +27,12 @@ class Node:
             self.right_click()
 
     def right_click(self):
-        if self.clicker == self.owner:
-            if self.status == "absorbing":
-                self.status = "neutral"
-                self.absorb(False)
-            else:
-                self.status = "expelling"
-                self.expel(True)
+        pass
 
     def left_click(self):
-        if self.enemy():
-            self.attack()
-        elif self.owner == None:
-            if self.clicker.buy_node(self):
+        if self.owner == None:
+            if self.clicker.buy_node():
                 self.capture()
-        else:
-            if self.status == "expelling":
-                self.status = "neutral"
-                self.expel(False)
-            else:
-                self.status = "absorbing"
-                self.absorb(True)
 
     def attack(self):
         pass
@@ -72,13 +52,13 @@ class Node:
 
     def expand(self):
         for edge in self.outgoing:
-            if not edge.duo_owned:
+            if edge.contested:
+                if self.owner.auto_attack:
+                    edge.switch(True)
+                    edge.popped = True
+            elif not edge.owned and self.owner.auto_expand:
                 edge.switch(True)
-
-    def enemy(self, player=None):
-        if player == None:
-            player = self.clicker
-        return self.owner != None and self.owner != player
+                edge.popped = False
 
     def check_edge_stati(self):
         for edge in self.incoming:
@@ -90,22 +70,22 @@ class Node:
         if clicker is None:
             clicker = self.clicker
         self.owner = clicker
+        clicker.count += 1
         self.check_edge_stati()
-        if self.owner.autoplay:
-            self.expand()
+        self.expand()
 
     def killed(self):
         if self.value < 0:
             self.value *= -1
+            if self.owner:
+                self.owner.count -= 1
             return True
         return False
 
     def size_factor(self):
-        if self.value < 5:
+        if self.value<5:
             return 0
-        if self.value >= 200:
-            return 1
-        return max(min(math.log10(self.value/10)/2+self.value/1000+0.15,1),0)
+        return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)
 
     @property
     def size(self):
@@ -118,3 +98,7 @@ class Node:
                 return self.owner.color
             return self.owner.color
         return BLACK
+
+    @property
+    def full(self):
+        return self.value >= GROWTH_STOP
