@@ -97,4 +97,4 @@ class Board:
             newEdge.check_status()
             self.edges.append(newEdge)
             self.id_dict[newEdge.id] = newEdge
-            self.extra_edges += 2
+            self.extra_edges += PLAYER_COUNT
