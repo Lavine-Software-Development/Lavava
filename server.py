@@ -61,17 +61,17 @@ class Server:
             print("Connected to:", addr)
             
             self.waiting_players.put(conn)
-            if self.waiting_players.qsize() == 2:
+            if self.waiting_players.qsize() == PLAYER_COUNT:
                 game = Game()
-                game.add_player(self.waiting_players.get())
-                game.add_player(self.waiting_players.get())
+                for i in range(PLAYER_COUNT):
+                    game.add_player(self.waiting_players.get())
 
                 tick_thread = Thread(target=self.send_ticks, args=(game,))
                 tick_thread.daemon = True
                 tick_thread.start()
 
-                start_new_thread(self.threaded_client, (0, game))
-                start_new_thread(self.threaded_client, (1, game))
+                for i in range(PLAYER_COUNT):
+                    start_new_thread(self.threaded_client, (i, game))
 
 if __name__ == "__main__":
     server = Server(NETWORK, 5555)

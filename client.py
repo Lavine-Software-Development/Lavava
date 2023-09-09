@@ -27,7 +27,7 @@ board = Board(*(n.board))
 players = board.player_dict
 player = players[player_num]
 clock = p.time.Clock()
-d = Draw(board, player_num, [players[0], players[1]])
+d = Draw(board, player_num, [players[x] for x in players])
 
 in_draw= False
 active=False

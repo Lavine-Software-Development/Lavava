@@ -3,6 +3,7 @@ from node import Node
 from edge import Edge
 from dynamicEdge import DynamicEdge
 import re
+from constants import *
 
 def distance_point_to_segment(px, py, x1, y1, x2, y2):
     segment_length_sq = (x2 - x1)**2 + (y2 - y1)**2
@@ -87,5 +88,5 @@ def unwrap_board(s):
             edges.append(DynamicEdge(node_dict[id1], node_dict[id2], id3))
 
 
-    return (num, (2, nodes, edges))
+    return (num, (PLAYER_COUNT, nodes, edges))
     
