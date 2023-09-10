@@ -4,61 +4,69 @@ from helpers import unwrap_board
 from constants import *
 
 class Network:
-    def __init__(self, action_callback, tick_callback):
+    def __init__(self, action_callback, tick_callback, eliminate_callback, receive_board_callback):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = NETWORK
         self.port = 5555
         self.addr = (self.server, self.port)
-        
-        # Get user input for hosting or joining a game
-        while True:
-            while True:
-                user_input = input("Do you want to HOST or JOIN a game? (HOST/JOIN): ").strip().upper()
-                if user_input in ["HOST", "JOIN"]:
-                    break
-                else:
-                    print("Invalid input. Please enter 'HOST' or 'JOIN'.")
-            
-            if user_input == "HOST":
-                player_count = input("Enter the number of players for the game: ")
-                self.init_data = f"HOST,{player_count}"
-            else:
-                game_code = input("Enter the game code to join: ")
-                self.init_data = f"JOIN,{game_code}"
-            
-            if vals := self.connect():
-                self.player, self.board = vals
-                self.action_callback = action_callback
-                self.tick_callback = tick_callback 
+        self.action_callback = action_callback
+        self.tick_callback = tick_callback
+        self.eliminate_callback = eliminate_callback
+        self.receive_board_callback = receive_board_callback
 
+        self.get_user_input_and_connect()
+
+    def get_user_input_and_connect(self):
+        while True:
+            self.get_user_input_for_game()
+            if self.connect_and_receive_board():
                 threading.Thread(target=self.listen_for_data).start()
                 break
 
-    def connect(self):
+    def get_user_input_for_game(self):
+        while True:
+            user_input = input("Do you want to HOST or JOIN a game? (HOST/JOIN): ").strip().upper()
+            if user_input in ["HOST", "JOIN"]:
+                break
+            else:
+                print("Invalid input. Please enter 'HOST' or 'JOIN'.")
+
+        if user_input == "HOST":
+            player_count = input("Enter the number of players for the game: ")
+            self.init_data = f"HOST,{player_count}"
+        else:
+            game_code = input("Enter the game code to join: ")
+            self.init_data = f"JOIN,{game_code}"
+
+    def connect_and_receive_board(self):
+        if self.establish_connection():
+            return self.receive_board_data()
+
+    def establish_connection(self):
         try:
             self.client.connect(self.addr)
-            
-            # Send initial data for hosting/joining the game
             self.client.send(self.init_data.encode())
-
-            data = self.client.recv(1024)  # First receive success or failure message
+            data = self.client.recv(1024)
             response = data.decode()
-            
-            # Check if the response is a failure message
             if response == "INVALID_CODE":
                 print("Failed to join the game: Invalid game code.")
                 return False
             else:
                 print("Connected to game", response)
-                
-                # Wait for the board data
-                data = self.client.recv(100*1024*1024)
-                return unwrap_board(data.decode())  # Now we expect the board data
-
+                return True
         except:
             print("Connection failed.")
             return False
 
+    def receive_board_data(self):
+        try:
+            data = self.client.recv(100*1024*1024)
+            self.player, self.board = unwrap_board(data.decode())
+            self.receive_board_callback()
+            return True
+        except:
+            print("Failed to receive board data.")
+            return False
 
     def send(self, data):
         try:
@@ -75,14 +83,23 @@ class Network:
                     data_list = list(filter(None, response.split(',')))
                     data_tuple = tuple(map(int, data_list))
                     while len(data_tuple) >= 3:
-                        sub = (data_tuple[0], data_tuple[1], data_tuple[2])
-                        new_data = tuple(data_tuple[x] for x in range(3, len(data_tuple)))
-                        data_tuple = new_data
+                        sub = data_tuple[:3]
+                        data_tuple = data_tuple[3:]
                         if sub == (0, 0, 0):
                             self.tick_callback()
+                        elif sub[0] == -1:
+                            print("Player", sub[1], "has been eliminated.")
+                            self.eliminate_callback(sub[1])
                         else:
                             print(sub)
                             self.action_callback(*sub)
             except socket.error as e:
                 print(e)
                 break
+
+if __name__ == "__main__":
+    # replace with your actual callbacks
+    def action_callback(): pass 
+    def tick_callback(): pass 
+
+    Network(action_callback, tick_callback)

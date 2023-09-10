@@ -58,7 +58,7 @@ class Server:
                 self.waiting_players[player_count_or_code]["players"].append(conn)
                 
                 if len(self.waiting_players[player_count_or_code]["players"]) == self.waiting_players[player_count_or_code]["player_count"]:
-                    game = Game()
+                    game = Game(2)
                     game.connections = self.waiting_players.pop(player_count_or_code)["players"]
                     self.start_game(game, player_count_or_code)
             else:
