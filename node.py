@@ -102,3 +102,6 @@ class Node:
     @property
     def full(self):
         return self.value >= GROWTH_STOP
+
+    def owned_and_alive(self):
+        return self.owner != None and not self.owner.eliminated

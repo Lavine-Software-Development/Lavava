@@ -95,7 +95,7 @@ class MapBuilder:
     def nearby(self, edge):
         return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)
 
-    def repr(self, num) -> str:
+    def repr(self, player, player_count) -> str:
         node_strs = []
         for node in self.nodes:
             node_strs.append(f"Node({node[0]}, {node[1][0]}, {node[1][1]})")
@@ -104,4 +104,4 @@ class MapBuilder:
         for edge in self.edges:
             edge_strs.append(f"Edge({edge[0]}, {edge[1]}, {edge[2]}, {edge[3]})")
 
-        return f"{num}Board(Nodes: [{', '.join(node_strs)}], Edges: [{', '.join(edge_strs)}])"
+        return f"{player},{player_count}Board(Nodes: [{', '.join(node_strs)}], Edges: [{', '.join(edge_strs)}])"

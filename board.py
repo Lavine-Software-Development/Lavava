@@ -8,6 +8,7 @@ class Board:
     def __init__(self, player_count, nodes, edges):
         self.nodes = nodes
         self.edges = edges
+        self.player_count = player_count
 
         self.edgeDict = defaultdict(set)
 
@@ -19,6 +20,21 @@ class Board:
         self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
 
         self.extra_edges = 2
+
+        self.remaining = {i for i in range(player_count)}
+        self.victor = None
+
+    def eliminate(self, player):
+        self.remaining.remove(player)
+        for edge in self.edges:
+            if edge.owned_by(self.player_dict[player]):
+                edge.switch(False)
+        self.player_dict[player].eliminate()
+
+    def check_over(self):
+        if len(self.remaining) == 1:
+            self.victor = self.player_dict[list(self.remaining)[0]]
+            self.victor.win()
 
     def remove_excess_nodes(self):
         return [node for node in self.nodes if len(node.incoming) + len(node.outgoing) > 0]
@@ -42,10 +58,18 @@ class Board:
 
     def update(self):
         for spot in self.nodes:
-            if spot.owner:
+            if spot.owned_and_alive():
                 spot.grow()
+
         for edge in self.edges:
             edge.update()
+        
+        for player in self.player_dict.values():
+            out = player.update()
+            if out:
+                self.eliminate(player.id)
+
+        self.check_over()
 
     def find_node(self, position):
         for node in self.nodes:
@@ -97,4 +121,4 @@ class Board:
             newEdge.check_status()
             self.edges.append(newEdge)
             self.id_dict[newEdge.id] = newEdge
-            self.extra_edges += PLAYER_COUNT
+            self.extra_edges += self.player_count

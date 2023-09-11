@@ -5,17 +5,21 @@ from constants import *
 
 class Draw:
     def __init__(self, board, player_num, players):
-        self.edges = board.edges
-        self.nodes = board.nodes
+        self.set_data(board, player_num, players)
         self.screen = py.display.set_mode(size)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
-        self.player = players[player_num]
-        self.players = players
         self.highlighted_node = None
         self.temp_line = None
 
         py.display.set_caption("Lavava")
+
+    def set_data(self, board, player_num, players):
+        self.board = board
+        self.edges = board.edges
+        self.nodes = board.nodes
+        self.player = players[player_num]
+        self.players = players
 
     def draw_arrow(self, edge, color, start, end, triangle_size=5, spacing=9):
         
@@ -84,10 +88,19 @@ class Draw:
 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
-        self.screen.blit(self.font.render(str(int(self.player.money)),True,(205, 204, 0)),(20,20))
+        self.screen.blit(self.font.render(str(int(self.player.money)),True,self.player.color),(20,20))
         self.screen.blit(self.small_font.render(f"{self.player.production_per_second:.1f}", True, (205, 204, 0)), (23, 60))
-        for i in range(PLAYER_COUNT):
+        for i in range(self.board.player_count):
             self.screen.blit(self.small_font.render(str(int(self.players[i].count)),True,self.players[i].color),(SCREEN_WIDTH/3 + i*150,20))
+        if self.board.victor:
+            self.screen.blit(self.font.render(f"Player {self.board.victor.id} Wins!",True,self.board.victor.color),(SCREEN_WIDTH - 300,20))
+            if self.player.victory:
+                self.screen.blit(self.small_font.render("R to restart",True,self.player.color),(SCREEN_WIDTH - 300,60))
+        elif self.player.eliminated:
+            self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(SCREEN_WIDTH - 300,20))
+        else:
+            self.screen.blit(self.small_font.render("A to Edge Build",True,self.player.color),(SCREEN_WIDTH - 300,20))
+            self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(SCREEN_WIDTH - 300,60))
 
     def wipe(self):
         self.screen.fill(WHITE)

@@ -14,10 +14,14 @@ class Player:
         self.considering_edge = False
         self.new_edge_start = None
         self.highlighted_node = None
+        self.eliminated = False
+        self.victory = False
+        self.started = False
 
     def buy_node(self):
         if self.money >= BUY_NODE_COST:
             self.money -= BUY_NODE_COST
+            self.started = True
             return True
         return False
 
@@ -35,6 +39,20 @@ class Player:
 
     def new_edge_started(self):
         return self.new_edge_start is not None
+
+    def eliminate(self):
+        self.eliminated = True
+        self.money = 0
+        self.color = GREY
+
+    def update(self):
+        if not self.eliminated:
+            self.money += self.tick_production
+            return self.started and self.count == 0
+        return False
+
+    def win(self):
+        self.victory = True
 
     @property
     def tick_production(self):
