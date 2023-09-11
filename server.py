@@ -45,26 +45,28 @@ class Server:
     def threaded_client(self, conn):
         data = conn.recv(1024).decode()
         is_host, player_count_or_code = data.split(",")
-        print(is_host, player_count_or_code)
 
         if is_host == "HOST":
             player_count = int(player_count_or_code)
             game_code = self.generate_game_code() # Generate a unique game code for the new game
-            self.waiting_players[game_code] = {"player_count": player_count, "players": [conn]}
+            self.waiting_players[game_code] = Game(player_count, game_code, conn)
             conn.sendall(game_code.encode())
         elif is_host == "JOIN":
+            code = player_count_or_code
             if player_count_or_code in self.waiting_players:
                 conn.sendall(player_count_or_code.encode())
-                self.waiting_players[player_count_or_code]["players"].append(conn)
+                self.waiting_players[code].add_player(conn)
                 
-                if len(self.waiting_players[player_count_or_code]["players"]) == self.waiting_players[player_count_or_code]["player_count"]:
-                    game = Game(2)
-                    game.connections = self.waiting_players.pop(player_count_or_code)["players"]
-                    self.start_game(game, player_count_or_code)
+                if self.waiting_players[code].is_ready():
+                    print("Game is ready to start")
+                    self.waiting_players[code].build()
+                    self.start_game(self.waiting_players[code])
+                else:
+                    print("Game is not ready to start")
             else:
                 conn.sendall("INVALID_CODE".encode())
 
-    def start_game(self, game, game_code):
+    def start_game(self, game):
         tick_thread = Thread(target=self.send_ticks, args=(game,))
         tick_thread.daemon = True
         tick_thread.start()
@@ -72,8 +74,21 @@ class Server:
         for i, conn in enumerate(game.connections):
             start_new_thread(self.threaded_client_in_game, (i, conn, game))
 
+    def restart_game(self, game):
+        # Reset the game state
+        game.build()  # You might need to implement this method in your Game class
+
+            # Now, iterate over all connections (players) and send the updated board data
+        for i, conn in enumerate(game.connections):
+            try:
+                # You would send the new representation of the board here
+                new_board_data = game.graph.repr(i, game.player_count)  # Get the new board representation
+                conn.sendall(new_board_data.encode())  # Send the new board data
+            except Exception as e:
+                print(f"Failed to send new board data to player {i}: {e}") 
+
     def threaded_client_in_game(self, player, conn, game):
-        conn.send(game.graph.repr(player).encode())
+        conn.send(game.graph.repr(player, game.player_count).encode())
         while True:
             try:
                 data = conn.recv(32)
@@ -84,6 +99,10 @@ class Server:
                     print("Received: ", data.decode())
                     for connection in game.connections:
                         connection.sendall(data)
+                    data_list = list(filter(None, data.decode().split(',')))
+                    data_tuple = tuple(map(int, data_list))
+                    if data_tuple == (-2, -2, -2):
+                        self.restart_game(game)
             except socket.error as e:
                 print(e)
         

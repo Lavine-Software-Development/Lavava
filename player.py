@@ -48,7 +48,8 @@ class Player:
     def update(self):
         if not self.eliminated:
             self.money += self.tick_production
-        return self.started and self.count == 0
+            return self.started and self.count == 0
+        return False
 
     def win(self):
         self.victory = True

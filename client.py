@@ -13,7 +13,6 @@ class Client:
         self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
         print("network done")
 
-    def reset_game(self):
         self.player_num = self.n.player
         self.board = Board(*(self.n.board))
         self.players = self.board.player_dict
@@ -25,7 +24,20 @@ class Client:
         self.closest = None
         self.position = None
 
+
         self.main_loop()
+
+    def reset_game(self):
+        self.player_num = self.n.player
+        self.board = Board(*(self.n.board))
+        self.players = self.board.player_dict
+        self.player = self.players[self.player_num]
+        self.d.set_data(self.board, self.player_num, [self.players[x] for x in self.players])
+
+        self.in_draw = False
+        self.active = False
+        self.closest = None
+        self.position = None
 
     def action(self, id, acting_player, button):
         if id in self.board.id_dict:
@@ -34,7 +46,7 @@ class Client:
             self.board.buy_new_edge(id, acting_player, button)
 
     def tick(self):
-        if not self.board.over:
+        if not self.board.victor:
             self.board.update()
 
     def eliminate(self, id):
@@ -44,7 +56,7 @@ class Client:
         self.n.send((-1, self.player_num, -1))
 
     def restart_send(self):
-        self.n.send((-2, self.player_num, -2))
+        self.n.send((-2, -2, -2))
 
     def keydown(self, event):
         if event.type == p.KEYDOWN:
@@ -56,7 +68,7 @@ class Client:
                 self.restart_send()
 
     def main_loop(self):
-        while not self.board.over:
+        while True:
 
             if not self.player.eliminated:
 

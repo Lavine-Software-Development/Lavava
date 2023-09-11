@@ -66,8 +66,9 @@ def angle_between_edges(edge1, edge2):
 
 def unwrap_board(s):
     node_dict = {}
-    num = int(s[0])
-    s = s[1:] 
+    player = int(s[0])
+    player_count = int(s[2])
+    s = s[3:] 
 
     nodes = []
     node_matches = re.findall(r"Node\((\d+), (-?\d+\.?\d*), (-?\d+\.?\d*)\)", s)
@@ -88,5 +89,5 @@ def unwrap_board(s):
             edges.append(DynamicEdge(node_dict[id1], node_dict[id2], id3))
 
 
-    return (num, (PLAYER_COUNT, nodes, edges))
+    return (player, (player_count, nodes, edges))
     

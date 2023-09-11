@@ -8,6 +8,7 @@ class Board:
     def __init__(self, player_count, nodes, edges):
         self.nodes = nodes
         self.edges = edges
+        self.player_count = player_count
 
         self.edgeDict = defaultdict(set)
 
@@ -21,10 +22,10 @@ class Board:
         self.extra_edges = 2
 
         self.remaining = {i for i in range(player_count)}
-        self.over = False
+        self.victor = None
 
     def eliminate(self, player):
-        self.remaning.pop(player)
+        self.remaining.remove(player)
         for edge in self.edges:
             if edge.owned_by(self.player_dict[player]):
                 edge.switch(False)
@@ -32,8 +33,8 @@ class Board:
 
     def check_over(self):
         if len(self.remaining) == 1:
-            self.over = True
-            self.player_dict[list(self.remaining)[0]].win()
+            self.victor = self.player_dict[list(self.remaining)[0]]
+            self.victor.win()
 
     def remove_excess_nodes(self):
         return [node for node in self.nodes if len(node.incoming) + len(node.outgoing) > 0]
@@ -120,4 +121,4 @@ class Board:
             newEdge.check_status()
             self.edges.append(newEdge)
             self.id_dict[newEdge.id] = newEdge
-            self.extra_edges += PLAYER_COUNT
+            self.extra_edges += self.player_count

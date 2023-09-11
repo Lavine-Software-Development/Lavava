@@ -4,7 +4,7 @@ from helpers import unwrap_board
 from constants import *
 
 class Network:
-    def __init__(self, action_callback, tick_callback, eliminate_callback, receive_board_callback):
+    def __init__(self, action_callback, tick_callback, eliminate_callback, reset_game_callback):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = NETWORK
         self.port = 5555
@@ -12,7 +12,7 @@ class Network:
         self.action_callback = action_callback
         self.tick_callback = tick_callback
         self.eliminate_callback = eliminate_callback
-        self.receive_board_callback = receive_board_callback
+        self.reset_game_callback = reset_game_callback
 
         self.get_user_input_and_connect()
 
@@ -62,7 +62,6 @@ class Network:
         try:
             data = self.client.recv(100*1024*1024)
             self.player, self.board = unwrap_board(data.decode())
-            self.receive_board_callback()
             return True
         except:
             print("Failed to receive board data.")
@@ -90,6 +89,10 @@ class Network:
                         elif sub[0] == -1:
                             print("Player", sub[1], "has been eliminated.")
                             self.eliminate_callback(sub[1])
+                        elif sub[0] == -2:
+                            print("Player", sub[1], "has won the game!")
+                            if self.receive_board_data():
+                                self.reset_game_callback()
                         else:
                             print(sub)
                             self.action_callback(*sub)
