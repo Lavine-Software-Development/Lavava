@@ -12,8 +12,6 @@ class Board:
 
         self.edgeDict = defaultdict(set)
 
-        self.nodes = self.remove_excess_nodes()
-
         self.expand_nodes()
 
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
@@ -35,9 +33,6 @@ class Board:
         if len(self.remaining) == 1:
             self.victor = self.player_dict[list(self.remaining)[0]]
             self.victor.win()
-
-    def remove_excess_nodes(self):
-        return [node for node in self.nodes if len(node.incoming) + len(node.outgoing) > 0]
 
     def expand_nodes(self):
 

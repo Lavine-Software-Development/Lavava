@@ -1,6 +1,7 @@
 import math
 import pygame as py
 from dynamicEdge import DynamicEdge
+from resourceNode import ResourceNode
 from constants import *
 
 class Draw:
@@ -82,9 +83,21 @@ class Draw:
 
     def blit_nodes(self):
         for spot in self.nodes:
-            py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+            if isinstance(spot, ResourceNode):
+                if spot.popped:
+                    py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+                elif spot.bubble_owner != None:
+                    angle1 = 2 * math.pi * (spot.bubble_size / spot.bubble)
+                    py.draw.arc(self.screen, spot.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), -angle1 / 2, angle1 / 2, spot.size)
+                    py.draw.arc(self.screen, spot.bubble_owner.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), angle1 / 2, -angle1 / 2 + 2 * math.pi, spot.size)
+                else:
+                    py.draw.circle(self.screen, GREY, spot.pos, spot.size)
+                py.draw.circle(self.screen, spot.ring_color, spot.pos, spot.size + 6, 6)
+            else:
+                py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
+                
 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
