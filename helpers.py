@@ -108,7 +108,7 @@ def unwrap_board(s):
                 nodes[id] = ResourceNode(id, data['coord'], True)
                 island_resources += 1
         elif network_resources < NETWORK_RESOURCE_COUNT and not data['out'] and \
-             data['in'] and len(data['in']) + len(data['dynamic']) >= 2:
+             data['in']:
 
             nodes[id] = ResourceNode(id, data['coord'], False)
             network_resources += 1
