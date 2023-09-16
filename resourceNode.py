@@ -21,11 +21,13 @@ class ResourceNode(Node):
         self.bubble_size = self.bubble
 
     def capture(self, clicker=None):
+        if self.owner:
+            self.owner.tick_production -= self.bonus
         super().capture(clicker)
         self.owner.tick_production += self.bonus
 
     def grow(self):
-        print(self.value)
+        pass
 
     def delivery(self, amount, player):
         if not self.popped:
@@ -40,7 +42,6 @@ class ResourceNode(Node):
         self.popped = True
         self.capture(self.bubble_owner)
         self.value = self.bubble * 0.44 # 1 - (18 + 5) / (2*18 + 5) = 
-        print(self.value)
 
     def bubble_controlled(self, owner):
         if self.bubble_owner == None or owner == self.bubble_owner:
