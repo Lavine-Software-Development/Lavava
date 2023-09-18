@@ -10,13 +10,13 @@ from dynamicEdge import DynamicEdge
 
 class MapBuilder:
 
-    def __init__(self, seed):
+    def __init__(self, generator):
         self.nodes = []
         self.edges = []
         self.node_objects = []
         self.edge_objects = []
         self.edgeDict = defaultdict(set)
-        self.generator = RandomGenerator(seed)
+        self.generator = generator
 
         self.make_nodes()
         self.make_edges()

@@ -90,8 +90,7 @@ class Network:
                             self.eliminate_callback(sub[1])
                         elif sub[0] == -2:
                             print("Player", sub[1], "has won the game!")
-                            if self.receive_board_data():
-                                self.reset_game_callback()
+                            self.reset_game_callback()
                         else:
                             print(sub)
                             self.action_callback(*sub)

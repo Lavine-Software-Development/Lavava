@@ -110,11 +110,13 @@ class Draw:
             self.screen.blit(self.font.render(f"Player {self.board.victor.id} Wins!",True,self.board.victor.color),(SCREEN_WIDTH - 300,20))
             if self.player.victory:
                 self.screen.blit(self.small_font.render("R to restart",True,self.player.color),(SCREEN_WIDTH - 300,60))
+            else:
+                self.screen.blit(self.small_font.render(f"Waiting for Player {self.board.victor.id} to restart",True,self.board.victor.color),(SCREEN_WIDTH - 450,60))
         elif self.board.timer > 0:
             if self.board.timer < 4:
-                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(SCREEN_WIDTH - 100,20))
+                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,BLACK),(SCREEN_WIDTH - 100,20))
             else:
-                self.screen.blit(self.small_font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(SCREEN_WIDTH - 100,20))
+                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(SCREEN_WIDTH - 100,20))
         elif self.player.eliminated:
             self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(SCREEN_WIDTH - 300,20))
         else:
