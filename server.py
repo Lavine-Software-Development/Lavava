@@ -82,13 +82,13 @@ class Server:
         for i, conn in enumerate(game.connections):
             try:
                 # You would send the new representation of the board here
-                new_board_data = game.graph.repr(i, game.player_count)  # Get the new board representation
+                new_board_data = game.repr(i)  # Get the new board representation
                 conn.sendall(new_board_data.encode())  # Send the new board data
             except Exception as e:
                 print(f"Failed to send new board data to player {i}: {e}") 
 
     def threaded_client_in_game(self, player, conn, game):
-        conn.send(game.graph.repr(player, game.player_count).encode())
+        conn.send(game.repr(player).encode())
         while True:
             try:
                 data = conn.recv(32)

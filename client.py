@@ -2,6 +2,7 @@ import pygame as p
 from network import Network
 from board import Board
 from draw import Draw
+from map_builder import MapBuilder
 
 class Client:
     def __init__(self):
@@ -11,28 +12,22 @@ class Client:
         self.hovered_node = None
 
         self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
-        print("network done")
 
-        self.player_num = self.n.player
-        self.board = Board(*(self.n.board))
-        self.players = self.board.player_dict
-        self.player = self.players[self.player_num]
+        self.start_game()
         self.d = Draw(self.board, self.player_num, [self.players[x] for x in self.players])
-
-        self.in_draw = False
-        self.active = False
-        self.closest = None
-        self.position = None
-
-
         self.main_loop()
 
     def reset_game(self):
-        self.player_num = self.n.player
-        self.board = Board(*(self.n.board))
+        self.start_game()
+        self.d.set_data(self.board, self.player_num, [self.players[x] for x in self.players])
+
+    def start_game(self):
+        self.player_num = int(self.n.data[0])
+        self.player_count = int(self.n.data[2])
+        map = MapBuilder(int(self.n.data[4:]))
+        self.board = Board(self.player_count, map.node_objects, map.edge_objects)
         self.players = self.board.player_dict
         self.player = self.players[self.player_num]
-        self.d.set_data(self.board, self.player_num, [self.players[x] for x in self.players])
 
         self.in_draw = False
         self.active = False
@@ -46,7 +41,7 @@ class Client:
             self.board.buy_new_edge(id, acting_player, button)
 
     def tick(self):
-        if not self.board.victor:
+        if self.board and not self.board.victor:
             self.board.update()
 
     def eliminate(self, id):

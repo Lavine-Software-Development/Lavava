@@ -1,6 +1,5 @@
 import socket
 import threading
-from helpers import unwrap_board
 from constants import *
 
 class Network:
@@ -60,8 +59,8 @@ class Network:
 
     def receive_board_data(self):
         try:
-            data = self.client.recv(100*1024*1024)
-            self.player, self.board = unwrap_board(data.decode())
+            data = self.client.recv(1024)
+            self.data = data.decode()
             return True
         except:
             print("Failed to receive board data.")
