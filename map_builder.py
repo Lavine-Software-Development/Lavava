@@ -14,6 +14,56 @@ class MapBuilder:
         self.make_nodes()
         self.make_edges()
 
+
+    def find(self, x, parent):
+        if parent[x] != x:
+            parent[x] = self.find(parent[x], parent)
+        return parent[x]
+
+    def union(self, x, y, parent, rank):
+        root_x = self.find(x, parent)
+        root_y = self.find(y, parent)
+        
+        if root_x != root_y:
+            if rank[root_x] > rank[root_y]:
+                parent[root_y] = root_x
+            else:
+                parent[root_x] = root_y
+                if rank[root_x] == rank[root_y]:
+                    rank[root_y] += 1
+
+    def is_valid_map(self,edges):
+        nodes = set()
+        for x, y in edges:
+            nodes.add(x)
+            nodes.add(y)
+        
+        parent = {node: node for node in nodes}
+        rank = {node: 0 for node in nodes}
+        component_size = {node: 1 for node in nodes}
+        
+        for x, y in edges:
+            root_x = self.find(x, parent)
+            root_y = self.find(y, parent)
+            
+            if root_x != root_y:
+                component_size[root_x] -= 1
+                component_size[root_y] += 1
+                self.union(x, y, parent, rank)
+        
+        islands = set()
+        for node in parent.keys():
+            islands.add(self.find(node, parent))
+        
+        if len(islands) != ISLAND_COUNT:
+            return False
+        
+        for island in islands:
+            if component_size[island] < ISLAND_MIN_NODES:
+                return False
+        
+        return True
+
     def make_nodes(self):  #assumes global list nodes is empty
         count = 0
         while count < NODE_COUNT:
@@ -34,6 +84,7 @@ class MapBuilder:
 
     def make_edges(self):
 
+        checklist=[]
         edge_set = set()
 
         count = 0
@@ -51,7 +102,7 @@ class MapBuilder:
             combo = (min(num1, num2), max(num1, num2))
 
             if combo not in edge_set and self.nearby(combo) and self.check_all_overlaps(combo) and self.check_angle_constraints(combo):
-
+                checklist.append(combo)
                 edge_set.add(combo)
                 self.edgeDict[num1].add(num2)
                 self.edgeDict[num2].add(num1)
@@ -59,7 +110,7 @@ class MapBuilder:
                 self.edges.append(myedge)
 
                 count += 1
-
+        print(self.is_valid_map(checklist))
     def overlap(self, edge1,edge2):
         return do_intersect(self.nodes[edge1[0]][1],self.nodes[edge1[1]][1],self.nodes[edge2[0]][1],self.nodes[edge2[1]][1])
 
