@@ -6,13 +6,12 @@ from helpers import *
 class Board:
 
     def __init__(self, player_count, nodes, edges):
+
         self.nodes = nodes
         self.edges = edges
         self.player_count = player_count
 
         self.edgeDict = defaultdict(set)
-
-        self.nodes = self.remove_excess_nodes()
 
         self.expand_nodes()
 
@@ -23,6 +22,8 @@ class Board:
 
         self.remaining = {i for i in range(player_count)}
         self.victor = None
+
+        self.timer = 60
 
     def eliminate(self, player):
         self.remaining.remove(player)
@@ -35,9 +36,6 @@ class Board:
         if len(self.remaining) == 1:
             self.victor = self.player_dict[list(self.remaining)[0]]
             self.victor.win()
-
-    def remove_excess_nodes(self):
-        return [node for node in self.nodes if len(node.incoming) + len(node.outgoing) > 0]
 
     def expand_nodes(self):
 
@@ -57,19 +55,27 @@ class Board:
             node.pos = (new_x, y)
 
     def update(self):
-        for spot in self.nodes:
-            if spot.owned_and_alive():
-                spot.grow()
 
-        for edge in self.edges:
-            edge.update()
-        
-        for player in self.player_dict.values():
-            out = player.update()
-            if out:
-                self.eliminate(player.id)
+        if self.timer > 0:
+            self.timer -= 0.1
 
-        self.check_over()
+            if self.timer > 3 and self.opening_moves == len(self.remaining) * 2:
+                self.timer = 3
+
+        else:
+            for spot in self.nodes:
+                if spot.owned_and_alive():
+                    spot.grow()
+
+            for edge in self.edges:
+                edge.update()
+            
+            for player in self.player_dict.values():
+                out = player.update()
+                if out:
+                    self.eliminate(player.id)
+
+            self.check_over()
 
     def find_node(self, position):
         for node in self.nodes:
@@ -122,3 +128,7 @@ class Board:
             self.edges.append(newEdge)
             self.id_dict[newEdge.id] = newEdge
             self.extra_edges += self.player_count
+
+    @property
+    def opening_moves(self):
+        return sum([player.count for player in self.player_dict.values()])

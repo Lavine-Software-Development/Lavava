@@ -11,6 +11,7 @@ class Node:
         self.outgoing = []
         self.id = id
         self.pos = pos
+        self.popped = True
 
     def __str__(self):
         return str(self.id)
@@ -33,6 +34,14 @@ class Node:
         if self.owner == None:
             if clicker.buy_node():
                 self.capture()
+
+    def delivery(self, amount, player):
+        if self.owner != player:
+            self.value -= amount
+            if self.killed():
+                self.capture(player)
+        else:
+            self.value += amount
 
     def attack(self):
         pass
@@ -86,6 +95,10 @@ class Node:
         if self.value<5:
             return 0
         return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)
+
+    @property
+    def current_incoming(self):
+        return [edge for edge in self.incoming if edge.to_node == self]
 
     @property
     def size(self):

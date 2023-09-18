@@ -1,6 +1,7 @@
 import math
 import pygame as py
 from dynamicEdge import DynamicEdge
+from resourceNode import ResourceNode
 from constants import *
 
 class Draw:
@@ -82,25 +83,45 @@ class Draw:
 
     def blit_nodes(self):
         for spot in self.nodes:
-            py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+            if isinstance(spot, ResourceNode):
+                if spot.popped:
+                    py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+                elif spot.bubble_owner != None:
+                    angle1 = 2 * math.pi * (spot.bubble_size / spot.bubble)
+                    py.draw.arc(self.screen, spot.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), -angle1 / 2, angle1 / 2, spot.size)
+                    py.draw.arc(self.screen, spot.bubble_owner.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), angle1 / 2, -angle1 / 2 + 2 * math.pi, spot.size)
+                else:
+                    py.draw.circle(self.screen, GREY, spot.pos, spot.size)
+                py.draw.circle(self.screen, spot.ring_color, spot.pos, spot.size + 6, 6)
+            else:
+                py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
+                
 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
         self.screen.blit(self.font.render(str(int(self.player.money)),True,self.player.color),(20,20))
-        self.screen.blit(self.small_font.render(f"{self.player.production_per_second:.1f}", True, (205, 204, 0)), (23, 60))
+        self.screen.blit(self.small_font.render(f"{self.player.production_per_second:.0f}", True, (205, 204, 0)), (23, 60))
         for i in range(self.board.player_count):
             self.screen.blit(self.small_font.render(str(int(self.players[i].count)),True,self.players[i].color),(SCREEN_WIDTH/3 + i*150,20))
+        
         if self.board.victor:
             self.screen.blit(self.font.render(f"Player {self.board.victor.id} Wins!",True,self.board.victor.color),(SCREEN_WIDTH - 300,20))
             if self.player.victory:
                 self.screen.blit(self.small_font.render("R to restart",True,self.player.color),(SCREEN_WIDTH - 300,60))
+        elif self.board.timer > 0:
+            if self.board.timer < 4:
+                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(SCREEN_WIDTH - 100,20))
+            else:
+                self.screen.blit(self.small_font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(SCREEN_WIDTH - 100,20))
         elif self.player.eliminated:
             self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(SCREEN_WIDTH - 300,20))
         else:
             self.screen.blit(self.small_font.render("A to Edge Build",True,self.player.color),(SCREEN_WIDTH - 300,20))
             self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(SCREEN_WIDTH - 300,60))
+
+        
 
     def wipe(self):
         self.screen.fill(WHITE)

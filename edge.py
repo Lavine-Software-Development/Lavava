@@ -1,4 +1,5 @@
 from constants import *
+from resourceNode import ResourceNode
 
 class Edge:
 
@@ -28,7 +29,7 @@ class Edge:
             self.on = specified
 
     def update(self):
-        if self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.on or (self.to_node.full and not self.contested):
+        if self.from_node.value < MINIMUM_TRANSFER_VALUE or self.flow_check():
             self.flowing = False
         elif self.from_node.value > BEGIN_TRANSFER_VALUE:
             self.flowing = True
@@ -37,6 +38,13 @@ class Edge:
             self.flow()
             if not self.popped:
                 self.pop()
+
+    def flow_check(self):
+        if not self.on or (self.to_node.full and not self.contested):
+            return True
+        if not self.to_node.popped:
+            return self.to_node.bubble_controlled(self.from_node.owner)
+        return False
 
     def pop(self):
         self.popped = True
@@ -49,14 +57,7 @@ class Edge:
         self.from_node.value -= amount_transferred
 
     def delivery(self, amount):
-        if self.to_node.owner != self.from_node.owner:
-            self.to_node.value -= amount
-            if self.to_node.killed():
-                self.capture()
-        else:
-            if self.to_node.owner == None:
-                self.capture()
-            self.to_node.value += amount
+        self.to_node.delivery(amount, self.from_node.owner)
 
     def capture(self):
         self.to_node.capture(self.from_node.owner)

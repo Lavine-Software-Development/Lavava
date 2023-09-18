@@ -17,6 +17,7 @@ class Player:
         self.eliminated = False
         self.victory = False
         self.started = False
+        self.tick_production = MONEY_RATE
 
     def buy_node(self):
         if self.money >= BUY_NODE_COST:
@@ -55,9 +56,5 @@ class Player:
         self.victory = True
 
     @property
-    def tick_production(self):
-        return round((1 + sqrt(self.count)) * MONEY_RATE, 2)
-
-    @property
     def production_per_second(self):
-        return self.tick_production * 4
+        return self.tick_production * 10
