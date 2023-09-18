@@ -11,7 +11,7 @@ import string
 
 class Server:
     def __init__(self, port):
-        self.server = '50.64.20.3'
+        self.server = '0.0.0.0'
         self.port = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.waiting_players = {}  # Stores the waiting players with the game code as the key

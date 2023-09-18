@@ -14,7 +14,7 @@ class MapBuilder:
         self.make_nodes()
         self.make_edges()
 
-
+    """
     def find(self, x, parent):
         if parent[x] != x:
             parent[x] = self.find(parent[x], parent)
@@ -63,7 +63,7 @@ class MapBuilder:
                 return False
         
         return True
-
+    """
     def make_nodes(self):  #assumes global list nodes is empty
         count = 0
         while count < NODE_COUNT:
@@ -110,7 +110,7 @@ class MapBuilder:
                 self.edges.append(myedge)
 
                 count += 1
-        print(self.is_valid_map(checklist))
+        #print(self.is_valid_map(checklist))
     def overlap(self, edge1,edge2):
         return do_intersect(self.nodes[edge1[0]][1],self.nodes[edge1[1]][1],self.nodes[edge2[0]][1],self.nodes[edge2[1]][1])
 
