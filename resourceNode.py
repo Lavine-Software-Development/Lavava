@@ -29,7 +29,7 @@ class ResourceNode(Node):
     def grow(self):
         pass
 
-    def left_click():
+    def left_click(self, clicker):
         pass
 
     def delivery(self, amount, player):
