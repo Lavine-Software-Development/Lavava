@@ -28,7 +28,7 @@ class Server:
 
     def generate_game_code(self):
         """Generate a unique game code."""
-        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        return ''.join(random.choices(string.ascii_uppercase, k=3))
 
     def send_ticks(self, game):
         time.sleep(1)
@@ -74,21 +74,8 @@ class Server:
         for i, conn in enumerate(game.connections):
             start_new_thread(self.threaded_client_in_game, (i, conn, game))
 
-    def restart_game(self, game):
-        # Reset the game state
-        game.build()  # You might need to implement this method in your Game class
-
-            # Now, iterate over all connections (players) and send the updated board data
-        for i, conn in enumerate(game.connections):
-            try:
-                # You would send the new representation of the board here
-                new_board_data = game.graph.repr(i, game.player_count)  # Get the new board representation
-                conn.sendall(new_board_data.encode())  # Send the new board data
-            except Exception as e:
-                print(f"Failed to send new board data to player {i}: {e}") 
-
     def threaded_client_in_game(self, player, conn, game):
-        conn.send(game.graph.repr(player, game.player_count).encode())
+        conn.send(game.repr(player).encode())
         while True:
             try:
                 data = conn.recv(32)
@@ -99,10 +86,6 @@ class Server:
                     print("Received: ", data.decode())
                     for connection in game.connections:
                         connection.sendall(data)
-                    data_list = list(filter(None, data.decode().split(',')))
-                    data_tuple = tuple(map(int, data_list))
-                    if data_tuple == (-2, -2, -2):
-                        self.restart_game(game)
             except socket.error as e:
                 print(e)
         

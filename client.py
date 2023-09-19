@@ -2,6 +2,8 @@ import pygame as p
 from network import Network
 from board import Board
 from draw import Draw
+from map_builder import MapBuilder
+from randomGenerator import RandomGenerator
 
 class Client:
     def __init__(self):
@@ -11,28 +13,24 @@ class Client:
         self.hovered_node = None
 
         self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
-        print("network done")
+        self.player_num = int(self.n.data[0])
+        self.player_count = int(self.n.data[2])
 
-        self.player_num = self.n.player
-        self.board = Board(*(self.n.board))
-        self.players = self.board.player_dict
-        self.player = self.players[self.player_num]
+        self.generator = RandomGenerator(int(self.n.data[4:]))
+
+        self.start_game()
         self.d = Draw(self.board, self.player_num, [self.players[x] for x in self.players])
-
-        self.in_draw = False
-        self.active = False
-        self.closest = None
-        self.position = None
-
-
         self.main_loop()
 
     def reset_game(self):
-        self.player_num = self.n.player
-        self.board = Board(*(self.n.board))
+        self.start_game()
+        self.d.set_data(self.board, self.player_num, [self.players[x] for x in self.players])
+
+    def start_game(self):
+        map = MapBuilder(self.generator)
+        self.board = Board(self.player_count, map.node_objects, map.edge_objects)
         self.players = self.board.player_dict
         self.player = self.players[self.player_num]
-        self.d.set_data(self.board, self.player_num, [self.players[x] for x in self.players])
 
         self.in_draw = False
         self.active = False
@@ -46,7 +44,7 @@ class Client:
             self.board.buy_new_edge(id, acting_player, button)
 
     def tick(self):
-        if not self.board.victor:
+        if self.board and not self.board.victor:
             self.board.update()
 
     def eliminate(self, id):
@@ -60,12 +58,14 @@ class Client:
 
     def keydown(self, event):
         if event.type == p.KEYDOWN:
-            if event.key == p.K_a:
-                self.player.switch_considering()
-            elif event.key == p.K_x:
-                self.eliminate_send()
-            elif event.key == p.K_r and self.player.victory:
-                self.restart_send()
+            if self.player.victory:
+                if event.key == p.K_r:
+                    self.restart_send()
+            else:
+                if event.key == p.K_a:
+                    self.player.switch_considering()
+                elif event.key == p.K_x:
+                    self.eliminate_send()
 
     def main_loop(self):
         while True:
@@ -80,14 +80,15 @@ class Client:
 
                     self.keydown(event)
 
-                    if event.type == p.MOUSEBUTTONDOWN:
-                        self.position = event.pos
-                        button = event.button
-                        self.mouse_button_down_event(button)
+                    if not self.player.victory:
+                        if event.type == p.MOUSEBUTTONDOWN:
+                            self.position = event.pos
+                            button = event.button
+                            self.mouse_button_down_event(button)
 
-                    elif event.type == p.MOUSEMOTION:
-                        self.position = event.pos
-                        self.mouse_motion_event()
+                        elif event.type == p.MOUSEMOTION:
+                            self.position = event.pos
+                            self.mouse_motion_event()
 
             self.d.blit(self.position)
 

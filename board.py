@@ -2,6 +2,7 @@ from collections import defaultdict
 from player import Player
 from constants import *
 from helpers import *
+from edge import Edge
 
 class Board:
 
