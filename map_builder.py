@@ -140,7 +140,7 @@ class MapBuilder:
                     nodes[id] = ResourceNode(id, data['coord'], True)
                     island_resources += 1
             elif network_resources < NETWORK_RESOURCE_COUNT and not data['out'] and \
-                data['in']:
+                data['in'] and not data['nearby']:
 
                 nodes[id] = ResourceNode(id, data['coord'], False)
                 network_resources += 1
