@@ -14,14 +14,14 @@ jobs:
         python-version: 3.11
 
     - run: pip install -r requirements.txt pyinstaller
-    - run: pyinstaller client.py
-    - run: pyinstaller server.py
+    - run: pyinstaller --onefile client.py
+    - run: pyinstaller --onefile server.py
     - run: ls -R dist/
     - uses: actions/upload-artifact@v2
       with:
         name: client-executable-${{ matrix.os }}
-        path: dist/client/*
+        path: dist/client
     - uses: actions/upload-artifact@v2
       with:
         name: server-executable-${{ matrix.os }}
-        path: dist/server/*
+        path: dist/server
