@@ -11,11 +11,12 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.11
 
     - run: pip install -r requirements.txt pyinstaller
-    - run: pyinstaller --onefile client.py
-    - run: pyinstaller --onefile server.py
+    - run: pyinstaller client.py
+    - run: pyinstaller server.py
+    - run: ls -R dist/
     - uses: actions/upload-artifact@v2
       with:
         name: client-executable-${{ matrix.os }}
