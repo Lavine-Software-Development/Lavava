@@ -3,15 +3,12 @@ Sup yall
 
 # Setup
 The game is for 2 to 4 players
-Each player must pull main and install requirements.txt
+Go to the action tab and select the most recent workflow for the mode you want to play.
+Download the client and server version for your OS.
 
-Choose one player to run the server. This player needs to check the local ip address on their computer.
-Go to the 'constants.py' file on each computer and change the 'NETWORK' value to the ip of the player running server
-
-The player running server should run server.py
-Each player should then run client.py. This must be after server.py is running
-
-One player types HOST and chooses how many players should play, and they will be given a 6 digit code
+Choose one player to run the server. This player needs to check the local ip address on their computer, and then start the server
+Each player should then run client. This MUST be after server.py is running. Enter the IP address of the computer running server 
+One player types HOST and chooses how many players should play, and they will be given a 3 digit code
 The other players type JOIN, and then type in the code.
 
 # Play
