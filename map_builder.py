@@ -133,7 +133,6 @@ class MapBuilder:
             for other_id in data['out'] + data['in'] + data['dynamic']:
                 if other_id in nodes and isinstance(nodes[other_id], ResourceNode):
                     data['nearby'] = True
-                    print("found a nearby")
                     break
             if data["island"]:
                 if island_resources < ISLAND_RESOURCE_COUNT:
