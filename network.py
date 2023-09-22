@@ -35,8 +35,7 @@ class Network:
             player_count = input("Enter the number of players for the game: ")
             self.init_data = f"HOST,{player_count}"
         else:
-            game_code = input("Enter the game code to join: ")
-            self.init_data = f"JOIN,{game_code}"
+            self.init_data = f"JOIN,{0}"
 
     def connect_and_receive_board(self):
         if self.establish_connection():

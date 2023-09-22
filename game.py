@@ -2,9 +2,8 @@ from map_builder import MapBuilder
 import random
 
 class Game:
-    def __init__(self, count, code, conn):
+    def __init__(self, count, conn):
         self.connections = [conn]
-        self.game_code = code
         self.player_count = count
 
     def add_player(self, conn):
