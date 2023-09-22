@@ -47,8 +47,8 @@ class Network:
             self.client.send(self.init_data.encode())
             data = self.client.recv(1024)
             response = data.decode()
-            if response == "INVALID_CODE":
-                print("Failed to join the game: Invalid game code.")
+            if response == "FAIL":
+                print("Failed to join the game: No one is currently hosting.")
                 return False
             else:
                 print("Connected to game", response)

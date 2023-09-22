@@ -13,6 +13,7 @@ class Client:
 
         self.counter = 0
         self.hovered_node = None
+        self.board = None
 
         self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
         self.player_num = int(self.n.data[0])
@@ -34,7 +35,7 @@ class Client:
 
     def start_game(self):
         map = MapBuilder(self.generator)
-        self.board = Board(self.player_count, map.node_objects, map.edge_objects)
+        self.board = Board(self.players, map.node_objects, map.edge_objects)
 
         self.in_draw = False
         self.active = False

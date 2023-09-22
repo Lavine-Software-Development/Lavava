@@ -9,15 +9,12 @@ class Board:
 
         self.nodes = nodes
         self.edges = edges
-        self.player_count = len(self.player_dict)
-
-        self.edgeDict = defaultdict(set)
-
-        self.expand_nodes()
-
-        self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.player_dict = player_dict
 
+        self.player_count = len(self.player_dict)
+        self.edgeDict = defaultdict(set)
+        self.expand_nodes()
+        self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.extra_edges = 2
 
         self.remaining = {i for i in range(self.player_count)}

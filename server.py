@@ -56,7 +56,7 @@ class Server:
                 else:
                     print("Game is not ready to start")
             else:
-                conn.sendall("No one is currently Hosting".encode())
+                conn.sendall("FAIL".encode())
 
     def start_game(self, game):
         tick_thread = Thread(target=self.send_ticks, args=(game,))
