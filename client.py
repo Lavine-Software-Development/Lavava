@@ -4,6 +4,8 @@ from board import Board
 from draw import Draw
 from map_builder import MapBuilder
 from randomGenerator import RandomGenerator
+from player import Player
+from constants import *
 
 class Client:
     def __init__(self):
@@ -15,6 +17,8 @@ class Client:
         self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
         self.player_num = int(self.n.data[0])
         self.player_count = int(self.n.data[2])
+        self.players = {i: Player(COLOR_DICT[i], i) for i in range(self.player_count)}
+        self.player = self.players[self.player_num]
 
         self.generator = RandomGenerator(int(self.n.data[4:]))
 
@@ -25,12 +29,12 @@ class Client:
     def reset_game(self):
         self.start_game()
         self.d.set_data(self.board, self.player_num, [self.players[x] for x in self.players])
+        for player in self.players.values():
+            player.default_values()
 
     def start_game(self):
         map = MapBuilder(self.generator)
         self.board = Board(self.player_count, map.node_objects, map.edge_objects)
-        self.players = self.board.player_dict
-        self.player = self.players[self.player_num]
 
         self.in_draw = False
         self.active = False
@@ -97,8 +101,6 @@ class Client:
 
             self.d.blit(self.position)
 
-        
-    
     def mouse_button_down_event(self, button):
         if id := self.board.find_node(self.position):
             if self.player.considering_edge:

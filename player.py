@@ -4,13 +4,17 @@ from math import sqrt
 class Player:
 
     def __init__(self, color, id):
-        self.money = START_MONEY
-        self.count = 0
-        self.begun = False
         self.color = color
         self.id = id
         self.auto_expand = True
         self.auto_attack = False
+        self.points = 0
+        self.default_values()
+
+    def default_values(self):
+        self.money = START_MONEY
+        self.count = 0
+        self.begun = False
         self.considering_edge = False
         self.new_edge_start = None
         self.highlighted_node = None
@@ -18,6 +22,7 @@ class Player:
         self.victory = False
         self.started = False
         self.tick_production = MONEY_RATE
+        self.placement = 0
 
     def buy_node(self):
         if self.money >= BUY_NODE_COST:
@@ -41,10 +46,11 @@ class Player:
     def new_edge_started(self):
         return self.new_edge_start is not None
 
-    def eliminate(self):
+    def eliminate(self, placement):
         self.eliminated = True
         self.money = 0
         self.color = GREY
+        self.placement = placement
 
     def update(self):
         if not self.eliminated:
@@ -54,6 +60,10 @@ class Player:
 
     def win(self):
         self.victory = True
+        self.placement = 0
+
+    def display(self):
+        print(f"Player {self.id}: {self.points}")
 
     @property
     def production_per_second(self):

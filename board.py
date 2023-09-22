@@ -1,27 +1,26 @@
 from collections import defaultdict
-from player import Player
 from constants import *
 from helpers import *
 from edge import Edge
 
 class Board:
 
-    def __init__(self, player_count, nodes, edges):
+    def __init__(self, player_dict, nodes, edges):
 
         self.nodes = nodes
         self.edges = edges
-        self.player_count = player_count
+        self.player_count = len(self.player_dict)
 
         self.edgeDict = defaultdict(set)
 
         self.expand_nodes()
 
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
-        self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
+        self.player_dict = player_dict
 
         self.extra_edges = 2
 
-        self.remaining = {i for i in range(player_count)}
+        self.remaining = {i for i in range(self.player_count)}
         self.victor = None
 
         self.timer = 60
@@ -37,6 +36,12 @@ class Board:
         if len(self.remaining) == 1:
             self.victor = self.player_dict[list(self.remaining)[0]]
             self.victor.win()
+            self.display_ranks()
+
+    def display_ranks(self):
+        for player in self.player_dict.values():
+            player.points += self.player_count - player.placement
+            player.display()
 
     def expand_nodes(self):
 
