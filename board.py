@@ -27,7 +27,7 @@ class Board:
         for edge in self.edges:
             if edge.owned_by(self.player_dict[player]):
                 edge.switch(False)
-        self.player_dict[player].eliminate()
+        self.player_dict[player].eliminate(len(self.remaining))
 
     def check_over(self):
         if len(self.remaining) == 1:
