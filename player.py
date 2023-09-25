@@ -4,7 +4,7 @@ from math import sqrt
 class Player:
 
     def __init__(self, color, id):
-        self.color = color
+        self.default_color = color
         self.id = id
         self.auto_expand = True
         self.auto_attack = False
@@ -23,6 +23,7 @@ class Player:
         self.started = False
         self.tick_production = MONEY_RATE
         self.placement = 0
+        self.color = self.default_color
 
     def buy_node(self):
         if self.money >= BUY_NODE_COST:
