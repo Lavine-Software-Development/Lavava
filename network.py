@@ -11,11 +11,12 @@ class Network:
         self.tick_callback = tick_callback
         self.eliminate_callback = eliminate_callback
         self.reset_game_callback = reset_game_callback
+        self.running = True
 
         self.get_user_input_and_connect()
 
     def get_user_input_and_connect(self):
-        while True:
+        while self.running:
             self.get_user_input_for_game()
             if self.connect_and_receive_board():
                 threading.Thread(target=self.listen_for_data).start()
@@ -74,7 +75,7 @@ class Network:
             print(e)
 
     def listen_for_data(self):
-        while True:
+        while self.running:
             try:
                 response = self.client.recv(32).decode()
                 if response:
@@ -86,17 +87,18 @@ class Network:
                         if sub == (0, 0, 0):
                             self.tick_callback()
                         elif sub[0] == -1:
-                            print("Player", sub[1], "has been eliminated.")
                             self.eliminate_callback(sub[1])
                         elif sub[0] == -2:
-                            print("Player", sub[1], "has won the game!")
                             self.reset_game_callback()
                         else:
-                            print(sub)
                             self.action_callback(*sub)
             except socket.error as e:
                 print(e)
                 break
+
+    def stop(self):
+        self.running = False
+        self.client.close()
 
 if __name__ == "__main__":
     # replace with your actual callbacks

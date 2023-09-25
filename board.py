@@ -37,8 +37,16 @@ class Board:
 
     def display_ranks(self):
         for player in self.player_dict.values():
-            player.points += self.player_count - player.placement
+            player.points += self.player_count - player.placement - 1
+
+        # Sort players by their points, descending.
+        sorted_by_score = sorted(self.player_dict.values(), key=lambda p: p.points, reverse=True)
+
+        print("New Scores")
+        print("-----------------")
+        for player in sorted_by_score:
             player.display()
+        print()
 
     def expand_nodes(self):
 
@@ -60,10 +68,12 @@ class Board:
 
     def update(self):
 
+        self.check_over()
+
         if self.timer > 0:
             self.timer -= 0.1
 
-            if self.timer > 3 and self.opening_moves == len(self.remaining) * 2:
+            if self.timer > 3 and self.opening_moves == len(self.remaining):
                 self.timer = 3
 
         else:
@@ -78,8 +88,6 @@ class Board:
                 out = player.update()
                 if out:
                     self.eliminate(player.id)
-
-            self.check_over()
 
     def find_node(self, position):
         for node in self.nodes:

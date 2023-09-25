@@ -6,6 +6,7 @@ from map_builder import MapBuilder
 from randomGenerator import RandomGenerator
 from player import Player
 from constants import *
+import sys
 
 class Client:
     def __init__(self):
@@ -14,6 +15,7 @@ class Client:
         self.counter = 0
         self.hovered_node = None
         self.board = None
+        self.running = True
 
         self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
         self.player_num = int(self.n.data[0])
@@ -73,11 +75,8 @@ class Client:
                     self.eliminate_send()
 
     def main_loop(self):
-        while True:
-
+        while self.running:
             for event in p.event.get():
-                self.d.wipe()
-        
                 if event.type == p.QUIT:
                     self.running = False
 
@@ -85,9 +84,9 @@ class Client:
                     width, height = event.w, event.h
                     for node in self.board.nodes:
                         node.relocate(width, height)
+                    self.d.relocate(width, height)
 
                 if not self.player.eliminated:
-
                     self.keydown(event)
 
                     if not self.player.victory:
@@ -100,7 +99,12 @@ class Client:
                             self.position = event.pos
                             self.mouse_motion_event()
 
+            self.d.wipe()
             self.d.blit(self.position)
+
+        self.n.stop()
+        self.d.close_window()
+        sys.exit()
 
     def mouse_button_down_event(self, button):
         if id := self.board.find_node(self.position):

@@ -4,7 +4,8 @@ from math import sqrt
 class Player:
 
     def __init__(self, color, id):
-        self.default_color = color
+        self.default_color = color[0]
+        self.name = color[1]
         self.id = id
         self.auto_expand = True
         self.auto_attack = False
@@ -20,7 +21,6 @@ class Player:
         self.highlighted_node = None
         self.eliminated = False
         self.victory = False
-        self.started = False
         self.tick_production = MONEY_RATE
         self.placement = 0
         self.color = self.default_color
@@ -28,7 +28,6 @@ class Player:
     def buy_node(self):
         if self.money >= BUY_NODE_COST:
             self.money -= BUY_NODE_COST
-            self.started = True
             return True
         return False
 
@@ -56,7 +55,7 @@ class Player:
     def update(self):
         if not self.eliminated:
             self.money += self.tick_production
-            return self.started and self.count == 0
+            return self.count == 0
         return False
 
     def win(self):
@@ -64,7 +63,7 @@ class Player:
         self.placement = 0
 
     def display(self):
-        print(f"Player {self.id}: {self.points}")
+        print(f"{self.name}|| {self.points}")
 
     @property
     def production_per_second(self):

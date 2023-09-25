@@ -12,6 +12,8 @@ class Draw:
         self.small_font = py.font.Font(None, 45)
         self.highlighted_node = None
         self.temp_line = None
+        self.width = SCREEN_WIDTH
+        self.height = SCREEN_HEIGHT
 
         py.display.set_caption("Lavava")
 
@@ -100,28 +102,28 @@ class Draw:
                 
 
     def blit_numbers(self):
-        py.draw.rect(self.screen,WHITE,(0,0,SCREEN_WIDTH,SCREEN_HEIGHT/13))
+        py.draw.rect(self.screen,WHITE,(0,0,self.width,self.height/13))
         self.screen.blit(self.font.render(str(int(self.player.money)),True,self.player.color),(20,20))
         self.screen.blit(self.small_font.render(f"{self.player.production_per_second:.0f}", True, (205, 204, 0)), (23, 60))
         for i in range(self.board.player_count):
-            self.screen.blit(self.small_font.render(str(int(self.players[i].count)),True,self.players[i].color),(SCREEN_WIDTH/3 + i*150,20))
+            self.screen.blit(self.small_font.render(str(int(self.players[i].count)),True,self.players[i].color),(self.width/3 + i*150,20))
         
         if self.board.victor:
-            self.screen.blit(self.font.render(f"Player {self.board.victor.id} Wins!",True,self.board.victor.color),(SCREEN_WIDTH - 300,20))
+            self.screen.blit(self.font.render(f"Player {self.board.victor.id} Wins!",True,self.board.victor.color),(self.width - 300,20))
             if self.player.victory:
-                self.screen.blit(self.small_font.render("R to restart",True,self.player.color),(SCREEN_WIDTH - 300,60))
+                self.screen.blit(self.small_font.render("R to restart",True,self.player.color),(self.width - 300,60))
             else:
-                self.screen.blit(self.small_font.render(f"Waiting for Player {self.board.victor.id} to restart",True,self.board.victor.color),(SCREEN_WIDTH - 450,60))
+                self.screen.blit(self.small_font.render(f"Waiting for Player {self.board.victor.id} to restart",True,self.board.victor.color),(self.width - 450,60))
         elif self.board.timer > 0:
             if self.board.timer < 4:
-                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,BLACK),(SCREEN_WIDTH - 100,20))
+                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,BLACK),(self.width - 100,20))
             else:
-                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(SCREEN_WIDTH - 100,20))
+                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(self.width - 100,20))
         elif self.player.eliminated:
-            self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(SCREEN_WIDTH - 300,20))
+            self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(self.width - 300,20))
         else:
-            self.screen.blit(self.small_font.render("A to Edge Build",True,self.player.color),(SCREEN_WIDTH - 300,20))
-            self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(SCREEN_WIDTH - 300,60))
+            self.screen.blit(self.small_font.render("A to Edge Build",True,self.player.color),(self.width - 300,20))
+            self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(self.width - 300,60))
 
         
 
@@ -169,3 +171,11 @@ class Draw:
         if self.player.new_edge_started():
             self.edge_build(mouse_pos)
         py.display.update() 
+
+    def relocate(self, width, height):
+        self.width = width
+        self.height = height
+
+    def close_window(self):
+        py.display.quit()
+        py.quit()
