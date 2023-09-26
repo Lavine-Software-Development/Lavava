@@ -19,7 +19,7 @@ class Client:
         self.running = True
         self.abilities = abilities
 
-        self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
+        self.n = Network(self.action)
         self.player_num = int(self.n.data[0])
         self.player_count = int(self.n.data[2])
         self.players = {i: Player(COLOR_DICT[i], i) for i in range(self.player_count)}
@@ -78,7 +78,7 @@ class Client:
                     self.restart_send()
             else:
                 if event.key in self.abilities:
-                    self.player.mode = self.abilities[event.key].name
+                    self.abilities[event.key].select(self.player)
                 elif event.key == p.K_x:
                     self.eliminate_send()
 

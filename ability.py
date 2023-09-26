@@ -9,4 +9,7 @@ class Ability:
         self.effect_func = effect_func
 
     def select(self, player):
-        if s
+        if player.mode == self.key:
+            player.mode = 'default'
+        elif player.money >= self.cost:
+            player.mode = self.key

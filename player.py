@@ -16,7 +16,6 @@ class Player:
         self.count = 0
         self.begun = False
         self.mode = 'default'
-        self.new_edge_start = None
         self.highlighted_node = None
         self.eliminated = False
         self.victory = False
