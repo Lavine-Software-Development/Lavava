@@ -3,14 +3,12 @@ import threading
 from constants import *
 
 class Network:
-    def __init__(self, action_callback, tick_callback, eliminate_callback, reset_game_callback):
+    def __init__(self, action_callback):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = None
         self.port = 5555
         self.action_callback = action_callback
         self.tick_callback = tick_callback
-        self.eliminate_callback = eliminate_callback
-        self.reset_game_callback = reset_game_callback
         self.running = True
 
         self.get_user_input_and_connect()
@@ -84,14 +82,7 @@ class Network:
                     while len(data_tuple) >= 3:
                         sub = data_tuple[:3]
                         data_tuple = data_tuple[3:]
-                        if sub == (0, 0, 0):
-                            self.tick_callback()
-                        elif sub[0] == -1:
-                            self.eliminate_callback(sub[1])
-                        elif sub[0] == -2:
-                            self.reset_game_callback()
-                        else:
-                            self.action_callback(*sub)
+                        self.action_callback(*sub)
             except socket.error as e:
                 print(e)
                 break

@@ -1,5 +1,4 @@
 from constants import *
-from math import sqrt
 
 class Player:
 
@@ -16,7 +15,7 @@ class Player:
         self.money = START_MONEY
         self.count = 0
         self.begun = False
-        self.considering_edge = False
+        self.mode = 'default'
         self.new_edge_start = None
         self.highlighted_node = None
         self.eliminated = False

@@ -6,6 +6,7 @@ from map_builder import MapBuilder
 from randomGenerator import RandomGenerator
 from player import Player
 from constants import *
+from ability_builder import abilities
 import sys
 
 class Client:
@@ -16,6 +17,7 @@ class Client:
         self.hovered_node = None
         self.board = None
         self.running = True
+        self.abilities = abilities
 
         self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
         self.player_num = int(self.n.data[0])
@@ -44,11 +46,17 @@ class Client:
         self.closest = None
         self.position = None
 
-    def action(self, id, acting_player, button):
-        if id in self.board.id_dict:
-            self.board.id_dict[id].click(self.players[acting_player], button)
+    def action(self, key, acting_player, board_id):
+        if key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
+            self.board.id_dict[board_id].click(self.players[acting_player], key)
+        elif key == TICK:
+            self.tick()
+        elif key == ELIMINATE_VAL:
+            self.eliminate(acting_player)
+        elif key == RESTART_GAME_VAL:
+            self.reset_game()
         else:
-            self.board.buy_new_edge(id, acting_player, button)
+            self.board.buy_new_edge(key, acting_player, board_id)
 
     def tick(self):
         if self.board and not self.board.victor:
@@ -58,10 +66,10 @@ class Client:
         self.board.eliminate(id)
 
     def eliminate_send(self):
-        self.n.send((-1, self.player_num, -1))
+        self.n.send((ELIMINATE_VAL, self.player_num, 0))
 
     def restart_send(self):
-        self.n.send((-2, -2, -2))
+        self.n.send((RESTART_GAME_VAL, 0, 0))
 
     def keydown(self, event):
         if event.type == p.KEYDOWN:
@@ -69,8 +77,8 @@ class Client:
                 if event.key == p.K_r:
                     self.restart_send()
             else:
-                if event.key == p.K_a:
-                    self.player.switch_considering()
+                if event.key in self.abilities:
+                    self.player.mode = self.abilities[event.key].name
                 elif event.key == p.K_x:
                     self.eliminate_send()
 
@@ -117,9 +125,9 @@ class Client:
                     if self.board.id_dict[id].owner == self.player:
                         self.player.new_edge_start = self.board.id_dict[id]
             else:
-                self.n.send((id, self.player_num, button))
+                self.n.send((button, self.player_num, id))
         elif id := self.board.find_edge(self.position):
-            self.n.send((id, self.player_num, button))
+            self.n.send((button, self.player_num, id))
         elif self.player.considering_edge:
             self.player.new_edge_start = None
 
