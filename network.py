@@ -23,16 +23,18 @@ class Network:
                 break
 
     def get_user_input_for_game(self):
-        self.server = input("Input Server IP Address: ")
+        self.server = input("Input Server IP Address (or d for DEFAULT): ")
+        if self.server == "d":
+            self.server = DEFAULT_SERVER
         self.addr = (self.server, self.port)
         while True:
-            user_input = input("Do you want to HOST or JOIN a game? (HOST/JOIN): ").strip().upper()
-            if user_input in ["HOST", "JOIN"]:
+            user_input = input("Do you want to HOST or JOIN a game? (h/j): ").strip()
+            if user_input in ["h", "j"]:
                 break
             else:
-                print("Invalid input. Please enter 'HOST' or 'JOIN'.")
+                print("Invalid input. Please enter 'h' or 'j'.")
 
-        if user_input == "HOST":
+        if user_input == "h":
             player_count = input("Enter the number of players for the game: ")
             self.init_data = f"HOST,{player_count}"
         else:
