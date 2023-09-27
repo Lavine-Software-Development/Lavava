@@ -28,7 +28,7 @@ class Client:
         self.generator = RandomGenerator(int(self.n.data[4:]))
 
         self.start_game()
-        self.d = Draw(self.board, self.player_num, [self.players[x] for x in self.players])
+        self.d = Draw(self.board, self.player_num, [self.players[x] for x in self.players], self.abilities[BRIDGE_CODE])
         self.main_loop()
 
     def reset_game(self):
@@ -40,7 +40,7 @@ class Client:
     def start_game(self):
         map = MapBuilder(self.generator)
         self.board = Board(self.players, map.node_objects, map.edge_objects)
-
+        self.abilities[BRIDGE_CODE].set_board(self.board)
         self.in_draw = False
         self.active = False
         self.closest = None
@@ -116,14 +116,9 @@ class Client:
 
     def mouse_button_down_event(self, button):
         if id := self.board.find_node(self.position):
-            if self.player.considering_edge:
-                if self.player.new_edge_started():
-                    if new_edge_id := self.board.check_new_edge(self.player.new_edge_start.id, id):
-                        self.n.send((new_edge_id, self.player.new_edge_start.id, id))
-                        self.player.switch_considering()
-                else:
-                    if self.board.id_dict[id].owner == self.player:
-                        self.player.new_edge_start = self.board.id_dict[id]
+            if self.player.mode in self.abilities:
+                if data := self.abilities[self.player.mode].use(self.player, self.board.id_dict[id]):
+                    self.n.send(data)   
             else:
                 self.n.send((button, self.player_num, id))
         elif id := self.board.find_edge(self.position):

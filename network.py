@@ -8,7 +8,6 @@ class Network:
         self.server = None
         self.port = 5555
         self.action_callback = action_callback
-        self.tick_callback = tick_callback
         self.running = True
 
         self.get_user_input_and_connect()

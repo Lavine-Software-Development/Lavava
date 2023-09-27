@@ -5,7 +5,7 @@ from resourceNode import ResourceNode
 from constants import *
 
 class Draw:
-    def __init__(self, board, player_num, players):
+    def __init__(self, board, player_num, players, bridge):
         self.set_data(board, player_num, players)
         self.screen = py.display.set_mode(size, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
@@ -14,6 +14,7 @@ class Draw:
         self.temp_line = None
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
+        self.bridge = bridge
 
         py.display.set_caption("Lavava")
 
@@ -132,13 +133,13 @@ class Draw:
 
     def highlight_node(self):
         if self.player.highlighted_node is not None:
-            if self.player.considering_edge:
+            if self.TBD:
                 py.draw.circle(self.screen, DARK_YELLOW, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
             else:
                 py.draw.circle(self.screen, self.player.color, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
 
     def edge_build(self, end):
-        start=self.player.new_edge_start.pos
+        start=self.board.id_dict[self.bridge.start_node].pos
         triangle_size=5
         spacing=9
         dx = end[0] - start[0]
@@ -168,7 +169,7 @@ class Draw:
         self.blit_edges()
         self.blit_numbers()
         self.highlight_node()
-        if self.player.new_edge_started():
+        if self.bridge.first_node is not None:
             self.edge_build(mouse_pos)
         py.display.update() 
 
