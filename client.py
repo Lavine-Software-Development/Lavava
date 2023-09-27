@@ -6,7 +6,7 @@ from map_builder import MapBuilder
 from randomGenerator import RandomGenerator
 from player import Player
 from constants import *
-from ability_builder import abilities
+from ability_builder import AbilityBuilder
 import sys
 
 class Client:
@@ -17,7 +17,6 @@ class Client:
         self.hovered_node = None
         self.board = None
         self.running = True
-        self.abilities = abilities
 
         self.n = Network(self.action)
         self.player_num = int(self.n.data[0])
@@ -28,7 +27,7 @@ class Client:
         self.generator = RandomGenerator(int(self.n.data[4:]))
 
         self.start_game()
-        self.d = Draw(self.board, self.player_num, [self.players[x] for x in self.players], self.abilities[BRIDGE_CODE])
+        self.d = Draw(self.board, self.player_num, [self.players[x] for x in self.players], self.abilities)
         self.main_loop()
 
     def reset_game(self):
@@ -40,7 +39,7 @@ class Client:
     def start_game(self):
         map = MapBuilder(self.generator)
         self.board = Board(self.players, map.node_objects, map.edge_objects)
-        self.abilities[BRIDGE_CODE].set_board(self.board)
+        self.abilities = AbilityBuilder(self.board).abilities
         self.in_draw = False
         self.active = False
         self.closest = None
@@ -56,7 +55,7 @@ class Client:
         elif key == RESTART_GAME_VAL:
             self.reset_game()
         else:
-            self.board.buy_new_edge(key, acting_player, board_id)
+            self.abilities[BRIDGE_CODE].input((key, acting_player, board_id))
 
     def tick(self):
         if self.board and not self.board.victor:
@@ -123,8 +122,6 @@ class Client:
                 self.n.send((button, self.player_num, id))
         elif id := self.board.find_edge(self.position):
             self.n.send((button, self.player_num, id))
-        elif self.player.considering_edge:
-            self.player.new_edge_start = None
 
     def mouse_motion_event(self):
         if id := self.board.find_node(self.position):

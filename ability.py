@@ -3,19 +3,20 @@ from constants import *
 
 class Ability(ABC):
 
-    def __init__(self, key, name, cost, color):
+    def __init__(self, key, name, cost, color, effect):
         self.key = key
         self.name = name
         self.cost = cost
         self.color = color
+        self.effect = effect
 
     @abstractmethod
     def build(self, player, node):
         pass
 
-    @abstractmethod
-    def effect(self, player, node):
-        pass
+    def input(self, player, data):
+        player.money -= self.cost
+        return self.effect(*data)
 
     def select(self, player):
         if player.mode == self.key:
@@ -34,25 +35,23 @@ class Ability(ABC):
 
 
 class Bridge(Ability):
-    def __init__(self):
-        super().__init__(BRIDGE_KEY, 'Bridge', BRIDGE_COST, DARK_YELLOW)
+    def __init__(self, check_new_edge, buy_new_edge):
+        super().__init__(BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, buy_new_edge)
         self.first_node = None
-        self.board = None
-
-    def set_board(self, board):
-        self.board = board
+        self.check_new_edge = check_new_edge
 
     def build(self, player, node):
         if self.first_node is not None:
-            if new_edge_id := self.board.check_new_edge(self.first_node, node.id):
+            if new_edge_id := self.check_new_edge(self.first_node, node.id):
                 old_node_id = self.first_node
                 self.first_node = None
-                return (new_edge_id, node.id, old_node_id)
+                return (new_edge_id, old_node_id, node.id)
         else:
             if node.owner == player:
                 self.first_node = node.id
         return False
 
-    def effect(self, player, node):
-        pass
+    def input(self, data):
+        player = self.effect(*data)
+        player.money -= self.cost
         

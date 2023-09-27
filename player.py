@@ -29,21 +29,6 @@ class Player:
             return True
         return False
 
-    def buy_edge(self):
-        if self.money >= BRIDGE_COST:
-            self.money -= BRIDGE_COST
-            return True
-        return False
-
-    def switch_considering(self):
-        self.considering_edge = not self.considering_edge
-        if self.money < BRIDGE_COST:
-            self.considering_edge = False
-        self.new_edge_start = None
-
-    def new_edge_started(self):
-        return self.new_edge_start is not None
-
     def eliminate(self, placement):
         self.eliminated = True
         self.money = 0
