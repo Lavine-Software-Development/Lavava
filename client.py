@@ -46,16 +46,19 @@ class Client:
         self.position = None
 
     def action(self, key, acting_player, board_id):
-        if key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-            self.board.id_dict[board_id].click(self.players[acting_player], key)
-        elif key == TICK:
+        if key == TICK:
             self.tick()
-        elif key == ELIMINATE_VAL:
-            self.eliminate(acting_player)
-        elif key == RESTART_GAME_VAL:
-            self.reset_game()
         else:
-            self.abilities[BRIDGE_CODE].input((key, acting_player, board_id))
+            if key in self.abilities:
+                self.abilities[key].input(self.players[acting_player], board_id)
+            elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
+                self.board.id_dict[board_id].click(self.players[acting_player], key)
+            elif key == ELIMINATE_VAL:
+                self.eliminate(acting_player)
+            elif key == RESTART_GAME_VAL:
+                self.reset_game()
+            else:
+                self.abilities[BRIDGE_CODE].input((key, acting_player, board_id))
 
     def tick(self):
         if self.board and not self.board.victor:

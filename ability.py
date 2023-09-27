@@ -11,12 +11,12 @@ class Ability(ABC):
         self.effect = effect
 
     @abstractmethod
-    def build(self, player, node):
+    def validate(self, player, node):
         pass
 
     def input(self, player, data):
         player.money -= self.cost
-        return self.effect(*data)
+        return self.effect(data)
 
     def select(self, player):
         if player.mode == self.key:
@@ -25,13 +25,13 @@ class Ability(ABC):
             player.mode = self.key
 
     def use(self, player, node):
-        if data := self.build(player, node):
+        if data := self.validate(player, node):
             return self.success(player, data)
         return False
 
     def success(self, player, data):
         player.mode = 'default'
-        return data
+        return (self.key, player.id, data)
 
 
 class Bridge(Ability):
@@ -40,7 +40,7 @@ class Bridge(Ability):
         self.first_node = None
         self.check_new_edge = check_new_edge
 
-    def build(self, player, node):
+    def validate(self, player, node):
         if self.first_node is not None:
             if new_edge_id := self.check_new_edge(self.first_node, node.id):
                 old_node_id = self.first_node
@@ -54,4 +54,19 @@ class Bridge(Ability):
     def input(self, data):
         player = self.effect(*data)
         player.money -= self.cost
+
+    def success(self, player, data):
+        player.mode = 'default'
+        return data
+
+
+class Nuke(Ability):
+    def __init__(self, remove_node):
+        super().__init__(NUKE_CODE, 'Nuke', NUKE_COST, BLACK, remove_node)
+
+    def validate(self, player, node):
+        if node.owner != player and node.owner is not None:
+            return node.id
+        return False
+
         

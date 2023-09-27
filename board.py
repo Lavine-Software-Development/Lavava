@@ -2,6 +2,7 @@ from collections import defaultdict
 from constants import *
 from helpers import *
 from edge import Edge
+from dynamicEdge import DynamicEdge
 
 class Board:
 
@@ -140,6 +141,24 @@ class Board:
             self.id_dict[newEdge.id] = newEdge
             self.extra_edges += self.player_count
             return self.id_dict[node_from].owner
+
+    def safe_remove(self, lst, value):
+        try:
+            lst.remove(value)
+        except ValueError:
+            pass
+
+    def remove_node(self, node_id):
+        node = self.id_dict[node_id]
+        for edge in node.outgoing + node.incoming:
+            opp = edge.opposite(node)
+            self.safe_remove(opp.incoming, edge)
+            self.safe_remove(opp.incoming, edge)
+            if edge.id in self.id_dict:
+                self.id_dict.pop(edge.id)
+                self.edges.remove(edge)
+        self.id_dict.pop(node_id)
+        self.nodes.remove(node)
 
     @property
     def opening_moves(self):

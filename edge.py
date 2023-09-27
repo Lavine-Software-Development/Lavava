@@ -82,4 +82,9 @@ class Edge:
                 return self.from_node.color
             return self.from_node.color
         return (50, 50, 50)
+
+    def opposite(self, node):
+        if node == self.from_node:
+            return self.to_node
+        return self.from_node
     
