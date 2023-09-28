@@ -28,7 +28,7 @@ class Player:
         self.money = 0
         self.color = GREY
         self.placement = placement
-        self.points += self.count / self.placement
+        self.points += self.count
 
     def update(self):
         if not self.eliminated:

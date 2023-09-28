@@ -3,11 +3,12 @@ from constants import *
 
 class Ability(ABC):
 
-    def __init__(self, key, name, cost, color):
+    def __init__(self, key, name, cost, color, shape):
         self.key = key
         self.name = name
         self.cost = cost
         self.color = color
+        self.shape = shape
 
     @abstractmethod
     def validate(self, player, node):
@@ -35,7 +36,7 @@ class Ability(ABC):
 
 class Bridge(Ability):
     def __init__(self, check_new_edge, buy_new_edge):
-        super().__init__(BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW)
+        super().__init__(BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle')
         self.first_node = None
         self.check_new_edge = check_new_edge
         self.buy_new_edge = buy_new_edge
@@ -66,7 +67,7 @@ class BasicAttack(Ability):
 class Nuke(BasicAttack):
 
     def __init__(self, remove_node):
-        super().__init__(NUKE_CODE, 'Nuke', NUKE_COST, BLACK)
+        super().__init__(NUKE_CODE, 'Nuke', NUKE_COST, BLACK, 'square')
         self.remove_node = remove_node
 
     def effect(self, node):
@@ -76,7 +77,7 @@ class Nuke(BasicAttack):
 class Poison(BasicAttack):
 
     def __init__(self):
-        super().__init__(POISON_CODE, 'Nuke', POISON_COST, PURPLE)
+        super().__init__(POISON_CODE, 'Nuke', POISON_COST, PURPLE, 'circle')
 
     def effect(self, node):
         node.poison_score = POISON_TICKS
@@ -85,7 +86,7 @@ class Poison(BasicAttack):
 class Spawn(Ability):
 
     def __init__(self, color):
-        super().__init__(SPAWN_CODE, 'Spawn', SPAWN_COST, color)
+        super().__init__(SPAWN_CODE, 'Spawn', SPAWN_COST, color, 'circle')
 
     def validate(self, player, node):
         if node.owner is None and player.money >= self.cost:

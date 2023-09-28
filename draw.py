@@ -25,6 +25,55 @@ class Draw:
         self.player = players[player_num]
         self.players = players
 
+    def _generate_darker_color(self, color):
+        return tuple(max(c - 50, 0) for c in color)
+
+    def _generate_lighter_color(self, color):
+        return tuple(min(c + 50, 255) for c in color)
+
+    def draw_button(self, shape, color, name, cost, position):
+        btn_size = ABILITY_SIZE * self.height
+
+        # Draw the button background
+        darker_color = self._generate_darker_color(color)
+        py.draw.rect(self.screen, darker_color, (position[0], position[1], btn_size, btn_size))
+
+        # Drawing shapes inside
+        lighter_color = self._generate_lighter_color(color)
+        if shape == "circle":
+            py.draw.circle(self.screen, lighter_color, (position[0] + btn_size // 2, position[1] + btn_size // 2), btn_size // 3)
+        elif shape == "square":
+            py.draw.rect(self.screen, lighter_color, (position[0] + btn_size // 4, position[1] + btn_size // 4, btn_size // 2, btn_size // 2))
+        elif shape == "triangle":
+            points = [
+                (position[0] + btn_size // 2, position[1] + btn_size // 4),
+                (position[0] + btn_size // 4, position[1] + 3 * btn_size // 4),
+                (position[0] + 3 * btn_size // 4, position[1] + 3 * btn_size // 4)
+            ]
+            py.draw.polygon(self.screen, lighter_color, points)
+        elif shape == "hexagon":
+            angle = 2 * math.pi / 6
+            points = []
+            for i in range(6):
+                x = position[0] + btn_size // 2 + btn_size // 3 * math.cos(i * angle)
+                y = position[1] + btn_size // 2 + btn_size // 3 * math.sin(i * angle)
+                points.append((x, y))
+            py.draw.polygon(self.screen, lighter_color, points)
+
+        # Drawing text (name and cost)
+        font = py.font.Font(None, int(self.height * ABILITY_FONT))
+        text = font.render(name, True, WHITE)
+        self.screen.blit(text, (position[0] + (btn_size - text.get_width()) // 2, position[1] + btn_size - 20))
+
+        cost_text = font.render(f"{cost}", True, WHITE)
+        self.screen.blit(cost_text, (position[0] + 10, position[1] + 10))
+
+    def draw_buttons(self):
+        y_position = int(ABILITY_START_HEIGHT * self.height)
+        for btn_data in self.abilities.values():
+            self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_data.cost, (self.width -  int(ABILITY_GAP * self.height), y_position))
+            y_position += int(ABILITY_GAP * self.height) # Vertical gap between buttons
+
     def draw_arrow(self, edge, color, start, end, triangle_size=5, spacing=9):
         
         dx = end[0] - start[0]
@@ -170,6 +219,7 @@ class Draw:
         self.blit_edges()
         self.blit_numbers()
         self.highlight_node()
+        self.draw_buttons()
         if self.abilities[BRIDGE_CODE].first_node is not None:
             self.edge_build(mouse_pos)
         py.display.update() 
