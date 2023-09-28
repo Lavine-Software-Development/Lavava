@@ -28,6 +28,7 @@ class Player:
         self.money = 0
         self.color = GREY
         self.placement = placement
+        self.points += self.count / self.placement
 
     def update(self):
         if not self.eliminated:
@@ -38,6 +39,7 @@ class Player:
     def win(self):
         self.victory = True
         self.placement = 0
+        self.points += NODE_COUNT
 
     def display(self):
         print(f"{self.name}|| {self.points}")

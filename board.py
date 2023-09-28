@@ -37,8 +37,6 @@ class Board:
             self.display_ranks()
 
     def display_ranks(self):
-        for player in self.player_dict.values():
-            player.points += self.player_count - player.placement - 1
 
         sorted_by_score = sorted(self.player_dict.values(), key=lambda p: p.points, reverse=True)
 
@@ -147,6 +145,7 @@ class Board:
 
     def remove_node(self, node_id):
         node = self.id_dict[node_id]
+        node.owner.count -= 1
         for edge in node.outgoing + node.incoming:
             opp = edge.opposite(node)
             self.safe_remove(opp.incoming, edge)
