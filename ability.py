@@ -77,6 +77,6 @@ class Poison(BasicAttack):
         super().__init__(POISON_CODE, 'Nuke', POISON_COST, PURPLE)
 
     def effect(self, node):
-        node.poison()
+        node.poison_score = POISON_TICKS
 
         

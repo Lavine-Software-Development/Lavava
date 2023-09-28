@@ -12,12 +12,21 @@ class Node:
         self.id = id
         self.pos = pos
         self.state = 'normal'
+        self.poison_score = -1
 
     def __str__(self):
         return str(self.id)
 
     def grow(self):
-        if not self.full:
+        if self.poison_score >= 0:
+            if self.poison_score == POISON_TICKS - POISON_SPREAD_DELAY:
+                self.spread_poison()
+            elif self.poison_score == 0:
+                self.end_poison()
+            self.poison_score -= 1
+            if self.value > MINIMUM_TRANSFER_VALUE:
+                self.value -= GROWTH_RATE
+        elif not self.full:
             self.value += GROWTH_RATE
 
     def click(self, clicker, button):
@@ -42,22 +51,6 @@ class Node:
                 self.capture(player)
         else:
             self.value += amount
-
-    def attack(self):
-        pass
-        # self.absorb(True)
-
-    def absorb(self, on):
-        pass
-        # for edge in self.incoming:
-        #     if edge.owned_by(self.clicker):
-        #         edge.switch(on)
-
-    def expel(self, on):
-        pass
-        # for edge in self.outgoing:
-        #     if not on or not edge.contested:
-        #         edge.switch(on)
 
     def expand(self):
         for edge in self.outgoing:
@@ -127,11 +120,36 @@ class Node:
     def normal(self):
         return self.state == 'normal'
 
+    def normalize(self):
+        self.state = 'normal'
+
     def owned_and_alive(self):
         return self.owner != None and not self.owner.eliminated
 
-    def poison(self):
+    def spread_poison(self):
         self.state = 'poisoned'
         for edge in self.outgoing:
             if edge.flowing and not edge.contested and edge.to_node.state != 'poisoned':
-                edge.to_node.poison()
+                edge.poisoned = True
+                edge.to_node.poison_score = POISON_TICKS
+
+    def end_poison(self):
+        self.normalize()
+        for edge in self.outgoing:
+            edge.poisoned = False
+
+    def attack(self):
+        pass
+        # self.absorb(True)
+
+    def absorb(self, on):
+        pass
+        # for edge in self.incoming:
+        #     if edge.owned_by(self.clicker):
+        #         edge.switch(on)
+
+    def expel(self, on):
+        pass
+        # for edge in self.outgoing:
+        #     if not on or not edge.contested:
+        #         edge.switch(on)

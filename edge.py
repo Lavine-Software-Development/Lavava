@@ -12,6 +12,7 @@ class Edge:
         self.owned = False
         self.contested = False
         self.popped = False
+        self.poisoned = False
         self.update_nodes()
 
     def update_nodes(self):
@@ -27,6 +28,8 @@ class Edge:
             self.on = not self.on
         else:
             self.on = specified
+        if not self.on:
+            self.popped = True
 
     def update(self):
         if self.from_node.value < MINIMUM_TRANSFER_VALUE or self.flow_check():
