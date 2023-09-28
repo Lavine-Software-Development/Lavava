@@ -5,7 +5,7 @@ from resourceNode import ResourceNode
 from constants import *
 
 class Draw:
-    def __init__(self, board, player_num, players):
+    def __init__(self, board, player_num, players, abilities):
         self.set_data(board, player_num, players)
         self.screen = py.display.set_mode(size, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
@@ -14,6 +14,7 @@ class Draw:
         self.temp_line = None
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
+        self.abilities = abilities
 
         py.display.set_caption("Lavava")
 
@@ -48,6 +49,8 @@ class Draw:
                 py.draw.polygon(self.screen, color, [point1, point2, point3])         
             else:
                 py.draw.lines(self.screen, color, True, [point1, point2, point3])
+            if edge.poisoned:
+                py.draw.lines(self.screen, PURPLE, True, [point1, point2, point3])
 
     def draw_circle(self, edge, color, start, end, circle_radius=3, spacing=6):
 
@@ -69,6 +72,8 @@ class Draw:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius)
             else:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
+            if edge.poisoned:
+                py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius, 1)
 
         point1 = pos
         point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
@@ -86,7 +91,7 @@ class Draw:
     def blit_nodes(self):
         for spot in self.nodes:
             if isinstance(spot, ResourceNode):
-                if spot.popped:
+                if spot.state != 'resource':
                     py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
                 elif spot.bubble_owner != None:
                     angle1 = 2 * math.pi * (spot.bubble_size / spot.bubble)
@@ -97,6 +102,8 @@ class Draw:
                 py.draw.circle(self.screen, spot.ring_color, spot.pos, spot.size + 6, 6)
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+            if spot.state == 'poisoned':
+                py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
                 
@@ -125,20 +132,15 @@ class Draw:
             self.screen.blit(self.small_font.render("A to Edge Build",True,self.player.color),(self.width - 300,20))
             self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(self.width - 300,60))
 
-        
-
     def wipe(self):
         self.screen.fill(WHITE)
 
     def highlight_node(self):
         if self.player.highlighted_node is not None:
-            if self.player.considering_edge:
-                py.draw.circle(self.screen, DARK_YELLOW, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
-            else:
-                py.draw.circle(self.screen, self.player.color, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
+            py.draw.circle(self.screen, self.abilities[self.player.mode].color, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
 
     def edge_build(self, end):
-        start=self.player.new_edge_start.pos
+        start=self.board.id_dict[self.abilities[BRIDGE_CODE].first_node].pos
         triangle_size=5
         spacing=9
         dx = end[0] - start[0]
@@ -168,7 +170,7 @@ class Draw:
         self.blit_edges()
         self.blit_numbers()
         self.highlight_node()
-        if self.player.new_edge_started():
+        if self.abilities[BRIDGE_CODE].first_node is not None:
             self.edge_build(mouse_pos)
         py.display.update() 
 

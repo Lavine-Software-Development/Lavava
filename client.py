@@ -6,6 +6,7 @@ from map_builder import MapBuilder
 from randomGenerator import RandomGenerator
 from player import Player
 from constants import *
+from ability_builder import AbilityBuilder
 import sys
 
 class Client:
@@ -17,7 +18,7 @@ class Client:
         self.board = None
         self.running = True
 
-        self.n = Network(self.action, self.tick, self.eliminate, self.reset_game)
+        self.n = Network(self.action)
         self.player_num = int(self.n.data[0])
         self.player_count = int(self.n.data[2])
         self.players = {i: Player(COLOR_DICT[i], i) for i in range(self.player_count)}
@@ -26,7 +27,7 @@ class Client:
         self.generator = RandomGenerator(int(self.n.data[4:]))
 
         self.start_game()
-        self.d = Draw(self.board, self.player_num, [self.players[x] for x in self.players])
+        self.d = Draw(self.board, self.player_num, [self.players[x] for x in self.players], self.abilities)
         self.main_loop()
 
     def reset_game(self):
@@ -38,17 +39,23 @@ class Client:
     def start_game(self):
         map = MapBuilder(self.generator)
         self.board = Board(self.players, map.node_objects, map.edge_objects)
-
+        self.abilities = AbilityBuilder(self.board, self.player).abilities
         self.in_draw = False
         self.active = False
         self.closest = None
         self.position = None
 
-    def action(self, id, acting_player, button):
-        if id in self.board.id_dict:
-            self.board.id_dict[id].click(self.players[acting_player], button)
-        else:
-            self.board.buy_new_edge(id, acting_player, button)
+    def action(self, key, acting_player, data):
+        if key == TICK:
+            self.tick()
+        elif key in self.abilities:
+            self.abilities[key].input(self.players[acting_player], (self.board.id_dict[d] for d in data))
+        elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
+            self.board.id_dict[data[0]].click(self.players[acting_player], key)
+        elif key == ELIMINATE_VAL:
+            self.eliminate(acting_player)
+        elif key == RESTART_GAME_VAL:
+            self.reset_game()
 
     def tick(self):
         if self.board and not self.board.victor:
@@ -58,10 +65,10 @@ class Client:
         self.board.eliminate(id)
 
     def eliminate_send(self):
-        self.n.send((-1, self.player_num, -1))
+        self.n.send((ELIMINATE_VAL, self.player_num, 0))
 
     def restart_send(self):
-        self.n.send((-2, -2, -2))
+        self.n.send((RESTART_GAME_VAL, 0, 0))
 
     def keydown(self, event):
         if event.type == p.KEYDOWN:
@@ -69,8 +76,8 @@ class Client:
                 if event.key == p.K_r:
                     self.restart_send()
             else:
-                if event.key == p.K_a:
-                    self.player.switch_considering()
+                if event.key in self.abilities:
+                    self.abilities[event.key].select(self.player)
                 elif event.key == p.K_x:
                     self.eliminate_send()
 
@@ -108,20 +115,11 @@ class Client:
 
     def mouse_button_down_event(self, button):
         if id := self.board.find_node(self.position):
-            if self.player.considering_edge:
-                if self.player.new_edge_started():
-                    if new_edge_id := self.board.check_new_edge(self.player.new_edge_start.id, id):
-                        self.n.send((new_edge_id, self.player.new_edge_start.id, id))
-                        self.player.switch_considering()
-                else:
-                    if self.board.id_dict[id].owner == self.player:
-                        self.player.new_edge_start = self.board.id_dict[id]
-            else:
-                self.n.send((id, self.player_num, button))
+            if data := self.abilities[self.player.mode].use(self.player, self.board.id_dict[id]):
+                self.n.send((self.player.mode, self.player_num, *data))
+                self.player.mode = DEFAULT_ABILITY_CODE
         elif id := self.board.find_edge(self.position):
-            self.n.send((id, self.player_num, button))
-        elif self.player.considering_edge:
-            self.player.new_edge_start = None
+            self.n.send((button, self.player_num, id))
 
     def mouse_motion_event(self):
         if id := self.board.find_node(self.position):

@@ -6,17 +6,17 @@ class ResourceNode(Node):
     def __init__(self, id, pos, island):
         super().__init__(id, pos)
 
-        self.popped = False
+        self.state = 'resource'
         self.bubble_owner = None
 
         if island:
             self.bonus = ISLAND_RESOURCE_BONUS
             self.bubble = ISLAND_RESOURCE_BUBBLE
-            self.ring_color = PURPLE
+            self.ring_color = YELLOW
         else:
             self.bonus = RESOURCE_BONUS
             self.bubble = RESOURCE_BUBBLE
-            self.ring_color = PURPLE
+            self.ring_color = DARK_YELLOW
 
         self.bubble_size = self.bubble
 
@@ -33,7 +33,7 @@ class ResourceNode(Node):
         pass
 
     def delivery(self, amount, player):
-        if not self.popped:
+        if not self.normal:
             self.bubble_owner = player
             self.bubble_size -= amount
             if self.bubble_size <= 0:
@@ -42,7 +42,7 @@ class ResourceNode(Node):
             super().delivery(amount, player)
 
     def pop(self):
-        self.popped = True
+        self.state = 'normal'
         self.capture(self.bubble_owner)
         self.value = self.bubble * 0.44 # 1 - (18 + 5) / (2*18 + 5) = 
 
@@ -55,7 +55,7 @@ class ResourceNode(Node):
         return False
 
     def size_factor(self):
-        if not self.popped:
+        if self.state == 'resource':
             return max(math.log10(self.bubble/10)/2+self.bubble/1000+0.15,0)/2
         else:
             if self.value<5:
@@ -64,9 +64,12 @@ class ResourceNode(Node):
 
     @property
     def color(self):
-        if not self.popped:
+        if self.state == 'resource':
             return GREY
         return super().color
+
+    def poison(self):
+        pass
 
     
 

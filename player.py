@@ -1,5 +1,4 @@
 from constants import *
-from math import sqrt
 
 class Player:
 
@@ -16,35 +15,13 @@ class Player:
         self.money = START_MONEY
         self.count = 0
         self.begun = False
-        self.considering_edge = False
-        self.new_edge_start = None
+        self.mode = DEFAULT_ABILITY_CODE
         self.highlighted_node = None
         self.eliminated = False
         self.victory = False
         self.tick_production = MONEY_RATE
         self.placement = 0
         self.color = self.default_color
-
-    def buy_node(self):
-        if self.money >= BUY_NODE_COST:
-            self.money -= BUY_NODE_COST
-            return True
-        return False
-
-    def buy_edge(self):
-        if self.money >= BUILD_EDGE_COST:
-            self.money -= BUILD_EDGE_COST
-            return True
-        return False
-
-    def switch_considering(self):
-        self.considering_edge = not self.considering_edge
-        if self.money < BUILD_EDGE_COST:
-            self.considering_edge = False
-        self.new_edge_start = None
-
-    def new_edge_started(self):
-        return self.new_edge_start is not None
 
     def eliminate(self, placement):
         self.eliminated = True

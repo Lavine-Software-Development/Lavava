@@ -14,6 +14,7 @@ class DynamicEdge(Edge):
         temp = self.to_node
         self.to_node = self.from_node
         self.from_node = temp
+        self.on = True
 
     def click(self, clicker, button):
         super().click(clicker, button)
