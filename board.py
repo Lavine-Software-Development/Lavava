@@ -40,7 +40,6 @@ class Board:
         for player in self.player_dict.values():
             player.points += self.player_count - player.placement - 1
 
-        # Sort players by their points, descending.
         sorted_by_score = sorted(self.player_dict.values(), key=lambda p: p.points, reverse=True)
 
         print("New Scores")
@@ -132,15 +131,13 @@ class Board:
         return do_intersect(self.nodeDict[edge1[0]],self.nodeDict[edge1[1]],self.nodeDict[edge2[0]],self.nodeDict[edge2[1]])
         
     def buy_new_edge(self, id, node_from, node_to):
-        if self.id_dict[node_from].owner is None:
-            print("ERROR: node_from has no owner", node_from.id, node_to.pos)
-        else:
-            newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
-            newEdge.check_status()
-            self.edges.append(newEdge)
-            self.id_dict[newEdge.id] = newEdge
-            self.extra_edges += self.player_count
-            return self.id_dict[node_from].owner
+        newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
+        newEdge.check_status()
+        newEdge.popped = True
+        newEdge.switch(True)
+        self.edges.append(newEdge)
+        self.id_dict[newEdge.id] = newEdge
+        self.extra_edges += self.player_count
 
     def safe_remove(self, lst, value):
         try:

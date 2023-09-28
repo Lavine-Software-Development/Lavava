@@ -49,6 +49,8 @@ class Draw:
                 py.draw.polygon(self.screen, color, [point1, point2, point3])         
             else:
                 py.draw.lines(self.screen, color, True, [point1, point2, point3])
+            if edge.poisoned:
+                py.draw.lines(self.screen, PURPLE, True, [point1, point2, point3])
 
     def draw_circle(self, edge, color, start, end, circle_radius=3, spacing=6):
 
@@ -70,6 +72,8 @@ class Draw:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius)
             else:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
+            if edge.poisoned:
+                py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius, 1)
 
         point1 = pos
         point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
@@ -87,7 +91,7 @@ class Draw:
     def blit_nodes(self):
         for spot in self.nodes:
             if isinstance(spot, ResourceNode):
-                if spot.popped:
+                if spot.state != 'resource':
                     py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
                 elif spot.bubble_owner != None:
                     angle1 = 2 * math.pi * (spot.bubble_size / spot.bubble)
@@ -98,6 +102,8 @@ class Draw:
                 py.draw.circle(self.screen, spot.ring_color, spot.pos, spot.size + 6, 6)
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+            if spot.state == 'poisoned':
+                py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
                 

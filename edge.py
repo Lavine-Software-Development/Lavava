@@ -12,6 +12,7 @@ class Edge:
         self.owned = False
         self.contested = False
         self.popped = False
+        self.poisoned = False
         self.update_nodes()
 
     def update_nodes(self):
@@ -27,6 +28,8 @@ class Edge:
             self.on = not self.on
         else:
             self.on = specified
+        if not self.on:
+            self.popped = True
 
     def update(self):
         if self.from_node.value < MINIMUM_TRANSFER_VALUE or self.flow_check():
@@ -42,7 +45,7 @@ class Edge:
     def flow_check(self):
         if not self.on or (self.to_node.full and not self.contested):
             return True
-        if not self.to_node.popped:
+        if self.to_node.state == 'resource':
             return self.to_node.bubble_controlled(self.from_node.owner)
         return False
 

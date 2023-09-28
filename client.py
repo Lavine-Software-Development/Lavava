@@ -45,20 +45,18 @@ class Client:
         self.closest = None
         self.position = None
 
-    def action(self, key, acting_player, board_id):
+    def action(self, key, acting_player, data):
         if key == TICK:
             self.tick()
         else:
             if key in self.abilities:
-                self.abilities[key].input(self.players[acting_player], board_id)
+                self.abilities[key].input(self.players[acting_player], (self.board.id_dict[d] for d in data))
             elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-                self.board.id_dict[board_id].click(self.players[acting_player], key)
+                self.board.id_dict[data[0]].click(self.players[acting_player], key)
             elif key == ELIMINATE_VAL:
                 self.eliminate(acting_player)
             elif key == RESTART_GAME_VAL:
                 self.reset_game()
-            else:
-                self.abilities[BRIDGE_CODE].input((key, acting_player, board_id))
 
     def tick(self):
         if self.board and not self.board.victor:
@@ -120,7 +118,8 @@ class Client:
         if id := self.board.find_node(self.position):
             if self.player.mode in self.abilities:
                 if data := self.abilities[self.player.mode].use(self.player, self.board.id_dict[id]):
-                    self.n.send(data)   
+                    self.n.send((self.player.mode, self.player_num, *data))
+                    self.player.mode = 'default'
             else:
                 self.n.send((button, self.player_num, id))
         elif id := self.board.find_edge(self.position):
