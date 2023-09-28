@@ -3,8 +3,9 @@ from constants import *
 
 class AbilityBuilder:
 
-    def __init__(self, board):
+    def __init__(self, board, player):
         self.board = board
+        self.player = player
         self.abilities = {}
         self.build_abilities()
 
@@ -17,3 +18,6 @@ class AbilityBuilder:
 
         poison = Poison()
         self.abilities[POISON_CODE] = poison
+
+        spawn = Spawn(self.player.color)
+        self.abilities[SPAWN_CODE] = spawn

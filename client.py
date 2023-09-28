@@ -39,7 +39,7 @@ class Client:
     def start_game(self):
         map = MapBuilder(self.generator)
         self.board = Board(self.players, map.node_objects, map.edge_objects)
-        self.abilities = AbilityBuilder(self.board).abilities
+        self.abilities = AbilityBuilder(self.board, self.player).abilities
         self.in_draw = False
         self.active = False
         self.closest = None
@@ -48,15 +48,14 @@ class Client:
     def action(self, key, acting_player, data):
         if key == TICK:
             self.tick()
-        else:
-            if key in self.abilities:
-                self.abilities[key].input(self.players[acting_player], (self.board.id_dict[d] for d in data))
-            elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-                self.board.id_dict[data[0]].click(self.players[acting_player], key)
-            elif key == ELIMINATE_VAL:
-                self.eliminate(acting_player)
-            elif key == RESTART_GAME_VAL:
-                self.reset_game()
+        elif key in self.abilities:
+            self.abilities[key].input(self.players[acting_player], (self.board.id_dict[d] for d in data))
+        elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
+            self.board.id_dict[data[0]].click(self.players[acting_player], key)
+        elif key == ELIMINATE_VAL:
+            self.eliminate(acting_player)
+        elif key == RESTART_GAME_VAL:
+            self.reset_game()
 
     def tick(self):
         if self.board and not self.board.victor:
@@ -116,12 +115,9 @@ class Client:
 
     def mouse_button_down_event(self, button):
         if id := self.board.find_node(self.position):
-            if self.player.mode in self.abilities:
-                if data := self.abilities[self.player.mode].use(self.player, self.board.id_dict[id]):
-                    self.n.send((self.player.mode, self.player_num, *data))
-                    self.player.mode = 'default'
-            else:
-                self.n.send((button, self.player_num, id))
+            if data := self.abilities[self.player.mode].use(self.player, self.board.id_dict[id]):
+                self.n.send((self.player.mode, self.player_num, *data))
+                self.player.mode = DEFAULT_ABILITY_CODE
         elif id := self.board.find_edge(self.position):
             self.n.send((button, self.player_num, id))
 

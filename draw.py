@@ -132,17 +132,12 @@ class Draw:
             self.screen.blit(self.small_font.render("A to Edge Build",True,self.player.color),(self.width - 300,20))
             self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(self.width - 300,60))
 
-        
-
     def wipe(self):
         self.screen.fill(WHITE)
 
     def highlight_node(self):
         if self.player.highlighted_node is not None:
-            if self.player.mode == 'default':
-                py.draw.circle(self.screen, self.player.color, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
-            else:
-                py.draw.circle(self.screen, self.abilities[self.player.mode].color, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
+            py.draw.circle(self.screen, self.abilities[self.player.mode].color, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
 
     def edge_build(self, end):
         start=self.board.id_dict[self.abilities[BRIDGE_CODE].first_node].pos

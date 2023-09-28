@@ -15,19 +15,13 @@ class Player:
         self.money = START_MONEY
         self.count = 0
         self.begun = False
-        self.mode = 'default'
+        self.mode = DEFAULT_ABILITY_CODE
         self.highlighted_node = None
         self.eliminated = False
         self.victory = False
         self.tick_production = MONEY_RATE
         self.placement = 0
         self.color = self.default_color
-
-    def buy_node(self):
-        if self.money >= BUY_NODE_COST:
-            self.money -= BUY_NODE_COST
-            return True
-        return False
 
     def eliminate(self, placement):
         self.eliminated = True

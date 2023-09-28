@@ -23,7 +23,7 @@ class Ability(ABC):
 
     def select(self, player):
         if player.mode == self.key:
-            player.mode = 'default'
+            player.mode = DEFAULT_ABILITY_CODE
         elif player.money >= self.cost:
             player.mode = self.key
 
@@ -31,6 +31,7 @@ class Ability(ABC):
         if data := self.validate(player, node):
             return data
         return False
+
 
 class Bridge(Ability):
     def __init__(self, check_new_edge, buy_new_edge):
@@ -71,6 +72,7 @@ class Nuke(BasicAttack):
     def effect(self, node):
         self.remove_node(node.id)
 
+
 class Poison(BasicAttack):
 
     def __init__(self):
@@ -78,5 +80,23 @@ class Poison(BasicAttack):
 
     def effect(self, node):
         node.poison_score = POISON_TICKS
+
+
+class Spawn(Ability):
+
+    def __init__(self, color):
+        super().__init__(SPAWN_CODE, 'Spawn', SPAWN_COST, color)
+
+    def validate(self, player, node):
+        if node.owner is None and player.money >= self.cost:
+            return [node.id]
+        return False
+
+    def effect(self, node, player):
+        node.capture(player)
+
+    def input(self, player, data):
+        player.money -= self.cost
+        return self.effect(*data, player)
 
         
