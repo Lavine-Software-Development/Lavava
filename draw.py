@@ -87,7 +87,7 @@ class Draw:
     def blit_nodes(self):
         for spot in self.nodes:
             if isinstance(spot, ResourceNode):
-                if spot.popped:
+                if spot.state != 'resource':
                     py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
                 elif spot.bubble_owner != None:
                     angle1 = 2 * math.pi * (spot.bubble_size / spot.bubble)
@@ -98,6 +98,8 @@ class Draw:
                 py.draw.circle(self.screen, spot.ring_color, spot.pos, spot.size + 6, 6)
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+            if spot.state == 'poisoned':
+                py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
                 

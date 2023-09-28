@@ -42,7 +42,7 @@ class Edge:
     def flow_check(self):
         if not self.on or (self.to_node.full and not self.contested):
             return True
-        if not self.to_node.popped:
+        if self.to_node.state == 'resource':
             return self.to_node.bubble_controlled(self.from_node.owner)
         return False
 

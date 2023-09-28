@@ -1,6 +1,7 @@
 import socket
 import threading
 from constants import *
+import ast
 
 class Network:
     def __init__(self, action_callback):
@@ -20,17 +21,18 @@ class Network:
                 break
 
     def get_user_input_for_game(self):
-        self.server = input("Input Server IP Address: ")
+        self.server = '10.0.0.187'
         self.addr = (self.server, self.port)
         while True:
-            user_input = input("Do you want to HOST or JOIN a game? (HOST/JOIN): ").strip().upper()
-            if user_input in ["HOST", "JOIN"]:
+            user_input = input("Do you want to HOST or JOIN a game? (HOST/JOIN): ").strip()
+            if user_input in ["h", "j"]:
                 break
             else:
                 print("Invalid input. Please enter 'HOST' or 'JOIN'.")
 
-        if user_input == "HOST":
-            player_count = input("Enter the number of players for the game: ")
+        if user_input == "h":
+            # player_count = input("Enter the number of players for the game: ")
+            player_count = 2
             self.init_data = f"HOST,{player_count}"
         else:
             self.init_data = f"JOIN,{0}"
@@ -66,22 +68,34 @@ class Network:
 
     def send(self, data):
         try:
-            message = ','.join(map(str, data)) + ','
+            head = data[:2]
+            tail = data[2:]
+            message = '(' + ','.join(map(str, head)) + ',[' + ','.join(map(str, tail)) + '])'
             self.client.send(message.encode())
         except socket.error as e:
             print(e)
 
+    
+
     def listen_for_data(self):
+        buffer = ''
         while self.running:
             try:
-                response = self.client.recv(32).decode()
-                if response:
-                    data_list = list(filter(None, response.split(',')))
-                    data_tuple = tuple(map(int, data_list))
-                    while len(data_tuple) >= 3:
-                        sub = data_tuple[:3]
-                        data_tuple = data_tuple[3:]
-                        self.action_callback(*sub)
+                chunk = self.client.recv(32).decode()
+                buffer += chunk
+
+                while '(' in buffer and ')' in buffer:
+                    start_index = buffer.find('(')
+                    end_index = buffer.find(')') + 1 
+                    response = buffer[start_index:end_index]
+
+                    data_tuple = ast.literal_eval(response)
+                    head = data_tuple[:2]
+                    tail = list(data_tuple[2])
+                    self.action_callback(*head, tail)
+
+                    buffer = buffer[end_index:]
+
             except socket.error as e:
                 print(e)
                 break

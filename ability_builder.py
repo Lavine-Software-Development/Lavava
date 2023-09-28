@@ -14,3 +14,6 @@ class AbilityBuilder:
 
         nuke = Nuke(self.board.remove_node)
         self.abilities[NUKE_CODE] = nuke
+
+        poison = Poison()
+        self.abilities[POISON_CODE] = poison

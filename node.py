@@ -11,7 +11,7 @@ class Node:
         self.outgoing = []
         self.id = id
         self.pos = pos
-        self.popped = True
+        self.state = 'normal'
 
     def __str__(self):
         return str(self.id)
@@ -123,5 +123,15 @@ class Node:
     def relocate(self, width, height):
         self.pos = (self.pos_x_per * width, self.pos_y_per * height)
 
+    @property
+    def normal(self):
+        return self.state == 'normal'
+
     def owned_and_alive(self):
         return self.owner != None and not self.owner.eliminated
+
+    def poison(self):
+        self.state = 'poisoned'
+        for edge in self.outgoing:
+            if edge.flowing and not edge.contested and edge.to_node.state != 'poisoned':
+                edge.to_node.poison()
