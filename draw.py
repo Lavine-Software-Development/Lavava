@@ -31,8 +31,17 @@ class Draw:
     def _generate_lighter_color(self, color):
         return tuple(min(c + 50, 255) for c in color)
 
-    def draw_button(self, shape, color, name, cost, position):
+    def draw_button(self, shape, color, name, cost, letter, position, selected):
         btn_size = ABILITY_SIZE * self.height
+        border_thickness = 10
+
+        if selected:
+            lighter_color = self._generate_lighter_color(color)
+            py.draw.rect(self.screen, lighter_color, 
+                        (position[0] - border_thickness, 
+                        position[1] - border_thickness, 
+                        btn_size + 2 * border_thickness, 
+                        btn_size + 2 * border_thickness))
 
         # Draw the button background
         darker_color = self._generate_darker_color(color)
@@ -62,8 +71,13 @@ class Draw:
 
         # Drawing text (name and cost)
         font = py.font.Font(None, int(self.height * ABILITY_FONT))
+
+        letter_text = font.render(letter, True, BLACK)  # White color
+        self.screen.blit(letter_text, (position[0] + (btn_size - letter_text.get_width()) // 2, 
+                                   position[1] + (btn_size - letter_text.get_height()) // 2))
+
         text = font.render(name, True, WHITE)
-        self.screen.blit(text, (position[0] + (btn_size - text.get_width()) // 2, position[1] + btn_size - 20))
+        self.screen.blit(text, (position[0] + (btn_size - text.get_width()) // 2, position[1] + btn_size - (FONT_GAP * self.height)))
 
         cost_text = font.render(f"{cost}", True, WHITE)
         self.screen.blit(cost_text, (position[0] + 10, position[1] + 10))
@@ -71,7 +85,8 @@ class Draw:
     def draw_buttons(self):
         y_position = int(ABILITY_START_HEIGHT * self.height)
         for btn_data in self.abilities.values():
-            self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_data.cost, (self.width -  int(ABILITY_GAP * self.height), y_position))
+            selected = self.player.mode == btn_data.key or (self.player.mode == 'default' and btn_data.key == 2)
+            self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_data.cost, btn_data.letter, (self.width -  int(ABILITY_GAP * self.height), y_position), selected)
             y_position += int(ABILITY_GAP * self.height) # Vertical gap between buttons
 
     def draw_arrow(self, edge, color, start, end, triangle_size=5, spacing=9):
@@ -178,8 +193,7 @@ class Draw:
         elif self.player.eliminated:
             self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(self.width - 300,20))
         else:
-            self.screen.blit(self.small_font.render("A to Edge Build",True,self.player.color),(self.width - 300,20))
-            self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(self.width - 300,60))
+            self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(self.width - 300,20))
 
     def wipe(self):
         self.screen.fill(WHITE)

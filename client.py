@@ -49,7 +49,8 @@ class Client:
         if key == TICK:
             self.tick()
         elif key in self.abilities:
-            self.abilities[key].input(self.players[acting_player], (self.board.id_dict[d] for d in data))
+            new_data = (self.board.id_dict[d] if d in self.board.id_dict else d for d in data)
+            self.abilities[key].input(self.players[acting_player], new_data)
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
             self.board.id_dict[data[0]].click(self.players[acting_player], key)
         elif key == ELIMINATE_VAL:

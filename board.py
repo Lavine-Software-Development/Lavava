@@ -55,7 +55,7 @@ class Board:
         far_right_x = far_right_node.pos[0]
 
         original_width = far_right_x - far_left_x
-        new_width = SCREEN_WIDTH - 50
+        new_width = SCREEN_WIDTH *  (1 - ABILITY_GAP)
         scaling_factor = new_width / original_width if original_width != 0 else 1
 
         for node in self.nodes:

@@ -3,12 +3,13 @@ from constants import *
 
 class Ability(ABC):
 
-    def __init__(self, key, name, cost, color, shape):
+    def __init__(self, key, name, cost, color, shape, letter=None):
         self.key = key
         self.name = name
         self.cost = cost
         self.color = color
         self.shape = shape
+        self.letter = letter
 
     @abstractmethod
     def validate(self, player, node):
@@ -36,13 +37,13 @@ class Ability(ABC):
 
 class Bridge(Ability):
     def __init__(self, check_new_edge, buy_new_edge):
-        super().__init__(BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle')
+        super().__init__(BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle', 'A')
         self.first_node = None
         self.check_new_edge = check_new_edge
         self.buy_new_edge = buy_new_edge
 
     def effect(self, id1, id2, id3):
-        return self.buy_new_edge(id1.id, id2.id, id3.id)
+        return self.buy_new_edge(id1, id2.id, id3.id)
 
     def validate(self, player, node):
         if self.first_node is not None:
@@ -67,7 +68,7 @@ class BasicAttack(Ability):
 class Nuke(BasicAttack):
 
     def __init__(self, remove_node):
-        super().__init__(NUKE_CODE, 'Nuke', NUKE_COST, BLACK, 'square')
+        super().__init__(NUKE_CODE, 'Nuke', NUKE_COST, BLACK, 'square', 'N')
         self.remove_node = remove_node
 
     def effect(self, node):
@@ -77,7 +78,7 @@ class Nuke(BasicAttack):
 class Poison(BasicAttack):
 
     def __init__(self):
-        super().__init__(POISON_CODE, 'Nuke', POISON_COST, PURPLE, 'circle')
+        super().__init__(POISON_CODE, 'Poison', POISON_COST, PURPLE, 'circle', 'P')
 
     def effect(self, node):
         node.poison_score = POISON_TICKS
