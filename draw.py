@@ -154,10 +154,8 @@ class Draw:
 
     def blit_nodes(self):
         for spot in self.nodes:
-            if isinstance(spot, ResourceNode):
-                if spot.state != 'resource':
-                    py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
-                elif spot.bubble_owner != None:
+            if spot.state == 'resource':
+                if spot.bubble_owner != None:
                     angle1 = 2 * math.pi * (spot.bubble_size / spot.bubble)
                     py.draw.arc(self.screen, spot.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), -angle1 / 2, angle1 / 2, spot.size)
                     py.draw.arc(self.screen, spot.bubble_owner.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), angle1 / 2, -angle1 / 2 + 2 * math.pi, spot.size)
@@ -171,7 +169,6 @@ class Draw:
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
                 
-
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,self.width,self.height/13))
         self.screen.blit(self.font.render(str(int(self.player.money)),True,self.player.color),(20,20))
