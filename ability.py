@@ -12,7 +12,7 @@ class Ability(ABC):
         self.letter = letter
 
     @abstractmethod
-    def validate(self, player, node):
+    def validate(self, player, item):
         pass
 
     @abstractmethod
@@ -26,18 +26,15 @@ class Ability(ABC):
         player.money -= self.cost
         return self.effect(*data)
 
-    def select(self, player, current):
+    def select(self, player):
+        self.wipe()
         if player.mode == self.key:
             player.mode = DEFAULT_ABILITY_CODE
-            self.wipe()
-            return DEFAULT_ABILITY_CODE
         elif player.money >= self.cost:
             player.mode = self.key
-            return self.key
-        return current
 
-    def use(self, player, node):
-        if data := self.validate(player, node):
+    def use(self, player, item):
+        if data := self.validate(player, item):
             return data
         return False
 

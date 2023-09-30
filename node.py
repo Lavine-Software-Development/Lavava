@@ -22,7 +22,7 @@ class Node:
             if self.poison_score == POISON_TICKS - POISON_SPREAD_DELAY:
                 self.spread_poison()
             elif self.poison_score == 0:
-                self.end_poison()
+                self.normalize()
             self.poison_score -= 1
             if self.value > MINIMUM_TRANSFER_VALUE:
                 self.value -= GROWTH_RATE
@@ -75,6 +75,7 @@ class Node:
         clicker.count += 1
         self.check_edge_stati()
         self.expand()
+        self.normalize()
 
     def killed(self):
         if self.value < 0:
@@ -122,6 +123,7 @@ class Node:
 
     def normalize(self):
         self.state = 'normal'
+        self.end_poison()
 
     def owned_and_alive(self):
         return self.owner != None and not self.owner.eliminated
@@ -129,12 +131,12 @@ class Node:
     def spread_poison(self):
         self.state = 'poisoned'
         for edge in self.outgoing:
-            if edge.flowing and not edge.contested and edge.to_node.state != 'poisoned':
+            if edge.on and not edge.contested and edge.to_node.state != 'poisoned':
                 edge.poisoned = True
                 edge.to_node.poison_score = POISON_TICKS
 
     def end_poison(self):
-        self.normalize()
+        self.poison_score = -1
         for edge in self.outgoing:
             edge.poisoned = False
 

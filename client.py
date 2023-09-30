@@ -44,7 +44,6 @@ class Client:
         self.active = False
         self.closest = None
         self.position = None
-        self.selected = DEFAULT_ABILITY_CODE
 
     def action(self, key, acting_player, data):
         if key == TICK:
@@ -79,8 +78,8 @@ class Client:
                     self.restart_send()
             else:
                 if event.key in self.abilities:
-                    self.abilities[self.selected].wipe()
-                    self.selected = self.abilities[event.key].select(self.player, self.selected)
+                    self.abilities[self.player.mode].wipe()
+                    self.abilities[event.key].select(self.player)
                 elif event.key == p.K_x:
                     self.eliminate_send()
 
