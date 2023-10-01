@@ -26,4 +26,4 @@ class AbilityBuilder:
         self.abilities[FREEZE_CODE] = freeze
 
         capital = Capital()
-        self.abilities[18] = capital
+        self.abilities[CAPITAL_CODE] = capital

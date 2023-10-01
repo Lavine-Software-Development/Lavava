@@ -69,13 +69,13 @@ class Node:
             edge.check_status()
 
     def capture(self, clicker=None):
+        self.normalize()
         if clicker is None:
             clicker = self.clicker
         self.owner = clicker
         clicker.count += 1
         self.check_edge_stati()
         self.expand()
-        self.normalize()
 
     def killed(self):
         if self.value < 0:
@@ -122,6 +122,8 @@ class Node:
         return self.state == 'normal'
 
     def normalize(self):
+        if self.state == 'capital':
+            self.owner.lose_capital(self)
         self.state = 'normal'
         self.end_poison()
 
@@ -139,6 +141,18 @@ class Node:
         self.poison_score = -1
         for edge in self.outgoing:
             edge.poisoned = False
+
+    def capitalize(self):
+        self.state = 'capital'
+        self.owner.capitalize(self)
+
+    @property
+    def edges(self):
+        return self.incoming + self.outgoing
+
+    @property
+    def neighbors(self):
+        return [edge.opposite(self) for edge in self.edges]
 
     def attack(self):
         pass

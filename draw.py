@@ -10,6 +10,7 @@ class Draw:
         self.screen = py.display.set_mode(size, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
+        self.smaller_font = py.font.Font(None, 35)
         self.highlighted_node = None
         self.temp_line = None
         self.width = SCREEN_WIDTH
@@ -60,14 +61,8 @@ class Draw:
                 (position[0] + 3 * btn_size // 4, position[1] + 3 * btn_size // 4)
             ]
             py.draw.polygon(self.screen, lighter_color, points)
-        elif shape == "hexagon":
-            angle = 2 * math.pi / 6
-            points = []
-            for i in range(6):
-                x = position[0] + btn_size // 2 + btn_size // 3 * math.cos(i * angle)
-                y = position[1] + btn_size // 2 + btn_size // 3 * math.sin(i * angle)
-                points.append((x, y))
-            py.draw.polygon(self.screen, lighter_color, points)
+        elif shape == "star":
+            self.draw_star((position[0] + btn_size // 2, position[1] + btn_size // 2), btn_size, lighter_color)
 
         # Drawing text (name and cost)
         font = py.font.Font(None, int(self.height * ABILITY_FONT))
@@ -88,6 +83,30 @@ class Draw:
             selected = self.player.mode == btn_data.key or (self.player.mode == 'default' and btn_data.key == 2)
             self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_data.cost, btn_data.letter, (self.width -  int(ABILITY_GAP * self.height), y_position), selected)
             y_position += int(ABILITY_GAP * self.height) # Vertical gap between buttons
+
+    def draw_star(self, position, size, color, filled=True):
+        inner_radius = size // 6  
+        outer_radius = size // 3  
+        star_points = []
+        
+        for i in range(5):
+            angle = math.radians(i * 72 + 55)  # Start at top point
+            
+            # Outer points
+            x = position[0] + outer_radius * math.cos(angle)
+            y = position[1] + outer_radius * math.sin(angle)
+            star_points.append((x, y))
+            
+            # Inner points
+            angle += math.radians(36)  # Halfway between outer points
+            x = position[0] + inner_radius * math.cos(angle)
+            y = position[1] + inner_radius * math.sin(angle)
+            star_points.append((x, y))
+
+        if filled:
+            py.draw.polygon(self.screen, color, star_points)
+        else:
+            py.draw.lines(self.screen, color, True, star_points) 
 
     def draw_arrow(self, edge, color, start, end, triangle_size=5, spacing=9):
         
@@ -168,6 +187,9 @@ class Draw:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
+                if spot.state == 'capital':
+                    py.draw.circle(self.screen, PINK, spot.pos, spot.size + 6, 4)
+                    
                 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,self.width,self.height/13))
@@ -175,22 +197,24 @@ class Draw:
         self.screen.blit(self.small_font.render(f"{self.player.production_per_second:.0f}", True, (205, 204, 0)), (23, 60))
         for i in range(self.board.player_count):
             self.screen.blit(self.small_font.render(str(int(self.players[i].count)),True,self.players[i].color),(self.width/3 + i*150,20))
+            if self.players[i].capital_count > 0:
+                self.screen.blit(self.smaller_font.render(str(int(self.players[i].capital_count)),True,PINK),(self.width/3 + i*150 + 40,20))
         
         if self.board.victor:
-            self.screen.blit(self.font.render(f"Player {self.board.victor.id} Wins!",True,self.board.victor.color),(self.width - 300,20))
+            self.screen.blit(self.font.render(f"Player {self.board.victor.id} Wins!",True,self.board.victor.color),(self.width - 450,20))
             if self.player.victory:
                 self.screen.blit(self.small_font.render("R to restart",True,self.player.color),(self.width - 300,60))
             else:
-                self.screen.blit(self.small_font.render(f"Waiting for Player {self.board.victor.id} to restart",True,self.board.victor.color),(self.width - 450,60))
+                self.screen.blit(self.small_font.render(f"Waiting for Player {self.board.victor.id} to restart",True,self.board.victor.color),(self.width - 600,60))
         elif self.board.timer > 0:
             if self.board.timer < 4:
-                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,BLACK),(self.width - 100,20))
+                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,BLACK),(self.width - 300,20))
             else:
                 self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(self.width - 300,20))
         elif self.player.eliminated:
-            self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(self.width - 300,20))
+            self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(self.width - 450,20))
         else:
-            self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(self.width - 300,20))
+            self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(self.width - 450,20))
 
     def wipe(self):
         self.screen.fill(WHITE)
@@ -224,10 +248,17 @@ class Draw:
             py.draw.polygon(self.screen, YELLOW, [point1, point2, point3])
             py.draw.lines(self.screen, BLACK, True, [point1, point2, point3]) 
 
+    def blit_capital_stars(self):
+        for spot in self.nodes:
+            if spot.state == 'capital':
+                self.draw_star(spot.pos, spot.size * 2, PINK)
+                self.draw_star(spot.pos, spot.size * 2, BLACK, False)
+
     def blit(self, mouse_pos):
         self.screen.fill(WHITE)
         self.blit_nodes()
         self.blit_edges()
+        self.blit_capital_stars()
         self.blit_numbers()
         self.highlight_node()
         self.draw_buttons()

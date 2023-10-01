@@ -68,7 +68,7 @@ class Bridge(Ability):
 class BasicAttack(Ability):
 
     def validate(self, player, node):
-        if node.owner != player and node.owner is not None:
+        if node.owner != player and node.owner is not None and node.state not in ['capital', 'resource']:
             return [node.id]
         return False
 
@@ -126,14 +126,20 @@ class Freeze(Ability):
 class Capital(Ability):
 
     def __init__(self):
-        super().__init__(CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'hexagon', 'C')
+        super().__init__(CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
 
-    def validate(self, player, edge):
-        if edge.state == 'two-way' and edge.from_node.owner == player:
-            return [edge.id]
+    def validate(self, player, node):
+        if node.normal and node.owner == player:
+            neighbor_capital = False
+            for neighbor in node.neighbors:
+                if neighbor.state == 'capital':
+                    neighbor_capital = True
+                    break
+            if not neighbor_capital:
+                return [node.id]
         return False
 
-    def effect(self, edge):
-        edge.freeze()
+    def effect(self, node):
+        node.capitalize()
 
         
