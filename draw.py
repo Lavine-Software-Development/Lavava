@@ -147,7 +147,7 @@ class Draw:
                 
     def blit_edges(self):
         for edge in self.edges:
-            if not isinstance(edge, DynamicEdge):
+            if edge.state == 'two-way':
                 self.draw_arrow(edge,edge.color,edge.from_node.pos,edge.to_node.pos)         
             else:
                 self.draw_circle(edge,edge.color,edge.from_node.pos,edge.to_node.pos)

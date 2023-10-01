@@ -3,12 +3,13 @@ from constants import *
 
 class Ability(ABC):
 
-    def __init__(self, key, name, cost, color, shape, letter=None):
+    def __init__(self, key, name, cost, color, shape, letter=None, click_type=NODE):
         self.key = key
         self.name = name
         self.cost = cost
         self.color = color
         self.shape = shape
+        self.click_type = click_type
         self.letter = letter
 
     @abstractmethod
@@ -107,5 +108,19 @@ class Spawn(Ability):
     def input(self, player, data):
         player.money -= self.cost
         return self.effect(*data, player)
+
+
+class Freeze(Ability):
+
+    def __init__(self):
+        super().__init__(FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle')
+
+    def validate(self, player, edge):
+        if edge.state == 'two-way' and edge.from_node.owner == player:
+            return [edge.id]
+        return False
+
+    def effect(self, edge):
+        edge.freeze()
 
         
