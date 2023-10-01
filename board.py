@@ -28,13 +28,26 @@ class Board:
         for edge in self.edges:
             if edge.owned_by(self.player_dict[player]):
                 edge.switch(False)
-        self.player_dict[player].eliminate(len(self.remaining))
+        self.player_dict[player].eliminate()
 
     def check_over(self):
         if len(self.remaining) == 1:
-            self.victor = self.player_dict[list(self.remaining)[0]]
-            self.victor.win()
-            self.display_ranks()
+            self.win_and_end(self.player_dict[list(self.remaining)[0]])
+        winner = None
+        for player in self.player_dict.values():
+            if player.check_capital_win():
+                winner = player
+                break
+        if winner:
+            for player in self.remaining.copy():
+                if player != winner.id:
+                    self.eliminate(player)
+            self.win_and_end(winner)
+
+    def win_and_end(self, player):
+        self.victor = player
+        self.victor.win()
+        self.display_ranks()
 
     def display_ranks(self):
 

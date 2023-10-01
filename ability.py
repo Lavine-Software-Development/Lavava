@@ -3,12 +3,13 @@ from constants import *
 
 class Ability(ABC):
 
-    def __init__(self, key, name, cost, color, shape, letter=None):
+    def __init__(self, key, name, cost, color, shape, letter=None, click_type=NODE):
         self.key = key
         self.name = name
         self.cost = cost
         self.color = color
         self.shape = shape
+        self.click_type = click_type
         self.letter = letter
 
     @abstractmethod
@@ -67,7 +68,7 @@ class Bridge(Ability):
 class BasicAttack(Ability):
 
     def validate(self, player, node):
-        if node.owner != player and node.owner is not None:
+        if node.owner != player and node.owner is not None and node.state not in ['capital', 'resource']:
             return [node.id]
         return False
 
@@ -107,5 +108,38 @@ class Spawn(Ability):
     def input(self, player, data):
         player.money -= self.cost
         return self.effect(*data, player)
+
+
+class Freeze(Ability):
+
+    def __init__(self):
+        super().__init__(FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
+
+    def validate(self, player, edge):
+        if edge.state == 'two-way' and edge.from_node.owner == player:
+            return [edge.id]
+        return False
+
+    def effect(self, edge):
+        edge.freeze()
+
+class Capital(Ability):
+
+    def __init__(self):
+        super().__init__(CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
+
+    def validate(self, player, node):
+        if node.normal and node.owner == player:
+            neighbor_capital = False
+            for neighbor in node.neighbors:
+                if neighbor.state == 'capital':
+                    neighbor_capital = True
+                    break
+            if not neighbor_capital:
+                return [node.id]
+        return False
+
+    def effect(self, node):
+        node.capitalize()
 
         

@@ -14,6 +14,7 @@ class Edge:
         self.popped = False
         self.poisoned = False
         self.update_nodes()
+        self.state = 'one-way'
 
     def update_nodes(self):
         self.to_node.incoming.append(self)

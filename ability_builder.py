@@ -21,3 +21,9 @@ class AbilityBuilder:
 
         poison = Poison()
         self.abilities[POISON_CODE] = poison
+
+        freeze = Freeze()
+        self.abilities[FREEZE_CODE] = freeze
+
+        capital = Capital()
+        self.abilities[CAPITAL_CODE] = capital
