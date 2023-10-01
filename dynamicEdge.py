@@ -14,12 +14,12 @@ class DynamicEdge(Edge):
         temp = self.to_node
         self.to_node = self.from_node
         self.from_node = temp
-        self.on = True
 
     def click(self, clicker, button):
         super().click(clicker, button)
         if button == 3:
             if not self.contested and self.to_node.owner == clicker or self.from_node.owner == clicker:
+                self.on = True
                 self.swap_direction()
 
     def check_status(self):

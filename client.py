@@ -31,10 +31,10 @@ class Client:
         self.main_loop()
 
     def reset_game(self):
-        self.start_game()
-        self.d.set_data(self.board, self.player_num, [self.players[x] for x in self.players])
         for player in self.players.values():
             player.default_values()
+        self.start_game()
+        self.d.set_data(self.board, self.player_num, [self.players[x] for x in self.players], self.abilities)
 
     def start_game(self):
         map = MapBuilder(self.generator)
@@ -78,6 +78,7 @@ class Client:
                     self.restart_send()
             else:
                 if event.key in self.abilities:
+                    self.abilities[self.player.mode].wipe()
                     self.abilities[event.key].select(self.player)
                 elif event.key == p.K_x:
                     self.eliminate_send()

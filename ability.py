@@ -12,11 +12,14 @@ class Ability(ABC):
         self.letter = letter
 
     @abstractmethod
-    def validate(self, player, node):
+    def validate(self, player, item):
         pass
 
     @abstractmethod
     def effect(self, data):
+        pass
+
+    def wipe(self):
         pass
 
     def input(self, player, data):
@@ -24,13 +27,14 @@ class Ability(ABC):
         return self.effect(*data)
 
     def select(self, player):
+        self.wipe()
         if player.mode == self.key:
             player.mode = DEFAULT_ABILITY_CODE
         elif player.money >= self.cost:
             player.mode = self.key
 
-    def use(self, player, node):
-        if data := self.validate(player, node):
+    def use(self, player, item):
+        if data := self.validate(player, item):
             return data
         return False
 
@@ -55,6 +59,9 @@ class Bridge(Ability):
             if node.owner == player:
                 self.first_node = node.id
         return False
+
+    def wipe(self):
+        self.first_node = None
 
 
 class BasicAttack(Ability):
@@ -90,7 +97,7 @@ class Spawn(Ability):
         super().__init__(SPAWN_CODE, 'Spawn', SPAWN_COST, color, 'circle')
 
     def validate(self, player, node):
-        if node.owner is None and player.money >= self.cost:
+        if node.owner is None and player.money >= self.cost and node.normal:
             return [node.id]
         return False
 
