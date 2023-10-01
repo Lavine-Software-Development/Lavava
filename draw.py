@@ -33,7 +33,7 @@ class Draw:
 
     def draw_button(self, shape, color, name, cost, letter, position, selected):
         btn_size = ABILITY_SIZE * self.height
-        border_thickness = 10
+        border_thickness = 5
 
         if selected:
             lighter_color = self._generate_lighter_color(color)
@@ -147,7 +147,7 @@ class Draw:
                 
     def blit_edges(self):
         for edge in self.edges:
-            if edge.state == 'two-way':
+            if edge.state == 'one-way':
                 self.draw_arrow(edge,edge.color,edge.from_node.pos,edge.to_node.pos)         
             else:
                 self.draw_circle(edge,edge.color,edge.from_node.pos,edge.to_node.pos)
@@ -186,7 +186,7 @@ class Draw:
             if self.board.timer < 4:
                 self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,BLACK),(self.width - 100,20))
             else:
-                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(self.width - 100,20))
+                self.screen.blit(self.font.render(f"{self.board.timer + 1:.0f}",True,self.player.color),(self.width - 300,20))
         elif self.player.eliminated:
             self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(self.width - 300,20))
         else:

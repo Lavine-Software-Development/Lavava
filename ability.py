@@ -113,7 +113,20 @@ class Spawn(Ability):
 class Freeze(Ability):
 
     def __init__(self):
-        super().__init__(FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle')
+        super().__init__(FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
+
+    def validate(self, player, edge):
+        if edge.state == 'two-way' and edge.from_node.owner == player:
+            return [edge.id]
+        return False
+
+    def effect(self, edge):
+        edge.freeze()
+
+class Capital(Ability):
+
+    def __init__(self):
+        super().__init__(CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'hexagon', 'C')
 
     def validate(self, player, edge):
         if edge.state == 'two-way' and edge.from_node.owner == player:

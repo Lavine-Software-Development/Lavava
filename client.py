@@ -39,6 +39,7 @@ class Client:
     def start_game(self):
         map = MapBuilder(self.generator)
         self.board = Board(self.players, map.node_objects, map.edge_objects)
+        self.find = {NODE: self.board.find_node, EDGE: self.board.find_edge}
         self.abilities = AbilityBuilder(self.board, self.player).abilities
         self.in_draw = False
         self.active = False
@@ -116,7 +117,8 @@ class Client:
         sys.exit()
 
     def mouse_button_down_event(self, button):
-        if id := self.board.find_node(self.position):
+        to_find = self.abilities[self.player.mode].click_type
+        if id := self.find[to_find](self.position):
             if data := self.abilities[self.player.mode].use(self.player, self.board.id_dict[id]):
                 self.n.send((self.player.mode, self.player_num, *data))
                 self.player.mode = DEFAULT_ABILITY_CODE
