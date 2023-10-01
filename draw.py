@@ -6,7 +6,7 @@ from constants import *
 
 class Draw:
     def __init__(self, board, player_num, players, abilities):
-        self.set_data(board, player_num, players)
+        self.set_data(board, player_num, players, abilities)
         self.screen = py.display.set_mode(size, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
@@ -14,16 +14,16 @@ class Draw:
         self.temp_line = None
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
-        self.abilities = abilities
 
         py.display.set_caption("Lavava")
 
-    def set_data(self, board, player_num, players):
+    def set_data(self, board, player_num, players, abilities):
         self.board = board
         self.edges = board.edges
         self.nodes = board.nodes
         self.player = players[player_num]
         self.players = players
+        self.abilities = abilities
 
     def _generate_darker_color(self, color):
         return tuple(max(c - 50, 0) for c in color)
