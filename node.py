@@ -133,7 +133,7 @@ class Node:
     def spread_poison(self):
         self.state = 'poisoned'
         for edge in self.outgoing:
-            if edge.on and not edge.contested and edge.to_node.state != 'poisoned':
+            if edge.on and not edge.contested and edge.to_node.normal:
                 edge.poisoned = True
                 edge.to_node.poison_score = POISON_TICKS
 
