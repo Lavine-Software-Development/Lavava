@@ -3,6 +3,7 @@ from edge import Edge
 class DynamicEdge(Edge):
     def __init__(self, node1, node2, id):
         super().__init__(node1, node2, id)
+        self.state = 'two-way'
 
     def update_nodes(self):
         self.to_node.outgoing.append(self)
@@ -11,9 +12,10 @@ class DynamicEdge(Edge):
         self.from_node.outgoing.append(self)
 
     def swap_direction(self):
-        temp = self.to_node
-        self.to_node = self.from_node
-        self.from_node = temp
+        if self.state == 'two-way':
+            temp = self.to_node
+            self.to_node = self.from_node
+            self.from_node = temp
 
     def click(self, clicker, button):
         super().click(clicker, button)
@@ -39,6 +41,9 @@ class DynamicEdge(Edge):
         if self.contested:
             if self.to_node.value > self.from_node.value:
                 self.swap_direction()
+
+    def freeze(self):
+        self.state = 'one-way'
     
 
 

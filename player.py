@@ -20,14 +20,13 @@ class Player:
         self.eliminated = False
         self.victory = False
         self.tick_production = MONEY_RATE
-        self.placement = 0
         self.color = self.default_color
+        self.capitals = {}
 
-    def eliminate(self, placement):
+    def eliminate(self):
         self.eliminated = True
         self.money = 0
         self.color = GREY
-        self.placement = placement
         self.points += self.count
 
     def update(self):
@@ -38,11 +37,25 @@ class Player:
 
     def win(self):
         self.victory = True
-        self.placement = 0
         self.points += NODE_COUNT
 
     def display(self):
         print(f"{self.name}|| {self.points}")
+
+    def capitalize(self, capital):
+        self.tick_production += CAPITAL_BONUS
+        self.capitals[capital.id] = capital
+
+    def lose_capital(self, capital):
+        self.tick_production -= CAPITAL_BONUS
+        del self.capitals[capital.id]
+
+    def check_capital_win(self):
+        return self.capital_count == CAPITAL_WIN_COUNT
+
+    @property
+    def capital_count(self):
+        return len([c for c in self.capitals.values() if c.full])
 
     @property
     def production_per_second(self):
