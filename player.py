@@ -13,11 +13,9 @@ class Player:
         self.money = START_MONEY
         self.count = 0
         self.begun = False
-        self.mode = DEFAULT_ABILITY_CODE
-        self.highlighted_node = None
         self.eliminated = False
         self.victory = False
-        self.tick_production = MONEY_RATE
+        self.tick_production = START_MONEY_RATE
         self.color = self.default_color
         self.capitals = {}
 

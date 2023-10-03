@@ -4,6 +4,7 @@ from constants import *
 class Node:
 
     def __init__(self, id, pos):
+        self.item_type = NODE
         self.value = 0
         self.owner = None
         self.incoming = []
@@ -12,6 +13,7 @@ class Node:
         self.pos = pos
         self.state = 'normal'
         self.poison_score = -1
+        self.type = NODE
 
     def __str__(self):
         return str(self.id)

@@ -4,6 +4,7 @@ from resourceNode import ResourceNode
 class Edge:
 
     def __init__(self, to_node, from_node, id):
+        self.item_type = EDGE
         self.to_node = to_node
         self.from_node = from_node
         self.id = id
@@ -15,6 +16,7 @@ class Edge:
         self.poisoned = False
         self.update_nodes()
         self.state = 'one-way'
+        self.type = EDGE
 
     def update_nodes(self):
         self.to_node.incoming.append(self)

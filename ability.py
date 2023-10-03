@@ -27,51 +27,41 @@ class Ability(ABC):
         player.money -= self.cost
         return self.effect(*data)
 
-    def select(self, player):
-        self.wipe()
-        if player.mode == self.key:
-            player.mode = DEFAULT_ABILITY_CODE
-        elif player.money >= self.cost:
-            player.mode = self.key
-
-    def use(self, player, item):
-        if data := self.validate(player, item):
-            return data
-        return False
+    def complete(self, item):
+        return [item.id]
 
 
 class Bridge(Ability):
-    def __init__(self, check_new_edge, buy_new_edge):
+    def __init__(self, check_new_edge, buy_new_edge, new_edge_id):
         super().__init__(BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle', 'A')
         self.first_node = None
         self.check_new_edge = check_new_edge
         self.buy_new_edge = buy_new_edge
+        self.new_edge_id = new_edge_id
 
     def effect(self, id1, id2, id3):
         return self.buy_new_edge(id1, id2.id, id3.id)
 
     def validate(self, player, node):
         if self.first_node is not None:
-            if new_edge_id := self.check_new_edge(self.first_node, node.id):
-                old_node_id = self.first_node
-                self.first_node = None
-                return [new_edge_id, old_node_id, node.id]
+            return self.check_new_edge(self.first_node, node.id)
         else:
-            if node.owner == player:
-                self.first_node = node.id
-        return False
+            return node.owner == player
 
     def wipe(self):
         self.first_node = None
+
+    def complete(self, node):
+        if not self.first_node:
+            self.first_node = node.id
+            return False
+        return (self.new_edge_id(self.first_node), self.first_node, node.id)
 
 
 class BasicAttack(Ability):
 
     def validate(self, player, node):
-        if node.owner != player and node.owner is not None and node.state not in ['capital', 'resource']:
-            return [node.id]
-        return False
-
+        return node.owner != player and node.owner is not None and node.state not in ['capital', 'resource']
 
 class Nuke(BasicAttack):
 
@@ -98,9 +88,7 @@ class Spawn(Ability):
         super().__init__(SPAWN_CODE, 'Spawn', SPAWN_COST, color, 'circle')
 
     def validate(self, player, node):
-        if node.owner is None and player.money >= self.cost and node.normal:
-            return [node.id]
-        return False
+        return node.owner is None and player.money >= self.cost and node.normal
 
     def effect(self, node, player):
         node.capture(player)
@@ -116,9 +104,7 @@ class Freeze(Ability):
         super().__init__(FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
 
     def validate(self, player, edge):
-        if edge.state == 'two-way' and edge.owned_by(player):
-            return [edge.id]
-        return False
+        return edge.state == 'two-way' and edge.owned_by(player):
 
     def effect(self, edge):
         edge.freeze()
@@ -136,7 +122,7 @@ class Capital(Ability):
                     neighbor_capital = True
                     break
             if not neighbor_capital:
-                return [node.id]
+                return True
         return False
 
     def effect(self, node):

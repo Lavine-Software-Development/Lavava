@@ -2,17 +2,20 @@ from collections import defaultdict
 from constants import *
 from helpers import *
 from edge import Edge
-from dynamicEdge import DynamicEdge
+from ability_builder import AbilityBuilder
 
 class Board:
 
-    def __init__(self, player_dict, nodes, edges):
+    def __init__(self, player_dict, main_color):
 
+        self.player_dict = player_dict
+        self.player_count = len(self.player_dict)
+        self.abilities = AbilityBuilder(main_color, self.check_new_edge, self.buy_new_edge, self.new_edge_id, self.remove_node).abilities
+
+    def reset(self, nodes, edges):
         self.nodes = nodes
         self.edges = edges
-        self.player_dict = player_dict
 
-        self.player_count = len(self.player_dict)
         self.edgeDict = defaultdict(set)
         self.expand_nodes()
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
@@ -23,12 +26,55 @@ class Board:
 
         self.timer = 60
 
+        self.highlighted = None
+        self.mode = DEFAULT_ABILITY_CODE
+
+    def select(self, key):
+        self.abilities[self.mode].wipe()
+        if self.mode == key:
+            self.mode = DEFAULT_ABILITY_CODE
+        elif self.player.money >= self.abilities[self.mode].cost:
+            self.mode = self.key
+
+    def action(self, key, acting_player, data):
+        if key in self.abilities:
+            new_data = (self.board.id_dict[d] if d in self.board.id_dict else d for d in data)
+            self.abilities[key].input(self.players[acting_player], new_data)
+        elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
+            self.id_dict[data[0]].click(self.players[acting_player], key)
+        elif key == ELIMINATE_VAL:
+            self.eliminate(acting_player)
+
+    def highlight(self, item):
+        self.highlighted = self.id_dict[item]
+
     def eliminate(self, player):
         self.remaining.remove(player)
         for edge in self.edges:
             if edge.owned_by(self.player_dict[player]):
                 edge.switch(False)
         self.player_dict[player].eliminate()
+
+    def hover(self, position):
+        if id := self.find_node(position) and self.ability.click == NODE:
+            self.highlight(self.ability.validate(id))
+        elif id := self.find_edge(position):
+            if self.ability.click == EDGE:
+                self.highlight(self.ability.validate(id))
+            else:
+                self.highlight(id)
+        else:
+            self.highlight(None)
+
+    def use_ability(self):
+        if self.ability.click_type == self.highlighted.type:
+            return self.ability.complete(self.highlighted)
+        return False
+
+    def click_edge(self):
+        if self.highlighted.type == EDGE:
+            return self.highlighted.id
+        return False
 
     def check_over(self):
         if len(self.remaining) == 1:
@@ -124,6 +170,9 @@ class Board:
             return False
         if not self.check_all_overlaps((node_to, node_from)):
             return False
+        return True
+
+    def new_edge_id(self, node_from):
         return NODE_COUNT + EDGE_COUNT + self.extra_edges + self.id_dict[node_from].owner.id
 
     def check_all_overlaps(self, edge):
@@ -141,7 +190,7 @@ class Board:
                         return False
         return True
 
-    def overlap(self, edge1,edge2):
+    def overlap(self, edge1, edge2):
         
         return do_intersect(self.nodeDict[edge1[0]],self.nodeDict[edge1[1]],self.nodeDict[edge2[0]],self.nodeDict[edge2[1]])
         
@@ -176,3 +225,7 @@ class Board:
     @property
     def opening_moves(self):
         return sum([player.count for player in self.player_dict.values()])
+
+    @property
+    def ability(self):
+        return self.abilities[self.mode]

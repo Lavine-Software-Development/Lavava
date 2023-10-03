@@ -1,12 +1,10 @@
 import math
 import pygame as py
-from dynamicEdge import DynamicEdge
-from resourceNode import ResourceNode
 from constants import *
 
 class Draw:
-    def __init__(self, board, player_num, players, abilities):
-        self.set_data(board, player_num, players, abilities)
+    def __init__(self, board, player_num):
+        self.set_data(board, player_num)
         self.screen = py.display.set_mode(size, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
@@ -23,7 +21,7 @@ class Draw:
         self.edges = board.edges
         self.nodes = board.nodes
         self.player = players[player_num]
-        self.players = players
+        self.players = self.board.players_dict.values()
         self.abilities = abilities
 
     def _generate_darker_color(self, color):

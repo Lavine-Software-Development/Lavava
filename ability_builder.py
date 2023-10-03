@@ -3,20 +3,16 @@ from constants import *
 
 class AbilityBuilder:
 
-    def __init__(self, board, player):
-        self.board = board
-        self.player = player
+    def __init__(self, color, check_new_edge, buy_new_edge, new_edge_id, remove_node):
         self.abilities = {}
-        self.build_abilities()
-
-    def build_abilities(self):
-        spawn = Spawn(self.player.color)
+        
+        spawn = Spawn(color)
         self.abilities[SPAWN_CODE] = spawn
 
-        bridge = Bridge(self.board.check_new_edge, self.board.buy_new_edge)
+        bridge = Bridge(check_new_edge, buy_new_edge, new_edge_id)
         self.abilities[BRIDGE_CODE] = bridge
 
-        nuke = Nuke(self.board.remove_node)
+        nuke = Nuke(remove_node)
         self.abilities[NUKE_CODE] = nuke
 
         poison = Poison()
