@@ -52,7 +52,7 @@ class Edge:
 
     def pop(self):
         self.popped = True
-        if not self.contested or not self.from_node.owner.auto_attack: 
+        if not self.contested or not AUTO_ATTACK: 
             self.on = False
 
     def flow(self):
@@ -62,9 +62,6 @@ class Edge:
 
     def delivery(self, amount):
         self.to_node.delivery(amount, self.from_node.owner)
-
-    def capture(self):
-        self.to_node.capture(self.from_node.owner)
 
     def check_status(self):
         self.owned = False

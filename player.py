@@ -6,8 +6,6 @@ class Player:
         self.default_color = color[0]
         self.name = color[1]
         self.id = id
-        self.auto_expand = True
-        self.auto_attack = False
         self.points = 0
         self.default_values()
 
@@ -30,10 +28,7 @@ class Player:
         self.points += self.count
 
     def update(self):
-        if not self.eliminated:
-            self.money += self.tick_production
-            return self.count == 0
-        return False
+        self.money += self.tick_production
 
     def win(self):
         self.victory = True

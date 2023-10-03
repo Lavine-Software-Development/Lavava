@@ -34,10 +34,9 @@ class ResourceNode(Node):
             super().delivery(amount, player)
 
     def pop(self):
-        self.normalize()
+        self.bubble_owner.tick_production += self.bonus
         self.capture(self.bubble_owner)
-        self.owner.tick_production += self.bonus
-        self.value = self.bubble * RESOURCE_RECOUP # 1 - (18 + 5) / (2*18 + 5) = NOT USED ANYMORE
+        self.value = MINIMUM_TRANSFER_VALUE
 
     def bubble_controlled(self, owner):
         if self.bubble_owner == None or owner == self.bubble_owner:
@@ -51,9 +50,7 @@ class ResourceNode(Node):
         if self.state == 'resource':
             return max(math.log10(self.bubble/10)/2+self.bubble/1000+0.15,0)/2
         else:
-            if self.value<5:
-                return 0
-            return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)
+            return super().size_factor()
 
     @property
     def color(self):

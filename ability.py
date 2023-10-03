@@ -116,7 +116,7 @@ class Freeze(Ability):
         super().__init__(FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
 
     def validate(self, player, edge):
-        if edge.state == 'two-way' and edge.from_node.owner == player:
+        if edge.state == 'two-way' and edge.owned_by(player):
             return [edge.id]
         return False
 
@@ -129,7 +129,7 @@ class Capital(Ability):
         super().__init__(CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
 
     def validate(self, player, node):
-        if node.normal and node.owner == player:
+        if node.owner == player and node.state != 'capital':
             neighbor_capital = False
             for neighbor in node.neighbors:
                 if neighbor.state == 'capital':

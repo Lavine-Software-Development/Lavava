@@ -33,6 +33,10 @@ class Board:
     def check_over(self):
         if len(self.remaining) == 1:
             self.win_and_end(self.player_dict[list(self.remaining)[0]])
+        else:
+            self.check_capital_win()
+
+    def check_capital_win(self):
         winner = None
         for player in self.player_dict.values():
             if player.check_capital_win():
@@ -96,8 +100,8 @@ class Board:
                 edge.update()
             
             for player in self.player_dict.values():
-                out = player.update()
-                if out:
+                player.update()
+                if player.count == 0:
                     self.eliminate(player.id)
 
     def find_node(self, position):
