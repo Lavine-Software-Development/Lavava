@@ -21,13 +21,9 @@ class Network:
                 break
 
     def get_user_input_for_game(self):
-        self.server = input("Input Server IP Address (or k/i/f for DEFAULT): ")
-        if self.server == "k":
-            self.server = DEFAULT_SERVER_K
-        elif self.server == "i":
-            self.server = DEFAULT_SERVER_I
-        elif self.server == "f":
-            self.server = DEFAULT_SERVER_FH
+        self.server = input("Input Server IP Address (or k/i/f/g for DEFAULT): ")
+        if self.server in SERVERS:
+            self.server = SERVERS[self.server]
         self.addr = (self.server, self.port)
         while True:
             user_input = input("Do you want to HOST or JOIN a game? (h/j): ").strip()

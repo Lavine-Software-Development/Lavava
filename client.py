@@ -22,11 +22,12 @@ class Client:
         self.player = self.players[self.player_num]
 
         self.board = Board(self.players, self.player.color)
-        self.d = Draw(self.board, self.player_num)
-
         self.generator = RandomGenerator(int(self.n.data[4:]))
 
         self.start_game()
+
+        self.d = Draw(self.board, self.player_num)
+
         self.main_loop()
 
     def start_game(self):

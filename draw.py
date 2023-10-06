@@ -16,13 +16,13 @@ class Draw:
 
         py.display.set_caption("Lavava")
 
-    def set_data(self, board, player_num, players, abilities):
+    def set_data(self, board, player_num):
         self.board = board
         self.edges = board.edges
         self.nodes = board.nodes
-        self.player = players[player_num]
-        self.players = self.board.players_dict.values()
-        self.abilities = abilities
+        self.player = self.board.player_dict[player_num]
+        self.players = self.board.player_dict.values()
+        self.abilities = self.board.abilities
 
     def _generate_darker_color(self, color):
         return tuple(max(c - 50, 0) for c in color)

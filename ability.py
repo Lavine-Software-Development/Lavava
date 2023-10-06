@@ -104,7 +104,7 @@ class Freeze(Ability):
         super().__init__(FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
 
     def validate(self, player, edge):
-        return edge.state == 'two-way' and edge.owned_by(player):
+        return edge.state == 'two-way' and edge.owned_by(player)
 
     def effect(self, edge):
         edge.freeze()
