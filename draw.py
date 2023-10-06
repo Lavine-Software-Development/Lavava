@@ -9,7 +9,6 @@ class Draw:
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
-        self.highlighted_node = None
         self.temp_line = None
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
@@ -21,7 +20,7 @@ class Draw:
         self.edges = board.edges
         self.nodes = board.nodes
         self.player = self.board.player_dict[player_num]
-        self.players = self.board.player_dict.values()
+        self.players = [x for x in self.board.player_dict.values()]
         self.abilities = self.board.abilities
 
     def _generate_darker_color(self, color):
@@ -78,7 +77,7 @@ class Draw:
     def draw_buttons(self):
         y_position = int(ABILITY_START_HEIGHT * self.height)
         for btn_data in self.abilities.values():
-            selected = self.player.mode == btn_data.key or (self.player.mode == 'default' and btn_data.key == 2)
+            selected = self.board.mode == btn_data.key or (self.board.mode == 'default' and btn_data.key == 2)
             self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_data.cost, btn_data.letter, (self.width -  int(ABILITY_GAP * self.height), y_position), selected)
             y_position += int(ABILITY_GAP * self.height) # Vertical gap between buttons
 
@@ -218,8 +217,8 @@ class Draw:
         self.screen.fill(WHITE)
 
     def highlight_node(self):
-        if self.player.highlighted_node is not None:
-            py.draw.circle(self.screen, self.abilities[self.player.mode].color, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
+        if self.board.highlighted is not None and self.board.highlighted.type == NODE:
+            py.draw.circle(self.screen, self.abilities[self.board.mode].color, self.board.highlighted.pos, self.board.highlighted.size + 5,2)
 
     def edge_build(self, end):
         start=self.board.id_dict[self.abilities[BRIDGE_CODE].first_node].pos

@@ -46,7 +46,10 @@ class Board:
             self.eliminate(acting_player)
 
     def highlight(self, item):
-        self.highlighted = self.id_dict[item]
+        if item is None:
+            self.highlighted = None
+        else:
+            self.highlighted = self.id_dict[item]
 
     def eliminate(self, player):
         self.remaining.remove(player)
@@ -56,10 +59,10 @@ class Board:
         self.player_dict[player].eliminate()
 
     def hover(self, position):
-        if id := self.find_node(position) and self.ability.click == NODE:
+        if id := self.find_node(position) and self.ability.click_type == NODE:
             self.highlight(self.ability.validate(id))
         elif id := self.find_edge(position):
-            if self.ability.click == EDGE:
+            if self.ability.click_type == EDGE:
                 self.highlight(self.ability.validate(id))
             else:
                 self.highlight(id)
