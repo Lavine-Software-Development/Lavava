@@ -221,7 +221,7 @@ class Draw:
             py.draw.circle(self.screen, self.abilities[self.board.mode].color, self.board.highlighted.pos, self.board.highlighted.size + 5,2)
 
     def edge_build(self, end):
-        start=self.board.id_dict[self.abilities[BRIDGE_CODE].first_node].pos
+        start=self.abilities[BRIDGE_CODE].first_node.pos
         triangle_size=5
         spacing=9
         dx = end[0] - start[0]

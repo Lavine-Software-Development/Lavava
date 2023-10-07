@@ -6,11 +6,12 @@ from ability_builder import AbilityBuilder
 
 class Board:
 
-    def __init__(self, player_dict, main_color):
+    def __init__(self, player_dict, player_num):
 
         self.player_dict = player_dict
+        self.player = player_dict[player_num]
         self.player_count = len(self.player_dict)
-        self.abilities = AbilityBuilder(main_color, self.check_new_edge, self.buy_new_edge, self.new_edge_id, self.remove_node).abilities
+        self.abilities = AbilityBuilder(self.player_dict[player_num], self.check_new_edge, self.buy_new_edge, self.new_edge_id, self.remove_node).abilities
 
     def reset(self, nodes, edges):
         self.nodes = nodes
@@ -33,15 +34,19 @@ class Board:
         self.abilities[self.mode].wipe()
         if self.mode == key:
             self.mode = DEFAULT_ABILITY_CODE
-        elif self.player.money >= self.abilities[self.mode].cost:
-            self.mode = self.key
+        elif self.player.money >= self.abilities[key].cost:
+            self.mode = key
+
+    def update_ability(self):
+        if self.ability.cost * 2 > self.player.money:
+            self.mode = DEFAULT_ABILITY_CODE
 
     def action(self, key, acting_player, data):
         if key in self.abilities:
-            new_data = (self.board.id_dict[d] if d in self.board.id_dict else d for d in data)
-            self.abilities[key].input(self.players[acting_player], new_data)
+            new_data = (self.id_dict[d] if d in self.id_dict else d for d in data)
+            self.abilities[key].input(self.player_dict[acting_player], new_data)
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-            self.id_dict[data[0]].click(self.players[acting_player], key)
+            self.id_dict[data[0]].click(self.player_dict[acting_player], key)
         elif key == ELIMINATE_VAL:
             self.eliminate(acting_player)
 
@@ -59,8 +64,11 @@ class Board:
         self.player_dict[player].eliminate()
 
     def hover(self, position):
-        if id := self.find_node(position) and self.ability.click_type == NODE:
-            self.highlight(self.ability.validate(id))
+        if id := self.find_node(position):
+            if self.ability.click_type == NODE and self.ability.validate(self.id_dict[id]):
+                self.highlight(id)
+            else:
+                self.highlight(None)
         elif id := self.find_edge(position):
             if self.ability.click_type == EDGE:
                 self.highlight(self.ability.validate(id))

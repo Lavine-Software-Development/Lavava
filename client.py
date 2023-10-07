@@ -21,7 +21,7 @@ class Client:
         self.players = {i: Player(COLOR_DICT[i], i) for i in range(self.player_count)}
         self.player = self.players[self.player_num]
 
-        self.board = Board(self.players, self.player.color)
+        self.board = Board(self.players, self.player_num)
         self.generator = RandomGenerator(int(self.n.data[4:]))
 
         self.start_game()
@@ -87,6 +87,7 @@ class Client:
                             self.mouse_button_down_event(event.button)
 
                         elif event.type == p.MOUSEMOTION:
+                            self.position = event.pos
                             self.board.hover(event.pos)
 
             self.d.wipe()
@@ -96,14 +97,11 @@ class Client:
         self.d.close_window()
         sys.exit()
 
-    def send_ability(self, data):
-        self.n.send(data)
-
-
     def mouse_button_down_event(self, button):
         if self.board.highlighted:
-            if data := self.board.use_ability:
+            if data := self.board.use_ability():
                 self.n.send((self.board.mode, self.player_num, *data))
+                self.board.update_ability()
             elif id := self.board.click_edge():
                 self.n.send((button, self.player_num, id))    
 

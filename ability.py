@@ -3,7 +3,8 @@ from constants import *
 
 class Ability(ABC):
 
-    def __init__(self, key, name, cost, color, shape, letter=None, click_type=NODE):
+    def __init__(self, player, key, name, cost, color, shape, letter=None, click_type=NODE):
+        self.player = player
         self.key = key
         self.name = name
         self.cost = cost
@@ -13,7 +14,7 @@ class Ability(ABC):
         self.letter = letter
 
     @abstractmethod
-    def validate(self, player, item):
+    def validate(self, item):
         pass
 
     @abstractmethod
@@ -27,13 +28,18 @@ class Ability(ABC):
         player.money -= self.cost
         return self.effect(*data)
 
-    def complete(self, item):
-        return [item.id]
+    def complete_check(self, item):
+        return [item]
 
+    def complete(self, item):
+        if data := self.complete_check(item):
+            self.wipe()
+            return data
+        return False
 
 class Bridge(Ability):
-    def __init__(self, check_new_edge, buy_new_edge, new_edge_id):
-        super().__init__(BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle', 'A')
+    def __init__(self, player, check_new_edge, buy_new_edge, new_edge_id):
+        super().__init__(player, BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle', 'A')
         self.first_node = None
         self.check_new_edge = check_new_edge
         self.buy_new_edge = buy_new_edge
@@ -42,31 +48,30 @@ class Bridge(Ability):
     def effect(self, id1, id2, id3):
         return self.buy_new_edge(id1, id2.id, id3.id)
 
-    def validate(self, player, node):
+    def validate(self, node):
         if self.first_node is not None:
-            return self.check_new_edge(self.first_node, node.id)
+            return self.first_node.id != node.id and self.check_new_edge(self.first_node.id, node.id)
         else:
-            return node.owner == player
+            return node.owner == self.player
 
     def wipe(self):
         self.first_node = None
 
-    def complete(self, node):
-        if not self.first_node:
-            self.first_node = node.id
+    def complete_check(self, node):
+        if self.first_node is None:
+            self.first_node = node
             return False
-        return (self.new_edge_id(self.first_node), self.first_node, node.id)
-
+        return (self.new_edge_id(self.first_node.id), self.first_node.id, node.id)
 
 class BasicAttack(Ability):
 
-    def validate(self, player, node):
-        return node.owner != player and node.owner is not None and node.state not in ['capital', 'resource']
+    def validate(self, node):
+        return node.owner != self.player and node.owner is not None and node.state not in ['capital', 'resource']
 
 class Nuke(BasicAttack):
 
-    def __init__(self, remove_node):
-        super().__init__(NUKE_CODE, 'Nuke', NUKE_COST, BLACK, 'square', 'N')
+    def __init__(self, player, remove_node):
+        super().__init__(player, NUKE_CODE, 'Nuke', NUKE_COST, BLACK, 'square', 'N')
         self.remove_node = remove_node
 
     def effect(self, node):
@@ -75,8 +80,8 @@ class Nuke(BasicAttack):
 
 class Poison(BasicAttack):
 
-    def __init__(self):
-        super().__init__(POISON_CODE, 'Poison', POISON_COST, PURPLE, 'circle', 'P')
+    def __init__(self, player):
+        super().__init__(player, POISON_CODE, 'Poison', POISON_COST, PURPLE, 'circle', 'P')
 
     def effect(self, node):
         node.poison_score = POISON_TICKS
@@ -84,11 +89,11 @@ class Poison(BasicAttack):
 
 class Spawn(Ability):
 
-    def __init__(self, color):
-        super().__init__(SPAWN_CODE, 'Spawn', SPAWN_COST, color, 'circle')
+    def __init__(self, player, color):
+        super().__init__(player, SPAWN_CODE, 'Spawn', SPAWN_COST, color, 'circle')
 
-    def validate(self, player, node):
-        return node.owner is None and player.money >= self.cost and node.normal
+    def validate(self, node):
+        return node.owner is None and self.player.money >= self.cost and node.normal
 
     def effect(self, node, player):
         node.capture(player)
@@ -100,22 +105,22 @@ class Spawn(Ability):
 
 class Freeze(Ability):
 
-    def __init__(self):
-        super().__init__(FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
+    def __init__(self, player):
+        super().__init__(player, FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
 
-    def validate(self, player, edge):
-        return edge.state == 'two-way' and edge.owned_by(player)
+    def validate(self, edge):
+        return edge.state == 'two-way' and edge.owned_by(self.player)
 
     def effect(self, edge):
         edge.freeze()
 
 class Capital(Ability):
 
-    def __init__(self):
-        super().__init__(CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
+    def __init__(self, player):
+        super().__init__(player, CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
 
-    def validate(self, player, node):
-        if node.owner == player and node.state != 'capital':
+    def validate(self, node):
+        if node.owner == self.player and node.state != 'capital':
             neighbor_capital = False
             for neighbor in node.neighbors:
                 if neighbor.state == 'capital':
