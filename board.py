@@ -28,6 +28,8 @@ class Board:
         self.timer = 60
 
         self.highlighted = None
+        self.highlighted_color = None
+
         self.mode = DEFAULT_ABILITY_CODE
 
     def select(self, key):
@@ -50,11 +52,15 @@ class Board:
         elif key == ELIMINATE_VAL:
             self.eliminate(acting_player)
 
-    def highlight(self, item):
+    def highlight(self, item, color=None):
         if item is None:
             self.highlighted = None
+            self.highlighted_color = None
         else:
             self.highlighted = self.id_dict[item]
+            self.highlighted_color = color
+            if color is None:
+                self.highlighted_color = self.ability.color
 
     def eliminate(self, player):
         self.remaining.remove(player)
@@ -70,10 +76,12 @@ class Board:
             else:
                 self.highlight(None)
         elif id := self.find_edge(position):
-            if self.ability.click_type == EDGE:
-                self.highlight(self.ability.validate(id))
-            else:
+            if self.ability.click_type == EDGE and self.ability.validate(self.id_dict[id]):
                 self.highlight(id)
+            elif self.id_dict[id].owned_by(self.player):
+                self.highlight(id, GREY)
+            else:
+                self.highlight(None)
         else:
             self.highlight(None)
 

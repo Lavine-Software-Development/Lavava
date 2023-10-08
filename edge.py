@@ -18,6 +18,9 @@ class Edge:
         self.state = 'one-way'
         self.type = EDGE
 
+    def __str__(self):
+        return str(self.id)
+
     def update_nodes(self):
         self.to_node.incoming.append(self)
         self.from_node.outgoing.append(self)

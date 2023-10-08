@@ -99,7 +99,7 @@ class Client:
 
     def mouse_button_down_event(self, button):
         if self.board.highlighted:
-            if data := self.board.use_ability():
+            if (data := self.board.use_ability()) and button != STANDARD_RIGHT_CLICK:
                 self.n.send((self.board.mode, self.player_num, *data))
                 self.board.update_ability()
             elif id := self.board.click_edge():

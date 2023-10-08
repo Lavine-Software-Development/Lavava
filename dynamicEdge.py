@@ -44,6 +44,9 @@ class DynamicEdge(Edge):
 
     def freeze(self):
         self.state = 'one-way'
+
+    def owned_by(self, player):
+        return super().owned_by(player) or (self.to_node.owner == player and self.from_node.owner is None)
     
 
 

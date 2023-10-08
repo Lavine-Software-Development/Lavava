@@ -105,32 +105,37 @@ class Draw:
         else:
             py.draw.lines(self.screen, color, True, star_points)
     
-    def edge_highlight(self, dy, dx, magnitude, length_factor, start, end):
-            angle = math.degrees(math.atan2(dy, dx))
-            
-            # Calculate the dimensions of the capsule
-            width = magnitude  # Length of the row of triangles
-            height = 5 * length_factor + 10  # Height based on the triangle size with some padding
-            
-            # Create a new surface for the capsule
-            capsule_surface = py.Surface((int(width), int(height)), py.SRCALPHA)
-            
-            # Draw the semicircles on the surface
-            py.draw.circle(capsule_surface, self.abilities[self.board.mode].color, (int(height/2), int(height/2)), int(height/2), 2)
-            py.draw.circle(capsule_surface, self.abilities[self.board.mode].color, (int(width - height/2), int(height/2)), int(height/2), 2)
-            
-            # Draw the rectangle in the middle
-            py.draw.rect(capsule_surface, self.abilities[self.board.mode].color, (int(height/2), 0, int(width - height), int(height)), 2)
-            
-            # Rotate the surface containing the capsule
-            rotated_surface = py.transform.rotate(capsule_surface, -angle)  # Negative because Pygame's rotation is counter-clockwise
-            
-            # Calculate the new position for the rotated surface
-            rotated_width, rotated_height = rotated_surface.get_size()
-            screen_pos = (start[0] + (end[0] - start[0]) / 2 - rotated_width / 2, start[1] + (end[1] - start[1]) / 2 - rotated_height / 2)
-            
-            # Blit the rotated surface onto the main screen
-            self.screen.blit(rotated_surface, screen_pos)
+    def edge_highlight(self, dy, dx, magnitude, length_factor, start, end, spacing):
+        # Calculate the angle of rotation
+        angle = math.degrees(math.atan2(dy, dx))
+        
+        # Calculate the dimensions of the capsule
+        width = magnitude  # Length of the row of triangles
+        height = length_factor * 2 + 10  # Height based on the triangle size with some padding
+        
+        # Create a new surface for the capsule
+        capsule_surface = py.Surface((int(width), int(height)), py.SRCALPHA)
+
+        # Calculate an offset based on one triangle's spacing for the rectangle's start and end
+        triangle_offset = spacing
+
+        # Calculate starting and ending points for the two lines based on the triangle's spacing
+        line_start_x = int(height/2) + triangle_offset
+        line_end_x = int(width - height/2) - triangle_offset
+
+        # Draw the lines
+        py.draw.line(capsule_surface, self.board.highlighted_color, (line_start_x, 2), (line_end_x, 2), 2)
+        py.draw.line(capsule_surface, self.board.highlighted_color, (line_start_x, height - 2), (line_end_x, height - 2), 2)
+        
+        # Rotate the surface containing the capsule
+        rotated_surface = py.transform.rotate(capsule_surface, -angle)  # Negative because Pygame's rotation is counter-clockwise
+        
+        # Calculate the new position for the rotated surface
+        rotated_width, rotated_height = rotated_surface.get_size()
+        screen_pos = (start[0] + (end[0] - start[0]) / 2 - rotated_width / 2, start[1] + (end[1] - start[1]) / 2 - rotated_height / 2)
+        
+        # Blit the rotated surface onto the main screen
+        self.screen.blit(rotated_surface, screen_pos)
 
     def draw_arrow(self, edge, color, start, end, triangle_size=5, spacing=9):
         
@@ -160,7 +165,7 @@ class Draw:
                 py.draw.lines(self.screen, PURPLE, True, [point1, point2, point3])
 
         if self.board.highlighted == edge:
-            self.edge_highlight(dy, dx, magnitude, length_factor, start, end)
+            self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
 
     def draw_circle(self, edge, color, start, end, circle_radius=3, spacing=6):
 
@@ -186,7 +191,7 @@ class Draw:
                 py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius, 1)
 
         if self.board.highlighted == edge:
-            self.edge_highlight(dy, dx, magnitude, length_factor, start, end)
+            self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
 
         point1 = pos
         point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
@@ -220,7 +225,7 @@ class Draw:
                 if spot.state == 'capital':
                     py.draw.circle(self.screen, PINK, spot.pos, spot.size + 6, 4)
             if self.board.highlighted == spot:
-                py.draw.circle(self.screen, self.abilities[self.board.mode].color, spot.pos, spot.size + 5,2)         
+                py.draw.circle(self.screen, self.board.highlighted_color, spot.pos, spot.size + 5,3)         
                 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,self.width,self.height/13))
