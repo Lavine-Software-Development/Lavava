@@ -4,6 +4,7 @@ from resourceNode import ResourceNode
 class Edge:
 
     def __init__(self, to_node, from_node, id):
+        self.item_type = EDGE
         self.to_node = to_node
         self.from_node = from_node
         self.id = id
@@ -15,6 +16,10 @@ class Edge:
         self.poisoned = False
         self.update_nodes()
         self.state = 'one-way'
+        self.type = EDGE
+
+    def __str__(self):
+        return str(self.id)
 
     def update_nodes(self):
         self.to_node.incoming.append(self)
@@ -52,7 +57,7 @@ class Edge:
 
     def pop(self):
         self.popped = True
-        if not self.contested or not self.from_node.owner.auto_attack: 
+        if not self.contested or not AUTO_ATTACK: 
             self.on = False
 
     def flow(self):
@@ -62,9 +67,6 @@ class Edge:
 
     def delivery(self, amount):
         self.to_node.delivery(amount, self.from_node.owner)
-
-    def capture(self):
-        self.to_node.capture(self.from_node.owner)
 
     def check_status(self):
         self.owned = False

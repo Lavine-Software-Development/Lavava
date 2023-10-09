@@ -4,33 +4,36 @@ from constants import *
 class Node:
 
     def __init__(self, id, pos):
+        self.item_type = NODE
         self.value = 0
         self.owner = None
-        self.clicker = None
         self.incoming = []
         self.outgoing = []
         self.id = id
         self.pos = pos
         self.state = 'normal'
         self.poison_score = -1
+        self.type = NODE
 
     def __str__(self):
         return str(self.id)
 
     def grow(self):
-        if self.poison_score >= 0:
-            if self.poison_score == POISON_TICKS - POISON_SPREAD_DELAY:
-                self.spread_poison()
-            elif self.poison_score == 0:
-                self.normalize()
-            self.poison_score -= 1
-            if self.value > MINIMUM_TRANSFER_VALUE:
-                self.value -= GROWTH_RATE
+        if self.poisoned:
+            self.poison()
         elif not self.full:
             self.value += GROWTH_RATE
 
+    def poison(self):
+        if self.poison_score == POISON_TICKS - POISON_SPREAD_DELAY:
+            self.spread_poison()
+        elif self.poison_score == 0:
+            self.end_poison()
+        if self.value > MINIMUM_TRANSFER_VALUE:
+            self.value -= GROWTH_RATE
+        self.poison_score -= 1
+
     def click(self, clicker, button):
-        self.clicker = clicker
         if button == 1:
             self.left_click(clicker)
         elif button == 3:
@@ -42,7 +45,7 @@ class Node:
     def left_click(self, clicker):
         if self.owner == None:
             if clicker.buy_node():
-                self.capture()
+                self.capture(clicker)
 
     def delivery(self, amount, player):
         if self.owner != player:
@@ -55,10 +58,10 @@ class Node:
     def expand(self):
         for edge in self.outgoing:
             if edge.contested:
-                if self.owner.auto_attack:
+                if AUTO_ATTACK:
                     edge.switch(True)
                     edge.popped = True
-            elif not edge.owned and self.owner.auto_expand:
+            elif not edge.owned and AUTO_EXPAND:
                 edge.switch(True)
                 edge.popped = False
 
@@ -68,10 +71,13 @@ class Node:
         for edge in self.outgoing:
             edge.check_status()
 
-    def capture(self, clicker=None):
+    def capture(self, clicker):
+        if self.poisoned:
+            self.end_poison()
+        elif self.state == 'capital':
+            self.owner.lose_capital()
+            
         self.normalize()
-        if clicker is None:
-            clicker = self.clicker
         self.owner = clicker
         clicker.count += 1
         self.check_edge_stati()
@@ -122,16 +128,12 @@ class Node:
         return self.state == 'normal'
 
     def normalize(self):
-        if self.state == 'capital':
-            self.owner.lose_capital(self)
         self.state = 'normal'
-        self.end_poison()
 
     def owned_and_alive(self):
         return self.owner != None and not self.owner.eliminated
 
     def spread_poison(self):
-        self.state = 'poisoned'
         for edge in self.outgoing:
             if edge.on and not edge.contested and edge.to_node.normal:
                 edge.poisoned = True
@@ -143,12 +145,18 @@ class Node:
             edge.poisoned = False
 
     def capitalize(self):
+        if self.poisoned:
+            self.end_poison()
         self.state = 'capital'
         self.owner.capitalize(self)
 
     @property
     def edges(self):
         return self.incoming + self.outgoing
+
+    @property
+    def poisoned(self):
+        return self.poison_score >= 0
 
     @property
     def neighbors(self):

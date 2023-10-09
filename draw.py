@@ -1,30 +1,27 @@
 import math
 import pygame as py
-from dynamicEdge import DynamicEdge
-from resourceNode import ResourceNode
 from constants import *
 
 class Draw:
-    def __init__(self, board, player_num, players, abilities):
-        self.set_data(board, player_num, players, abilities)
+    def __init__(self, board, player_num):
+        self.set_data(board, player_num)
         self.screen = py.display.set_mode(size, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
-        self.highlighted_node = None
         self.temp_line = None
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
 
         py.display.set_caption("Lavava")
 
-    def set_data(self, board, player_num, players, abilities):
+    def set_data(self, board, player_num):
         self.board = board
         self.edges = board.edges
         self.nodes = board.nodes
-        self.player = players[player_num]
-        self.players = players
-        self.abilities = abilities
+        self.player = self.board.player_dict[player_num]
+        self.players = [x for x in self.board.player_dict.values()]
+        self.abilities = self.board.abilities
 
     def _generate_darker_color(self, color):
         return tuple(max(c - 50, 0) for c in color)
@@ -80,7 +77,7 @@ class Draw:
     def draw_buttons(self):
         y_position = int(ABILITY_START_HEIGHT * self.height)
         for btn_data in self.abilities.values():
-            selected = self.player.mode == btn_data.key or (self.player.mode == 'default' and btn_data.key == 2)
+            selected = self.board.mode == btn_data.key or (self.board.mode == 'default' and btn_data.key == 2)
             self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_data.cost, btn_data.letter, (self.width -  int(ABILITY_GAP * self.height), y_position), selected)
             y_position += int(ABILITY_GAP * self.height) # Vertical gap between buttons
 
@@ -106,7 +103,36 @@ class Draw:
         if filled:
             py.draw.polygon(self.screen, color, star_points)
         else:
-            py.draw.lines(self.screen, color, True, star_points) 
+            py.draw.lines(self.screen, color, True, star_points)
+    
+    def edge_highlight(self, dy, dx, magnitude, length_factor, start, end, spacing):
+        # Calculate the angle of rotation
+        angle = math.degrees(math.atan2(dy, dx))
+        
+        # Calculate the dimensions of the capsule
+        width = magnitude  # Length of the row of triangles
+        height = length_factor * 2 + 15  # Height based on the triangle size with some padding
+        
+        # Create a new surface for the capsule
+        capsule_surface = py.Surface((int(width), int(height)), py.SRCALPHA)
+
+        # Calculate starting and ending points for the two lines based on the triangle's spacing
+        line_start_x = int(height/2) + spacing
+        line_end_x = int(width - height/2) - spacing
+
+        # Draw the lines
+        py.draw.line(capsule_surface, self.board.highlighted_color, (line_start_x, 2), (line_end_x, 2), 2)
+        py.draw.line(capsule_surface, self.board.highlighted_color, (line_start_x, height - 2), (line_end_x, height - 2), 2)
+        
+        # Rotate the surface containing the capsule
+        rotated_surface = py.transform.rotate(capsule_surface, -angle)  # Negative because Pygame's rotation is counter-clockwise
+        
+        # Calculate the new position for the rotated surface
+        rotated_width, rotated_height = rotated_surface.get_size()
+        screen_pos = (start[0] + (end[0] - start[0]) / 2 - rotated_width / 2, start[1] + (end[1] - start[1]) / 2 - rotated_height / 2)
+        
+        # Blit the rotated surface onto the main screen
+        self.screen.blit(rotated_surface, screen_pos)
 
     def draw_arrow(self, edge, color, start, end, triangle_size=5, spacing=9):
         
@@ -135,6 +161,9 @@ class Draw:
             if edge.poisoned:
                 py.draw.lines(self.screen, PURPLE, True, [point1, point2, point3])
 
+        if self.board.highlighted == edge:
+            self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
+
     def draw_circle(self, edge, color, start, end, circle_radius=3, spacing=6):
 
         length_factor = 1.5
@@ -157,6 +186,9 @@ class Draw:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
             if edge.poisoned:
                 py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius, 1)
+
+        if self.board.highlighted == edge:
+            self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
 
         point1 = pos
         point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
@@ -183,13 +215,14 @@ class Draw:
                 py.draw.circle(self.screen, spot.ring_color, spot.pos, spot.size + 6, 6)
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
-            if spot.state == 'poisoned':
+            if spot.poisoned:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
                 if spot.state == 'capital':
                     py.draw.circle(self.screen, PINK, spot.pos, spot.size + 6, 4)
-                    
+            if self.board.highlighted == spot:
+                py.draw.circle(self.screen, self.board.highlighted_color, spot.pos, spot.size + 5,3)         
                 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,self.width,self.height/13))
@@ -218,13 +251,9 @@ class Draw:
 
     def wipe(self):
         self.screen.fill(WHITE)
-
-    def highlight_node(self):
-        if self.player.highlighted_node is not None:
-            py.draw.circle(self.screen, self.abilities[self.player.mode].color, self.player.highlighted_node.pos, self.player.highlighted_node.size + 5,2)
-
+            
     def edge_build(self, end):
-        start=self.board.id_dict[self.abilities[BRIDGE_CODE].first_node].pos
+        start=self.abilities[BRIDGE_CODE].first_node.pos
         triangle_size=5
         spacing=9
         dx = end[0] - start[0]
@@ -260,7 +289,6 @@ class Draw:
         self.blit_edges()
         self.blit_capital_stars()
         self.blit_numbers()
-        self.highlight_node()
         self.draw_buttons()
         if self.abilities[BRIDGE_CODE].first_node is not None:
             self.edge_build(mouse_pos)
