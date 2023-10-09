@@ -21,7 +21,8 @@ class Network:
                 break
 
     def get_user_input_for_game(self):
-        self.server = input("Input Server IP Address (or k/i/f/g for DEFAULT): ")
+        server_keys = '/'.join(SERVERS.keys())
+        self.server = input(f"Input Server IP Address ({server_keys} for DEFAULT): ")
         if self.server in SERVERS:
             self.server = SERVERS[self.server]
         self.addr = (self.server, self.port)

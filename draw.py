@@ -111,17 +111,14 @@ class Draw:
         
         # Calculate the dimensions of the capsule
         width = magnitude  # Length of the row of triangles
-        height = length_factor * 2 + 10  # Height based on the triangle size with some padding
+        height = length_factor * 2 + 15  # Height based on the triangle size with some padding
         
         # Create a new surface for the capsule
         capsule_surface = py.Surface((int(width), int(height)), py.SRCALPHA)
 
-        # Calculate an offset based on one triangle's spacing for the rectangle's start and end
-        triangle_offset = spacing
-
         # Calculate starting and ending points for the two lines based on the triangle's spacing
-        line_start_x = int(height/2) + triangle_offset
-        line_end_x = int(width - height/2) - triangle_offset
+        line_start_x = int(height/2) + spacing
+        line_end_x = int(width - height/2) - spacing
 
         # Draw the lines
         py.draw.line(capsule_surface, self.board.highlighted_color, (line_start_x, 2), (line_end_x, 2), 2)

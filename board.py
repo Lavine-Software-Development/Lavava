@@ -86,7 +86,7 @@ class Board:
             self.highlight(None)
 
     def use_ability(self):
-        if self.ability.click_type == self.highlighted.type:
+        if self.ability.click_type == self.highlighted.type and self.ability.color == self.highlighted_color:
             return self.ability.complete(self.highlighted)
         return False
 
