@@ -13,6 +13,7 @@ class Node:
         self.pos = pos
         self.state = 'normal'
         self.poison_score = -1
+        self.capitalizing_score = -1
         self.type = NODE
 
     def __str__(self):
@@ -21,17 +22,25 @@ class Node:
     def grow(self):
         if self.poisoned:
             self.poison()
+        elif self.shrinking:
+            self.shrink()
         elif not self.full:
             self.value += GROWTH_RATE
 
     def poison(self):
         if self.poison_score == POISON_TICKS - POISON_SPREAD_DELAY:
             self.spread_poison()
-        elif self.poison_score == 0:
-            self.end_poison()
+        elif self.shrinking == 0:
+            self.shrink()
         if self.value > MINIMUM_TRANSFER_VALUE:
             self.value -= GROWTH_RATE
         self.poison_score -= 1
+
+    def shrink(self):
+        self.capitalizing_score -= CAPITAL_SHRINK_SPEED
+        self.value = max(self.capitalizing_score, MINIMUM_TRANSFER_VALUE)
+        if self.value == MINIMUM_TRANSFER_VALUE:
+            self.capitalize()
 
     def click(self, clicker, button):
         if button == 1:
@@ -75,7 +84,7 @@ class Node:
         if self.poisoned:
             self.end_poison()
         elif self.state == 'capital':
-            self.owner.lose_capital()
+            self.owner.lose_capital(self)
             
         self.normalize()
         self.owner = clicker
@@ -135,7 +144,7 @@ class Node:
 
     def spread_poison(self):
         for edge in self.outgoing:
-            if edge.on and not edge.contested and edge.to_node.normal:
+            if edge.to_node != self and edge.on and not edge.contested and edge.to_node.normal:
                 edge.poisoned = True
                 edge.to_node.poison_score = POISON_TICKS
 
@@ -149,6 +158,7 @@ class Node:
             self.end_poison()
         self.state = 'capital'
         self.owner.capitalize(self)
+        self.capitalizing_score = -1
 
     @property
     def edges(self):
@@ -157,6 +167,10 @@ class Node:
     @property
     def poisoned(self):
         return self.poison_score >= 0
+
+    @property
+    def shrinking(self):
+        return self.capitalizing_score >= 0
 
     @property
     def neighbors(self):

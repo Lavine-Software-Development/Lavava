@@ -120,7 +120,7 @@ class Capital(Ability):
         super().__init__(player, CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
 
     def validate(self, node):
-        if node.owner == self.player and node.state != 'capital':
+        if node.owner == self.player and node.state != 'capital' and node.full:
             neighbor_capital = False
             for neighbor in node.neighbors:
                 if neighbor.state == 'capital':
@@ -131,6 +131,6 @@ class Capital(Ability):
         return False
 
     def effect(self, node):
-        node.capitalize()
+        node.capitalizing_score = node.value
 
         
