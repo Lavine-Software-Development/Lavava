@@ -30,8 +30,8 @@ class Node:
     def poison(self):
         if self.poison_score == POISON_TICKS - POISON_SPREAD_DELAY:
             self.spread_poison()
-        elif self.shrinking == 0:
-            self.shrink()
+        elif self.poison_score == 0:
+            self.end_poison()
         if self.value > MINIMUM_TRANSFER_VALUE:
             self.value -= GROWTH_RATE
         self.poison_score -= 1
@@ -116,8 +116,6 @@ class Node:
     @property
     def color(self):
         if self.owner:
-            if self.value >= 250:
-                return self.owner.color
             return self.owner.color
         return BLACK
 

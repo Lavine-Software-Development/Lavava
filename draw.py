@@ -138,7 +138,7 @@ class Draw:
         
         dx = end[0] - start[0]
         dy = end[1] - start[1]
-        magnitude = math.sqrt(dx*dx + dy*dy)
+        magnitude = max(math.sqrt(dx*dx + dy*dy), 1)
         
         dx /= magnitude
         dy /= magnitude

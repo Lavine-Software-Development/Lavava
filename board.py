@@ -158,7 +158,7 @@ class Board:
 
         else:
             for spot in self.nodes:
-                if spot.owned_and_alive():
+                if spot.owned_and_alive(): # keep 
                     spot.grow()
 
             for edge in self.edges:
