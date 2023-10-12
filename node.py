@@ -1,11 +1,12 @@
 from constants import *
+from nodeStateFactory import StateFactory
+import math
 
 class Node:
 
-    def __init__(self, id, pos):
+    def __init__(self, id, pos, state_name):
+        self.set_state(state_name)
         self.item_type = NODE
-        self.value = 0
-        self.owner = None
         self.incoming = []
         self.outgoing = []
         self.id = id
@@ -14,6 +15,9 @@ class Node:
 
     def __str__(self):
         return str(self.id)
+
+    def set_state(self, state_name):
+        self.state = StateFactory.create_state(state_name, self)
 
     def click(self, clicker, button):
         if button == 1:
@@ -45,21 +49,9 @@ class Node:
         for edge in self.outgoing:
             edge.check_status()
 
-    def capture(self, clicker):
-        if self.poisoned:
-            self.end_poison()
-        elif self.state == 'capital':
-            self.owner.lose_capital(self)
-            
-        self.normalize()
-        self.owner = clicker
-        clicker.count += 1
+    def capture(self):
         self.check_edge_stati()
         self.expand()
-
-    @property
-    def current_incoming(self):
-        return [edge for edge in self.incoming if edge.to_node == self]
 
     def set_pos_per(self):
         self.pos_x_per = self.pos[0] / SCREEN_WIDTH
@@ -77,10 +69,38 @@ class Node:
                 edge.poisoned = True
                 edge.to_node.poison_score = POISON_TICKS
 
+    def grow(self):
+        self.state.grow()
+
+    def delivery(self, amount, player):
+        return self.state.delivery(amount, player)
+
     @property
     def edges(self):
         return self.incoming + self.outgoing
 
     @property
+    def current_incoming(self):
+        return [edge for edge in self.incoming if edge.to_node == self]
+
+    @property
     def neighbors(self):
         return [edge.opposite(self) for edge in self.edges]
+
+    @property
+    def value(self):
+        return self.state.value
+
+    @property
+    def owner(self):
+        return self.state.owner
+
+    @property
+    def size(self):
+        return int(5+self.size_factor()*18)
+
+    @property
+    def size_factor(self):
+        if self.value<5:
+            return 0
+        return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)

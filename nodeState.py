@@ -1,10 +1,10 @@
 from constants import GROWTH_RATE, POISON_TICKS, POISON_SPREAD_DELAY, \
     MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT, BLACK, GROWTH_STOP
 from abc import ABC, abstractmethod
-import math
+from observable import Observable
 
 
-class AbstractState(ABC):
+class AbstractState(ABC, Observable):
 
     def __init__(self, value=0, owner=None):
         self.value = value
@@ -27,10 +27,6 @@ class AbstractState(ABC):
         pass
 
     @property
-    def size(self):
-        return int(5+self.size_factor()*18)
-
-    @property
     def color(self):
         if self.owner:
             return self.owner.color
@@ -40,15 +36,8 @@ class AbstractState(ABC):
     def full(self):
         return self.value >= GROWTH_STOP
 
-    @property
-    def size_factor(self):
-        if self.value<5:
-            return 0
-        return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)
 
-
-
-class AbstractStandardDeliveryState(AbstractState):
+class AbstractStandardDelivery(AbstractState):
 
     def __init__(self, value=0, owner=None):
         super().__init__(value, owner)
@@ -73,9 +62,9 @@ class AbstractStandardDeliveryState(AbstractState):
     def capture(self, player):
         self.value *= -1
         self.owner = player
+        self.emit('capture')
 
-
-class DefaultState(AbstractStandardDeliveryState):
+class DefaultState(AbstractStandardDelivery):
 
     def grow(self):
         self.value += GROWTH_RATE
@@ -84,17 +73,16 @@ class DefaultState(AbstractStandardDeliveryState):
         return False
 
 
-class PoisonedState(AbstractStandardDeliveryState):
+class PoisonedState(AbstractStandardDelivery):
 
-    def __init__(self, spread_poison, value=0, owner=None):
+    def __init__(self, value=0, owner=None):
         super().__init__(value, owner)
         self.reset_on_capture = True
-        self.spread_poison = spread_poison
         self.poison_timer = POISON_TICKS
 
     def grow(self):
         if self.poison_timer == POISON_TICKS - POISON_SPREAD_DELAY:
-            self.spread_poison()
+            self.emit('spread_poison')
         if self.value > MINIMUM_TRANSFER_VALUE:
             self.value -= GROWTH_RATE
         self.poison_timer -= 1
@@ -103,7 +91,7 @@ class PoisonedState(AbstractStandardDeliveryState):
         return self.poison_timer == 0
 
 
-class CapitalState(AbstractStandardDeliveryState):
+class CapitalState(AbstractStandardDelivery):
 
     def __init__(self, value=0, owner=None):
         super().__init__(value, owner)
@@ -123,7 +111,6 @@ class CapitalState(AbstractStandardDeliveryState):
 
     def state_over(self):
         return False
-
 
 class MineState(AbstractState):
 
