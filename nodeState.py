@@ -1,6 +1,8 @@
 from constants import GROWTH_RATE, POISON_TICKS, POISON_SPREAD_DELAY, \
-    MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT
+    MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT, BLACK, GROWTH_STOP
 from abc import ABC, abstractmethod
+import math
+
 
 class AbstractState(ABC):
 
@@ -19,6 +21,31 @@ class AbstractState(ABC):
     @abstractmethod
     def state_over(self):
         pass
+
+    @abstractmethod
+    def display(self):
+        pass
+
+    @property
+    def size(self):
+        return int(5+self.size_factor()*18)
+
+    @property
+    def color(self):
+        if self.owner:
+            return self.owner.color
+        return BLACK
+
+    @property
+    def full(self):
+        return self.value >= GROWTH_STOP
+
+    @property
+    def size_factor(self):
+        if self.value<5:
+            return 0
+        return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)
+
 
 
 class AbstractStandardDeliveryState(AbstractState):
