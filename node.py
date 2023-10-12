@@ -11,9 +11,6 @@ class Node:
         self.outgoing = []
         self.id = id
         self.pos = pos
-        self.state = 'normal'
-        self.poison_score = -1
-        self.capitalizing_score = -1
         self.type = NODE
 
     def __str__(self):
