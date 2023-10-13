@@ -1,11 +1,13 @@
 from constants import *
-from nodeStateFactory import StateFactory
 import math
+from nodeState import *
 
 class Node:
 
     def __init__(self, id, pos, state_name='default'):
         self.set_state(state_name)
+        self.value = 0
+        self.owner = None
         self.item_type = NODE
         self.incoming = []
         self.outgoing = []
@@ -16,8 +18,21 @@ class Node:
     def __str__(self):
         return str(self.id)
 
-    def set_state(self, state_name):
-        self.state = StateFactory.create_state(state_name, self)
+    def __getattr__(self, name):
+        try:
+            return getattr(self.node_state, name)
+        except AttributeError:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+    def set_state(self, state_name, data=None):
+        if state_name == 'default':
+            self.state = DefaultState(self)
+        elif state_name == "poisoned":
+            self.state = PoisonedState(self)
+        elif state_name == "capital":
+            self.state = CapitalState(self)
+        elif state_name == "mine":
+            self.state = MineState(self, data)
         self.state_name = state_name
 
     def set_default_state(self):
@@ -53,10 +68,6 @@ class Node:
         for edge in self.outgoing:
             edge.check_status()
 
-    def capture(self):
-        self.check_edge_stati()
-        self.expand()
-
     def set_pos_per(self):
         self.pos_x_per = self.pos[0] / SCREEN_WIDTH
         self.pos_y_per = self.pos[1] / SCREEN_HEIGHT
@@ -74,12 +85,32 @@ class Node:
                 edge.to_node.poison_score = POISON_TICKS
 
     def grow(self):
-        self.state.grow()
+        self.value += self.state.grow()
         if self.state.state_over():
             self.set_default_state()
 
     def delivery(self, amount, player):
-        return self.state.delivery(amount, player)
+        self.value += self.state.delivery(amount, player)
+        if self.state.killed():
+            self.capture(player)
+
+    def capture(self, player):
+        self.value = self.state.capture()
+        self.owner = player
+        self.check_edge_stati()
+        self.expand()
+        if self.state.reset_on_capture:
+            self.set_default_state()
+
+    def absorbing(self):
+        for edge in self.current_incoming:
+            if edge.flowing:
+                return True
+        return False
+
+    @property
+    def full(self):
+        return self.value >= GROWTH_STOP
 
     @property
     def edges(self):
@@ -92,21 +123,3 @@ class Node:
     @property
     def neighbors(self):
         return [edge.opposite(self) for edge in self.edges]
-
-    @property
-    def value(self):
-        return self.state.value
-
-    @property
-    def owner(self):
-        return self.state.owner
-
-    @property
-    def size(self):
-        return int(5+self.size_factor()*18)
-
-    @property
-    def size_factor(self):
-        if self.value<5:
-            return 0
-        return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)

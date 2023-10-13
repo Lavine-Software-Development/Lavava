@@ -46,17 +46,7 @@ class ResourceNode(Node):
                 return True
         return False
 
-    def size_factor(self):
-        if self.state == 'resource':
-            return max(math.log10(self.bubble/10)/2+self.bubble/1000+0.15,0)/2
-        else:
-            return super().size_factor()
 
-    @property
-    def color(self):
-        if self.state == 'resource':
-            return GREY
-        return super().color
     
 
 

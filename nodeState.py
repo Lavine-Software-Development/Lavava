@@ -1,14 +1,24 @@
 from constants import GROWTH_RATE, POISON_TICKS, POISON_SPREAD_DELAY, \
-    MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT, BLACK, GROWTH_STOP
+    MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT, BLACK, GROWTH_STOP, \
+    GREY
 from abc import ABC, abstractmethod
 from observable import Observable
+import math
 
 
 class AbstractState(ABC, Observable):
 
-    def __init__(self, value=0, owner=None):
-        self.value = value
-        self.owner = owner
+    def __init__(self, node):
+        self.node = node
+        self.reset_on_capture = False
+
+    @property
+    def value(self):
+        return self.node.value
+
+    @property
+    def owner(self):
+        return self.node.owner
 
     @abstractmethod
     def grow(self):
@@ -19,12 +29,26 @@ class AbstractState(ABC, Observable):
         pass
 
     @abstractmethod
-    def state_over(self):
+    def capture(self):
         pass
 
     @abstractmethod
-    def display(self):
+    def killed(self):
         pass
+
+    @abstractmethod
+    def state_over(self):
+        pass
+
+    @property
+    def size(self):
+        return int(5+self.size_factor()*18)
+
+    @property
+    def size_factor(self):
+        if self.value<5:
+            return 0
+        return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)
 
     @property
     def color(self):
@@ -32,105 +56,104 @@ class AbstractState(ABC, Observable):
             return self.owner.color
         return BLACK
 
-    @property
-    def full(self):
-        return self.value >= GROWTH_STOP
 
+class DefaultState(AbstractState):
 
-class AbstractStandardDelivery(AbstractState):
-
-    def __init__(self, value=0, owner=None):
-        super().__init__(value, owner)
+    def grow(self):
+        if self.value < GROWTH_STOP:
+            return GROWTH_RATE
+        return 0
 
     def delivery(self, amount, player):
-        self.change_value(amount, player)
-        if self.killed():
-            self.capture(player)
+        if self.owner == None or self.owner != player:
+            return -amount
+        return amount
 
-    def change_value(self, amount, player):
-        if self.owner != player:
-            self.value -= amount
-        else:
-            self.value += amount
+    def capture(self):
+        return self.value * -1
 
     def killed(self):
         return self.value < 0
 
-    def capture(self, player):
-        self.value *= -1
-        self.owner = player
-        self.emit('capture')
-
-
-class DefaultState(AbstractStandardDelivery):
-
-    def grow(self):
-        self.value += GROWTH_RATE
-    
     def state_over(self):
         return False
 
 
-class PoisonedState(AbstractStandardDelivery):
+class PoisonedState(DefaultState):
 
-    def __init__(self, value=0, owner=None):
-        super().__init__(value, owner)
+    def __init__(self, node):
+        super().__init__(node)
+        self.reset_on_capture = True
         self.poison_timer = POISON_TICKS
 
     def grow(self):
-        if self.poison_timer == POISON_TICKS - POISON_SPREAD_DELAY:
-            self.emit('spread_poison')
-        if self.value > MINIMUM_TRANSFER_VALUE:
-            self.value -= GROWTH_RATE
         self.poison_timer -= 1
+        if self.poison_timer == POISON_TICKS - POISON_SPREAD_DELAY:
+            self.node.spread_poison()
+        if self.value > MINIMUM_TRANSFER_VALUE:
+            return GROWTH_RATE * -1
+        return 0
 
     def state_over(self):
         return self.poison_timer == 0
 
-    def capture(self, player):
-        super().capture(player)
-        self.emit('back_to_default')
 
+class CapitalState(DefaultState):
 
-class CapitalState(AbstractStandardDelivery):
-
-    def __init__(self, value=0, owner=None):
-        super().__init__(value, owner)
+    def __init__(self, node):
+        super().__init__(node)
         self.reset_on_capture = True
         self.capitalized = False
 
     def grow(self):
         if not self.capitalized:
-            self.shrink()
+            return self.shrink()
+        return 0
 
     def shrink(self):
-        self.value -= CAPITAL_SHRINK_SPEED
-        if self.value <= MINIMUM_TRANSFER_VALUE:
-            self.value = MINIMUM_TRANSFER_VALUE
+        if self.value + CAPITAL_SHRINK_SPEED <= MINIMUM_TRANSFER_VALUE:
             self.capitalized = True
             self.owner.capitalize(self)
+            return MINIMUM_TRANSFER_VALUE - self.value
+        return CAPITAL_SHRINK_SPEED
 
-    def capture(self, player):
-        super().capture(player)
-        self.emit('back_to_default')
+    def capture(self):
+        self.owner.lose_capital(self)
+        return super().capture()
 
-    def state_over(self):
-        return False
 
 class MineState(AbstractState):
 
-    def __init__(self, island):
-        super().__init__()
+    def __init__(self, node, island):
+        super().__init__(node)
+        self.reset_on_capture = True
         self.bonus, self.bubble, self.ring_color = MINE_DICT[island]
 
     def grow(self):
-        pass
+        return 0
 
     def delivery(self, amount, player):
-        self.value += amount
-        if player != self.owner:
-            self.owner = player
-        return False
+        if player == self.owner:
+            return amount
+        elif self.node.absorbing():
+            self.node.owner = player
+            return amount
+        return 0
+
+    def killed(self):
+        return self.value >= self.bubble
+
+    def capture(self):
+        return MINIMUM_TRANSFER_VALUE
 
     def state_over(self):
-        return self.value >= self.bubble
+        return False
+
+    def size_factor(self):
+        return max(math.log10(self.bubble/10)/2+self.bubble/1000+0.15,0)/2
+
+    @property
+    def color(self):
+        if self.owner:
+            return self.owner.color
+        return GREY
