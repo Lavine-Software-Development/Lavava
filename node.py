@@ -4,7 +4,7 @@ import math
 
 class Node:
 
-    def __init__(self, id, pos, state_name):
+    def __init__(self, id, pos, state_name='default'):
         self.set_state(state_name)
         self.item_type = NODE
         self.incoming = []
@@ -18,6 +18,10 @@ class Node:
 
     def set_state(self, state_name):
         self.state = StateFactory.create_state(state_name, self)
+        self.state_name = state_name
+
+    def set_default_state(self):
+        self.set_state('default')
 
     def click(self, clicker, button):
         if button == 1:
@@ -71,6 +75,8 @@ class Node:
 
     def grow(self):
         self.state.grow()
+        if self.state.state_over():
+            self.set_default_state()
 
     def delivery(self, amount, player):
         return self.state.delivery(amount, player)

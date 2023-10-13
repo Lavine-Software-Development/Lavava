@@ -41,14 +41,11 @@ class AbstractStandardDelivery(AbstractState):
 
     def __init__(self, value=0, owner=None):
         super().__init__(value, owner)
-        self.reset_on_capture = False
 
     def delivery(self, amount, player):
         self.change_value(amount, player)
         if self.killed():
             self.capture(player)
-            return self.reset_on_capture
-        return False
 
     def change_value(self, amount, player):
         if self.owner != player:
@@ -64,6 +61,7 @@ class AbstractStandardDelivery(AbstractState):
         self.owner = player
         self.emit('capture')
 
+
 class DefaultState(AbstractStandardDelivery):
 
     def grow(self):
@@ -77,7 +75,6 @@ class PoisonedState(AbstractStandardDelivery):
 
     def __init__(self, value=0, owner=None):
         super().__init__(value, owner)
-        self.reset_on_capture = True
         self.poison_timer = POISON_TICKS
 
     def grow(self):
@@ -89,6 +86,10 @@ class PoisonedState(AbstractStandardDelivery):
 
     def state_over(self):
         return self.poison_timer == 0
+
+    def capture(self, player):
+        super().capture(player)
+        self.emit('back_to_default')
 
 
 class CapitalState(AbstractStandardDelivery):
@@ -108,6 +109,10 @@ class CapitalState(AbstractStandardDelivery):
             self.value = MINIMUM_TRANSFER_VALUE
             self.capitalized = True
             self.owner.capitalize(self)
+
+    def capture(self, player):
+        super().capture(player)
+        self.emit('back_to_default')
 
     def state_over(self):
         return False

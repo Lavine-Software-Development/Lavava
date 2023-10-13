@@ -15,4 +15,5 @@ class StateFactory:
             state = CapitalState(node.value, node.owner)
 
         state.on('capture', node.capture)
+        state.on('back_to_default', node.set_default_state)
         return state

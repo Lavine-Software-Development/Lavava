@@ -2,7 +2,7 @@ from collections import defaultdict
 from constants import *
 from helpers import *
 from edge import Edge
-from ability_builder import AbilityBuilder
+from abilityFactory import AbilityBuilder
 
 class Board:
 
