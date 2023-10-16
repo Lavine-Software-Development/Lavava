@@ -38,12 +38,12 @@ class Ability(ABC):
         return False
 
 class Bridge(Ability):
-    def __init__(self, player, check_new_edge, buy_new_edge, new_edge_id):
+    def __init__(self, player, new_edge_id, check_new_edge, buy_new_edge):
         super().__init__(player, BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle', 'A')
         self.first_node = None
+        self.new_edge_id = new_edge_id
         self.check_new_edge = check_new_edge
         self.buy_new_edge = buy_new_edge
-        self.new_edge_id = new_edge_id
 
     def effect(self, id1, id2, id3):
         return self.buy_new_edge(id1, id2.id, id3.id)
@@ -84,16 +84,16 @@ class Poison(BasicAttack):
         super().__init__(player, POISON_CODE, 'Poison', POISON_COST, PURPLE, 'circle', 'P')
 
     def effect(self, node):
-        node.poison_score = POISON_TICKS
+        node.set_state('poisoned')
 
 
 class Spawn(Ability):
 
-    def __init__(self, player, color):
-        super().__init__(player, SPAWN_CODE, 'Spawn', SPAWN_COST, color, 'circle')
+    def __init__(self, player):
+        super().__init__(player, SPAWN_CODE, 'Spawn', SPAWN_COST, player.default_color, 'circle')
 
     def validate(self, node):
-        return node.owner is None and self.player.money >= self.cost and node.normal
+        return node.owner is None and self.player.money >= self.cost and node.state_name == 'default'
 
     def effect(self, node, player):
         node.capture(player)
@@ -120,10 +120,10 @@ class Capital(Ability):
         super().__init__(player, CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
 
     def validate(self, node):
-        if node.owner == self.player and node.state != 'capital' and node.full:
+        if node.owner == self.player and node.state_name != 'capital' and node.full:
             neighbor_capital = False
             for neighbor in node.neighbors:
-                if neighbor.state == 'capital':
+                if neighbor.state_name == 'capital':
                     neighbor_capital = True
                     break
             if not neighbor_capital:
@@ -131,6 +131,6 @@ class Capital(Ability):
         return False
 
     def effect(self, node):
-        node.capitalizing_score = node.value
+        node.set_state('capital')
 
         

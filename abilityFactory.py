@@ -3,23 +3,23 @@ from constants import *
 
 class AbilityBuilder:
 
-    def __init__(self, player, check_new_edge, buy_new_edge, new_edge_id, remove_node):
+    def __init__(self, board):
         self.abilities = {}
         
-        spawn = Spawn(player, player.color)
+        spawn = Spawn(board.player)
         self.abilities[SPAWN_CODE] = spawn
 
-        bridge = Bridge(player, check_new_edge, buy_new_edge, new_edge_id)
+        bridge = Bridge(board.player, board.new_edge_id, board.check_new_edge, board.buy_new_edge)
         self.abilities[BRIDGE_CODE] = bridge
 
-        nuke = Nuke(player, remove_node)
+        nuke = Nuke(board.player, board.remove_node)
         self.abilities[NUKE_CODE] = nuke
 
-        poison = Poison(player)
+        poison = Poison(board.player)
         self.abilities[POISON_CODE] = poison
 
-        freeze = Freeze(player)
+        freeze = Freeze(board.player)
         self.abilities[FREEZE_CODE] = freeze
 
-        capital = Capital(player)
+        capital = Capital(board.player)
         self.abilities[CAPITAL_CODE] = capital
