@@ -165,9 +165,10 @@ class Board:
                 edge.update()
             
             for player in self.player_dict.values():
-                player.update()
-                if player.count == 0:
-                    self.eliminate(player.id)
+                if not player.eliminated:
+                    player.update()
+                    if player.count == 0:
+                        self.eliminate(player.id)
 
     def find_node(self, position):
         for node in self.nodes:
