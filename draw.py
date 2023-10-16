@@ -208,8 +208,7 @@ class Draw:
             if spot.state_name == 'mine':
                 state = spot.state
                 if spot.owner != None:
-                    angle1 = 2 * math.pi * (spot.value / state.bubble)
-                    print(spot.value / state.bubble)
+                    angle1 = 2 * math.pi * ((state.bubble - spot.value) / state.bubble)
                     py.draw.arc(self.screen, state.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), -angle1 / 2, angle1 / 2, spot.size)
                     py.draw.arc(self.screen, spot.owner.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), angle1 / 2, -angle1 / 2 + 2 * math.pi, spot.size)
                 else:

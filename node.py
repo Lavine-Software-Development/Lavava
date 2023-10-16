@@ -109,7 +109,7 @@ class Node:
 
     @property
     def full(self):
-        return self.value >= GROWTH_STOP
+        return self.state.full
 
     @property
     def edges(self):

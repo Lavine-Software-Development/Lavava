@@ -40,6 +40,10 @@ class AbstractState(ABC):
         pass
 
     @property
+    def full(self):
+        return self.value >= GROWTH_STOP
+
+    @property
     def size_factor(self):
         if self.value<5:
             return 0
@@ -133,6 +137,8 @@ class MineState(AbstractState):
         return self.value >= self.bubble
 
     def capture(self):
+        self.owner.tick_production += self.bonus
+        self.owner.count += 1
         return MINIMUM_TRANSFER_VALUE
 
     def state_over(self):
@@ -144,6 +150,8 @@ class MineState(AbstractState):
 
     @property
     def color(self):
-        if self.owner:
-            return self.owner.color
         return GREY
+
+    @property
+    def full(self):
+        return False
