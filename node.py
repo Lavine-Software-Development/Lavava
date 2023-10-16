@@ -1,11 +1,10 @@
 from constants import *
-import math
 from nodeState import *
 
 class Node:
 
-    def __init__(self, id, pos, state_name='default'):
-        self.set_state(state_name)
+    def __init__(self, id, pos, state_name='default', data=None):
+        self.set_state(state_name, data)
         self.value = 0
         self.owner = None
         self.item_type = NODE
@@ -17,12 +16,6 @@ class Node:
 
     def __str__(self):
         return str(self.id)
-
-    def __getattr__(self, name):
-        try:
-            return getattr(self.node_state, name)
-        except AttributeError:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
     def set_state(self, state_name, data=None):
         if state_name == 'default':
@@ -94,9 +87,15 @@ class Node:
         if self.state.killed():
             self.capture(player)
 
+    def update_ownerships(self, player):
+        if self.owner != None:
+            self.owner.count -= 1
+        player.count += 1
+        self.owner = player
+
     def capture(self, player):
         self.value = self.state.capture()
-        self.owner = player
+        self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()
         if self.state.reset_on_capture:
@@ -123,3 +122,13 @@ class Node:
     @property
     def neighbors(self):
         return [edge.opposite(self) for edge in self.edges]
+
+    @property
+    def size(self):
+        return int(5+self.state.size_factor*18)
+
+    @property
+    def color(self):
+        if self.owner:
+            return self.owner.color
+        return BLACK

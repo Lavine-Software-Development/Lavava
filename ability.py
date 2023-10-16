@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from constants import *
-from observable import Observable
 
-class Ability(ABC, Observable):
+class Ability(ABC):
 
     def __init__(self, player, key, name, cost, color, shape, letter=None, click_type=NODE):
         self.player = player
@@ -39,16 +38,19 @@ class Ability(ABC, Observable):
         return False
 
 class Bridge(Ability):
-    def __init__(self, player):
+    def __init__(self, player, new_edge_id, check_new_edge, buy_new_edge):
         super().__init__(player, BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle', 'A')
         self.first_node = None
+        self.new_edge_id = new_edge_id
+        self.check_new_edge = check_new_edge
+        self.buy_new_edge = buy_new_edge
 
     def effect(self, id1, id2, id3):
-        return self.emit('buy_new_edge', id1, id2.id, id3.id)
+        return self.buy_new_edge(id1, id2.id, id3.id)
 
     def validate(self, node):
         if self.first_node is not None:
-            return self.first_node.id != node.id and self.emit('check_new_edge', self.first_node.id, node.id)
+            return self.first_node.id != node.id and self.check_new_edge(self.first_node.id, node.id)
         else:
             return node.owner == self.player
 
@@ -59,7 +61,7 @@ class Bridge(Ability):
         if self.first_node is None:
             self.first_node = node
             return False
-        return (self.emit('new_edge_id', self.first_node.id), self.first_node.id, node.id)
+        return (self.new_edge_id(self.first_node.id), self.first_node.id, node.id)
 
 class BasicAttack(Ability):
 
@@ -68,11 +70,12 @@ class BasicAttack(Ability):
 
 class Nuke(BasicAttack):
 
-    def __init__(self, player):
+    def __init__(self, player, remove_node):
         super().__init__(player, NUKE_CODE, 'Nuke', NUKE_COST, BLACK, 'square', 'N')
+        self.remove_node = remove_node
 
     def effect(self, node):
-        self.emit('remove_node', node.id)
+        self.remove_node(node.id)
 
 
 class Poison(BasicAttack):

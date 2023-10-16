@@ -11,7 +11,7 @@ class Board:
         self.player_dict = player_dict
         self.player = player_dict[player_num]
         self.player_count = len(self.player_dict)
-        self.abilities = AbilityBuilder(self.player_dict[player_num], self.check_new_edge, self.buy_new_edge, self.new_edge_id, self.remove_node).abilities
+        self.abilities = AbilityBuilder(self).abilities
 
     def reset(self, nodes, edges):
         self.nodes = nodes

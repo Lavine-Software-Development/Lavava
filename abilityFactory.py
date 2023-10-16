@@ -9,14 +9,10 @@ class AbilityBuilder:
         spawn = Spawn(board.player)
         self.abilities[SPAWN_CODE] = spawn
 
-        bridge = Bridge(board.player)
-        bridge.on('new_edge_id', board.new_edge_id)
-        bridge.on('check_new_edge', board.check_new_edge)
-        bridge.on('buy_new_edge', board.buy_new_edge)
+        bridge = Bridge(board.player, board.new_edge_id, board.check_new_edge, board.buy_new_edge)
         self.abilities[BRIDGE_CODE] = bridge
 
-        nuke = Nuke(board.player)
-        nuke.on('remove_node', board.remove_node)
+        nuke = Nuke(board.player, board.remove_node)
         self.abilities[NUKE_CODE] = nuke
 
         poison = Poison(board.player)

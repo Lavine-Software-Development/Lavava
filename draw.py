@@ -205,21 +205,23 @@ class Draw:
 
     def blit_nodes(self):
         for spot in self.nodes:
-            if spot.state == 'resource':
-                if spot.bubble_owner != None:
-                    angle1 = 2 * math.pi * (spot.bubble_size / spot.bubble)
-                    py.draw.arc(self.screen, spot.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), -angle1 / 2, angle1 / 2, spot.size)
-                    py.draw.arc(self.screen, spot.bubble_owner.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), angle1 / 2, -angle1 / 2 + 2 * math.pi, spot.size)
+            if spot.state_name == 'mine':
+                state = spot.state
+                if spot.owner != None:
+                    angle1 = 2 * math.pi * (spot.value / state.bubble)
+                    print(spot.value / state.bubble)
+                    py.draw.arc(self.screen, state.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), -angle1 / 2, angle1 / 2, spot.size)
+                    py.draw.arc(self.screen, spot.owner.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), angle1 / 2, -angle1 / 2 + 2 * math.pi, spot.size)
                 else:
                     py.draw.circle(self.screen, GREY, spot.pos, spot.size)
-                py.draw.circle(self.screen, spot.ring_color, spot.pos, spot.size + 6, 6)
+                py.draw.circle(self.screen, spot.state.ring_color, spot.pos, spot.size + 6, 6)
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
-            if spot.poisoned:
+            if spot.state_name == 'poisoned':
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
-                if spot.state == 'capital':
+                if spot.state_name == 'capital':
                     py.draw.circle(self.screen, PINK, spot.pos, spot.size + 6, 4)
             if self.board.highlighted == spot:
                 py.draw.circle(self.screen, self.board.highlighted_color, spot.pos, spot.size + 5,3)         

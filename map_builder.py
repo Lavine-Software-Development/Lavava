@@ -5,7 +5,6 @@ from helpers import *
 from randomGenerator import RandomGenerator
 from node import Node
 from edge import Edge
-from resourceNode import ResourceNode
 from dynamicEdge import DynamicEdge
 
 class MapBuilder:
@@ -131,17 +130,17 @@ class MapBuilder:
         for id, data in node_to_edge.items():
 
             for other_id in data['out'] + data['in'] + data['dynamic']:
-                if other_id in nodes and isinstance(nodes[other_id], ResourceNode):
+                if other_id in nodes and nodes[other_id].state_name == 'mine':
                     data['nearby'] = True
                     break
             if data["island"]:
                 if island_resources < ISLAND_RESOURCE_COUNT:
-                    nodes[id] = ResourceNode(id, data['coord'], True)
+                    nodes[id] = Node(id, data['coord'], 'mine', True)
                     island_resources += 1
             elif network_resources < NETWORK_RESOURCE_COUNT and not data['out'] and \
                 data['in'] and not data['nearby']:
 
-                nodes[id] = ResourceNode(id, data['coord'], False)
+                nodes[id] = Node(id, data['coord'], 'mine', False)
                 network_resources += 1
             else:
                 nodes[id] = Node(id, data["coord"])
@@ -151,7 +150,7 @@ class MapBuilder:
                 edges.append(Edge(nodes[data['out'][i]], nodes[id], data['out_ids'][i]))
 
         for id, data in dynamic_edges.items():
-            if isinstance(nodes[data[0]], ResourceNode):
+            if nodes[data[0]].state_name == 'mine':
                 edges.append(DynamicEdge(nodes[data[0]], nodes[data[1]], id))
             else:
                 edges.append(DynamicEdge(nodes[data[1]], nodes[data[0]], id))

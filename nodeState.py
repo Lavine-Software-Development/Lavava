@@ -2,11 +2,10 @@ from constants import GROWTH_RATE, POISON_TICKS, POISON_SPREAD_DELAY, \
     MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT, BLACK, GROWTH_STOP, \
     GREY
 from abc import ABC, abstractmethod
-from observable import Observable
 import math
 
 
-class AbstractState(ABC, Observable):
+class AbstractState(ABC):
 
     def __init__(self, node):
         self.node = node
@@ -41,20 +40,10 @@ class AbstractState(ABC, Observable):
         pass
 
     @property
-    def size(self):
-        return int(5+self.size_factor()*18)
-
-    @property
     def size_factor(self):
         if self.value<5:
             return 0
         return max(math.log10(self.value/10)/2+self.value/1000+0.15,0)
-
-    @property
-    def color(self):
-        if self.owner:
-            return self.owner.color
-        return BLACK
 
 
 class DefaultState(AbstractState):
@@ -149,6 +138,7 @@ class MineState(AbstractState):
     def state_over(self):
         return False
 
+    @property
     def size_factor(self):
         return max(math.log10(self.bubble/10)/2+self.bubble/1000+0.15,0)/2
 
