@@ -2,55 +2,26 @@ from collections import defaultdict
 from constants import *
 from helpers import *
 from edge import Edge
-from abilityFactory import AbilityBuilder
 
 class Board:
 
-    def __init__(self, player_dict, player_num):
-
-        self.player_dict = player_dict
-        self.player = player_dict[player_num]
-        self.player_count = len(self.player_dict)
-        self.abilities = AbilityBuilder(self).abilities
+    def __init__(self, main_player):
+        self.nodes = []
+        self.edges = []
+        self.edge_dict = defaultdict(set)
+        self.id_dict = {}
+        self.extra_edges = 2
+        self.highlighted = None
+        self.highlighted_color = None
+        self.main_player = main_player
 
     def reset(self, nodes, edges):
         self.nodes = nodes
         self.edges = edges
-
-        self.edgeDict = defaultdict(set)
+        self.edge_dict = defaultdict(set)
         self.expand_nodes()
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.extra_edges = 2
-
-        self.remaining = {i for i in range(self.player_count)}
-        self.victor = None
-
-        self.timer = 60
-
-        self.highlighted = None
-        self.highlighted_color = None
-
-        self.mode = DEFAULT_ABILITY_CODE
-
-    def select(self, key):
-        self.abilities[self.mode].wipe()
-        if self.mode == key:
-            self.mode = DEFAULT_ABILITY_CODE
-        elif self.player.money >= self.abilities[key].cost:
-            self.mode = key
-
-    def update_ability(self):
-        if self.ability.cost * 2 > self.player.money:
-            self.mode = DEFAULT_ABILITY_CODE
-
-    def action(self, key, acting_player, data):
-        if key in self.abilities:
-            new_data = (self.id_dict[d] if d in self.id_dict else d for d in data)
-            self.abilities[key].input(self.player_dict[acting_player], new_data)
-        elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-            self.id_dict[data[0]].click(self.player_dict[acting_player], key)
-        elif key == ELIMINATE_VAL:
-            self.eliminate(acting_player)
 
     def highlight(self, item, color=None):
         if item is None:
@@ -60,73 +31,28 @@ class Board:
             self.highlighted = self.id_dict[item]
             self.highlighted_color = color
             if color is None:
-                self.highlighted_color = self.ability.color
+                self.highlighted_color = self.main_player.color
 
-    def eliminate(self, player):
-        self.remaining.remove(player)
-        for edge in self.edges:
-            if edge.owned_by(self.player_dict[player]):
-                edge.switch(False)
-        self.player_dict[player].eliminate()
-
-    def hover(self, position):
+    def hover(self, position, ability):
         if id := self.find_node(position):
-            if self.ability.click_type == NODE and self.ability.validate(self.id_dict[id]):
+            if ability.click_type == NODE and ability.validate(self.id_dict[id]):
                 self.highlight(id)
             else:
                 self.highlight(None)
         elif id := self.find_edge(position):
-            if self.ability.click_type == EDGE and self.ability.validate(self.id_dict[id]):
+            if ability.click_type == EDGE and ability.validate(self.id_dict[id]):
                 self.highlight(id)
-            elif self.id_dict[id].owned_by(self.player):
+            elif self.id_dict[id].owned_by(self.main_player):
                 self.highlight(id, GREY)
             else:
                 self.highlight(None)
         else:
             self.highlight(None)
 
-    def use_ability(self):
-        if self.ability.click_type == self.highlighted.type and self.ability.color == self.highlighted_color:
-            return self.ability.complete(self.highlighted)
-        return False
-
     def click_edge(self):
         if self.highlighted.type == EDGE:
             return self.highlighted.id
         return False
-
-    def check_over(self):
-        if len(self.remaining) == 1:
-            self.win_and_end(self.player_dict[list(self.remaining)[0]])
-        else:
-            self.check_capital_win()
-
-    def check_capital_win(self):
-        winner = None
-        for player in self.player_dict.values():
-            if player.check_capital_win():
-                winner = player
-                break
-        if winner:
-            for player in self.remaining.copy():
-                if player != winner.id:
-                    self.eliminate(player)
-            self.win_and_end(winner)
-
-    def win_and_end(self, player):
-        self.victor = player
-        self.victor.win()
-        self.display_ranks()
-
-    def display_ranks(self):
-
-        sorted_by_score = sorted(self.player_dict.values(), key=lambda p: p.points, reverse=True)
-
-        print("New Scores")
-        print("-----------------")
-        for player in sorted_by_score:
-            player.display()
-        print()
 
     def expand_nodes(self):
 
@@ -147,28 +73,12 @@ class Board:
             node.set_pos_per()
 
     def update(self):
+        for spot in self.nodes:
+            if spot.owned_and_alive():  # keep 
+                spot.grow()
 
-        self.check_over()
-
-        if self.timer > 0:
-            self.timer -= 0.1
-
-            if self.timer > 3 and self.opening_moves == len(self.remaining):
-                self.timer = 3
-
-        else:
-            for spot in self.nodes:
-                if spot.owned_and_alive(): # keep 
-                    spot.grow()
-
-            for edge in self.edges:
-                edge.update()
-            
-            for player in self.player_dict.values():
-                if not player.eliminated:
-                    player.update()
-                    if player.count == 0:
-                        self.eliminate(player.id)
+        for edge in self.edges:
+            edge.update()
 
     def find_node(self, position):
         for node in self.nodes:
@@ -241,11 +151,3 @@ class Board:
                 self.edges.remove(edge)
         self.id_dict.pop(node_id)
         self.nodes.remove(node)
-
-    @property
-    def opening_moves(self):
-        return sum([player.count for player in self.player_dict.values()])
-
-    @property
-    def ability(self):
-        return self.abilities[self.mode]
