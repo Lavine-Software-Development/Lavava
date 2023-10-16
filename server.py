@@ -1,7 +1,7 @@
 import socket
 from _thread import start_new_thread
 from queue import Queue
-from game import Game
+from batch import Batch
 import sys
 import time
 from threading import Thread
@@ -42,7 +42,7 @@ class Server:
 
         if is_host == "HOST":
             player_count = int(player_count)
-            self.waiting_players = Game(player_count, conn)
+            self.waiting_players = Batch(player_count, conn)
             conn.sendall("Players may JOIN".encode())
         elif is_host == "JOIN":
             if self.waiting_players:
