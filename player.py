@@ -37,11 +37,11 @@ class Player:
 
     def capitalize(self, capital):
         self.tick_production += CAPITAL_BONUS
-        self.capitals[capital.id] = capital
+        self.capitals[capital.node.id] = capital
 
     def lose_capital(self, capital):
         self.tick_production -= CAPITAL_BONUS
-        del self.capitals[capital.id]
+        del self.capitals[capital.node.id]
 
     def check_capital_win(self):
         return self.capital_count == CAPITAL_WIN_COUNT

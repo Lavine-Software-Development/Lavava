@@ -13,7 +13,6 @@ class Edge:
         self.owned = False
         self.contested = False
         self.popped = False
-        self.poisoned = False
         self.update_nodes()
         self.state = 'one-way'
         self.type = EDGE

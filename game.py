@@ -4,7 +4,6 @@ from board import Board
 from draw import Draw
 from map_builder import MapBuilder
 from randomGenerator import RandomGenerator
-from player import Player
 from constants import *
 import sys
 from abilityManager import AbilityManager

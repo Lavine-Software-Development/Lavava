@@ -126,7 +126,7 @@ class Board:
         newEdge.switch(True)
         self.edges.append(newEdge)
         self.id_dict[newEdge.id] = newEdge
-        self.extra_edges += self.player_count
+        self.extra_edges += 5
 
     def safe_remove(self, lst, value):
         try:

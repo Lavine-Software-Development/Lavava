@@ -5,7 +5,7 @@ class PlayerManager:
     def __init__(self, player_count, main_player_number):
         self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
         self.main_player = self.player_dict[main_player_number]
-        self.remaining = {i for i in range(len(player_count))}
+        self.remaining = {i for i in range(player_count)}
         self.victor = None
         self.timer = 60
 

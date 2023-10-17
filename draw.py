@@ -19,8 +19,8 @@ class Draw:
         self.board = board
         self.edges = board.edges
         self.nodes = board.nodes
-        self.players = [x for x in self.player_manager.player_dict.values()]
-        self.player = self.player_manager.main_player
+        self.players = [x for x in player_manager.player_dict.values()]
+        self.player = player_manager.main_player
         self.player_manager = player_manager
         self.abilities = ability_manager.abilities
         self.ability_manager = ability_manager
@@ -160,8 +160,6 @@ class Draw:
                 py.draw.polygon(self.screen, color, [point1, point2, point3])         
             else:
                 py.draw.lines(self.screen, color, True, [point1, point2, point3])
-            if edge.poisoned:
-                py.draw.lines(self.screen, PURPLE, True, [point1, point2, point3])
 
         if self.board.highlighted == edge:
             self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
@@ -186,8 +184,8 @@ class Draw:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius)
             else:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
-            if edge.poisoned:
-                py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius, 1)
+            # if edge.poisoned:
+            #     py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius, 1)
 
         if self.board.highlighted == edge:
             self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
@@ -237,11 +235,11 @@ class Draw:
                 self.screen.blit(self.smaller_font.render(str(int(self.players[i].capital_count)),True,PINK),(self.width/3 + i*150 + 40,20))
         
         if self.player_manager.victor:
-            self.screen.blit(self.font.render(f"Player {self.board.victor.id} Wins!",True,self.board.victor.color),(self.width - 450,20))
+            self.screen.blit(self.font.render(f"Player {self.player_manager.victor.id} Wins!",True,self.player_manager.victor.color),(self.width - 450,20))
             if self.player.victory:
                 self.screen.blit(self.small_font.render("R to restart",True,self.player.color),(self.width - 300,60))
             else:
-                self.screen.blit(self.small_font.render(f"Waiting for Player {self.board.victor.id} to restart",True,self.board.victor.color),(self.width - 600,60))
+                self.screen.blit(self.small_font.render(f"Waiting for Player {self.player_manager.victor.id} to restart",True,self.player_manager.victor.color),(self.width - 600,60))
         elif self.player_manager.timer > 0:
             if self.player_manager.timer < 4:
                 self.screen.blit(self.font.render(f"{self.player_manager.timer + 1:.0f}",True,BLACK),(self.width - 300,20))
@@ -282,7 +280,7 @@ class Draw:
 
     def blit_capital_stars(self):
         for spot in self.nodes:
-            if spot.state == 'capital':
+            if spot.state_name == 'capital' and spot.state.capitalized:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 

@@ -50,7 +50,7 @@ class Bridge(Ability):
 
     def validate(self, node):
         if self.first_node is not None:
-            return self.first_node.id != node.id and self.check_new_edge(self.first_node.id, node.id)
+            return self.first_node.id != node.id and node.state_name != 'capital' and self.check_new_edge(self.first_node.id, node.id)
         else:
             return node.owner == self.main_player
 
