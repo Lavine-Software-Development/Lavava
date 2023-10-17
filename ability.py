@@ -3,8 +3,8 @@ from constants import *
 
 class Ability(ABC):
 
-    def __init__(self, player, key, name, cost, color, shape, letter=None, click_type=NODE):
-        self.player = player
+    def __init__(self, main_player, key, name, cost, color, shape, letter=None, click_type=NODE):
+        self.main_player = main_player
         self.key = key
         self.name = name
         self.cost = cost
@@ -38,8 +38,8 @@ class Ability(ABC):
         return False
 
 class Bridge(Ability):
-    def __init__(self, player, new_edge_id, check_new_edge, buy_new_edge):
-        super().__init__(player, BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle', 'A')
+    def __init__(self, main_player, new_edge_id, check_new_edge, buy_new_edge):
+        super().__init__(main_player, BRIDGE_CODE, 'Bridge', BRIDGE_COST, DARK_YELLOW, 'triangle', 'A')
         self.first_node = None
         self.new_edge_id = new_edge_id
         self.check_new_edge = check_new_edge
@@ -50,9 +50,9 @@ class Bridge(Ability):
 
     def validate(self, node):
         if self.first_node is not None:
-            return self.first_node.id != node.id and self.check_new_edge(self.first_node.id, node.id)
+            return self.first_node.id != node.id and node.state_name != 'capital' and self.check_new_edge(self.first_node.id, node.id)
         else:
-            return node.owner == self.player
+            return node.owner == self.main_player
 
     def wipe(self):
         self.first_node = None
@@ -66,12 +66,12 @@ class Bridge(Ability):
 class BasicAttack(Ability):
 
     def validate(self, node):
-        return node.owner != self.player and node.owner is not None and node.state not in ['capital', 'resource']
+        return node.owner != self.main_player and node.owner is not None and node.state not in ['capital', 'resource']
 
 class Nuke(BasicAttack):
 
-    def __init__(self, player, remove_node):
-        super().__init__(player, NUKE_CODE, 'Nuke', NUKE_COST, BLACK, 'square', 'N')
+    def __init__(self, main_player, remove_node):
+        super().__init__(main_player, NUKE_CODE, 'Nuke', NUKE_COST, BLACK, 'square', 'N')
         self.remove_node = remove_node
 
     def effect(self, node):
@@ -80,8 +80,8 @@ class Nuke(BasicAttack):
 
 class Poison(BasicAttack):
 
-    def __init__(self, player):
-        super().__init__(player, POISON_CODE, 'Poison', POISON_COST, PURPLE, 'circle', 'P')
+    def __init__(self, main_player):
+        super().__init__(main_player, POISON_CODE, 'Poison', POISON_COST, PURPLE, 'circle', 'P')
 
     def effect(self, node):
         node.set_state('poisoned')
@@ -89,11 +89,11 @@ class Poison(BasicAttack):
 
 class Spawn(Ability):
 
-    def __init__(self, player):
-        super().__init__(player, SPAWN_CODE, 'Spawn', SPAWN_COST, player.default_color, 'circle')
+    def __init__(self, main_player):
+        super().__init__(main_player, SPAWN_CODE, 'Spawn', SPAWN_COST, main_player.default_color, 'circle')
 
     def validate(self, node):
-        return node.owner is None and self.player.money >= self.cost and node.state_name == 'default'
+        return node.owner is None and self.main_player.money >= self.cost and node.state_name == 'default'
 
     def effect(self, node, player):
         node.capture(player)
@@ -105,22 +105,22 @@ class Spawn(Ability):
 
 class Freeze(Ability):
 
-    def __init__(self, player):
-        super().__init__(player, FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
+    def __init__(self, main_player):
+        super().__init__(main_player, FREEZE_CODE, 'Freeze', FREEZE_COST, LIGHT_BLUE, 'triangle', 'F', EDGE)
 
     def validate(self, edge):
-        return edge.state == 'two-way' and edge.owned_by(self.player)
+        return edge.state == 'two-way' and edge.owned_by(self.main_player)
 
     def effect(self, edge):
         edge.freeze()
 
 class Capital(Ability):
 
-    def __init__(self, player):
-        super().__init__(player, CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
+    def __init__(self, main_player):
+        super().__init__(main_player, CAPITAL_CODE, 'Capital', CAPITAL_COST, PINK, 'star', 'C')
 
     def validate(self, node):
-        if node.owner == self.player and node.state_name != 'capital' and node.full:
+        if node.owner == self.main_player and node.state_name != 'capital' and node.full:
             neighbor_capital = False
             for neighbor in node.neighbors:
                 if neighbor.state_name == 'capital':

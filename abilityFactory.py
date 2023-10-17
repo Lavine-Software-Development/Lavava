@@ -1,25 +1,25 @@
 from ability import *
 from constants import *
 
-class AbilityBuilder:
+class AbilityFactory:
 
-    def __init__(self, board):
+    def __init__(self, player, board):
         self.abilities = {}
         
-        spawn = Spawn(board.player)
+        spawn = Spawn(player)
         self.abilities[SPAWN_CODE] = spawn
 
-        bridge = Bridge(board.player, board.new_edge_id, board.check_new_edge, board.buy_new_edge)
+        bridge = Bridge(player, board.new_edge_id, board.check_new_edge, board.buy_new_edge)
         self.abilities[BRIDGE_CODE] = bridge
 
-        nuke = Nuke(board.player, board.remove_node)
+        nuke = Nuke(player, board.remove_node)
         self.abilities[NUKE_CODE] = nuke
 
-        poison = Poison(board.player)
+        poison = Poison(player)
         self.abilities[POISON_CODE] = poison
 
-        freeze = Freeze(board.player)
+        freeze = Freeze(player)
         self.abilities[FREEZE_CODE] = freeze
 
-        capital = Capital(board.player)
+        capital = Capital(player)
         self.abilities[CAPITAL_CODE] = capital

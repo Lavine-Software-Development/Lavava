@@ -1,5 +1,4 @@
 from constants import *
-from resourceNode import ResourceNode
 
 class Edge:
 
@@ -13,7 +12,6 @@ class Edge:
         self.owned = False
         self.contested = False
         self.popped = False
-        self.poisoned = False
         self.update_nodes()
         self.state = 'one-way'
         self.type = EDGE

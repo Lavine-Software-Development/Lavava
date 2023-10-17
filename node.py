@@ -73,9 +73,8 @@ class Node:
 
     def spread_poison(self):
         for edge in self.outgoing:
-            if edge.to_node != self and edge.on and not edge.contested and edge.to_node.normal:
-                edge.poisoned = True
-                edge.to_node.poison_score = POISON_TICKS
+            if edge.to_node != self and edge.on and not edge.contested and edge.to_node.state_name == 'default':
+                edge.to_node.set_state('poisoned')
 
     def grow(self):
         self.value += self.state.grow()
