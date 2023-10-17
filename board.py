@@ -23,36 +23,31 @@ class Board:
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.extra_edges = 2
 
-    def highlight(self, item, color=None):
-        if item is None:
-            self.highlighted = None
-            self.highlighted_color = None
-        else:
-            self.highlighted = self.id_dict[item]
-            self.highlighted_color = color
-            if color is None:
-                self.highlighted_color = self.main_player.color
+    def check_highlight(self, position, ability):
+        self.highlighted_color = ability.color
+        self.highlighted = self.hover(position, ability)
 
     def hover(self, position, ability):
         if id := self.find_node(position):
             if ability.click_type == NODE and ability.validate(self.id_dict[id]):
-                self.highlight(id)
-            else:
-                self.highlight(None)
+                return self.id_dict[id]
         elif id := self.find_edge(position):
             if ability.click_type == EDGE and ability.validate(self.id_dict[id]):
-                self.highlight(id)
+                return self.id_dict[id]
             elif self.id_dict[id].owned_by(self.main_player):
-                self.highlight(id, GREY)
-            else:
-                self.highlight(None)
-        else:
-            self.highlight(None)
+                self.highlighted_color = GREY
+                return self.id_dict[id]
+        return None
 
     def click_edge(self):
         if self.highlighted.type == EDGE:
             return self.highlighted.id
         return False
+
+    def eliminate(self, player):
+        for edge in self.edges:
+            if edge.owned_by(player):
+                edge.switch(False)
 
     def expand_nodes(self):
 

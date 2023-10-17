@@ -3,8 +3,8 @@ import pygame as py
 from constants import *
 
 class Draw:
-    def __init__(self, board, players, player_num, ability_manager, player_manager):
-        self.set_data(board, players, player_num, ability_manager, player_manager)
+    def __init__(self, board, ability_manager, player_manager):
+        self.set_data(board, ability_manager, player_manager)
         self.screen = py.display.set_mode(size, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
@@ -15,12 +15,12 @@ class Draw:
 
         py.display.set_caption("Lavava")
 
-    def set_data(self, board, players, player_num, ability_manager, player_manager):
+    def set_data(self, board, ability_manager, player_manager):
         self.board = board
         self.edges = board.edges
         self.nodes = board.nodes
-        self.players = [x for x in players.values()]
-        self.player = players[player_num]
+        self.players = [x for x in self.player_manager.player_dict.values()]
+        self.player = self.player_manager.main_player
         self.player_manager = player_manager
         self.abilities = ability_manager.abilities
         self.ability_manager = ability_manager

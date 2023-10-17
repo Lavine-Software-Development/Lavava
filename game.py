@@ -17,26 +17,25 @@ class Game:
         self.running = True
 
         self.network = Network(self.action)
+
         self.player_num = int(self.network.data[0])
-        self.player_count = int(self.network.data[2])
-        self.players = {i: Player(COLOR_DICT[i], i) for i in range(self.player_count)}
-        self.player = self.players[self.player_num]
+        player_count = int(self.network.data[2])
+
+        self.player_manager = PlayerManager(player_count, self.player_num)
+        self.player = self.player_manager.main_player
 
         self.board = Board(self.player)
-        self.player_manager = PlayerManager(self.players, self.board)
-        self.ability_manager = AbilityManager(self.players, self.player_num, self.board)
+        self.ability_manager = AbilityManager(self.player, self.board)
         self.generator = RandomGenerator(int(self.network.data[4:]))
 
         self.start_game()
 
-        self.drawer = Draw(self.board, self.players, self.player_num, self.ability_manager, self.player_manager)
+        self.drawer = Draw(self.board, self.ability_manager, self.player_manager)
 
         self.main_loop()
 
-
     def start_game(self):
-        for player in self.players.values():
-            player.default_values()
+        self.player_manager.reset()
         map_builder = MapBuilder(self.generator)
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
         self.position = None
@@ -44,11 +43,18 @@ class Game:
     def action(self, key, acting_player, data):
         if key == RESTART_GAME_VAL:
             self.start_game()
-            self.drawer.set_data(self.board, self.players, self.player_num, self.ability_manager.abilities, self.player_manager)
+            self.drawer.set_data(self.board, self.ability_manager, self.player_manager)
+        elif key == ELIMINATE_VAL:
+            self.player_manager.eliminate(acting_player)
+            self.board.eliminate(self.player_manager.player_dict[acting_player])
         elif key == TICK:
             self.tick()
-        else:
-            self.ability_manager.action(key, acting_player, data)
+        elif key in self.ability_manager.abilities:
+            new_data = (self.board.id_dict[d] if d in self.board.id_dict else d for d in data)
+            self.ability_manager.abilities[key].input(self.player_manager.player_dict[acting_player], new_data)
+        elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
+            self.board.id_dict[data[0]].click(self.player_manager.player_dict[acting_player], key)
+
 
     def tick(self):
         if self.board and not self.player_manager.victor and not self.player_manager.update_timer():
@@ -57,7 +63,7 @@ class Game:
             self.player_manager.check_over()
             
     def eliminate_send(self):
-        self.network.send((ELIMINATE_VAL, self.player_num, 0))
+        self.network.send((ELIMINATE_VAL, self.player_manager.player, 0))
 
     def restart_send(self):
         self.network.send((RESTART_GAME_VAL, 0, 0))
@@ -90,12 +96,11 @@ class Game:
 
                     if not self.player.victory:
                         if event.type == p.MOUSEBUTTONDOWN:
-                            self.position = event.pos
                             self.mouse_button_down_event(event.button)
 
                         elif event.type == p.MOUSEMOTION:
                             self.position = event.pos
-                            self.board.hover(event.pos, self.ability_manager.ability)
+                            self.board.check_highlight(event.pos, self.ability_manager.ability)
 
             self.drawer.wipe()
             self.drawer.blit(self.position)
@@ -106,7 +111,7 @@ class Game:
 
     def mouse_button_down_event(self, button):
         if self.board.highlighted:
-            if (data := self.ability_manager.use_ability()) and button != STANDARD_RIGHT_CLICK:
+            if (data := self.ability_manager.use_ability(self.board.highlighted, self.board.highlighted_color)) and button != STANDARD_RIGHT_CLICK:
                 self.network.send((self.ability_manager.mode, self.player_num, *data))
                 self.ability_manager.update_ability()
             elif id := self.board.click_edge():

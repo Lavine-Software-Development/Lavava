@@ -1,10 +1,17 @@
+from player import Player
+from constants import COLOR_DICT
+
 class PlayerManager:
-    def __init__(self, player_dict, board):
-        self.player_dict = player_dict
-        self.board = board
-        self.remaining = {i for i in range(len(player_dict))}
+    def __init__(self, player_count, main_player_number):
+        self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
+        self.main_player = self.player_dict[main_player_number]
+        self.remaining = {i for i in range(len(player_count))}
         self.victor = None
         self.timer = 60
+
+    def reset(self):
+        for player in self.player_dict.values():
+            player.default_values()
 
     def update(self):
         for player in self.player_dict.values():
@@ -15,9 +22,6 @@ class PlayerManager:
 
     def eliminate(self, player):
         self.remaining.remove(player)
-        for edge in self.board.edges:
-            if edge.owned_by(self.player_dict[player]):
-                edge.switch(False)
         self.player_dict[player].eliminate()
 
     def check_over(self):
