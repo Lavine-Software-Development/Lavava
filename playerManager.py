@@ -12,6 +12,9 @@ class PlayerManager:
     def reset(self):
         for player in self.player_dict.values():
             player.default_values()
+        self.timer = 60
+        self.victor = None
+        self.remaining = {i for i in range(len(self.player_dict))}
 
     def update(self):
         for player in self.player_dict.values():

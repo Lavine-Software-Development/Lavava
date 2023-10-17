@@ -1,5 +1,4 @@
 from constants import *
-from resourceNode import ResourceNode
 
 class Edge:
 
