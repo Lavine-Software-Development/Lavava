@@ -16,10 +16,10 @@ jobs:
     - run: pip install -r requirements.txt pyinstaller
     - run: |
         if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-          pyinstaller --onefile client.py
+          pyinstaller --onefile game.py
           pyinstaller --onefile server.py
         else
-          pyinstaller client.py
+          pyinstaller game.py
           pyinstaller server.py
         fi
       shell: bash
@@ -27,8 +27,8 @@ jobs:
       shell: bash
     - uses: actions/upload-artifact@v2
       with:
-        name: client-executable-${{ matrix.os }}
-        path: dist/client*
+        name: game-executable-${{ matrix.os }}
+        path: dist/game*
     - uses: actions/upload-artifact@v2
       with:
         name: server-executable-${{ matrix.os }}
