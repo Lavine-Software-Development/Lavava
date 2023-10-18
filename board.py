@@ -5,7 +5,7 @@ from edge import Edge
 
 class Board:
 
-    def __init__(self, main_player):
+    def __init__(self):
         self.nodes = []
         self.edges = []
         self.edge_dict = defaultdict(set)
@@ -13,7 +13,6 @@ class Board:
         self.extra_edges = 2
         self.highlighted = None
         self.highlighted_color = None
-        self.main_player = main_player
 
     def reset(self, nodes, edges):
         self.nodes = nodes
@@ -34,7 +33,7 @@ class Board:
         elif id := self.find_edge(position):
             if ability.click_type == EDGE and ability.validate(self.id_dict[id]):
                 return self.id_dict[id]
-            elif self.id_dict[id].owned_by(self.main_player):
+            elif self.id_dict[id].owned_by(CONTEXT['main_player']):
                 self.highlighted_color = GREY
                 return self.id_dict[id]
         return None

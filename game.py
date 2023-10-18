@@ -17,14 +17,12 @@ class Game:
 
         self.network = Network(self.action)
 
-        self.player_num = int(self.network.data[0])
+        player_num = int(self.network.data[0])
         player_count = int(self.network.data[2])
 
-        self.player_manager = PlayerManager(player_count, self.player_num)
-        self.player = self.player_manager.main_player
-
-        self.board = Board(self.player)
-        self.ability_manager = AbilityManager(self.player, self.board)
+        self.player_manager = PlayerManager(player_count, player_num)
+        self.board = Board()
+        self.ability_manager = AbilityManager(self.board)
         self.generator = RandomGenerator(int(self.network.data[4:]))
 
         self.start_game()
@@ -69,7 +67,7 @@ class Game:
 
     def keydown(self, event):
         if event.type == p.KEYDOWN:
-            if self.player.victory:
+            if CONTEXT['main_player'].victory:
                 if event.key == p.K_r:
                     self.restart_send()
             else:
@@ -90,10 +88,10 @@ class Game:
                         node.relocate(width, height)
                     self.drawer.relocate(width, height)
 
-                if not self.player.eliminated:
+                if not CONTEXT['main_player'].eliminated:
                     self.keydown(event)
 
-                    if not self.player.victory:
+                    if not CONTEXT['main_player'].victory:
                         if event.type == p.MOUSEBUTTONDOWN:
                             self.mouse_button_down_event(event.button)
 
@@ -111,10 +109,10 @@ class Game:
     def mouse_button_down_event(self, button):
         if self.board.highlighted:
             if (data := self.ability_manager.use_ability(self.board.highlighted, self.board.highlighted_color)) and button != STANDARD_RIGHT_CLICK:
-                self.network.send((self.ability_manager.mode, self.player_num, *data))
+                self.network.send((self.ability_manager.mode, CONTEXT['main_player'].id, *data))
                 self.ability_manager.update_ability()
             elif id := self.board.click_edge():
-                self.network.send((button, self.player_num, id))
+                self.network.send((button, CONTEXT['main_player'].id, id))
 
 if __name__ == "__main__":
     Game()

@@ -20,7 +20,6 @@ class Draw:
         self.edges = board.edges
         self.nodes = board.nodes
         self.players = [x for x in player_manager.player_dict.values()]
-        self.player = player_manager.main_player
         self.player_manager = player_manager
         self.abilities = ability_manager.abilities
         self.ability_manager = ability_manager
@@ -227,8 +226,8 @@ class Draw:
                 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,self.width,self.height/13))
-        self.screen.blit(self.font.render(str(int(self.player.money)),True,self.player.color),(20,20))
-        self.screen.blit(self.small_font.render(f"{self.player.production_per_second:.0f}", True, (205, 204, 0)), (23, 60))
+        self.screen.blit(self.font.render(str(int(CONTEXT['main_player'].money)),True,CONTEXT['main_player'].color),(20,20))
+        self.screen.blit(self.small_font.render(f"{CONTEXT['main_player'].production_per_second:.0f}", True, (205, 204, 0)), (23, 60))
         for i in range(len(self.players)):
             self.screen.blit(self.small_font.render(str(int(self.players[i].count)),True,self.players[i].color),(self.width/3 + i*150,20))
             if self.players[i].capital_count > 0:
@@ -236,19 +235,19 @@ class Draw:
         
         if self.player_manager.victor:
             self.screen.blit(self.font.render(f"Player {self.player_manager.victor.id} Wins!",True,self.player_manager.victor.color),(self.width - 450,20))
-            if self.player.victory:
-                self.screen.blit(self.small_font.render("R to restart",True,self.player.color),(self.width - 300,60))
+            if CONTEXT['main_player'].victory:
+                self.screen.blit(self.small_font.render("R to restart",True,CONTEXT['main_player'].color),(self.width - 300,60))
             else:
                 self.screen.blit(self.small_font.render(f"Waiting for Player {self.player_manager.victor.id} to restart",True,self.player_manager.victor.color),(self.width - 600,60))
         elif self.player_manager.timer > 0:
             if self.player_manager.timer < 4:
                 self.screen.blit(self.font.render(f"{self.player_manager.timer + 1:.0f}",True,BLACK),(self.width - 300,20))
             else:
-                self.screen.blit(self.font.render(f"{self.player_manager.timer + 1:.0f}",True,self.player.color),(self.width - 300,20))
-        elif self.player.eliminated:
-            self.screen.blit(self.font.render("ELIMINATED",True,self.player.color),(self.width - 450,20))
+                self.screen.blit(self.font.render(f"{self.player_manager.timer + 1:.0f}",True,CONTEXT['main_player'].color),(self.width - 300,20))
+        elif CONTEXT['main_player'].eliminated:
+            self.screen.blit(self.font.render("ELIMINATED",True,CONTEXT['main_player'].color),(self.width - 450,20))
         else:
-            self.screen.blit(self.small_font.render("X to Forfeit",True,self.player.color),(self.width - 450,20))
+            self.screen.blit(self.small_font.render("X to Forfeit",True,CONTEXT['main_player'].color),(self.width - 450,20))
 
     def wipe(self):
         self.screen.fill(WHITE)
