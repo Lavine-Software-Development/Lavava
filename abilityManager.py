@@ -1,9 +1,9 @@
 from constants import *
-from abilityFactory import AbilityFactory
+from abilityFactory import create_abilities
 
 class AbilityManager:
     def __init__(self, board):
-        self.abilities = AbilityFactory(board).abilities
+        self.abilities = create_abilities(board)
         self.mode = DEFAULT_ABILITY_CODE
 
     def select(self, key):

@@ -1,6 +1,5 @@
 import socket
 from _thread import start_new_thread
-from queue import Queue
 from batch import Batch
 import sys
 import time

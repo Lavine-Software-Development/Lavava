@@ -46,7 +46,7 @@ class Game:
             self.board.eliminate(self.player_manager.player_dict[acting_player])
         elif key == TICK:
             self.tick()
-        elif key in self.ability_manager.abilities:
+        elif key in ABILITY_CODES:
             new_data = (self.board.id_dict[d] if d in self.board.id_dict else d for d in data)
             self.ability_manager.abilities[key].input(self.player_manager.player_dict[acting_player], new_data)
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
