@@ -10,23 +10,20 @@ class Player:
         self.default_values()
 
     def default_values(self):
-        self.money = START_MONEY
         self.count = 0
         self.begun = False
         self.eliminated = False
         self.victory = False
-        self.tick_production = START_MONEY_RATE
         self.color = self.default_color
         self.capitals = {}
 
     def eliminate(self):
         self.eliminated = True
-        self.money = 0
         self.color = GREY
         self.points += self.count
 
     def update(self):
-        self.money += self.tick_production
+        pass
 
     def win(self):
         self.victory = True
@@ -35,14 +32,12 @@ class Player:
     def display(self):
         print(f"{self.name}|| {self.points}")
 
-    def capitalize(self, capital):
-        self.tick_production += CAPITAL_BONUS
-        self.capitals[capital.node.id] = capital
-
-    def lose_capital(self, capital):
-        self.tick_production -= CAPITAL_BONUS
-        del self.capitals[capital.node.id]
-
+    def capital_handover(self, capital, gain=True):
+        if gain:
+            self.capitals[capital.node.id] = capital
+        else:
+            del self.capitals[capital.node.id]
+        
     def check_capital_win(self):
         return self.capital_count == CAPITAL_WIN_COUNT
 
@@ -50,6 +45,30 @@ class Player:
     def capital_count(self):
         return len([c for c in self.capitals.values() if c.full])
 
+
+class MoneyPlayer(Player):
+
+    def default_values(self):
+        self.money = START_MONEY
+        self.tick_production = START_MONEY_RATE
+        super().default_values()
+
+    def capital_handover(self, capital, gain=True):
+        if gain:
+            self.tick_production += CAPITAL_BONUS
+        else:
+            self.tick_production -= CAPITAL_BONUS
+        super().capital_handover(capital, gain)
+
+    def eliminate(self):
+        self.money = 0
+        super().eliminate()
+
+    def update(self):
+        self.money += self.tick_production
+
     @property
     def production_per_second(self):
         return self.tick_production * 10
+
+    

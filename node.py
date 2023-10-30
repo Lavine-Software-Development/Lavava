@@ -99,6 +99,8 @@ class Node:
         self.expand()
         if self.state.reset_on_capture:
             self.set_default_state()
+        else:
+            self.state.new_owner()
 
     def absorbing(self):
         for edge in self.current_incoming:
