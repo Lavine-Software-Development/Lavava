@@ -2,7 +2,6 @@ from collections import defaultdict
 import numpy as np
 from constants import *
 from helpers import *
-from randomGenerator import RandomGenerator
 from node import Node
 from edge import Edge
 from dynamicEdge import DynamicEdge
@@ -16,6 +15,8 @@ class MapBuilder:
         self.edge_objects = []
         self.edgeDict = defaultdict(set)
         self.generator = generator
+
+    def build(self):
 
         self.make_nodes()
         self.make_edges()
@@ -101,44 +102,9 @@ class MapBuilder:
         return True
 
     def nearby(self, edge):
-        return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)
-
-    def starter_mines(nodes: dict[int: Node]):
-        return_nodes = []
-        island_mines = 0
-        network_mines = 0
-        for node in nodes.values():
-            if len(node.edges) == 0:
-                if island_mines < ISLAND_RESOURCE_COUNT:
-                    node.set_state('mine', True)
-                    return_nodes.append(node)
-                    island_mines += 1
-            else:
-                if sum(1 for edge in node.incoming if edge.state == 'one-way') and \
-                    network_mines < NETWORK_RESOURCE_COUNT and \
-                    not any(1 for neigh in node.neighbors if neigh.state_name == 'mine'):
-                        node.set_state('mine', False)
-                        network_mines += 1
-                return_nodes.append(node)
-
-        return return_nodes
-
-    def starter_capitals(nodes: dict[int: Node]):
-        return_nodes = []
-        capitals = 0
-        for node in nodes.values():
-            if len(node.edges) != 0:
-                if sum(1 for edge in node.incoming if edge.state == 'one-way') and \
-                    capitals < CAPITAL_START_COUNT and \
-                    not any(1 for neigh in node.neighbors if neigh.state_name == 'capital'):
-                        node.set_state('capital')
-                        capitals += 1
-                return_nodes.append(node)
-        return return_nodes         
+        return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)      
 
     def convert_to_objects(self):
-        node_to_edge = {}
-        dynamic_edges = {}
         nodes = {}
         edges = []
 
@@ -152,11 +118,8 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        if CONTEXT['mode']['name'] == MONEY:
-            nodes = self.starter_mines(nodes)
-
-        elif CONTEXT['mode']['name'] == RELOAD:
-            nodes = self.starter_capitals(nodes)
+        starter_effect =  MODE['setup']
+        nodes = starter_effect(nodes)
 
         self.edge_objects = edges
         self.node_objects = nodes

@@ -1,6 +1,8 @@
 from nodeState import *
 from constants import CONTEXT
 
+CONTEXT
+
 def set_node_state(self, state_name, data=None):
     if state_name == 'default':
         return DefaultState(self)

@@ -8,6 +8,7 @@ from constants import *
 import sys
 from abilityManager import AbilityManager
 from playerManager import PlayerManager
+from mode_builder import set_mode
 
 class Game:
     def __init__(self):
@@ -19,22 +20,24 @@ class Game:
 
         player_num = int(self.network.data[0])
         player_count = int(self.network.data[2])
-        CONTEXT['mode'] = MODES[int(int(self.network.data[3]))]
+        mode = int(self.network.data[3])
 
         self.player_manager = PlayerManager(player_count, player_num)
         self.board = Board()
         self.ability_manager = AbilityManager(self.board)
         self.generator = RandomGenerator(int(self.network.data[4:]))
 
-        self.start_game()
+        self.start_game(mode)
 
         self.drawer = Draw(self.board, self.ability_manager, self.player_manager)
 
         self.main_loop()
 
-    def start_game(self):
+    def start_game(self, mode):
         self.player_manager.reset()
         map_builder = MapBuilder(self.generator)
+        set_mode(mode, map_builder)
+        map_builder.build()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
         self.position = None
 
@@ -49,7 +52,7 @@ class Game:
             self.tick()
         elif key in ABILITY_CODES:
             new_data = (self.board.id_dict[d] if d in self.board.id_dict else d for d in data)
-            self.ability_manager.abilities[key].input(self.player_manager.player_dict[acting_player], new_data)
+            self.ability_manager.input(key, self.player_manager.player_dict[acting_player], new_data)
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
             self.board.id_dict[data[0]].click(self.player_manager.player_dict[acting_player], key)
 

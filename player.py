@@ -1,6 +1,6 @@
 from constants import *
 
-class Player:
+class DefaultPlayer:
 
     def __init__(self, color, id):
         self.default_color = color[0]
@@ -46,7 +46,7 @@ class Player:
         return len([c for c in self.capitals.values() if c.full])
 
 
-class MoneyPlayer(Player):
+class MoneyPlayer(DefaultPlayer):
 
     def default_values(self):
         self.money = START_MONEY

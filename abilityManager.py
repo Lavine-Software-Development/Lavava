@@ -12,6 +12,9 @@ class AbstractAbilityManager(ABC):
             return self.ability.complete(item)
         return False
 
+    def update(self):
+        pass
+
     @abstractmethod
     def select(self, key):
         pass
@@ -20,11 +23,14 @@ class AbstractAbilityManager(ABC):
     def update_ability(self):
         pass
 
+    def input(self, key, player, data):
+        return self.abilities[key].effect(player, data)
+
     @property
     def ability(self):
         return self.abilities[self.mode]
 
-class MoneyAbilityManager:
+class MoneyAbilityManager(AbstractAbilityManager):
     def __init__(self, board):
         super().__init__(board, create_money_abilities)
 
@@ -39,6 +45,39 @@ class MoneyAbilityManager:
         if self.ability.cost * 2 > CONTEXT['main_player'].money:
             self.mode = DEFAULT_ABILITY_CODE
 
+    def input(self, key, player, data):
+        player.money -= self.abilities[key].cost
+        return super().input(key, player, data)
 
-class ReloadAbilityManager:
+class ReloadAbilityManager(AbstractAbilityManager):
+    def __init__(self, board):
+        super().__init__(board, create_reload_abilities)
+        self.load_count = {SPAWN_CODE: 0, BRIDGE_CODE: 0, SPAWN_CODE: 0}
+        self.full_load = {SPAWN_CODE: SPAWN_RELOAD, BRIDGE_CODE: BRIDGE_RELOAD, FREEZE_CODE: FREEZE_RELOAD}
+        self.remaining_usage = {SPAWN_CODE: SPAWN_TOTAL, BRIDGE_CODE: BRIDGE_TOTAL, FREEZE_CODE: FREEZE_TOTAL}
 
+    def select(self, key):
+        self.abilities[self.mode].wipe()
+        if self.mode == key:
+            self.mode = DEFAULT_ABILITY_CODE
+        elif self.full(key):
+            self.mode = key
+
+    def update_ability(self):
+        self.mode = DEFAULT_ABILITY_CODE
+
+    def input(self, key, player, data):
+        if player == CONTEXT['main_player']:
+            self.load_count[key] = 0
+            self.remaining_usage[key] -= 1
+        return super().input(key, player, data)
+
+    def update(self):
+        for key in self.load_count:
+            if self.remaining_usage[key] > 0:
+                if not self.full(key):
+                    self.load_count[key] += 1
+
+    @property
+    def full(self, key):
+        return self.load_count[key] == self.full_load[key]
