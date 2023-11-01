@@ -103,6 +103,39 @@ class MapBuilder:
     def nearby(self, edge):
         return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)
 
+    def starter_mines(nodes: dict[int: Node]):
+        return_nodes = []
+        island_mines = 0
+        network_mines = 0
+        for node in nodes.values():
+            if len(node.edges) == 0:
+                if island_mines < ISLAND_RESOURCE_COUNT:
+                    node.set_state('mine', True)
+                    return_nodes.append(node)
+                    island_mines += 1
+            else:
+                if sum(1 for edge in node.incoming if edge.state == 'one-way') and \
+                    network_mines < NETWORK_RESOURCE_COUNT and \
+                    not any(1 for neigh in node.neighbors if neigh.state_name == 'mine'):
+                        node.set_state('mine', False)
+                        network_mines += 1
+                return_nodes.append(node)
+
+        return return_nodes
+
+    def starter_capitals(nodes: dict[int: Node]):
+        return_nodes = []
+        capitals = 0
+        for node in nodes.values():
+            if len(node.edges) != 0:
+                if sum(1 for edge in node.incoming if edge.state == 'one-way') and \
+                    capitals < CAPITAL_START_COUNT and \
+                    not any(1 for neigh in node.neighbors if neigh.state_name == 'capital'):
+                        node.set_state('capital')
+                        capitals += 1
+                return_nodes.append(node)
+        return return_nodes         
+
     def convert_to_objects(self):
         node_to_edge = {}
         dynamic_edges = {}
@@ -110,50 +143,20 @@ class MapBuilder:
         edges = []
 
         for node in self.nodes:
-            node_to_edge[node[0]] = {'coord': node[1], 'out': [], 'out_ids': [], 'in': [], 'dynamic': [], 'island': True, 'nearby': False}
+            nodes[node[0]] = Node(node[0], node[1])
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
             if dynamic:
-                dynamic_edges[id3] = (id1, id2)
-                node_to_edge[id2]["dynamic"].append(id1)
-                node_to_edge[id1]["dynamic"].append(id2)
+                edges.append(DynamicEdge(nodes[id1], nodes[id2], id3))
             else:
-                node_to_edge[id2]["out"].append(id1)
-                node_to_edge[id1]["in"].append(id2)
-                node_to_edge[id2]["out_ids"].append(id3)
-            node_to_edge[id1]["island"] = False
-            node_to_edge[id2]["island"] = False
+                edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        network_resources = 0
-        island_resources = 0
-        for id, data in node_to_edge.items():
+        if CONTEXT['mode']['name'] == MONEY:
+            nodes = self.starter_mines(nodes)
 
-            for other_id in data['out'] + data['in'] + data['dynamic']:
-                if other_id in nodes and nodes[other_id].state_name == 'mine':
-                    data['nearby'] = True
-                    break
-            if data["island"]:
-                if island_resources < ISLAND_RESOURCE_COUNT:
-                    nodes[id] = Node(id, data['coord'], 'mine', True)
-                    island_resources += 1
-            elif network_resources < NETWORK_RESOURCE_COUNT and not data['out'] and \
-                data['in'] and not data['nearby']:
-
-                nodes[id] = Node(id, data['coord'], 'mine', False)
-                network_resources += 1
-            else:
-                nodes[id] = Node(id, data["coord"])
-
-        for id, data in node_to_edge.items():
-            for i in range(len(data['out'])):
-                edges.append(Edge(nodes[data['out'][i]], nodes[id], data['out_ids'][i]))
-
-        for id, data in dynamic_edges.items():
-            if nodes[data[0]].state_name == 'mine':
-                edges.append(DynamicEdge(nodes[data[0]], nodes[data[1]], id))
-            else:
-                edges.append(DynamicEdge(nodes[data[1]], nodes[data[0]], id))
+        elif CONTEXT['mode']['name'] == RELOAD:
+            nodes = self.starter_capitals(nodes)
 
         self.edge_objects = edges
-        self.node_objects = list(nodes.values())
+        self.node_objects = nodes

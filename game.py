@@ -19,6 +19,7 @@ class Game:
 
         player_num = int(self.network.data[0])
         player_count = int(self.network.data[2])
+        CONTEXT['mode'] = MODES[int(int(self.network.data[3]))]
 
         self.player_manager = PlayerManager(player_count, player_num)
         self.board = Board()

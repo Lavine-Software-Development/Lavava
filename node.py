@@ -1,10 +1,10 @@
 from constants import *
-from nodeState import *
+from state_builder import set_node_state
 
 class Node:
 
-    def __init__(self, id, pos, state_name='default', data=None):
-        self.set_state(state_name, data)
+    def __init__(self, id, pos):
+        self.set_state('default')
         self.value = 0
         self.owner = None
         self.item_type = NODE
@@ -18,14 +18,7 @@ class Node:
         return str(self.id)
 
     def set_state(self, state_name, data=None):
-        if state_name == 'default':
-            self.state = DefaultState(self)
-        elif state_name == "poisoned":
-            self.state = PoisonedState(self)
-        elif state_name == "capital":
-            self.state = CapitalState(self)
-        elif state_name == "mine":
-            self.state = MineState(self, data)
+        self.state = set_node_state(state_name, data)
         self.state_name = state_name
 
     def set_default_state(self):
