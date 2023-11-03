@@ -23,6 +23,10 @@ class AbstractAbilityManager(ABC):
     def update_ability(self):
         pass
 
+    @abstractmethod
+    def default_validate(self):
+        pass
+
     def input(self, key, player, data):
         return self.abilities[key].effect(player, data)
 
@@ -49,11 +53,13 @@ class MoneyAbilityManager(AbstractAbilityManager):
         player.money -= self.abilities[key].cost
         return super().input(key, player, data)
 
+    def default_validate(self):
+        return CONTEXT['main_player'].money >= self.ability.cost
+
 class ReloadAbilityManager(AbstractAbilityManager):
     def __init__(self, board):
         super().__init__(board, create_reload_abilities)
-        self.load_count = {SPAWN_CODE: 0, BRIDGE_CODE: 0, SPAWN_CODE: 0}
-        self.full_load = {SPAWN_CODE: SPAWN_RELOAD, BRIDGE_CODE: BRIDGE_RELOAD, FREEZE_CODE: FREEZE_RELOAD}
+        self.load_count = {SPAWN_CODE: SPAWN_RELOAD, BRIDGE_CODE: 0, FREEZE_CODE: 0}
         self.remaining_usage = {SPAWN_CODE: SPAWN_TOTAL, BRIDGE_CODE: BRIDGE_TOTAL, FREEZE_CODE: FREEZE_TOTAL}
 
     def select(self, key):
@@ -76,8 +82,10 @@ class ReloadAbilityManager(AbstractAbilityManager):
         for key in self.load_count:
             if self.remaining_usage[key] > 0:
                 if not self.full(key):
-                    self.load_count[key] += 1
+                    self.load_count[key] += 0.1
 
-    @property
+    def default_validate(self):
+        return self.full(DEFAULT_ABILITY_CODE)
+
     def full(self, key):
-        return self.load_count[key] == self.full_load[key]
+        return self.load_count[key] == self.abilities[key].cost

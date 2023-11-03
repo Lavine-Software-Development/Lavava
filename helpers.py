@@ -89,8 +89,9 @@ def starter_capitals(nodes):
                 capitals < CAPITAL_START_COUNT and \
                 not any(1 for neigh in node.neighbors if neigh.state_name == 'capital'):
                     node.set_state('capital')
+                    node.value = 100
                     capitals += 1
             return_nodes.append(node)
-    return return_nodes   
+    return return_nodes  
 
     

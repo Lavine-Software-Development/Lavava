@@ -4,10 +4,9 @@ from board import Board
 from draw import Draw
 from map_builder import MapBuilder
 from randomGenerator import RandomGenerator
+from playerManager import PlayerManager
 from constants import *
 import sys
-from abilityManager import AbilityManager
-from playerManager import PlayerManager
 from mode_builder import set_mode
 
 class Game:
@@ -20,24 +19,27 @@ class Game:
 
         player_num = int(self.network.data[0])
         player_count = int(self.network.data[2])
-        mode = int(self.network.data[3])
+        mode = int(self.network.data[4])
+
+        set_mode(mode)
 
         self.player_manager = PlayerManager(player_count, player_num)
-        self.board = Board()
-        self.ability_manager = AbilityManager(self.board)
-        self.generator = RandomGenerator(int(self.network.data[4:]))
 
-        self.start_game(mode)
+        self.board = Board()
+        self.generator = RandomGenerator(int(self.network.data[6:]))
+
+        self.start_game()
 
         self.drawer = Draw(self.board, self.ability_manager, self.player_manager)
 
         self.main_loop()
 
-    def start_game(self, mode):
+    def start_game(self):
         self.player_manager.reset()
         map_builder = MapBuilder(self.generator)
-        set_mode(mode, map_builder)
         map_builder.build()
+        AbilityManager = MODE['manager']
+        self.ability_manager = AbilityManager(self.board)
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
         self.position = None
 
@@ -51,7 +53,7 @@ class Game:
         elif key == TICK:
             self.tick()
         elif key in ABILITY_CODES:
-            new_data = (self.board.id_dict[d] if d in self.board.id_dict else d for d in data)
+            new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
             self.ability_manager.input(key, self.player_manager.player_dict[acting_player], new_data)
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
             self.board.id_dict[data[0]].click(self.player_manager.player_dict[acting_player], key)
@@ -61,10 +63,11 @@ class Game:
         if self.board and not self.player_manager.victor and not self.player_manager.update_timer():
             self.board.update()
             self.player_manager.update()
+            self.ability_manager.update()
             self.player_manager.check_over()
             
     def eliminate_send(self):
-        self.network.send((ELIMINATE_VAL, self.player_manager.player, 0))
+        self.network.send((ELIMINATE_VAL, CONTEXT['main_player'].id, 0))
 
     def restart_send(self):
         self.network.send((RESTART_GAME_VAL, 0, 0))
@@ -101,7 +104,7 @@ class Game:
 
                         elif event.type == p.MOUSEMOTION:
                             self.position = event.pos
-                            self.board.check_highlight(event.pos, self.ability_manager.ability)
+                            self.board.check_highlight(event.pos, self.ability_manager)
 
             self.drawer.wipe()
             self.drawer.blit(self.position)

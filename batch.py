@@ -17,4 +17,4 @@ class Batch:
         return len(self.connections) == self.player_count
 
     def repr(self, player) -> str:
-        return f"{player},{self.player_count},{self.seed},{self.mode}"
+        return f"{player},{self.player_count},{self.mode},{self.seed}"

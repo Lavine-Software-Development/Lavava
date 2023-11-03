@@ -128,6 +128,10 @@ class StartingCapitalState(CapitalState):
     def new_owner(self):
         self.owner.capital_handover(self)
 
+    def capture(self):
+        if self.owner:
+            super().capture()
+
 
 class MineState(AbstractState):
 

@@ -226,8 +226,9 @@ class Draw:
                 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,self.width,self.height/13))
-        self.screen.blit(self.font.render(str(int(CONTEXT['main_player'].money)),True,CONTEXT['main_player'].color),(20,20))
-        self.screen.blit(self.small_font.render(f"{CONTEXT['main_player'].production_per_second:.0f}", True, (205, 204, 0)), (23, 60))
+        if CONTEXT['mode'] == 1:
+            self.screen.blit(self.font.render(str(int(CONTEXT['main_player'].money)),True,CONTEXT['main_player'].color),(20,20))
+            self.screen.blit(self.small_font.render(f"{CONTEXT['main_player'].production_per_second:.0f}", True, (205, 204, 0)), (23, 60))
         for i in range(len(self.players)):
             self.screen.blit(self.small_font.render(str(int(self.players[i].count)),True,self.players[i].color),(self.width/3 + i*150,20))
             if self.players[i].capital_count > 0:

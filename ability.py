@@ -71,7 +71,7 @@ class Nuke(BasicAttack):
         self.remove_node = remove_node
 
     def effect(self, player, data):
-        node = data
+        node = data[0]
         self.remove_node(node.id)
 
 
@@ -81,7 +81,7 @@ class Poison(BasicAttack):
         super().__init__(POISON_CODE, 'Poison', cost, PURPLE, 'circle', 'P')
 
     def effect(self, player, data):
-        node = data
+        node = data[0]
         node.set_state('poisoned')
 
 
@@ -91,10 +91,10 @@ class Spawn(Ability):
         super().__init__(SPAWN_CODE, 'Spawn', cost, CONTEXT['main_player'].default_color, 'circle')
 
     def validate(self, node):
-        return node.owner is None and  CONTEXT['main_player'].money >= self.cost and node.state_name == 'default'
+        return node.owner is None and node.state_name == 'default'
 
     def effect(self, player, data):
-        node = data
+        node = data[0]
         node.capture(player)
 
     def input(self, player, data):
@@ -111,7 +111,7 @@ class Freeze(Ability):
         return edge.state == 'two-way' and edge.owned_by( CONTEXT['main_player'])
 
     def effect(self, player, data):
-        edge = data
+        edge = data[0]
         edge.freeze()
 
 class Capital(Ability):
@@ -131,7 +131,7 @@ class Capital(Ability):
         return False
 
     def effect(self, player, data):
-        node = data
+        node = data[0]
         node.set_state('capital')
 
         

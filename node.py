@@ -4,7 +4,7 @@ from state_builder import set_node_state
 class Node:
 
     def __init__(self, id, pos):
-        self.set_state('default')
+        self.set_default_state()
         self.value = 0
         self.owner = None
         self.item_type = NODE
@@ -18,7 +18,7 @@ class Node:
         return str(self.id)
 
     def set_state(self, state_name, data=None):
-        self.state = set_node_state(state_name, data)
+        self.state = set_node_state(self, state_name, data)
         self.state_name = state_name
 
     def set_default_state(self):

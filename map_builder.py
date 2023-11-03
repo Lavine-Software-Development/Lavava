@@ -68,7 +68,7 @@ class MapBuilder:
                 self.edges.append(myedge)
 
                 count += 1
-        #print(self.is_valid_map(checklist))
+
     def overlap(self, edge1,edge2):
         return do_intersect(self.nodes[edge1[0]][1],self.nodes[edge1[1]][1],self.nodes[edge2[0]][1],self.nodes[edge2[1]][1])
 
