@@ -30,7 +30,7 @@ class Draw:
     def _generate_lighter_color(self, color):
         return tuple(min(c + 50, 255) for c in color)
 
-    def draw_button(self, shape, color, name, cost, letter, position, selected):
+    def draw_button(self, shape, color, name, cost, letter, position, selected, loading=False):
         btn_size = ABILITY_SIZE * self.height
         border_thickness = 5
 
@@ -62,6 +62,13 @@ class Draw:
         elif shape == "star":
             self.draw_star((position[0] + btn_size // 2, position[1] + btn_size // 2), btn_size, lighter_color)
 
+        if loading:
+            py.draw.rect(self.screen, BLACK, 
+                        (position[0], 
+                        position[1], 
+                        btn_size, 
+                        btn_size))
+
         # Drawing text (name and cost)
         font = py.font.Font(None, int(self.height * ABILITY_FONT))
 
@@ -79,7 +86,13 @@ class Draw:
         y_position = int(ABILITY_START_HEIGHT * self.height)
         for btn_data in self.abilities.values():
             selected = self.ability_manager.mode == btn_data.key or (self.ability_manager.mode == 'default' and btn_data.key == 2)
-            self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_data.cost, btn_data.letter, (self.width -  int(ABILITY_GAP * self.height), y_position), selected)
+            btn_value = btn_data.cost
+            loading = True
+            if CONTEXT['mode'] == 2:
+                btn_value = self.ability_manager.remaining_usage[btn_data.key]
+                if self.ability_manager.full(btn_data.key):
+                    loading = False
+            self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_value, btn_data.letter, (self.width -  int(ABILITY_GAP * self.height), y_position), selected, loading)
             y_position += int(ABILITY_GAP * self.height) # Vertical gap between buttons
 
     def draw_star(self, position, size, color, filled=True):

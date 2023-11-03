@@ -83,6 +83,7 @@ def starter_mines(nodes):
 def starter_capitals(nodes):
     return_nodes = []
     capitals = 0
+    islands = 0
     for node in nodes.values():
         if len(node.edges) != 0:
             if sum(1 for edge in node.incoming if edge.state == 'one-way') and \
@@ -92,6 +93,12 @@ def starter_capitals(nodes):
                     node.value = 100
                     capitals += 1
             return_nodes.append(node)
+        else:
+            if islands < CAPITAL_ISLAND_COUNT:
+                node.set_state('capital')
+                node.value = 100
+                islands += 1
+                return_nodes.append(node)
     return return_nodes  
 
     

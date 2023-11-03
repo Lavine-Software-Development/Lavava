@@ -130,7 +130,9 @@ class StartingCapitalState(CapitalState):
 
     def capture(self):
         if self.owner:
-            super().capture()
+            return super().capture()
+        else:
+            return DefaultState.capture(self)
 
 
 class MineState(AbstractState):

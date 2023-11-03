@@ -88,4 +88,4 @@ class ReloadAbilityManager(AbstractAbilityManager):
         return self.full(DEFAULT_ABILITY_CODE)
 
     def full(self, key):
-        return self.load_count[key] == self.abilities[key].cost
+        return self.load_count[key] >= self.abilities[key].cost
