@@ -22,7 +22,9 @@ ONE_WAY_COUNT = 17 # to 1
 MIN_ANGLE = 15
 
 NODE = 'node'
+PORT_NODE = 'port node'
 EDGE = 'edge'
+DYNAMIC_EDGE = 'dynamic edge'
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 700
@@ -51,7 +53,7 @@ PURPLE = (153, 51, 255)
 PINK = (255, 51, 153)
 LIGHT_BLUE = (173, 216, 230)
 
-COLOR_DICT = {0: (RED, "   RED "), 1: (BLUE, "  BLUE "), 2: (ORANGE, "ORANGE "), 3: (GREEN, " GREEN ")}
+COLOR_DICT = {0: (RED, "   RED "), 1: (BLUE, "  BLUE "), 2: (ORANGE, "ORANGE "), 3: (GREEN, " GREEN "), 4: (YELLOW, "YELLOW ")}
 
 GROWTH_RATE = 0.15
 GROWTH_STOP = 250

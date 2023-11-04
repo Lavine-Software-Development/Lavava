@@ -35,6 +35,7 @@ class Game:
         self.main_loop()
 
     def start_game(self):
+        CONTEXT['started'] = False
         self.player_manager.reset()
         map_builder = MapBuilder(self.generator)
         map_builder.build()
@@ -60,7 +61,7 @@ class Game:
 
 
     def tick(self):
-        if self.board and not self.player_manager.victor and not self.player_manager.update_timer():
+        if self.board and not self.player_manager.victor and not CONTEXT['started'] and self.player_manager.update_timer():
             self.board.update()
             self.player_manager.update()
             self.ability_manager.update()

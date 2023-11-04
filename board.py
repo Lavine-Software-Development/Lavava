@@ -2,6 +2,7 @@ from collections import defaultdict
 from constants import *
 from helpers import *
 from edge import Edge
+from dynamicEdge import DynamicEdge
 
 class Board:
 
@@ -126,8 +127,16 @@ class Board:
         
         return do_intersect(self.nodeDict[edge1[0]],self.nodeDict[edge1[1]],self.nodeDict[edge2[0]],self.nodeDict[edge2[1]])
         
-    def buy_new_edge(self, id, node_from, node_to):
-        newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
+    def buy_new_edge(self, id, node_from, node_to, edge_type):
+        if edge_type == DYNAMIC_EDGE:
+            newEdge = DynamicEdge(self.id_dict[node_to], self.id_dict[node_from], id)
+        else:
+            newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
+
+        for node in (self.id_dict[node_to], self.id_dict[node_from]):
+            if node.item_type == PORT_NODE:
+                node.port_count -= 1
+                
         newEdge.check_status()
         newEdge.popped = True
         newEdge.switch(True)

@@ -66,6 +66,7 @@ class PlayerManager:
             if self.timer > 3 and self.opening_moves == len(self.remaining):
                 self.timer = 3
             return True
+        CONTEXT['started'] = True
         return False
 
     @property

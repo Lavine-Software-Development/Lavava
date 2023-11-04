@@ -1,5 +1,5 @@
 from constants import GROWTH_RATE, POISON_TICKS, POISON_SPREAD_DELAY, \
-    MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT, BLACK, GROWTH_STOP, \
+    MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT, GROWTH_STOP, \
     GREY
 from abc import ABC, abstractmethod
 import math
@@ -10,6 +10,7 @@ class AbstractState(ABC):
     def __init__(self, node):
         self.node = node
         self.reset_on_capture = False
+        self.acceptBridge = True
 
     @property
     def value(self):
@@ -100,6 +101,7 @@ class CapitalState(DefaultState):
         super().__init__(node)
         self.reset_on_capture = True
         self.capitalized = False
+        self.acceptBridge = False
 
     def grow(self):
         if not self.capitalized:
@@ -122,17 +124,18 @@ class StartingCapitalState(CapitalState):
 
     def __init__(self, node):
         super().__init__(node)
-        self.reset_on_capture = False
         self.capitalized = True
+
+    def grow(self):
+        return 0
 
     def new_owner(self):
         self.owner.capital_handover(self)
 
     def capture(self):
         if self.owner:
-            return super().capture()
-        else:
-            return DefaultState.capture(self)
+            self.owner.capital_handover(self, False)
+        return DefaultState.capture(self)
 
 
 class MineState(AbstractState):

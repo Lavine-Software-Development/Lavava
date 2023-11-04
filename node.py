@@ -17,6 +17,12 @@ class Node:
     def __str__(self):
         return str(self.id)
 
+    def new_edge(self, edge, dir):
+        if dir == 'incoming':
+            self.incoming.append(edge)
+        else:
+            self.outgoing.append(edge)
+
     def set_state(self, state_name, data=None):
         self.state = set_node_state(self, state_name, data)
         self.state_name = state_name
@@ -101,6 +107,9 @@ class Node:
                 return True
         return False
 
+    def acceptBridge(self):
+        return self.state.acceptBridge
+
     @property
     def full(self):
         return self.state.full
@@ -126,3 +135,22 @@ class Node:
         if self.owner:
             return self.owner.color
         return BLACK
+
+
+class PortNode(Node):
+
+    def __init__(self, id, pos, port_count):
+        super().init(id, pos)
+        self.item_type = PORT_NODE
+        self.port_count = port_count
+
+    def acceptBridge(self):
+        return self.port_count > 0 and self.state.acceptBridge
+
+    def new_edge(self, edge, dir):
+        if CONTEXT['started'] and edge not in self.edges:
+            self.port_count -= 1
+        super().new_edge(edge, dir)
+
+
+    

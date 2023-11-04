@@ -1,15 +1,17 @@
 from edge import Edge
+from constants import DYNAMIC_EDGE
 
 class DynamicEdge(Edge):
     def __init__(self, node1, node2, id):
         super().__init__(node1, node2, id)
         self.state = 'two-way'
+        self.item_type = DYNAMIC_EDGE
 
     def update_nodes(self):
-        self.to_node.outgoing.append(self)
-        self.from_node.incoming.append(self)
-        self.to_node.incoming.append(self)
-        self.from_node.outgoing.append(self)
+        self.to_node.new_edge(self, 'incoming')
+        self.from_node.new_edge(self, 'outgoing')
+        self.to_node.new_edge(self, 'outgoing')
+        self.from_node.new_edge(self, 'incoming')
 
     def swap_direction(self):
         if self.state == 'two-way':

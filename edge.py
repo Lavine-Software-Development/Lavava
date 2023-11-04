@@ -20,8 +20,8 @@ class Edge:
         return str(self.id)
 
     def update_nodes(self):
-        self.to_node.incoming.append(self)
-        self.from_node.outgoing.append(self)
+        self.to_node.new_edge(self, 'incoming')
+        self.from_node.new_edge(self, 'outgoing')
 
     def click(self, clicker, button):
         if button == 1 and self.owned_by(clicker):
