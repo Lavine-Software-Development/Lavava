@@ -39,6 +39,9 @@ class AbstractState(ABC):
     def state_over(self):
         pass
 
+    def new_owner(self):
+        pass
+
     @property
     def full(self):
         return self.value >= GROWTH_STOP
@@ -111,8 +114,25 @@ class CapitalState(DefaultState):
         return CAPITAL_SHRINK_SPEED
 
     def capture(self):
-        self.owner.lose_capital(self)
+        self.owner.capital_handover(self, False)
         return super().capture()
+
+
+class StartingCapitalState(CapitalState):
+
+    def __init__(self, node):
+        super().__init__(node)
+        self.reset_on_capture = False
+        self.capitalized = True
+
+    def new_owner(self):
+        self.owner.capital_handover(self)
+
+    def capture(self):
+        if self.owner:
+            return super().capture()
+        else:
+            return DefaultState.capture(self)
 
 
 class MineState(AbstractState):

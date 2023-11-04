@@ -1,6 +1,5 @@
 import socket
 from _thread import start_new_thread
-from queue import Queue
 from batch import Batch
 import sys
 import time
@@ -38,11 +37,11 @@ class Server:
 
     def threaded_client(self, conn):
         data = conn.recv(1024).decode()
-        is_host, player_count = data.split(",")
+        is_host, player_count, mode = data.split(",")
 
         if is_host == "HOST":
             player_count = int(player_count)
-            self.waiting_players = Batch(player_count, conn)
+            self.waiting_players = Batch(player_count, mode, conn)
             conn.sendall("Players may JOIN".encode())
         elif is_host == "JOIN":
             if self.waiting_players:

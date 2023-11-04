@@ -60,4 +60,45 @@ def angle_between_edges(edge1, edge2):
     angle = math.acos(dot_product / (magnitude1 * magnitude2))
     return math.degrees(angle)
 
+def starter_mines(nodes):
+    return_nodes = []
+    island_mines = 0
+    network_mines = 0
+    for node in nodes.values():
+        if len(node.edges) == 0:
+            if island_mines < ISLAND_RESOURCE_COUNT:
+                node.set_state('mine', True)
+                return_nodes.append(node)
+                island_mines += 1
+        else:
+            if sum(1 for edge in node.incoming if edge.state == 'one-way') and \
+                network_mines < NETWORK_RESOURCE_COUNT and \
+                not any(1 for neigh in node.neighbors if neigh.state_name == 'mine'):
+                    node.set_state('mine', False)
+                    network_mines += 1
+            return_nodes.append(node)
+
+    return return_nodes
+
+def starter_capitals(nodes):
+    return_nodes = []
+    capitals = 0
+    islands = 0
+    for node in nodes.values():
+        if len(node.edges) != 0:
+            if sum(1 for edge in node.incoming if edge.state == 'one-way') and \
+                capitals < CAPITAL_START_COUNT and \
+                not any(1 for neigh in node.neighbors if neigh.state_name == 'capital'):
+                    node.set_state('capital')
+                    node.value = 100
+                    capitals += 1
+            return_nodes.append(node)
+        else:
+            if islands < CAPITAL_ISLAND_COUNT:
+                node.set_state('capital')
+                node.value = 100
+                islands += 1
+                return_nodes.append(node)
+    return return_nodes  
+
     

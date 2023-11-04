@@ -1,25 +1,19 @@
 from ability import *
 from constants import *
 
-class AbilityFactory:
+def create_money_abilities(board):
+    return {
+        SPAWN_CODE: Spawn(SPAWN_COST),
+        BRIDGE_CODE: Bridge(BRIDGE_COST, board.new_edge_id, board.check_new_edge, board.buy_new_edge),
+        NUKE_CODE: Nuke(NUKE_COST, board.remove_node),
+        POISON_CODE: Poison(POISON_COST),
+        FREEZE_CODE: Freeze(FREEZE_COST),
+        CAPITAL_CODE: Capital(CAPITAL_COST)
+    }
 
-    def __init__(self, player, board):
-        self.abilities = {}
-        
-        spawn = Spawn(player)
-        self.abilities[SPAWN_CODE] = spawn
-
-        bridge = Bridge(player, board.new_edge_id, board.check_new_edge, board.buy_new_edge)
-        self.abilities[BRIDGE_CODE] = bridge
-
-        nuke = Nuke(player, board.remove_node)
-        self.abilities[NUKE_CODE] = nuke
-
-        poison = Poison(player)
-        self.abilities[POISON_CODE] = poison
-
-        freeze = Freeze(player)
-        self.abilities[FREEZE_CODE] = freeze
-
-        capital = Capital(player)
-        self.abilities[CAPITAL_CODE] = capital
+def create_reload_abilities(board):
+    return {
+        SPAWN_CODE: Spawn(SPAWN_RELOAD),
+        BRIDGE_CODE: Bridge(BRIDGE_RELOAD, board.new_edge_id, board.check_new_edge, board.buy_new_edge),
+        FREEZE_CODE: Freeze(FREEZE_RELOAD),
+    }

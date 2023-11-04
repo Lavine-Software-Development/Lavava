@@ -2,7 +2,6 @@ from collections import defaultdict
 import numpy as np
 from constants import *
 from helpers import *
-from randomGenerator import RandomGenerator
 from node import Node
 from edge import Edge
 from dynamicEdge import DynamicEdge
@@ -16,6 +15,8 @@ class MapBuilder:
         self.edge_objects = []
         self.edgeDict = defaultdict(set)
         self.generator = generator
+
+    def build(self):
 
         self.make_nodes()
         self.make_edges()
@@ -67,7 +68,7 @@ class MapBuilder:
                 self.edges.append(myedge)
 
                 count += 1
-        #print(self.is_valid_map(checklist))
+
     def overlap(self, edge1,edge2):
         return do_intersect(self.nodes[edge1[0]][1],self.nodes[edge1[1]][1],self.nodes[edge2[0]][1],self.nodes[edge2[1]][1])
 
@@ -101,59 +102,24 @@ class MapBuilder:
         return True
 
     def nearby(self, edge):
-        return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)
+        return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)      
 
     def convert_to_objects(self):
-        node_to_edge = {}
-        dynamic_edges = {}
         nodes = {}
         edges = []
 
         for node in self.nodes:
-            node_to_edge[node[0]] = {'coord': node[1], 'out': [], 'out_ids': [], 'in': [], 'dynamic': [], 'island': True, 'nearby': False}
+            nodes[node[0]] = Node(node[0], node[1])
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
             if dynamic:
-                dynamic_edges[id3] = (id1, id2)
-                node_to_edge[id2]["dynamic"].append(id1)
-                node_to_edge[id1]["dynamic"].append(id2)
+                edges.append(DynamicEdge(nodes[id1], nodes[id2], id3))
             else:
-                node_to_edge[id2]["out"].append(id1)
-                node_to_edge[id1]["in"].append(id2)
-                node_to_edge[id2]["out_ids"].append(id3)
-            node_to_edge[id1]["island"] = False
-            node_to_edge[id2]["island"] = False
+                edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        network_resources = 0
-        island_resources = 0
-        for id, data in node_to_edge.items():
-
-            for other_id in data['out'] + data['in'] + data['dynamic']:
-                if other_id in nodes and nodes[other_id].state_name == 'mine':
-                    data['nearby'] = True
-                    break
-            if data["island"]:
-                if island_resources < ISLAND_RESOURCE_COUNT:
-                    nodes[id] = Node(id, data['coord'], 'mine', True)
-                    island_resources += 1
-            elif network_resources < NETWORK_RESOURCE_COUNT and not data['out'] and \
-                data['in'] and not data['nearby']:
-
-                nodes[id] = Node(id, data['coord'], 'mine', False)
-                network_resources += 1
-            else:
-                nodes[id] = Node(id, data["coord"])
-
-        for id, data in node_to_edge.items():
-            for i in range(len(data['out'])):
-                edges.append(Edge(nodes[data['out'][i]], nodes[id], data['out_ids'][i]))
-
-        for id, data in dynamic_edges.items():
-            if nodes[data[0]].state_name == 'mine':
-                edges.append(DynamicEdge(nodes[data[0]], nodes[data[1]], id))
-            else:
-                edges.append(DynamicEdge(nodes[data[1]], nodes[data[0]], id))
+        starter_effect =  MODE['setup']
+        nodes = starter_effect(nodes)
 
         self.edge_objects = edges
-        self.node_objects = list(nodes.values())
+        self.node_objects = nodes

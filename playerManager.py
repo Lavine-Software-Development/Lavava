@@ -1,10 +1,11 @@
-from player import Player
-from constants import COLOR_DICT
+from constants import COLOR_DICT, CONTEXT, MODE
 
 class PlayerManager:
     def __init__(self, player_count, main_player_number):
-        self.player_dict = {i: Player(COLOR_DICT[i], i) for i in range(player_count)}
-        self.main_player = self.player_dict[main_player_number]
+        PlayerClass = MODE['player']
+        self.player_dict = {i: PlayerClass(COLOR_DICT[i], i) for i in range(player_count)}
+        self.player_points = {i: 0 for i in range(player_count)}
+        CONTEXT['main_player'] = self.player_dict[main_player_number]
         self.remaining = {i for i in range(player_count)}
         self.victor = None
         self.timer = 60

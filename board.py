@@ -5,7 +5,7 @@ from edge import Edge
 
 class Board:
 
-    def __init__(self, main_player):
+    def __init__(self):
         self.nodes = []
         self.edges = []
         self.edge_dict = defaultdict(set)
@@ -13,7 +13,6 @@ class Board:
         self.extra_edges = 2
         self.highlighted = None
         self.highlighted_color = None
-        self.main_player = main_player
 
     def reset(self, nodes, edges):
         self.nodes = nodes
@@ -23,18 +22,26 @@ class Board:
         self.id_dict = {node.id: node for node in self.nodes} | {edge.id: edge for edge in self.edges}
         self.extra_edges = 2
 
-    def check_highlight(self, position, ability):
-        self.highlighted_color = ability.color
-        self.highlighted = self.hover(position, ability)
+    def check_highlight(self, position, ability_manager):
+        ability = ability_manager.ability
+        self.highlighted_color = ability_manager.ability.color
+        self.highlighted = self.hover(position, ability_manager)
 
-    def hover(self, position, ability):
+    def validate(self, ability_manager, id):
+        if ability_manager.mode == DEFAULT_ABILITY_CODE:
+            if not ability_manager.default_validate():
+                return False
+        return ability_manager.ability.validate(self.id_dict[id])
+
+    def hover(self, position, ability_manager):
+        ability = ability_manager.ability
         if id := self.find_node(position):
-            if ability.click_type == NODE and ability.validate(self.id_dict[id]):
+            if ability.click_type == NODE and self.validate(ability_manager, id): 
                 return self.id_dict[id]
         elif id := self.find_edge(position):
-            if ability.click_type == EDGE and ability.validate(self.id_dict[id]):
+            if ability.click_type == EDGE and self.validate(ability_manager, id):
                 return self.id_dict[id]
-            elif self.id_dict[id].owned_by(self.main_player):
+            elif self.id_dict[id].owned_by(CONTEXT['main_player']):
                 self.highlighted_color = GREY
                 return self.id_dict[id]
         return None

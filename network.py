@@ -35,9 +35,10 @@ class Network:
 
         if user_input == "h":
             player_count = input("Enter the number of players for the game: ")
-            self.init_data = f"HOST,{player_count}"
+            game_type = input("Enter game type. MONEY - 1, RELOAD - 2: ")
+            self.init_data = f"HOST,{player_count},{game_type}"
         else:
-            self.init_data = f"JOIN,{0}"
+            self.init_data = f"JOIN,{0},{0}"
 
     def connect_and_receive_board(self):
         if self.establish_connection():
@@ -76,8 +77,6 @@ class Network:
             self.client.send(message.encode())
         except socket.error as e:
             print(e)
-
-    
 
     def listen_for_data(self):
         buffer = ''
