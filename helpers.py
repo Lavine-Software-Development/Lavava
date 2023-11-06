@@ -1,5 +1,6 @@
 import math
 from constants import *
+from node import Node, PortNode
 
 def distance_point_to_segment(px, py, x1, y1, x2, y2):
     segment_length_sq = (x2 - x1)**2 + (y2 - y1)**2
@@ -59,6 +60,21 @@ def angle_between_edges(edge1, edge2):
     
     angle = math.acos(dot_product / (magnitude1 * magnitude2))
     return math.degrees(angle)
+
+def starter_nodes(node_list):
+    nodes = []
+    for node in node_list:
+        nodes.append(Node(node[0], node[1]))
+    return nodes
+
+def starter_port_nodes(node_list):
+    nodes = []
+    for index, node in enumerate(node_list):
+        if index % PORT_NODE_1_IN == 0:
+            nodes.append(PortNode(node[0], node[1], PORT_NODE_START_PORTS))
+        else:
+            nodes.append(PortNode(node[0], node[1], 0))
+    return nodes
 
 def starter_mines(nodes):
     return_nodes = []

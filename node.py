@@ -143,6 +143,7 @@ class PortNode(Node):
         super().init(id, pos)
         self.item_type = PORT_NODE
         self.port_count = port_count
+        self.is_port = port_count == 0
 
     def acceptBridge(self):
         return self.port_count > 0 and self.state.acceptBridge

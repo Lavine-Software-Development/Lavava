@@ -108,10 +108,13 @@ class Freeze(Ability):
         super().__init__(FREEZE_CODE, 'Freeze', cost, LIGHT_BLUE, 'triangle', 'F', EDGE)
 
     def validate(self, edge):
-        return edge.state == 'two-way' and edge.owned_by( CONTEXT['main_player'])
+        return edge.state == 'two-way' and \
+            edge.from_node.owner == CONTEXT['main_player'] or edge.to_node.owner == CONTEXT['main_player']
 
     def effect(self, player, data):
         edge = data[0]
+        if player != edge.from_node.owner:
+            edge.swap()
         edge.freeze()
 
 class Capital(Ability):

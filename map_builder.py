@@ -105,11 +105,10 @@ class MapBuilder:
         return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)      
 
     def convert_to_objects(self):
-        nodes = {}
         edges = []
 
-        for node in self.nodes:
-            nodes[node[0]] = Node(node[0], node[1])
+        node_function = MODE['starter_nodes']
+        nodes = node_function(self.nodes)
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
