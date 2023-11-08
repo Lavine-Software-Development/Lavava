@@ -140,18 +140,46 @@ class Node:
 class PortNode(Node):
 
     def __init__(self, id, pos, port_count):
-        super().init(id, pos)
+        super().__init__(id, pos)
         self.item_type = PORT_NODE
         self.port_count = port_count
-        self.is_port = port_count == 0
+        self.burning = 0
+
+    @property
+    def is_port(self):
+        return self.port_count != 0
 
     def acceptBridge(self):
-        return self.port_count > 0 and self.state.acceptBridge
+        return self.port_count > 0 and not self.on_fire and self.state.acceptBridge
 
     def new_edge(self, edge, dir):
         if CONTEXT['started'] and edge not in self.edges:
             self.port_count -= 1
         super().new_edge(edge, dir)
 
+    def burn(self):
+        self.burning = BURN_TIME
+
+    @property
+    def on_fire(self):
+        return self.burning > 0
+
+    def grow(self):
+        if self.on_fire:
+            self.burning -= 1
+            if not self.on_fire:
+                self.lose_ports()
+        super().grow()
+
+    def lose_ports(self):
+        self.port_count = 0
+
+    @property
+    def color(self):
+        if self.owner:
+            return self.owner.color
+        elif self.is_port:
+            return BROWN
+        return BLACK
 
     

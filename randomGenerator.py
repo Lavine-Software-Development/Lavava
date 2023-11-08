@@ -2,7 +2,6 @@ import random
 
 class RandomGenerator:
     def __init__(self, seed):
-        print("are you sure bud")
         self.seed = seed
         self.random = random.Random(seed)
     

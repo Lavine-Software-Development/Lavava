@@ -95,6 +95,17 @@ class PoisonedState(DefaultState):
         return self.poison_timer == 0
 
 
+class BurnedState(DefaultState):
+
+    def __init__(self, node):
+        super().__init__(node)
+        self.reset_on_capture = True
+        self.burn_timer = POISON_TICKS
+
+    def state_over(self):
+        return self.burn_timer == 0
+
+
 class CapitalState(DefaultState):
 
     def __init__(self, node):

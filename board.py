@@ -132,10 +132,6 @@ class Board:
             newEdge = DynamicEdge(self.id_dict[node_to], self.id_dict[node_from], id)
         else:
             newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
-
-        for node in (self.id_dict[node_to], self.id_dict[node_from]):
-            if node.item_type == PORT_NODE:
-                node.port_count -= 1
                 
         newEdge.check_status()
         newEdge.popped = True

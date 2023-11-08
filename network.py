@@ -35,7 +35,8 @@ class Network:
 
         if user_input == "h":
             player_count = input("Enter the number of players for the game: ")
-            game_type = input("Enter game type. MONEY - 1, RELOAD - 2: ")
+            game_modes = ', '.join(f'{key} - {val}' for key, val in MODES.items())
+            game_type = input(f"Enter game type. {game_modes}: ")
             self.init_data = f"HOST,{player_count},{game_type}"
         else:
             self.init_data = f"JOIN,{0},{0}"

@@ -107,7 +107,7 @@ class MapBuilder:
     def convert_to_objects(self):
         edges = []
 
-        node_function = MODE['starter_nodes']
+        node_function = MODE['node_function']
         nodes = node_function(self.nodes)
 
         for edge in self.edges:

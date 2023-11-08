@@ -53,15 +53,14 @@ class Game:
             self.board.eliminate(self.player_manager.player_dict[acting_player])
         elif key == TICK:
             self.tick()
-        elif key in ABILITY_CODES:
+        elif key in CONTEXT['all_ability_codes']:
             new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
-            self.ability_manager.input(key, self.player_manager.player_dict[acting_player], new_data)
+            CONTEXT['ability_effects'][key].effect(self.player_manager.player_dict[acting_player], new_data)
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
             self.board.id_dict[data[0]].click(self.player_manager.player_dict[acting_player], key)
 
-
     def tick(self):
-        if self.board and not self.player_manager.victor and not CONTEXT['started'] and self.player_manager.update_timer():
+        if self.board and not self.player_manager.victor and not self.player_manager.update_timer():
             self.board.update()
             self.player_manager.update()
             self.ability_manager.update()
@@ -79,7 +78,7 @@ class Game:
                 if event.key == p.K_r:
                     self.restart_send()
             else:
-                if event.key in ABILITY_CODES:
+                if event.key in self.ability_manager.abilities:
                     self.ability_manager.select(event.key)
                 elif event.key == p.K_x:
                     self.eliminate_send()

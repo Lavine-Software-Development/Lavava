@@ -80,7 +80,7 @@ def starter_mines(nodes):
     return_nodes = []
     island_mines = 0
     network_mines = 0
-    for node in nodes.values():
+    for node in nodes:
         if len(node.edges) == 0:
             if island_mines < ISLAND_RESOURCE_COUNT:
                 node.set_state('mine', True)
@@ -100,7 +100,7 @@ def starter_capitals(nodes):
     return_nodes = []
     capitals = 0
     islands = 0
-    for node in nodes.values():
+    for node in nodes:
         if len(node.edges) != 0:
             if sum(1 for edge in node.incoming if edge.state == 'one-way') and \
                 capitals < CAPITAL_START_COUNT and \

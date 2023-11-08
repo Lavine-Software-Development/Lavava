@@ -85,9 +85,9 @@ class Draw:
     def draw_buttons(self):
         y_position = int(ABILITY_START_HEIGHT * self.height)
         for btn_data in self.abilities.values():
+            btn_value = getattr(self.ability_manager, MODE['ability_display'])[btn_data.key]
             selected = self.ability_manager.mode == btn_data.key or (self.ability_manager.mode == 'default' and btn_data.key == 2)
-            btn_value = btn_data.cost
-            loading = True
+            loading = False
             if CONTEXT['mode'] == 2:
                 btn_value = self.ability_manager.remaining_usage[btn_data.key]
                 if self.ability_manager.full(btn_data.key):
@@ -235,11 +235,42 @@ class Draw:
                 if spot.state_name == 'capital':
                     py.draw.circle(self.screen, PINK, spot.pos, spot.size + 6, 4)
             if self.board.highlighted == spot:
-                py.draw.circle(self.screen, self.board.highlighted_color, spot.pos, spot.size + 5,3)         
+                py.draw.circle(self.screen, self.board.highlighted_color, spot.pos, spot.size + 5,3)
+            if spot.owner and spot.item_type == PORT_NODE and spot.is_port:
+                port_width, port_height = spot.size * 1.5, spot.size / 1.5  # Size of the ports
+                port_color = BROWN
+                if spot.on_fire:
+                    port_color = STRONG_ORANGE
+                    percentage = spot.burning / BURN_TIME
+                    port_width *= percentage
+                port_count = spot.port_count  # Number of ports
+                angle_step = 2 * math.pi / port_count  # Angle step for each port
+
+                for i in range(port_count):
+                    # Angle for this port
+                    angle = i * angle_step
+                    # Calculate the center of the port rectangle
+                    port_center_x = spot.pos[0] + (spot.size + port_height / 2) * math.cos(angle)
+                    port_center_y = spot.pos[1] + (spot.size + port_height / 2) * math.sin(angle)
+                    
+                    # Create a new surface to draw the port rectangle (with per-pixel alpha)
+                    port_surface = py.Surface((port_width, port_height), py.SRCALPHA)
+                    py.draw.rect(port_surface, port_color, (0, 0, port_width, port_height))
+                    
+                    # Rotate the port surface to point outwards
+                    rotated_port = py.transform.rotate(port_surface, math.degrees(-angle))
+
+                    # Get the new rect to blit the rotated port
+                    rotated_rect = rotated_port.get_rect(center=(port_center_x, port_center_y))
+
+                    # Blit the rotated port surface onto the screen
+                    self.screen.blit(rotated_port, rotated_rect.topleft)
+
+
                 
     def blit_numbers(self):
         py.draw.rect(self.screen,WHITE,(0,0,self.width,self.height/13))
-        if CONTEXT['mode'] == 1:
+        if CONTEXT['mode'] != 2:
             self.screen.blit(self.font.render(str(int(CONTEXT['main_player'].money)),True,CONTEXT['main_player'].color),(20,20))
             self.screen.blit(self.small_font.render(f"{CONTEXT['main_player'].production_per_second:.0f}", True, (205, 204, 0)), (23, 60))
         for i in range(len(self.players)):
@@ -266,8 +297,11 @@ class Draw:
     def wipe(self):
         self.screen.fill(WHITE)
             
-    def edge_build(self, end):
-        start=self.abilities[BRIDGE_CODE].first_node.pos
+    def edge_build(self, end, type):
+        if type == 1:
+            start=self.abilities[BRIDGE_CODE].first_node.pos
+        else:
+            start=self.abilities[D_BRIDGE_CODE].first_node.pos
         triangle_size=5
         spacing=9
         dx = end[0] - start[0]
@@ -277,19 +311,22 @@ class Draw:
         dx /= magnitude
         dy /= magnitude
         
-        num_triangles = int((magnitude-10) / spacing)
+        num_shapes = int((magnitude-10) / spacing)
         
         length_factor = 1.5
         
-        for i in range(1, num_triangles + 1):
+        for i in range(1, num_shapes + 1):
             pos = (start[0] + i * spacing * dx +5*dx, start[1] + i * spacing * dy+5*dy)
             
-            point1 = pos
-            point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
-            point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
-      
-            py.draw.polygon(self.screen, YELLOW, [point1, point2, point3])
-            py.draw.lines(self.screen, BLACK, True, [point1, point2, point3]) 
+            if type == 1:
+                point1 = pos
+                point2 = (pos[0] - length_factor * triangle_size * dx + triangle_size * dy, pos[1] - length_factor * triangle_size * dy - triangle_size * dx)
+                point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
+                py.draw.polygon(self.screen, YELLOW, [point1, point2, point3])
+                py.draw.lines(self.screen, BLACK, True, [point1, point2, point3]) 
+            else:
+                py.draw.circle(self.screen, YELLOW, pos, 3)
+                py.draw.circle(self.screen, BLACK, (int(pos[0]), int(pos[1])), 3, 1)
 
     def blit_capital_stars(self):
         for spot in self.nodes:
@@ -304,8 +341,10 @@ class Draw:
         self.blit_capital_stars()
         self.blit_numbers()
         self.draw_buttons()
-        if self.abilities[BRIDGE_CODE].first_node is not None:
-            self.edge_build(mouse_pos)
+        if BRIDGE_CODE in self.abilities and self.abilities[BRIDGE_CODE].first_node is not None:
+            self.edge_build(mouse_pos, 1)
+        if D_BRIDGE_CODE in self.abilities and self.abilities[D_BRIDGE_CODE].first_node is not None:
+            self.edge_build(mouse_pos, 2)
         py.display.update() 
 
     def relocate(self, width, height):
