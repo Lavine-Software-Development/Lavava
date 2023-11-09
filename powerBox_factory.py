@@ -3,12 +3,12 @@ from constants import *
 
 def make_boxes():
     return {
-        'PoisonBox': PowerBox('Poison', PURPLE, 'circle'),
-        'FreezeBox': PowerBox('Freeze', LIGHT_BLUE, 'triangle'),
-        'NukeBox': PowerBox('Nuke', BLACK, 'square'),
-        'BurnBox': PowerBox('Burn', DARK_ORANGE, 'square'),
-        'SpawnBox': PowerBox('Spawn', CONTEXT['main_player'].default_color, 'circle', ''),
-        'BridgeBox': PowerBox('Bridge', YELLOW, 'triangle', 'A'),
-        'D-BridgeBox': PowerBox('D-Bridge', YELLOW, 'circle'),
-        'CapitalBox': PowerBox('Capital', PINK, 'star'),
+        BRIDGE_CODE: PowerBox('Bridge', YELLOW, 'triangle', 'A'),
+        POISON_CODE: PowerBox('Poison', PURPLE, 'circle'),
+        FREEZE_CODE: PowerBox('Freeze', LIGHT_BLUE, 'triangle'),
+        BURN_CODE: PowerBox('Burn', DARK_ORANGE, 'square'),
+        D_BRIDGE_CODE: PowerBox('D-Bridge', YELLOW, 'circle'),
+        NUKE_CODE: PowerBox('Nuke', BLACK, 'square'),
+        CAPITAL_CODE: PowerBox('Capital', PINK, 'star'),    
+        SPAWN_CODE: PowerBox('Spawn', CONTEXT['main_player'].default_color, 'circle', ''),
     }

@@ -1,3 +1,4 @@
+from constants import LETTER_TO_CODE, BREAKDOWNS
 class PowerBox:
 
     def __init__(self, name, color, shape, letter=None):
@@ -14,4 +15,6 @@ class PowerBox:
 
     @property
     def display_num(self):
+        if self.stat_func is None:
+            return BREAKDOWNS[LETTER_TO_CODE[self.letter]]['cost']
         return self.stat_func()

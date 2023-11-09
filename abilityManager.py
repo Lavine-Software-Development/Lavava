@@ -2,10 +2,11 @@ from constants import *
 from abc import ABC, abstractmethod
 from ability import *
 from ability_factory import make_abilities
+from chooseUI import choose_abilities_ui
 
 class AbstractAbilityManager(ABC):
     def __init__(self, board):
-        self.ability_codes = self.choose_abilities()
+        self.ability_codes = choose_abilities_ui()
         self.abilities = self.create_abilities(board)
         self.mode = DEFAULT_ABILITY_CODE
 
