@@ -84,15 +84,14 @@ class Draw:
 
     def draw_buttons(self):
         y_position = int(ABILITY_START_HEIGHT * self.height)
-        for btn_data in self.abilities.values():
-            btn_value = getattr(self.ability_manager, MODE['ability_display'])[btn_data.key]
-            selected = self.ability_manager.mode == btn_data.key or (self.ability_manager.mode == 'default' and btn_data.key == 2)
+        for btn in self.abilities.values():
+            btn_box = btn.box
+            selected = self.ability_manager.mode == btn.key or (self.ability_manager.mode == 'default' and btn.key == 2)
             loading = False
             if CONTEXT['mode'] == 2:
-                btn_value = self.ability_manager.remaining_usage[btn_data.key]
-                if self.ability_manager.full(btn_data.key):
-                    loading = False
-            self.draw_button(btn_data.shape, btn_data.color, btn_data.name, btn_value, btn_data.letter, (self.width -  int(ABILITY_GAP * self.height), y_position), selected, loading)
+                if not self.ability_manager.full(btn.key):
+                    loading = True
+            self.draw_button(btn_box.shape, btn_box.color, btn_box.name, btn_box.display_num, btn_box.letter, (self.width -  int(ABILITY_GAP * self.height), y_position), selected, loading)
             y_position += int(ABILITY_GAP * self.height) # Vertical gap between buttons
 
     def draw_star(self, position, size, color, filled=True):
@@ -299,9 +298,9 @@ class Draw:
             
     def edge_build(self, end, type):
         if type == 1:
-            start=self.abilities[BRIDGE_CODE].first_node.pos
+            start=self.abilities[BRIDGE_CODE].clicks[0].pos
         else:
-            start=self.abilities[D_BRIDGE_CODE].first_node.pos
+            start=self.abilities[D_BRIDGE_CODE].clicks[0].pos
         triangle_size=5
         spacing=9
         dx = end[0] - start[0]
@@ -341,9 +340,9 @@ class Draw:
         self.blit_capital_stars()
         self.blit_numbers()
         self.draw_buttons()
-        if BRIDGE_CODE in self.abilities and self.abilities[BRIDGE_CODE].first_node is not None:
+        if BRIDGE_CODE in self.abilities and len(self.abilities[BRIDGE_CODE].clicks) >= 1:
             self.edge_build(mouse_pos, 1)
-        if D_BRIDGE_CODE in self.abilities and self.abilities[D_BRIDGE_CODE].first_node is not None:
+        if D_BRIDGE_CODE in self.abilities and len(self.abilities[D_BRIDGE_CODE].clicks) >= 1:
             self.edge_build(mouse_pos, 2)
         py.display.update() 
 

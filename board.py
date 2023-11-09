@@ -24,8 +24,7 @@ class Board:
         self.extra_edges = 2
 
     def check_highlight(self, position, ability_manager):
-        ability = ability_manager.ability
-        self.highlighted_color = ability_manager.ability.color
+        self.highlighted_color = ability_manager.box.color
         self.highlighted = self.hover(position, ability_manager)
 
     def validate(self, ability_manager, id):

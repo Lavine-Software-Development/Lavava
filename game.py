@@ -8,6 +8,7 @@ from playerManager import PlayerManager
 from constants import *
 import sys
 from mode_builder import set_mode
+from ability_effects import make_ability_effects
 
 class Game:
     def __init__(self):
@@ -26,6 +27,9 @@ class Game:
         self.player_manager = PlayerManager(player_count, player_num)
 
         self.board = Board()
+
+        self.ability_effects = make_ability_effects(self.board)
+
         self.generator = RandomGenerator(int(self.network.data[6:]))
 
         self.start_game()
@@ -55,7 +59,7 @@ class Game:
             self.tick()
         elif key in CONTEXT['all_ability_codes']:
             new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
-            CONTEXT['ability_effects'][key].effect(self.player_manager.player_dict[acting_player], new_data)
+            self.ability_effects[key]( new_data, self.player_manager.player_dict[acting_player])
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
             self.board.id_dict[data[0]].click(self.player_manager.player_dict[acting_player], key)
 

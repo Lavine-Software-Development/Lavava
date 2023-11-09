@@ -1,12 +1,17 @@
 from constants import *
 from abc import ABC, abstractmethod
 from ability import *
+from ability_factory import make_abilities
 
 class AbstractAbilityManager(ABC):
     def __init__(self, board):
         self.ability_codes = self.choose_abilities()
         self.abilities = self.create_abilities(board)
         self.mode = DEFAULT_ABILITY_CODE
+
+    def set_box_numbers(self, stat):
+        for ability in self.abilities.values():
+            ability.box.set_stat_func(lambda key=ability.key: stat[key])
 
     def choose_abilities(self):
         while True:
@@ -24,21 +29,11 @@ class AbstractAbilityManager(ABC):
 
     def create_abilities(self, board):
         codes = self.ability_codes
-        all_dict = {
-            SPAWN_CODE: Spawn(),
-            BRIDGE_CODE: Bridge(board.new_edge_id, board.check_new_edge, board.buy_new_edge),
-            D_BRIDGE_CODE: D_Bridge(board.new_edge_id, board.check_new_edge, board.buy_new_edge),
-            NUKE_CODE: Nuke(board.remove_node),
-            POISON_CODE: Poison(),
-            FREEZE_CODE: Freeze(),
-            CAPITAL_CODE: Capital(),
-            BURN_CODE: Burn()
-        }
-        CONTEXT['ability_effects'] = all_dict
+        all_dict = make_abilities(board)
         return {k: all_dict[k] for k in codes}
 
     def use_ability(self, item, color):
-        if self.ability.click_type == item.type and self.ability.color == color:
+        if self.ability.click_type == item.type and self.box.color == color:
             return self.ability.complete(item)
         return False
 
@@ -61,10 +56,15 @@ class AbstractAbilityManager(ABC):
     def ability(self):
         return self.abilities[self.mode]
 
+    @property
+    def box(self):
+        return self.ability.box
+
 class MoneyAbilityManager(AbstractAbilityManager):
     def __init__(self, board):
         super().__init__(board)
         self.costs = {code: BREAKDOWNS[code]['cost'] for code in self.ability_codes}
+        self.set_box_numbers(self.costs)
 
     def select(self, key):
         self.abilities[self.mode].wipe()
@@ -88,6 +88,7 @@ class ReloadAbilityManager(AbstractAbilityManager):
         self.load_count[SPAWN_CODE] = SPAWN_RELOAD
         self.remaining_usage = {code: BREAKDOWNS[code]['total'] for code in self.ability_codes}
         self.full_reload = {code: BREAKDOWNS[code]['reload'] for code in self.ability_codes}
+        self.set_box_numbers(self.remaining_usage)
 
     def select(self, key):
         self.abilities[self.mode].wipe()
