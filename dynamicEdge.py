@@ -41,7 +41,7 @@ class DynamicEdge(Edge):
     def update(self):
         super().update()
         if self.contested:
-            if self.to_node.value > self.from_node.value:
+            if self.to_node.value > self.from_node.value and self.to_node.state_name != 'mine':
                 self.swap_direction()
 
     def freeze(self):
