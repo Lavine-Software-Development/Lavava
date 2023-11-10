@@ -122,7 +122,7 @@ class CapitalState(DefaultState):
     def shrink(self):
         if self.value + CAPITAL_SHRINK_SPEED <= MINIMUM_TRANSFER_VALUE:
             self.capitalized = True
-            self.owner.capitalize(self)
+            self.owner.capital_handover(self)
             return MINIMUM_TRANSFER_VALUE - self.value
         return CAPITAL_SHRINK_SPEED
 

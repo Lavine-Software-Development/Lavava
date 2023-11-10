@@ -7,7 +7,7 @@ def no_click(data):
 def standard_node_attack(data):
     node = data[0]
     return node.owner != CONTEXT['main_player'] and node.owner is not None \
-        and node.state_name not in ['capital', 'resource']
+        and node.state_name not in ['capital', 'mine']
 
 def dynamic_edge_own_either(data):
     edge = data[0]
@@ -28,11 +28,11 @@ def capital_logic(data):
 
 def standard_port_node(data):
     node = data[0]
-    return node.owner is not None and node.is_port and node.state_name not in ['resource']
+    return node.owner is not None and node.is_port and node.state_name not in ['mine']
 
 def unowned_node(data):
     node = data[0]
-    return node.owner is None and node.state_name not in ['resource']
+    return node.owner is None and node.state_name not in ['mine']
 
 def new_edge_validator(check_new_edge):
 
@@ -45,7 +45,7 @@ def new_edge_validator(check_new_edge):
             return first_node.id != second_node.id and check_new_edge(first_node.id, second_node.id)
 
     def new_edge_ports(data):
-        return all(node.port_count > 0 for node in data) and new_edge_standard(data)
+        return data[0].port_count > 0 and new_edge_standard(data)
 
     if CONTEXT['mode'] == 3:
         return new_edge_ports

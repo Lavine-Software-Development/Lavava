@@ -160,7 +160,7 @@ class PortNode(Node):
         return self.port_count > 0 and not self.on_fire and self.state.acceptBridge
 
     def new_edge(self, edge, dir):
-        if CONTEXT['started'] and edge not in self.edges:
+        if CONTEXT['started'] and edge not in self.edges and dir == 'outgoing':
             self.port_count -= 1
         super().new_edge(edge, dir)
 
