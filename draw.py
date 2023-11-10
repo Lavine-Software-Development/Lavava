@@ -168,7 +168,10 @@ class Draw:
             point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
 
             if edge.flowing:
-                py.draw.polygon(self.screen, color, [point1, point2, point3])         
+                if edge.raged:
+                    py.draw.polygon(self.screen, PURPLE, [point1, point2, point3])
+                else:
+                    py.draw.polygon(self.screen, color, [point1, point2, point3])
             else:
                 py.draw.lines(self.screen, color, True, [point1, point2, point3])
 
@@ -192,11 +195,12 @@ class Draw:
         for i in range(1, num_circles):
             pos = (start[0] + i * spacing * dx+5*dx, start[1] + i * spacing * dy+5*dy)
             if edge.flowing:
-                py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius)
+                if edge.raged:
+                    py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius)
+                else:
+                    py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius)
             else:
                 py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1)
-            # if edge.poisoned:
-            #     py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius, 1)
 
         if self.board.highlighted == edge:
             self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
@@ -293,6 +297,9 @@ class Draw:
         else:
             self.screen.blit(self.small_font.render("X to Forfeit",True,CONTEXT['main_player'].color),(self.width - 450,20))
 
+    def blit_waiting(self):
+        self.screen.blit(self.small_font.render("Waiting for other Players to Choose Abilities",True,GREEN),(self.width // 7,20))
+
     def wipe(self):
         self.screen.fill(WHITE)
             
@@ -333,12 +340,15 @@ class Draw:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 
-    def blit(self, mouse_pos):
+    def blit(self, mouse_pos, waiting=False):
         self.screen.fill(WHITE)
         self.blit_nodes()
         self.blit_edges()
         self.blit_capital_stars()
-        self.blit_numbers()
+        if waiting:
+            self.blit_waiting()
+        else:
+            self.blit_numbers()
         self.draw_buttons()
         if BRIDGE_CODE in self.abilities and len(self.abilities[BRIDGE_CODE].clicks) >= 1:
             self.edge_build(mouse_pos, 1)

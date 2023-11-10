@@ -14,20 +14,6 @@ class AbstractAbilityManager(ABC):
         for ability in self.abilities.values():
             ability.box.set_stat_func(lambda key=ability.key: stat[key])
 
-    def choose_abilities(self):
-        while True:
-            print("Choose 4 Abilities by letter. Caps unnecessary. List without spaces:")
-            for code in CONTEXT['all_ability_codes']:
-                print(f'{BREAKDOWNS[code]["letter"]} - {BREAKDOWNS[code]["name"]}')
-            choices = input("Choose: ")
-            split_choices = {x.upper() for x in choices}
-            if len(split_choices) == 4 and all(x in LETTER_TO_CODE for x in split_choices):
-                codes = [LETTER_TO_CODE[x] for x in split_choices]
-                if all(x in CONTEXT['all_ability_codes'] for x in codes):
-                    CONTEXT['all_ability_codes'].add(SPAWN_CODE)
-                    return [SPAWN_CODE] + codes
-            print('Oops bad input. Try again!')
-
     def create_abilities(self, board):
         codes = self.ability_codes
         all_dict = make_abilities(board)
@@ -37,6 +23,10 @@ class AbstractAbilityManager(ABC):
         if self.ability.click_type == item.type and self.box.color == color:
             return self.ability.complete(item)
         return False
+
+    def switch_to(self, key):
+        self.mode = key
+        return self.ability.complete_check()
 
     def update(self):
         pass
@@ -72,7 +62,8 @@ class MoneyAbilityManager(AbstractAbilityManager):
         if self.mode == key:
             self.mode = DEFAULT_ABILITY_CODE
         elif CONTEXT['main_player'].money >= self.costs[key]:
-            self.mode = key
+            return self.switch_to(key)
+        return False
 
     def update_ability(self):
         CONTEXT['main_player'].money -= self.costs[self.mode]
@@ -96,7 +87,8 @@ class ReloadAbilityManager(AbstractAbilityManager):
         if self.mode == key:
             self.mode = DEFAULT_ABILITY_CODE
         elif self.full(key):
-            self.mode = key
+            return self.switch_to(key)
+        return False
 
     def update_ability(self):
         self.load_count[self.mode] = 0

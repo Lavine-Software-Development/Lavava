@@ -12,6 +12,11 @@ def make_nuke(remove_node):
         remove_node(node.id)
     return nuke_effect
 
+def make_rage(rage):
+    def rage_effect(data, player):
+        rage(player)
+    return rage_effect
+
 def freeze_effect(data, player):
     edge = data[0]
     if player != edge.from_node.owner:
@@ -39,5 +44,6 @@ def make_ability_effects(board):
          D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
          SPAWN_CODE: spawn_effect, FREEZE_CODE: freeze_effect,
          NUKE_CODE: make_nuke(board.remove_node), BURN_CODE: burn_effect,
-         POISON_CODE: poison_effect, CAPITAL_CODE: capital_effect}
+         POISON_CODE: poison_effect, CAPITAL_CODE: capital_effect,
+         RAGE_CODE: make_rage(board.rage)}
 

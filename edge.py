@@ -15,9 +15,13 @@ class Edge:
         self.update_nodes()
         self.state = 'one-way'
         self.type = EDGE
+        self.rage_count = 0
 
     def __str__(self):
         return str(self.id)
+
+    def enrage(self):
+        self.rage_count = RAGE_TIME
 
     def update_nodes(self):
         self.to_node.new_edge(self, 'incoming')
@@ -46,6 +50,9 @@ class Edge:
             if not self.popped:
                 self.pop()
 
+        if self.raged:
+            self.rage_count -= 0.1
+
     def flow_check(self):
         return not self.on or (self.to_node.full and not self.contested)
 
@@ -56,7 +63,8 @@ class Edge:
 
     def flow(self):
         amount_transferred = TRANSFER_RATE * self.from_node.value
-        self.delivery(amount_transferred)
+        if self.raged:
+            amount_transferred *= RAGE_MULTIPLIER
         self.from_node.value -= amount_transferred
 
     def delivery(self, amount):
@@ -82,6 +90,10 @@ class Edge:
                 return self.from_node.color
             return self.from_node.color
         return (50, 50, 50)
+
+    @property
+    def raged(self):
+        return self.rage_count > 0
 
     def opposite(self, node):
         if node == self.from_node:

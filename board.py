@@ -15,6 +15,11 @@ class Board:
         self.highlighted = None
         self.highlighted_color = None
 
+    def rage(self, player):
+        for edge in self.edges:
+            if edge.owned_by(player):
+                edge.enrage()
+
     def reset(self, nodes, edges):
         self.nodes = nodes
         self.edges = edges

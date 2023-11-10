@@ -16,7 +16,8 @@ def make_abilities(board):
         NUKE_CODE: Ability(NUKE_CODE, standard_node_attack, 1, boxes[NUKE_CODE]),
         CAPITAL_CODE: Ability(CAPITAL_CODE, capital_logic, 1, boxes[CAPITAL_CODE]),
         BURN_CODE: Ability(BURN_CODE, standard_port_node, 1, boxes[BURN_CODE]),
-        FREEZE_CODE: Ability(FREEZE_CODE, dynamic_edge_own_either, 1, boxes[FREEZE_CODE], None, EDGE)
+        FREEZE_CODE: Ability(FREEZE_CODE, dynamic_edge_own_either, 1, boxes[FREEZE_CODE], None, EDGE),
+        RAGE_CODE: Ability(RAGE_CODE, no_click, 0, boxes[RAGE_CODE])
     }
 
 

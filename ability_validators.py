@@ -1,5 +1,9 @@
 from constants import CONTEXT
 
+
+def no_click(data):
+    return False
+
 def standard_node_attack(data):
     node = data[0]
     return node.owner != CONTEXT['main_player'] and node.owner is not None \
