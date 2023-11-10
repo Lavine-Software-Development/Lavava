@@ -168,7 +168,7 @@ class Draw:
             point3 = (pos[0] - length_factor * triangle_size * dx - triangle_size * dy, pos[1] - length_factor * triangle_size * dy + triangle_size * dx)
 
             if edge.flowing:
-                if edge.raged:
+                if edge.currently_raging:
                     py.draw.polygon(self.screen, PURPLE, [point1, point2, point3])
                 else:
                     py.draw.polygon(self.screen, color, [point1, point2, point3])
@@ -195,7 +195,7 @@ class Draw:
         for i in range(1, num_circles):
             pos = (start[0] + i * spacing * dx+5*dx, start[1] + i * spacing * dy+5*dy)
             if edge.flowing:
-                if edge.raged:
+                if edge.currently_raging:
                     py.draw.circle(self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius)
                 else:
                     py.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])), circle_radius)

@@ -63,8 +63,9 @@ class Edge:
 
     def flow(self):
         amount_transferred = TRANSFER_RATE * self.from_node.value
-        if self.raged:
+        if self.currently_raging:
             amount_transferred *= RAGE_MULTIPLIER
+        self.delivery(amount_transferred)
         self.from_node.value -= amount_transferred
 
     def delivery(self, amount):
@@ -83,6 +84,9 @@ class Edge:
     def owned_by(self, player):
         return self.from_node.owner == player
 
+    def can_be_owned_by(self, player):
+        return self.owned_by(player)
+
     @property
     def color(self):
         if self.on:
@@ -94,6 +98,10 @@ class Edge:
     @property
     def raged(self):
         return self.rage_count > 0
+
+    @property
+    def currently_raging(self):
+        return self.raged and self.from_node.owner and self.from_node.owner.raged
 
     def opposite(self, node):
         if node == self.from_node:

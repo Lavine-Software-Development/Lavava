@@ -75,6 +75,11 @@ class Node:
             if edge.to_node != self and edge.on and not edge.contested and edge.to_node.state_name == 'default':
                 edge.to_node.set_state('poisoned')
 
+    def spread_rage(self):
+        for edge in self.outgoing:
+            if not edge.raged:
+                edge.enrage()
+
     def grow(self):
         self.value += self.state.grow()
         if self.state.state_over():
@@ -84,6 +89,8 @@ class Node:
         self.value += self.state.delivery(amount, player)
         if self.state.killed():
             self.capture(player)
+        if player.raged:
+            self.spread_rage()
 
     def update_ownerships(self, player):
         if self.owner != None:

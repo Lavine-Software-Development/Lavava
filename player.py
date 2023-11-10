@@ -7,7 +7,15 @@ class DefaultPlayer:
         self.name = color[1]
         self.id = id
         self.points = 0
+        self.rage_count = 0
         self.default_values()
+
+    def enrage(self):
+        self.rage_count = RAGE_TIME
+
+    @property
+    def raged(self):
+        return self.rage_count > 0
 
     def default_values(self):
         self.count = 0
@@ -23,7 +31,8 @@ class DefaultPlayer:
         self.points += self.count
 
     def update(self):
-        pass
+        if self.raged:
+            self.rage_count -= 0.1
 
     def win(self):
         self.victory = True
@@ -66,6 +75,7 @@ class MoneyPlayer(DefaultPlayer):
 
     def update(self):
         self.money += self.tick_production
+        super().update()
 
     @property
     def production_per_second(self):

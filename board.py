@@ -17,7 +17,7 @@ class Board:
 
     def rage(self, player):
         for edge in self.edges:
-            if edge.owned_by(player):
+            if edge.can_be_owned_by(player):
                 edge.enrage()
 
     def reset(self, nodes, edges):

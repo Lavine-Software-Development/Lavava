@@ -67,7 +67,7 @@ class MoneyAbilityManager(AbstractAbilityManager):
 
     def update_ability(self):
         CONTEXT['main_player'].money -= self.costs[self.mode]
-        if self.costs[self.mode] > CONTEXT['main_player'].money:
+        if self.costs[self.mode] > CONTEXT['main_player'].money or self.mode == RAGE_CODE:
             self.mode = DEFAULT_ABILITY_CODE
 
     def default_validate(self):

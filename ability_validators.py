@@ -12,7 +12,7 @@ def standard_node_attack(data):
 def dynamic_edge_own_either(data):
     edge = data[0]
     return edge.state == 'two-way' and \
-        (edge.from_node.owner == CONTEXT['main_player'] or edge.to_node.owner == CONTEXT['main_player'])
+        (edge.from_node.owner == CONTEXT['main_player'])
 
 def capital_logic(data):
     node = data[0]

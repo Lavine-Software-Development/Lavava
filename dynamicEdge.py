@@ -49,6 +49,9 @@ class DynamicEdge(Edge):
 
     def owned_by(self, player):
         return super().owned_by(player) or (self.to_node.owner == player and self.from_node.owner is None)
+
+    def can_be_owned_by(self, player):
+        return self.to_node.owner == player or self.to_node.owner == player
     
 
 

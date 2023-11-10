@@ -15,12 +15,13 @@ def make_nuke(remove_node):
 def make_rage(rage):
     def rage_effect(data, player):
         rage(player)
+        player.enrage()
     return rage_effect
 
 def freeze_effect(data, player):
     edge = data[0]
-    if player != edge.from_node.owner:
-        edge.swap_direction()
+    # if player != edge.from_node.owner:
+    #     edge.swap_direction()
     edge.freeze()
 
 def spawn_effect(data, player):
