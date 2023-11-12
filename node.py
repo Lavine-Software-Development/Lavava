@@ -1,5 +1,6 @@
 from constants import *
 from state_builder import set_node_state
+from nodeState import MineState
 
 class Node:
 
@@ -86,6 +87,11 @@ class Node:
             self.set_default_state()
 
     def delivery(self, amount, player):
+        match self.state:
+            case MineState(_):
+                pass
+            case _:
+                pass
         self.value += self.state.delivery(amount, player)
         if self.state.killed():
             self.capture(player)
