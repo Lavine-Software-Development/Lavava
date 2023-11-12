@@ -1,7 +1,7 @@
 from constants import GROWTH_RATE, POISON_TICKS, POISON_SPREAD_DELAY, \
     MINIMUM_TRANSFER_VALUE, CAPITAL_SHRINK_SPEED, MINE_DICT, GROWTH_STOP, \
-    GREY
-from abc import ABC, abstractmethod
+    GREY, TRANSFER_RATE, RAGE_MULTIPLIER
+from abc import ABC, abstractmethod, abstractproperty
 import math
 
 
@@ -25,7 +25,15 @@ class AbstractState(ABC):
         pass
 
     @abstractmethod
-    def delivery(self, value, amount):
+    def delivery(self, amount, player):
+        pass
+
+    @abstractmethod
+    def accept_delivery(self, player):
+        pass
+
+    @abstractmethod
+    def send_amount(self):
         pass
 
     @abstractmethod
@@ -61,10 +69,16 @@ class DefaultState(AbstractState):
             return GROWTH_RATE
         return 0
 
-    def delivery(self, amount, player):
+    def delivery_amount(self, amount, player):
         if self.owner == None or self.owner != player:
             return -amount
         return amount
+
+    def accept_delivery(self, player):
+        return not self.full or player != self.owner
+
+    def send_amount(self):
+        TRANSFER_RATE * self.value
 
     def capture(self):
         return self.value * -1
@@ -189,3 +203,9 @@ class MineState(AbstractState):
     @property
     def full(self):
         return False
+
+
+class RageState(DefaultState):
+
+    def send_amount(self):
+        return super().send_amount() * RAGE_MULTIPLIER

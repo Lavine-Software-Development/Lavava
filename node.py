@@ -92,6 +92,12 @@ class Node:
         if player.raged:
             self.spread_rage()
 
+    def accept_delivery(self, player):
+        return self.state.accept_delivery(player)
+
+    def send_amount(self):
+        return self.state.send_amount()
+
     def update_ownerships(self, player):
         if self.owner != None:
             self.owner.count -= 1

@@ -40,7 +40,7 @@ class Edge:
             self.popped = True
 
     def update(self):
-        if self.from_node.value < MINIMUM_TRANSFER_VALUE or self.flow_check():
+        if self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.flow_check():
             self.flowing = False
         elif self.from_node.value > BEGIN_TRANSFER_VALUE:
             self.flowing = True
@@ -54,7 +54,7 @@ class Edge:
             self.rage_count -= 0.1
 
     def flow_check(self):
-        return not self.on or (self.to_node.full and not self.contested)
+        return self.from_node.send_amount() and self.to_node.accept_delivery(self.owner)
 
     def pop(self):
         self.popped = True
@@ -62,9 +62,7 @@ class Edge:
             self.on = False
 
     def flow(self):
-        amount_transferred = TRANSFER_RATE * self.from_node.value
-        if self.currently_raging:
-            amount_transferred *= RAGE_MULTIPLIER
+        amount_transferred = self.from_node.send_amount()
         self.delivery(amount_transferred)
         self.from_node.value -= amount_transferred
 
@@ -86,6 +84,10 @@ class Edge:
 
     def can_be_owned_by(self, player):
         return self.owned_by(player)
+
+    @property
+    def owner(self):
+        return self.from_node.owner
 
     @property
     def color(self):
