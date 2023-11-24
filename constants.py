@@ -7,8 +7,8 @@ CONTEXT = {}
 MODE = {}
 
 SERVER_FH = '192.168.9.109'
-SERVER_I = '10.0.0.122'
-SERVER_GD = '100.65.13.163'
+SERVER_I = '10.0.0.87'
+SERVER_GD = '100.65.13.254'
 SERVER_UG = '100.69.15.226'
 SERVER_CO = '192.168.1.106'
 SERVER_D = '192.168.0.200'
@@ -27,6 +27,9 @@ EDGE = 3000
 DYNAMIC_EDGE = 3500
 
 MODES = {1: 'Money', 2: 'Reload', 3: 'Ports'}
+
+STATE_NAMES = {'default', 'capital', 'mine'}
+EFFECT_NAMES = {'burn', 'poison', 'rage'}
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 700

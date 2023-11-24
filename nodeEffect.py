@@ -1,11 +1,10 @@
-from abc import ABC, abstractmethod, abstractproperty
-from constants import BURN_TICKS, POISON_TICKS, RAGE_TICKS, RAGE_MULTIPLIER
+from abc import ABC
+from constants import BURN_TICKS, POISON_TICKS, RAGE_TICKS, RAGE_MULTIPLIER, POISON_SPREAD_DELAY
 from effectEnums import EffectType
 
 class AbstractEffect(ABC):
 
-    def __init__(self, node, expiry_time, effect_type):
-        self.node = node
+    def __init__(self, expiry_time, effect_type):
         self.expiry_time = expiry_time
         self.counter = 0
         self.effect_type = effect_type
@@ -26,26 +25,32 @@ class AbstractEffect(ABC):
 
 class Burning(AbstractEffect):
 
-    def __init__(self, node):
-        super().__init__(node, BURN_TICKS, EffectType.NONE)
+    def __init__(self, lose_ports):
+        super().__init__(BURN_TICKS, EffectType.NONE)
+        self.lose_ports_func = lose_ports
 
     def complete(self):
-        self.node.lose_ports()
+        self.lose_ports_func()
 
 
 class Poisoned(AbstractEffect):
 
-    def __init__(self, node):
-        super().__init__(node, POISON_TICKS, EffectType.GROW)
+    def __init__(self, spread_poison):
+        super().__init__(POISON_TICKS, EffectType.GROW)
 
     def effect(self, amount):
         return amount * -1
 
+    def count(self):
+        if self.counter == POISON_SPREAD_DELAY:
+            self.spread_poison()
+        super().count()
 
-class Raged(AbstractEffect):
 
-    def __init__(self, node):
-        super().__init__(node, RAGE_TICKS, EffectType.EXPEL)
+class Enraged(AbstractEffect):
+
+    def __init__(self):
+        super().__init__(RAGE_TICKS, EffectType.EXPEL)
 
     def effect(self, amount):
         return amount * RAGE_MULTIPLIER

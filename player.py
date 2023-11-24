@@ -11,7 +11,7 @@ class DefaultPlayer:
         self.default_values()
 
     def enrage(self):
-        self.rage_count = RAGE_TIME
+        self.rage_count = RAGE_TICKS
 
     @property
     def raged(self):
@@ -32,7 +32,7 @@ class DefaultPlayer:
 
     def update(self):
         if self.raged:
-            self.rage_count -= 0.1
+            self.rage_count -= 1
 
     def win(self):
         self.victory = True
@@ -61,6 +61,9 @@ class MoneyPlayer(DefaultPlayer):
         self.money = START_MONEY
         self.tick_production = START_MONEY_RATE
         super().default_values()
+
+    def change_tick(self, amount):
+        self.tick_production += amount
 
     def capital_handover(self, capital, gain=True):
         if gain:
