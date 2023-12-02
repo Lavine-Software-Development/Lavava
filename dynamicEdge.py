@@ -15,7 +15,7 @@ class DynamicEdge(Edge):
 
     def click_swap(self):
         self.on = True
-        self.swap_direction
+        self.swap_direction()
 
     def natural_swap(self):
         self.on = False

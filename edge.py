@@ -21,7 +21,7 @@ class Edge:
         return str(self.id)
 
     def enrage(self):
-        self.rage_count = RAGE_TIME
+        self.rage_count = RAGE_TICKS
 
     def update_nodes(self):
         self.to_node.new_edge(self, 'incoming')
@@ -40,7 +40,7 @@ class Edge:
             self.popped = True
 
     def update(self):
-        if self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.flow_check():
+        if not self.on or self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.flow_check():
             self.flowing = False
         elif self.from_node.value > BEGIN_TRANSFER_VALUE:
             self.flowing = True
@@ -54,7 +54,7 @@ class Edge:
             self.rage_count -= 0.1
 
     def flow_check(self):
-        return self.from_node.send_amount() and self.to_node.accept_delivery(self.owner)
+        return self.to_node.accept_delivery(self.owner)
 
     def pop(self):
         self.popped = True

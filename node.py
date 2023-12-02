@@ -138,26 +138,28 @@ class Node:
             self.calculate_interactions()
 
     def delivery(self, amount, player):
-        self.value += self.state.intake(amount, self.intake_multiplier, player == self.owner)
+        self.value += self.state.intake(amount, self.intake_multiplier, player != self.owner)
+        if self.state.flow_ownership:
+            self.owner = player
         if self.state.killed(self.value):
             self.capture(player)
         if player.raged:
             self.spread_rage()
 
     def accept_delivery(self, player):
-        return self.state.accept_intake(player == self.owner, self.value)
+        return self.state.accept_intake(player != self.owner, self.value)
 
     def send_amount(self):
-        return self.state.expel(self.expel_multiplier)
+        return self.state.expel(self.expel_multiplier, self.value)
 
     def update_ownerships(self, player):
-        if self.owner != None:
+        if self.owner != None and self.owner != player:
             self.owner.count -= 1
         player.count += 1
         self.owner = player
 
     def capture(self, player):
-        self.value *= self.state.capture_event()
+        self.value = self.state.capture_event()(self.value)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()

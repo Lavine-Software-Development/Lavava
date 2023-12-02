@@ -244,7 +244,7 @@ class Draw:
                 port_color = BROWN
                 if spot.on_fire:
                     port_color = STRONG_ORANGE
-                    percentage = spot.burning / BURN_TIME
+                    percentage = spot.burning / BURN_TICKS
                     port_width *= percentage
                 port_count = spot.port_count  # Number of ports
                 angle_step = 2 * math.pi / port_count  # Angle step for each port
