@@ -15,7 +15,7 @@ def make_nuke(remove_node):
 def make_rage(rage):
     def rage_effect(data, player):
         rage(player)
-        player.enrage()
+        player.effects['rage'] = RAGE_TICKS
     return rage_effect
 
 def freeze_effect(data, player):
