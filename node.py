@@ -145,6 +145,8 @@ class Node:
             self.capture(player)
         if player.raged:
             self.spread_rage()
+        # if self.state_name == 'mine':
+        #     print(self.owner.id)
 
     def accept_delivery(self, player):
         return self.state.accept_intake(player != self.owner, self.value)
@@ -177,7 +179,7 @@ class Node:
 
     @property
     def full(self):
-        return self.value >= GROWTH_STOP
+        return self.value >= self.state.full_size
 
     @property
     def edges(self):

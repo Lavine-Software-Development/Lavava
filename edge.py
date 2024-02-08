@@ -40,7 +40,7 @@ class Edge:
             self.popped = True
 
     def update(self):
-        if not self.on or self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.flow_check():
+        if not self.on or self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.flow_allowed():
             self.flowing = False
         elif self.from_node.value > BEGIN_TRANSFER_VALUE:
             self.flowing = True
@@ -53,7 +53,7 @@ class Edge:
         if self.raged:
             self.rage_count -= 0.1
 
-    def flow_check(self):
+    def flow_allowed(self):
         return self.to_node.accept_delivery(self.owner)
 
     def pop(self):

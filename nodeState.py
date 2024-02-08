@@ -135,3 +135,7 @@ class MineState(AbstractState):
     @property
     def color(self):
         return GREY
+
+    @property
+    def full_size(self):
+        return self.bubble
