@@ -178,6 +178,10 @@ class Node:
         return self.state.acceptBridge
 
     @property
+    def swap_status(self):
+        return self.state.swap_status
+
+    @property
     def full(self):
         return self.value >= self.state.full_size
 

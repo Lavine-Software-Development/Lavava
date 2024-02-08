@@ -46,9 +46,16 @@ class DynamicEdge(Edge):
             self.contested = True
 
     def update(self):
+        # check to see if edge should swap on its own. This only occurs when its contested
+        # point to the node with a lower status
+        # if equal status, point to the node with a lower value
         super().update()
         if self.contested:
-            if self.to_node.value > self.from_node.value:
+            to_status = self.to_node.swap_status
+            from_status = self.from_node.swap_status
+            if from_status < to_status:
+                self.natural_swap()
+            elif to_status == from_status and self.from_node.value < self.to_node.value:
                 self.natural_swap()
 
     def freeze(self):

@@ -1,5 +1,6 @@
 from constants import GROWTH_RATE, MINIMUM_TRANSFER_VALUE, \
-    CAPITAL_SHRINK_SPEED, MINE_DICT, GROWTH_STOP, GREY, TRANSFER_RATE, CONTEXT, GROWTH_STOP
+    CAPITAL_SHRINK_SPEED, MINE_DICT, GROWTH_STOP, GREY, TRANSFER_RATE, \
+     CONTEXT, GROWTH_STOP, STANDARD_SWAP_STATUS, BELOW_SWAP_STATUS
 from abc import ABC, abstractmethod
 import math
 
@@ -11,6 +12,7 @@ class AbstractState(ABC):
         self.reset_on_capture = reset_on_capture
         self.flow_ownership = flow_ownership
         self.acceptBridge = True
+        self.swap_status = STANDARD_SWAP_STATUS
 
     def grow(self, multiplier):
         return GROWTH_RATE * multiplier
@@ -112,6 +114,7 @@ class MineState(AbstractState):
         super().__init__(id, True, True)
         self.bonus, self.bubble, self.ring_color = MINE_DICT[island]
         self.absorbing_func = absorbing_func
+        self.swap_status = BELOW_SWAP_STATUS
 
     def grow(self, multipler):
         return 0
