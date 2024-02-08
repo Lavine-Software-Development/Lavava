@@ -17,7 +17,7 @@ class Board:
 
     def rage(self, player):
         for edge in self.edges:
-            if edge.can_be_owned_by(player):
+            if edge.can_be_controlled_by(player):
                 edge.enrage()
 
     def reset(self, nodes, edges):
@@ -46,7 +46,7 @@ class Board:
         elif id := self.find_edge(position):
             if ability.click_type == EDGE and self.validate(ability_manager, id):
                 return self.id_dict[id]
-            elif self.id_dict[id].owned_by(CONTEXT['main_player']):
+            elif self.id_dict[id].controlled_by(CONTEXT['main_player']):
                 self.highlighted_color = GREY
                 return self.id_dict[id]
         return None
@@ -58,7 +58,7 @@ class Board:
 
     def eliminate(self, player):
         for edge in self.edges:
-            if edge.owned_by(player):
+            if edge.controlled_by(player):
                 edge.switch(False)
 
     def expand_nodes(self):

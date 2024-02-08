@@ -30,20 +30,12 @@ class DynamicEdge(Edge):
     def click(self, clicker, button):
         super().click(clicker, button)
         if button == 3:
-            if not self.contested and self.to_node.owner == clicker or self.from_node.owner == clicker:
+            if not self.contested and (self.to_node.owner == clicker or self.from_node.owner == clicker):
                 self.click_swap()
 
     def check_status(self):
-        self.owned = False
-        self.contested = False
-        if self.to_node.owner == None or self.from_node.owner == None:
-            if self.from_node.owner is None:
-                self.natural_swap()
-            return
-        elif self.to_node.owner == self.from_node.owner:
-            self.owned = True
-        else:
-            self.contested = True
+        if self.from_node.owner is None and self.to_node.owner != None:
+            self.natural_swap()
 
     def update(self):
         # check to see if edge should swap on its own. This only occurs when its contested
@@ -61,10 +53,10 @@ class DynamicEdge(Edge):
     def freeze(self):
         self.state = 'one-way'
 
-    def owned_by(self, player):
-        return super().owned_by(player) or (self.to_node.owner == player and self.from_node.owner is None)
+    def controlled_by(self, player):
+        return super().controlled_by(player) or (self.to_node.owner == player and self.from_node.owner is None)
 
-    def can_be_owned_by(self, player):
+    def can_be_controlled_by(self, player):
         return self.to_node.owner == player or self.to_node.owner == player
     
 

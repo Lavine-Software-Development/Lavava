@@ -9,8 +9,6 @@ class Edge:
         self.id = id
         self.on = False
         self.flowing = False
-        self.owned = False
-        self.contested = False
         self.popped = False
         self.update_nodes()
         self.state = 'one-way'
@@ -28,7 +26,7 @@ class Edge:
         self.from_node.new_edge(self, 'outgoing')
 
     def click(self, clicker, button):
-        if button == 1 and self.owned_by(clicker):
+        if button == 1 and self.controlled_by(clicker):
             self.switch()
 
     def switch(self, specified=None):
@@ -70,20 +68,25 @@ class Edge:
         self.to_node.delivery(amount, self.from_node.owner)
 
     def check_status(self):
-        self.owned = False
-        self.contested = False
-        if self.to_node.owner == None or self.from_node.owner == None:
-            return
-        elif self.to_node.owner == self.from_node.owner:
-            self.owned = True
-        else:
-            self.contested = True
+        pass
 
-    def owned_by(self, player):
+    def controlled_by(self, player):
         return self.from_node.owner == player
 
-    def can_be_owned_by(self, player):
-        return self.owned_by(player)
+    def can_be_controlled_by(self, player):
+        return self.controlled_by(player)
+
+    @property
+    def owned(self):
+        return self.duo_ownership and self.to_node.owner == self.from_node.owner
+
+    @property
+    def duo_ownership(self):
+        return self.to_node.owner != None and self.from_node.owner != None
+
+    @property
+    def contested(self):
+        return self.duo_ownership and self.to_node.owner !=  self.from_node.owner
 
     @property
     def owner(self):
