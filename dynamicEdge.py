@@ -29,8 +29,12 @@ class DynamicEdge(Edge):
 
     def click(self, clicker, button):
         super().click(clicker, button)
-        if button == 3:
-            if not self.contested and (self.to_node.owner == clicker or self.from_node.owner == clicker):
+        if button == 3 and self.to_node.owner == clicker:
+            # must own the node that will become from_node after swap (to_node becomes from_node)
+            # if you don't own both sides, you can only swap when full
+            if self.owned:
+                self.click_swap()
+            elif self.to_node.full:
                 self.click_swap()
 
     def check_status(self):
@@ -38,17 +42,23 @@ class DynamicEdge(Edge):
             self.natural_swap()
 
     def update(self):
-        # check to see if edge should swap on its own. This only occurs when its contested
+        # check to see if edge should swap on its own. This only occurs when its contested.
         # point to the node with a lower status
-        # if equal status, point to the node with a lower value
+        # if equal status, only swap if from_node is not full and smaller than to_node*
+        # note that if flowing, a slight advantage is given to from_node (momentum)
         super().update()
         if self.contested:
             to_status = self.to_node.swap_status
             from_status = self.from_node.swap_status
             if from_status < to_status:
                 self.natural_swap()
-            elif to_status == from_status and self.from_node.value < self.to_node.value:
-                self.natural_swap()
+            elif to_status == from_status and not self.from_node.full:
+                to_value = self.to_node.value
+                from_value = self.from_node.value
+                if self.flowing:
+                    from_value *= 1.05
+                if from_value < to_value:
+                    self.natural_swap()
 
     def freeze(self):
         self.state = 'one-way'
