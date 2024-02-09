@@ -7,7 +7,7 @@ class DefaultPlayer:
         self.name = color[1]
         self.id = id
         self.points = 0
-        self.effects = {}
+        self.effects = set()
         self.default_values()
 
     def default_values(self):
@@ -24,10 +24,11 @@ class DefaultPlayer:
         self.points += self.count
 
     def update(self):
-        for eff in list(self.effects.keys()): 
-            self.effects[eff] -= 1
-            if self.effects[eff] <= 0:
-                del self.effects[eff]
+        self.effects = filter(lambda effect : (effect.count()), self.effects)
+
+    def pass_on_effects(self, node):
+        for effect in self.effects:
+            effect.spread(node)
 
     def win(self):
         self.victory = True
