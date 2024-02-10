@@ -111,8 +111,8 @@ class StartingCapitalState(CapitalState):
 
     def capture_event(self):
         if self.is_owned:
-            self.capital_handover(self, False)
-        return DefaultState.capture(self)
+            CONTEXT['main_player'].capital_handover(self, False)
+        return super().capture_event()
 
 
 class MineState(AbstractState):
