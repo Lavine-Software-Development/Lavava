@@ -1,9 +1,15 @@
 from abc import ABC
-from constants import BURN_TICKS, POISON_TICKS, RAGE_TICKS, RAGE_MULTIPLIER, POISON_SPREAD_DELAY
+from constants import (
+    BURN_TICKS,
+    POISON_TICKS,
+    RAGE_TICKS,
+    RAGE_MULTIPLIER,
+    POISON_SPREAD_DELAY,
+)
 from effectEnums import EffectType
 
-class AbstractEffect(ABC):
 
+class AbstractEffect(ABC):
     def __init__(self, expiry_time, effect_type):
         self.expiry_time = expiry_time
         self.counter = 0
@@ -24,7 +30,6 @@ class AbstractEffect(ABC):
 
 
 class Burning(AbstractEffect):
-
     def __init__(self, lose_ports):
         super().__init__(BURN_TICKS, EffectType.NONE)
         self.lose_ports_func = lose_ports
@@ -34,7 +39,6 @@ class Burning(AbstractEffect):
 
 
 class Poisoned(AbstractEffect):
-
     def __init__(self, spread_poison):
         super().__init__(POISON_TICKS, EffectType.GROW)
         self.spread_poison = spread_poison
@@ -49,10 +53,8 @@ class Poisoned(AbstractEffect):
 
 
 class Enraged(AbstractEffect):
-
     def __init__(self):
         super().__init__(RAGE_TICKS, EffectType.EXPEL)
 
     def effect(self, amount):
         return amount * RAGE_MULTIPLIER
-        

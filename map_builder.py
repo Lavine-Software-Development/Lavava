@@ -1,12 +1,21 @@
 from collections import defaultdict
 import numpy as np
-from constants import NODE_COUNT, EDGE_COUNT, ONE_WAY_COUNT, MAX_EDGE_LENGTH, SCREEN_WIDTH, SCREEN_HEIGHT, MIN_ANGLE, MODE
+from constants import (
+    NODE_COUNT,
+    EDGE_COUNT,
+    ONE_WAY_COUNT,
+    MAX_EDGE_LENGTH,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    MIN_ANGLE,
+    MODE,
+)
 from helpers import do_intersect, angle_between_edges
 from edge import Edge
 from dynamicEdge import DynamicEdge
 
-class MapBuilder:
 
+class MapBuilder:
     def __init__(self, generator):
         self.nodes = []
         self.edges = []
@@ -16,66 +25,86 @@ class MapBuilder:
         self.generator = generator
 
     def build(self):
-
         self.make_nodes()
         self.make_edges()
         self.convert_to_objects()
 
-    def make_nodes(self):  #assumes global list nodes is empty
+    def make_nodes(self):  # assumes global list nodes is empty
         count = 0
         while count < NODE_COUNT:
-            
-            spot = [self.generator.randint(int(SCREEN_WIDTH/10),int(9*SCREEN_WIDTH/10)),self.generator.randint(int(SCREEN_HEIGHT/10),int(9*SCREEN_HEIGHT/10))]
+            spot = [
+                self.generator.randint(
+                    int(SCREEN_WIDTH / 10), int(9 * SCREEN_WIDTH / 10)
+                ),
+                self.generator.randint(
+                    int(SCREEN_HEIGHT / 10), int(9 * SCREEN_HEIGHT / 10)
+                ),
+            ]
 
-            works=True
+            works = True
 
             for node in self.nodes:
-
-                if np.sqrt((spot[0]-node[1][0])**2+(spot[1]-node[1][1])**2) < 3*min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5):
-
-                    works=False
+                if np.sqrt(
+                    (spot[0] - node[1][0]) ** 2 + (spot[1] - node[1][1]) ** 2
+                ) < 3 * min(SCREEN_WIDTH, SCREEN_HEIGHT) / (NODE_COUNT / 1.5):
+                    works = False
 
             if works:
                 self.nodes.append((count, spot))
                 count += 1
 
     def make_edges(self):
-
-        checklist=[]
+        checklist = []
         edge_set = set()
 
         count = 0
 
         while count < EDGE_COUNT:
-
-            num1 = self.generator.randint(0, NODE_COUNT-1)
-            num2 = self.generator.randint(0, NODE_COUNT-1)
+            num1 = self.generator.randint(0, NODE_COUNT - 1)
+            num2 = self.generator.randint(0, NODE_COUNT - 1)
 
             while num2 == num1:
-
-                num2 =self.generator.randint(0, NODE_COUNT-1)
-    
+                num2 = self.generator.randint(0, NODE_COUNT - 1)
 
             combo = (min(num1, num2), max(num1, num2))
 
-            if combo not in edge_set and self.nearby(combo) and self.check_all_overlaps(combo) and self.check_angle_constraints(combo):
+            if (
+                combo not in edge_set
+                and self.nearby(combo)
+                and self.check_all_overlaps(combo)
+                and self.check_angle_constraints(combo)
+            ):
                 checklist.append(combo)
                 edge_set.add(combo)
                 self.edgeDict[num1].add(num2)
                 self.edgeDict[num2].add(num1)
-                myedge = (self.nodes[num1][0], self.nodes[num2][0], len(self.edges) + NODE_COUNT, count >= ONE_WAY_COUNT)
+                myedge = (
+                    self.nodes[num1][0],
+                    self.nodes[num2][0],
+                    len(self.edges) + NODE_COUNT,
+                    count >= ONE_WAY_COUNT,
+                )
                 self.edges.append(myedge)
 
                 count += 1
 
-    def overlap(self, edge1,edge2):
-        return do_intersect(self.nodes[edge1[0]][1],self.nodes[edge1[1]][1],self.nodes[edge2[0]][1],self.nodes[edge2[1]][1])
+    def overlap(self, edge1, edge2):
+        return do_intersect(
+            self.nodes[edge1[0]][1],
+            self.nodes[edge1[1]][1],
+            self.nodes[edge2[0]][1],
+            self.nodes[edge2[1]][1],
+        )
 
     def check_all_overlaps(self, edge):
-
         for key in self.edgeDict:
             for val in self.edgeDict[key]:
-                if edge[0]!=val and edge[0]!=key and edge[1]!=val and edge[1]!=key:
+                if (
+                    edge[0] != val
+                    and edge[0] != key
+                    and edge[1] != val
+                    and edge[1] != key
+                ):
                     if self.overlap(edge, (key, val)):
                         return False
         return True
@@ -83,7 +112,7 @@ class MapBuilder:
     def check_angle_constraints(self, new_edge):
         p1 = self.nodes[new_edge[0]][1]
         p2 = self.nodes[new_edge[1]][1]
-        
+
         for key in self.edgeDict:
             for val in self.edgeDict[key]:
                 if new_edge[0] == key or new_edge[0] == val:
@@ -101,12 +130,15 @@ class MapBuilder:
         return True
 
     def nearby(self, edge):
-        return np.sqrt((self.nodes[edge[0]][1][0]-self.nodes[edge[1]][1][0])**2+(self.nodes[edge[0]][1][1]-self.nodes[edge[1]][1][1])**2) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT)/(NODE_COUNT/1.5)      
+        return np.sqrt(
+            (self.nodes[edge[0]][1][0] - self.nodes[edge[1]][1][0]) ** 2
+            + (self.nodes[edge[0]][1][1] - self.nodes[edge[1]][1][1]) ** 2
+        ) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT) / (NODE_COUNT / 1.5)
 
     def convert_to_objects(self):
         edges = []
 
-        node_function = MODE['node_function']
+        node_function = MODE["node_function"]
         nodes = node_function(self.nodes)
 
         for edge in self.edges:
@@ -116,7 +148,7 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        starter_effect =  MODE['setup']
+        starter_effect = MODE["setup"]
         nodes = starter_effect(nodes)
 
         self.edge_objects = edges
