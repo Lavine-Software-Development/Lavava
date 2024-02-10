@@ -4,6 +4,7 @@ from constants import MODES
 from server_constants import SERVERS
 import ast
 
+
 class Network:
     def __init__(self, action_callback):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,7 +23,7 @@ class Network:
                 break
 
     def get_user_input_for_game(self):
-        server_keys = '/'.join(SERVERS.keys())
+        server_keys = "/".join(SERVERS.keys())
         self.server = input(f"Input Server IP Address ({server_keys} for DEFAULT): ")
         if self.server in SERVERS:
             self.server = SERVERS[self.server]
@@ -36,7 +37,7 @@ class Network:
 
         if user_input == "h":
             player_count = input("Enter the number of players for the game: ")
-            game_modes = ', '.join(f'{key} - {val}' for key, val in MODES.items())
+            game_modes = ", ".join(f"{key} - {val}" for key, val in MODES.items())
             game_type = input(f"Enter game type. {game_modes}: ")
             self.init_data = f"HOST,{player_count},{game_type}"
         else:
@@ -75,21 +76,23 @@ class Network:
         try:
             head = data[:2]
             tail = data[2:]
-            message = '(' + ','.join(map(str, head)) + ',[' + ','.join(map(str, tail)) + '])'
+            message = (
+                "(" + ",".join(map(str, head)) + ",[" + ",".join(map(str, tail)) + "])"
+            )
             self.client.send(message.encode())
         except socket.error as e:
             print(e)
 
     def listen_for_data(self):
-        buffer = ''
+        buffer = ""
         while self.running:
             try:
                 chunk = self.client.recv(32).decode()
                 buffer += chunk
 
-                while '(' in buffer and ')' in buffer:
-                    start_index = buffer.find('(')
-                    end_index = buffer.find(')') + 1 
+                while "(" in buffer and ")" in buffer:
+                    start_index = buffer.find("(")
+                    end_index = buffer.find(")") + 1
                     response = buffer[start_index:end_index]
 
                     data_tuple = ast.literal_eval(response)
@@ -107,9 +110,13 @@ class Network:
         self.running = False
         self.client.close()
 
+
 if __name__ == "__main__":
     # replace with your actual callbacks
-    def action_callback(): pass 
-    def tick_callback(): pass 
+    def action_callback():
+        pass
+
+    def tick_callback():
+        pass
 
     Network(action_callback)

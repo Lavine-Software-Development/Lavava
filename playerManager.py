@@ -1,11 +1,14 @@
 from constants import COLOR_DICT, CONTEXT, MODE
 
+
 class PlayerManager:
     def __init__(self, player_count, main_player_number):
-        PlayerClass = MODE['player']
-        self.player_dict = {i: PlayerClass(COLOR_DICT[i], i) for i in range(player_count)}
+        PlayerClass = MODE["player"]
+        self.player_dict = {
+            i: PlayerClass(COLOR_DICT[i], i) for i in range(player_count)
+        }
         self.player_points = {i: 0 for i in range(player_count)}
-        CONTEXT['main_player'] = self.player_dict[main_player_number]
+        CONTEXT["main_player"] = self.player_dict[main_player_number]
         self.remaining = {i for i in range(player_count)}
         self.victor = None
         self.timer = 60
@@ -52,7 +55,9 @@ class PlayerManager:
         self.display_ranks()
 
     def display_ranks(self):
-        sorted_by_score = sorted(self.player_dict.values(), key=lambda p: p.points, reverse=True)
+        sorted_by_score = sorted(
+            self.player_dict.values(), key=lambda p: p.points, reverse=True
+        )
         print("New Scores")
         print("-----------------")
         for player in sorted_by_score:
@@ -66,8 +71,8 @@ class PlayerManager:
             if self.timer > 3 and self.opening_moves == len(self.remaining):
                 self.timer = 3
             return True
-            
-        CONTEXT['started'] = True
+
+        CONTEXT["started"] = True
         return False
 
     @property

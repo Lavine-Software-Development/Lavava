@@ -1,5 +1,6 @@
 import random
 
+
 class Batch:
     def __init__(self, count, mode, conn):
         self.connections = [conn]
@@ -11,7 +12,7 @@ class Batch:
 
     def build(self):
         self.seed = random.randint(0, 10000)
-        
+
     def is_ready(self):
         return len(self.connections) == self.player_count
 
