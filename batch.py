@@ -1,4 +1,3 @@
-from map_builder import MapBuilder
 import random
 
 class Batch:

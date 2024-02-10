@@ -7,8 +7,15 @@ class DefaultPlayer:
         self.name = color[1]
         self.id = id
         self.points = 0
-        self.effects = {}
+        self.rage_count = 0
         self.default_values()
+
+    def enrage(self):
+        self.rage_count = RAGE_TICKS
+
+    @property
+    def raged(self):
+        return self.rage_count > 0
 
     def default_values(self):
         self.count = 0
@@ -24,10 +31,8 @@ class DefaultPlayer:
         self.points += self.count
 
     def update(self):
-        for eff in list(self.effects.keys()): 
-            self.effects[eff] -= 1
-            if self.effects[eff] <= 0:
-                del self.effects[eff]
+        if self.raged:
+            self.rage_count -= 1
 
     def win(self):
         self.victory = True
