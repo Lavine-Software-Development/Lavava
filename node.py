@@ -46,6 +46,8 @@ class Node:
         elif state_name == "capital":
             CapitalStateType = MODE['capital']
             return CapitalStateType(self.id)
+        else:
+            return DefaultState(self.id)
 
     def new_effect(self, effect_name):
         if effect_name == 'poison':
@@ -125,7 +127,7 @@ class Node:
         self.effects_tick()
 
     def effects_tick(self):
-        expired_effects = {}
+        expired_effects = set()
         for key, effect in self.effects.items():
             effect.count()
             if effect.expired:
@@ -220,7 +222,7 @@ class PortNode(Node):
 
     def new_effect(self, effect_name):
         if effect_name == 'burn':
-            return Burning(self, self.lose_ports)
+            return Burning(self.lose_ports)
         else:
             return super().new_effect(effect_name)
 
@@ -238,7 +240,7 @@ class PortNode(Node):
 
     def grow(self):
         if self.on_fire:
-            self.burning -= 1
+            self.effects['burn'].count()
             if not self.on_fire:
                 self.lose_ports()
         super().grow()
