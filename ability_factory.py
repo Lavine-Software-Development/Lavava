@@ -1,7 +1,7 @@
-from constants import *
+from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, EDGE
 from ability import Ability
-from ability_validators import *
-from ability_return import *
+from ability_validators import new_edge_validator, standard_node_attack, capital_logic, standard_port_node, dynamic_edge_own_either, no_click
+from ability_return import unowned_node, make_new_edge
 from powerBox_factory import make_boxes
 
 def make_abilities(board):

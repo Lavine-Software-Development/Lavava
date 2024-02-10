@@ -38,7 +38,7 @@ class DynamicEdge(Edge):
                 self.click_swap()
 
     def check_status(self):
-        if self.from_node.owner is None and self.to_node.owner != None:
+        if self.from_node.owner is None and self.to_node.owner is not None:
             self.natural_swap()
 
     def update(self):

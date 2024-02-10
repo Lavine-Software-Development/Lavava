@@ -1,5 +1,5 @@
 import math
-from constants import *
+from constants import ISLAND_RESOURCE_COUNT, NETWORK_RESOURCE_COUNT, CAPITAL_START_COUNT, CAPITAL_ISLAND_COUNT, PORT_LAYOUT
 from node import Node, PortNode
 
 def distance_point_to_segment(px, py, x1, y1, x2, y2):

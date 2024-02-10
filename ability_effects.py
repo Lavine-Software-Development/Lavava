@@ -1,4 +1,4 @@
-from constants import *
+from constants import RAGE_TICKS, BRIDGE_CODE, D_BRIDGE_CODE, SPAWN_CODE, FREEZE_CODE, NUKE_CODE, BURN_CODE, POISON_CODE, CAPITAL_CODE, RAGE_CODE, EDGE, DYNAMIC_EDGE
 
 def make_bridge(buy_new_edge, bridge_type):
     def bridge_effect(data, player):

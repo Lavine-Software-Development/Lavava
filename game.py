@@ -5,7 +5,7 @@ from draw import Draw
 from map_builder import MapBuilder
 from randomGenerator import RandomGenerator
 from playerManager import PlayerManager
-from constants import *
+from constants import CONTEXT, RESTART_GAME_VAL, ELIMINATE_VAL, ABILITIES_CHOSEN_VAL, TICK, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, MODE
 import sys
 from mode_builder import set_mode
 from ability_effects import make_ability_effects

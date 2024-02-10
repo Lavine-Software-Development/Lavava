@@ -1,5 +1,5 @@
 from powerBox import PowerBox
-from constants import *
+from constants import BRIDGE_CODE, POISON_CODE, FREEZE_CODE, BURN_CODE, D_BRIDGE_CODE, NUKE_CODE, CAPITAL_CODE, RAGE_CODE, SPAWN_CODE, CONTEXT, YELLOW, PURPLE, LIGHT_BLUE, DARK_ORANGE, BLACK, PINK, GREEN
 
 def make_boxes():
     return {

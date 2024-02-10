@@ -3,7 +3,6 @@ from nodeState import CapitalState, StartingCapitalState
 from player import MoneyPlayer, DefaultPlayer
 from helpers import starter_capitals, starter_mines, starter_port_nodes, starter_nodes
 from abilityManager import MoneyAbilityManager, ReloadAbilityManager
-from node import Node, PortNode
 
 def set_mode(mode_num):
     if mode_num == 1:

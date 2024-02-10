@@ -1,8 +1,7 @@
 from collections import defaultdict
 import numpy as np
-from constants import *
-from helpers import *
-from node import Node
+from constants import NODE_COUNT, EDGE_COUNT, ONE_WAY_COUNT, MAX_EDGE_LENGTH, SCREEN_WIDTH, SCREEN_HEIGHT, MIN_ANGLE, MODE
+from helpers import do_intersect, angle_between_edges
 from edge import Edge
 from dynamicEdge import DynamicEdge
 
