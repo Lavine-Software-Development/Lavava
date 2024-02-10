@@ -49,9 +49,9 @@ class Node:
 
     def new_effect(self, effect_name):
         if effect_name == 'poison':
-            return Poisoned(self, self.spread_poison)
+            return Poisoned(self.spread_poison)
         elif effect_name == 'rage':
-            return Enraged(self)
+            return Enraged()
 
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1

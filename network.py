@@ -1,6 +1,7 @@
 import socket
 import threading
-from constants import SERVERS, MODES
+from constants import MODES
+from server_constants import SERVERS
 import ast
 
 class Network:
@@ -111,4 +112,4 @@ if __name__ == "__main__":
     def action_callback(): pass 
     def tick_callback(): pass 
 
-    Network(action_callback, tick_callback)
+    Network(action_callback)
