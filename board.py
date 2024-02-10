@@ -53,7 +53,7 @@ class Board:
         return None
 
     def click_edge(self):
-        if self.highlighted.type == EDGE:
+        if self.highlighted and self.highlighted.type == EDGE:
             return self.highlighted.id
         return False
 

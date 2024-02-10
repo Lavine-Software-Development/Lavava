@@ -37,6 +37,7 @@ class Poisoned(AbstractEffect):
 
     def __init__(self, spread_poison):
         super().__init__(POISON_TICKS, EffectType.GROW)
+        self.spread_poison = spread_poison
 
     def effect(self, amount):
         return amount * -1

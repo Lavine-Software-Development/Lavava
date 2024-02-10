@@ -66,7 +66,7 @@ class DefaultState(AbstractState):
 class CapitalState(DefaultState):
 
     def __init__(self, id):
-        super().__init__(id, True, False)
+        super().__init__(id)
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.ceil((GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED))
@@ -95,7 +95,7 @@ class CapitalState(DefaultState):
 class StartingCapitalState(CapitalState):
 
     def __init__(self, id, capital_handover, is_owned=True):
-        super().__init__(id, True, False)
+        AbstractState.__init__(self, id, True, False)
         self.capitalized = True
         self.is_owned = is_owned
 
