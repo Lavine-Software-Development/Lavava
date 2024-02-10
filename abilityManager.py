@@ -1,6 +1,5 @@
-from constants import *
+from constants import DEFAULT_ABILITY_CODE, BREAKDOWNS, SPAWN_RELOAD, RAGE_CODE, CONTEXT, SPAWN_CODE
 from abc import ABC, abstractmethod
-from ability import *
 from ability_factory import make_abilities
 from chooseUI import choose_abilities_ui
 

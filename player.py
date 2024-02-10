@@ -1,4 +1,4 @@
-from constants import *
+from constants import RAGE_TICKS, GREY, NODE_COUNT, CAPITAL_WIN_COUNT, START_MONEY, START_MONEY_RATE, CAPITAL_BONUS
 
 class DefaultPlayer:
 

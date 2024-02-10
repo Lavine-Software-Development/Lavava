@@ -1,6 +1,6 @@
 import socket
 import threading
-from constants import *
+from constants import SERVERS, MODES
 import ast
 
 class Network:

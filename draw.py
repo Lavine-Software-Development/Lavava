@@ -1,11 +1,11 @@
 import math
 import pygame as py
-from constants import *
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, ABILITY_SIZE, ABILITY_FONT, ABILITY_GAP, FONT_GAP, BLACK, WHITE, GREEN, YELLOW, PURPLE, PINK, GREY, BROWN, STRONG_ORANGE, ABILITY_START_HEIGHT, BRIDGE_CODE, D_BRIDGE_CODE, PORT_NODE, BURN_TICKS, CONTEXT, SIZE
 
 class Draw:
     def __init__(self, board, ability_manager, player_manager):
         self.set_data(board, ability_manager, player_manager)
-        self.screen = py.display.set_mode(size, py.RESIZABLE)
+        self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
@@ -222,7 +222,7 @@ class Draw:
         for spot in self.nodes:
             if spot.state_name == 'mine':
                 state = spot.state
-                if spot.owner != None:
+                if spot.owner is not None:
                     angle1 = 2 * math.pi * ((state.bubble - spot.value) / state.bubble)
                     py.draw.arc(self.screen, state.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), -angle1 / 2, angle1 / 2, spot.size)
                     py.draw.arc(self.screen, spot.owner.color, (spot.pos[0] - spot.size, spot.pos[1] - spot.size, spot.size * 2, spot.size * 2), angle1 / 2, -angle1 / 2 + 2 * math.pi, spot.size)

@@ -4,7 +4,6 @@ from batch import Batch
 import sys
 import time
 from threading import Thread
-from constants import *
 
 class Server:
     def __init__(self, port):

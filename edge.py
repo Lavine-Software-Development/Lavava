@@ -1,4 +1,4 @@
-from constants import *
+from constants import EDGE, RAGE_TICKS, MINIMUM_TRANSFER_VALUE, BEGIN_TRANSFER_VALUE, AUTO_ATTACK
 
 class Edge:
 
@@ -30,7 +30,7 @@ class Edge:
             self.switch()
 
     def switch(self, specified=None):
-        if specified == None:
+        if specified is None:
             self.on = not self.on
         else:
             self.on = specified
@@ -82,7 +82,7 @@ class Edge:
 
     @property
     def duo_ownership(self):
-        return self.to_node.owner != None and self.from_node.owner != None
+        return self.to_node.owner is not None and self.from_node.owner is not None
 
     @property
     def contested(self):

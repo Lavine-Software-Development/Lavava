@@ -1,6 +1,6 @@
-from constants import *
-from nodeState import *
-from nodeEffect import *
+from constants import NODE, PORT_NODE, SCREEN_WIDTH, SCREEN_HEIGHT, STATE_NAMES, EFFECT_NAMES, AUTO_ATTACK, AUTO_EXPAND, CONTEXT, MODE, BLACK, BROWN
+from nodeState import DefaultState, MineState
+from nodeEffect import EffectType, Poisoned, Enraged, Burning
 
 class Node:
 
@@ -40,7 +40,7 @@ class Node:
         if state_name == 'default':
             return DefaultState(self.id)
         elif state_name == "mine":
-            if data == True and CONTEXT['mode'] == 3:
+            if data is True and CONTEXT['mode'] == 3:
                 self.port_count = 3
             return MineState(self.id, self.absorbing, data)
         elif state_name == "capital":
@@ -79,7 +79,7 @@ class Node:
         pass
 
     def left_click(self, clicker):
-        if self.owner == None:
+        if self.owner is None:
             if clicker.buy_node():
                 self.capture(clicker)
 
@@ -107,7 +107,7 @@ class Node:
         self.pos = (self.pos_x_per * width, self.pos_y_per * height)
 
     def owned_and_alive(self):
-        return self.owner != None and not self.owner.eliminated
+        return self.owner is not None and not self.owner.eliminated
 
     def spread_poison(self):
         for edge in self.outgoing:
@@ -154,7 +154,7 @@ class Node:
         return self.state.expel(self.expel_multiplier, self.value)
 
     def update_ownerships(self, player):
-        if self.owner != None and self.owner != player:
+        if self.owner is not None and self.owner != player:
             self.owner.count -= 1
         player.count += 1
         self.owner = player

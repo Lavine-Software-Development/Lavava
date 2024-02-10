@@ -1,6 +1,6 @@
 import pygame
 from powerBox_factory import make_boxes
-from constants import *
+from constants import GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, SPAWN_CODE, CONTEXT
 import math
 
 # Constants
