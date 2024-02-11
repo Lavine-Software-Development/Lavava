@@ -174,7 +174,7 @@ def choose_abilities_ui():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN and len(selected_boxes) == 4:
                     CONTEXT["all_ability_codes"].add(SPAWN_CODE)
-                    return [SPAWN_CODE] + list(selected_boxes)
+                    running = False
                 if event.key == pygame.K_ESCAPE:
                     running = False
 
@@ -185,3 +185,4 @@ def choose_abilities_ui():
         clock.tick(60)
 
     pygame.quit()
+    return [SPAWN_CODE] + list(selected_boxes)

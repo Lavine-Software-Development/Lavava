@@ -88,7 +88,7 @@ class MoneyAbilityManager(AbstractAbilityManager):
 class ReloadAbilityManager(AbstractAbilityManager):
     def __init__(self, board):
         super().__init__(board)
-        self.load_count = {code: 0 for code in self.ability_codes}
+        self.load_count = {code: 0.0 for code in self.ability_codes}
         self.load_count[SPAWN_CODE] = SPAWN_RELOAD
         self.remaining_usage = {
             code: BREAKDOWNS[code]["total"] for code in self.ability_codes
