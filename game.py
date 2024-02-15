@@ -13,10 +13,9 @@ from constants import (
     TICK,
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
-    MODE,
 )
+from modeConstants import MODE_ABILITY_MANAGERS
 import sys
-from mode_builder import set_mode
 from ability_effects import make_ability_effects
 
 
@@ -32,9 +31,6 @@ class Game:
         player_num = int(self.network.data[0])
         player_count = int(self.network.data[2])
         self.pcount = player_count
-        mode = int(self.network.data[4])
-
-        set_mode(mode)
 
         self.player_manager = PlayerManager(player_count, player_num)
 
@@ -52,12 +48,12 @@ class Game:
 
     def start_game(self):
         CONTEXT["started"] = False
+        mode = CONTEXT["mode"]
         self.chose_count = 0
         self.player_manager.reset()
-        map_builder = MapBuilder(self.generator)
+        map_builder = MapBuilder(self.generator, mode)
         map_builder.build()
-        AbilityManager = MODE["manager"]
-        self.ability_manager = AbilityManager(self.board)
+        self.ability_manager = MODE_ABILITY_MANAGERS[mode](self.board)
         self.chose_send()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
         self.position = None
