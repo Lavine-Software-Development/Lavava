@@ -22,7 +22,6 @@ from ability_effects import make_ability_effects
 
 class Game:
     def __init__(self):
-        p.init()
 
         self.running = True
         self.chose_count = 0

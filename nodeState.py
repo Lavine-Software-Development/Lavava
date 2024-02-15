@@ -36,7 +36,7 @@ class AbstractState(ABC):
         return TRANSFER_RATE * multiplier * value
 
     @abstractmethod
-    def capture_event(self):
+    def capture_event(self, player):
         pass
 
     @abstractmethod
@@ -63,7 +63,7 @@ class DefaultState(AbstractState):
             change *= -1
         return change
 
-    def capture_event(self):
+    def capture_event(self, player=None):
         return lambda value: value * -1
 
     def killed(self, value):
@@ -92,8 +92,8 @@ class CapitalState(DefaultState):
         self.shrink_count -= 1
         return CAPITAL_SHRINK_SPEED
 
-    def capture_event(self):
-        CONTEXT["main_player"].capital_handover(self, False)
+    def capture_event(self, player):
+        player.capital_handover(self, False)
         return super().capture_event()
 
     def killed(self, value):
@@ -109,10 +109,10 @@ class StartingCapitalState(CapitalState):
     def grow(self, multiplier):
         return 0
 
-    def capture_event(self):
+    def capture_event(self, player):
         if self.is_owned:
-            CONTEXT['main_player'].capital_handover(self, False)
-        return super().capture_event()
+            player.capital_handover(self, False)
+        return super().capture_event(player)
 
 
 class MineState(AbstractState):
