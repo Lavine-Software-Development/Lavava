@@ -140,7 +140,7 @@ class Node:
                 edge.enrage()
 
     def grow(self):
-        if self.value < self.state.full_size:
+        if self.state.can_grow(self.value):
             self.value += self.state.grow(self.grow_multiplier)
         self.effects_tick()
 
@@ -166,8 +166,6 @@ class Node:
             self.capture(player)
         if player.raged:
             self.spread_rage()
-        # if self.state_name == 'mine':
-        #     print(self.owner.id)
 
     def accept_delivery(self, player):
         return self.state.accept_intake(player != self.owner, self.value)
@@ -182,7 +180,7 @@ class Node:
         self.owner = player
 
     def capture(self, player):
-        self.value = self.state.capture_event()(self.value)
+        self.value = self.state.capture_event(player)(self.value,)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()

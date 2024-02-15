@@ -51,6 +51,9 @@ class AbstractState(ABC):
     @property
     def full_size(self):
         return GROWTH_STOP
+    
+    def can_grow(self, value):
+        return value < self.full_size
 
 
 class DefaultState(AbstractState):
@@ -83,6 +86,11 @@ class CapitalState(DefaultState):
         if not self.capitalized:
             return self.shrink()
         return 0
+    
+    def can_grow(self, value):
+        if not self.capitalized:
+            return True
+        return super().can_grow(value)
 
     def shrink(self):
         if self.shrink_count == 0:
@@ -134,8 +142,8 @@ class MineState(AbstractState):
     def killed(self, value):
         return value >= self.bubble
 
-    def capture_event(self):
-        CONTEXT["main_player"].change_tick(self.bonus)
+    def capture_event(self, player):
+        player.change_tick(self.bonus)
         return lambda value: MINIMUM_TRANSFER_VALUE
 
     def size_factor(self, value):
