@@ -141,7 +141,7 @@ def choose_abilities_ui():
     boxes = {
         key: val
         for key, val in all_boxes.items()
-        if key in CONTEXT["all_ability_codes"]
+        # if key in CONTEXT["all_ability_codes"]
     }
     selected_boxes = set()
 

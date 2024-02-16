@@ -15,12 +15,8 @@ class MKD(dict): # Multi Key Dictionary
         else:
             super().__setitem__(key, value)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-        for arg in args:
-            for key, value in arg:
-                self.__setitem__(key, value)
-        for key, value in kwargs.items():
+    def __init__(self, *args):
+        for key, value in args:
             self.__setitem__(key, value)
 
 MODE_PLAYERS = MKD(((1, 3), MoneyPlayer), (2, DefaultPlayer))

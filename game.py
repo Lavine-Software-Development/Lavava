@@ -31,6 +31,7 @@ class Game:
 
         player_num = int(self.network.data[0])
         player_count = int(self.network.data[2])
+        mode.MODE = int(self.network.data[4])
         self.pcount = player_count
 
         self.player_manager = PlayerManager(player_count, player_num)
