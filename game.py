@@ -14,9 +14,10 @@ from constants import (
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
 )
-from modeConstants import MODE_ABILITY_MANAGERS
+from modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
 import sys
 from ability_effects import make_ability_effects
+import mode
 
 
 class Game:
@@ -48,12 +49,11 @@ class Game:
 
     def start_game(self):
         CONTEXT["started"] = False
-        mode = CONTEXT["mode"]
         self.chose_count = 0
         self.player_manager.reset()
-        map_builder = MapBuilder(self.generator, mode)
+        map_builder = MapBuilder(self.generator)
         map_builder.build()
-        self.ability_manager = MODE_ABILITY_MANAGERS[mode](self.board)
+        self.ability_manager = MODE_ABILITY_MANAGERS[mode.MODE](self.board)
         self.chose_send()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
         self.position = None
@@ -70,7 +70,7 @@ class Game:
         elif key == TICK:
             if self.chose_count == self.pcount:
                 self.tick()
-        elif key in CONTEXT["all_ability_codes"]:
+        elif key in self.ability_options:
             new_data = [
                 self.board.id_dict[d] if d in self.board.id_dict else d for d in data
             ]
@@ -165,6 +165,10 @@ class Game:
                 self.ability_manager.update_ability()
             elif id := self.board.click_edge():
                 self.network.send((button, CONTEXT["main_player"].id, id))
+
+    @property
+    def ability_options(self):
+        return ABILITY_OPTIONS[mode.MODE]
 
 
 if __name__ == "__main__":

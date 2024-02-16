@@ -13,18 +13,16 @@ from helpers import do_intersect, angle_between_edges
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from modeConstants import STARTING_NODES, STARTING_NODES_STATES
-
+import mode
 
 class MapBuilder:
-    def __init__(self, generator, mode):
+    def __init__(self, generator):
         self.nodes = []
         self.edges = []
         self.node_objects = []
         self.edge_objects = []
         self.edgeDict = defaultdict(set)
         self.generator = generator
-        self.starter_states = STARTING_NODES_STATES[mode]
-        self.node_function = STARTING_NODES[mode]
 
     def build(self):
         self.make_nodes()
@@ -153,3 +151,11 @@ class MapBuilder:
 
         self.edge_objects = edges
         self.node_objects = nodes
+
+    @property
+    def starter_states(self):
+        return STARTING_NODES_STATES[mode.MODE]
+    
+    @property
+    def node_function(self):
+        return STARTING_NODES[mode.MODE]

@@ -23,14 +23,6 @@ class MKD(dict): # Multi Key Dictionary
         for key, value in kwargs.items():
             self.__setitem__(key, value)
 
-PLAYER = None
-MANAGER = None
-START_NODE_ALGORITHM = None
-START_NODE_STATE_ALGORITHM = None
-CAPITAL_TYPE = None
-ABILITY_DISPLAY = None
-ABILITY_OPTION = None
-
 MODE_PLAYERS = MKD(((1, 3), MoneyPlayer), (2, DefaultPlayer))
 MODE_ABILITY_MANAGERS = MKD(((1, 3), MoneyAbilityManager), (2, ReloadAbilityManager))
 STARTING_NODES = MKD(((1, 2), starter_default_nodes), (3, starter_port_nodes))
