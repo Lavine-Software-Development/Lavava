@@ -57,6 +57,7 @@ class Node:
                 self.port_count = 3
             return MineState(self.id, self.absorbing, data)
         elif state_name == "capital":
+            self.owner.capital_handover(self)
             CapitalStateType = MODE["capital"]
             return CapitalStateType(self.id)
         else:
@@ -180,7 +181,7 @@ class Node:
         self.owner = player
 
     def capture(self, player):
-        self.value = self.state.capture_event(player)(self.value,)
+        self.value = self.state.capture_event(player)(self.value)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()

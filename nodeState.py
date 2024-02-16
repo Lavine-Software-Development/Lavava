@@ -6,7 +6,6 @@ from constants import (
     GROWTH_STOP,
     GREY,
     TRANSFER_RATE,
-    CONTEXT,
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
 )
@@ -78,7 +77,7 @@ class CapitalState(DefaultState):
         super().__init__(id)
         self.capitalized = False
         self.acceptBridge = False
-        self.shrink_count = math.ceil(
+        self.shrink_count = math.floor(
             (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED)
         )
 
@@ -95,7 +94,6 @@ class CapitalState(DefaultState):
     def shrink(self):
         if self.shrink_count == 0:
             self.capitalized = True
-            CONTEXT["main_player"].capital_handover(self)
             return 0
         self.shrink_count -= 1
         return CAPITAL_SHRINK_SPEED
@@ -106,6 +104,11 @@ class CapitalState(DefaultState):
 
     def killed(self, value):
         return value < 0
+    
+    def accept_intake(self, contested, value):
+        if self.capitalized:
+            return value < self.full_size or contested
+        return False
 
 
 class StartingCapitalState(CapitalState):
