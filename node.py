@@ -154,6 +154,7 @@ class Node:
 
         if expired_effects:
             for key in expired_effects:
+                self.effects[key].complete()
                 self.effects.pop(key)
             self.calculate_interactions()
 
