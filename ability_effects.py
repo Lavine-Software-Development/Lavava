@@ -57,7 +57,7 @@ def poison_effect(data, player):
 
 def burn_effect(data, player):
     node = data[0]
-    node.burn()
+    node.set_state("burn")
 
 
 def capital_effect(data, player):
