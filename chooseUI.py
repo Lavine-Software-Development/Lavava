@@ -137,12 +137,8 @@ def choose_abilities_ui():
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = pygame.time.Clock()
     # Create boxes
-    all_boxes = make_boxes()
-    boxes = {
-        key: val
-        for key, val in all_boxes.items()
-        # if key in CONTEXT["all_ability_codes"]
-    }
+    boxes = make_boxes()
+    boxes.pop(SPAWN_CODE)
     selected_boxes = set()
 
     # Calculate positions for boxes and store them as Pygame Rects for easy collision detection
@@ -173,7 +169,6 @@ def choose_abilities_ui():
                         break
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN and len(selected_boxes) == 4:
-                    CONTEXT["all_ability_codes"].add(SPAWN_CODE)
                     running = False
                 if event.key == pygame.K_ESCAPE:
                     running = False

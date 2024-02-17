@@ -2,12 +2,12 @@ from constants import LETTER_TO_CODE, BREAKDOWNS
 
 
 class PowerBox:
-    def __init__(self, name, color, shape, letter=None):
+    def __init__(self, name, color, shape, letter=''):
         self.name = name
         self.color = color
         self.shape = shape
         self.letter = letter
-        if letter is None:
+        if letter == '':
             self.letter = name[0]
         self.stat_func = None
 

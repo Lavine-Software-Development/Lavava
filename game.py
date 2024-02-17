@@ -22,31 +22,32 @@ import mode
 
 class Game:
     def __init__(self):
-        p.init()
 
         self.running = True
         self.chose_count = 0
 
-        self.network = Network(self.action)
-
-        player_num = int(self.network.data[0])
-        player_count = int(self.network.data[2])
-        mode.MODE = int(self.network.data[4])
-        self.pcount = player_count
-
-        self.player_manager = PlayerManager(player_count, player_num)
+        self.setup()
 
         self.board = Board()
 
         self.ability_effects = make_ability_effects(self.board)
-
-        self.generator = RandomGenerator(int(self.network.data[6:]))
 
         self.start_game()
 
         self.drawer = Draw(self.board, self.ability_manager, self.player_manager)
 
         self.main_loop()
+
+    def setup(self):
+
+        self.network = Network(self.action)
+
+        player_num = int(self.network.data[0])
+        self.pcount = int(self.network.data[2])
+        mode.MODE = int(self.network.data[4])
+        self.generator = RandomGenerator(int(self.network.data[6:]))
+
+        self.player_manager = PlayerManager(self.pcount, player_num)
 
     def start_game(self):
         CONTEXT["started"] = False
@@ -82,6 +83,8 @@ class Game:
             self.board.id_dict[data[0]].click(
                 self.player_manager.player_dict[acting_player], key
             )
+        else:
+            print("NOT ALLOWED")
 
     def tick(self):
         if (

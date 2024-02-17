@@ -80,3 +80,12 @@ class PlayerManager:
     @property
     def opening_moves(self):
         return sum([player.count for player in self.player_dict.values()])
+    
+
+class SoloPlayerManager(PlayerManager):
+
+    def __init__(self):
+        super().__init__(1, 0)
+
+    def check_over(self):
+        self.check_capital_win()

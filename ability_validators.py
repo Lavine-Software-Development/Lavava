@@ -1,5 +1,5 @@
 from constants import CONTEXT
-
+import mode
 
 def no_click(data):
     return False
@@ -60,6 +60,6 @@ def new_edge_validator(check_new_edge):
     def new_edge_ports(data):
         return data[0].port_count > 0 and new_edge_standard(data)
 
-    if CONTEXT["mode"] == 3:
+    if mode.MODE == 3:
         return new_edge_ports
     return new_edge_standard

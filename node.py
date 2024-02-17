@@ -56,7 +56,8 @@ class Node:
                 self.port_count = 3
             return MineState(self.id, self.absorbing, data)
         elif state_name == "capital":
-            CapitalStateType = MODE["capital"]
+            from modeConstants import CAPITAL_TYPES
+            CapitalStateType = CAPITAL_TYPES[mode.MODE]
             return CapitalStateType(self.id)
         else:
             return DefaultState(self.id)
