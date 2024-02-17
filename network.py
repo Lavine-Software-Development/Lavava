@@ -32,7 +32,7 @@ class SoloNetwork:
         return True
 
     def send(self, data):
-        self.action_callback(*data[:2], [data[2]])
+        self.action_callback(*data[:2], data[2:])
 
     def listen(self):
         time.sleep(1)
