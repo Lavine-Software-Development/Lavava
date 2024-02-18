@@ -1,7 +1,8 @@
 import pygame
 from powerBox_factory import make_boxes
-from constants import GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, SPAWN_CODE, CONTEXT
+from constants import GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, SPAWN_CODE
 import math
+import mode
 
 # Constants
 WINDOW_WIDTH = 800  # Adjust as needed
@@ -13,7 +14,6 @@ PADDING = 25  # Padding between boxes
 BOX_PADDING = 18  # Padding around each box
 
 # Initialization
-
 
 def _generate_darker_color(color):
     return tuple(max(c - 50, 0) for c in color)
@@ -137,12 +137,9 @@ def choose_abilities_ui():
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = pygame.time.Clock()
     # Create boxes
-    all_boxes = make_boxes()
-    boxes = {
-        key: val
-        for key, val in all_boxes.items()
-        if key in CONTEXT["all_ability_codes"]
-    }
+    from modeConstants import ABILITY_OPTIONS
+    boxes = {key: val for key, val in make_boxes().items() if key in ABILITY_OPTIONS[mode.MODE]}
+    boxes.pop(SPAWN_CODE)
     selected_boxes = set()
 
     # Calculate positions for boxes and store them as Pygame Rects for easy collision detection
@@ -173,7 +170,6 @@ def choose_abilities_ui():
                         break
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN and len(selected_boxes) == 4:
-                    CONTEXT["all_ability_codes"].add(SPAWN_CODE)
                     running = False
                 if event.key == pygame.K_ESCAPE:
                     running = False

@@ -8,12 +8,12 @@ from constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     MIN_ANGLE,
-    MODE,
 )
 from helpers import do_intersect, angle_between_edges
 from edge import Edge
 from dynamicEdge import DynamicEdge
-
+from modeConstants import STARTING_NODES, STARTING_NODES_STATES
+import mode
 
 class MapBuilder:
     def __init__(self, generator):
@@ -138,8 +138,7 @@ class MapBuilder:
     def convert_to_objects(self):
         edges = []
 
-        node_function = MODE["node_function"]
-        nodes = node_function(self.nodes)
+        nodes = self.node_function(self.nodes)
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
@@ -148,8 +147,15 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        starter_effect = MODE["setup"]
-        nodes = starter_effect(nodes)
+        nodes = self.starter_states(nodes)
 
         self.edge_objects = edges
         self.node_objects = nodes
+
+    @property
+    def starter_states(self):
+        return STARTING_NODES_STATES[mode.MODE]
+    
+    @property
+    def node_function(self):
+        return STARTING_NODES[mode.MODE]

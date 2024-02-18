@@ -112,7 +112,7 @@ class CapitalState(DefaultState):
 
 
 class StartingCapitalState(CapitalState):
-    def __init__(self, id, capital_handover, is_owned=True):
+    def __init__(self, id, is_owned=True):
         AbstractState.__init__(self, id, True, False)
         self.capitalized = True
         self.is_owned = is_owned

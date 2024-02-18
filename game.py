@@ -13,11 +13,11 @@ from constants import (
     TICK,
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
-    MODE,
 )
+from modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
 import sys
-from mode_builder import set_mode
 from ability_effects import make_ability_effects
+import mode
 
 
 class Game:
@@ -26,22 +26,11 @@ class Game:
         self.running = True
         self.chose_count = 0
 
-        self.network = Network(self.action)
-
-        player_num = int(self.network.data[0])
-        player_count = int(self.network.data[2])
-        self.pcount = player_count
-        mode = int(self.network.data[4])
-
-        set_mode(mode)
-
-        self.player_manager = PlayerManager(player_count, player_num)
+        self.setup()
 
         self.board = Board()
 
         self.ability_effects = make_ability_effects(self.board)
-
-        self.generator = RandomGenerator(int(self.network.data[6:]))
 
         self.start_game()
 
@@ -49,14 +38,24 @@ class Game:
 
         self.main_loop()
 
+    def setup(self):
+
+        self.network = Network(self.action)
+
+        player_num = int(self.network.data[0])
+        self.pcount = int(self.network.data[2])
+        mode.MODE = int(self.network.data[4])
+        self.generator = RandomGenerator(int(self.network.data[6:]))
+
+        self.player_manager = PlayerManager(self.pcount, player_num)
+
     def start_game(self):
         CONTEXT["started"] = False
         self.chose_count = 0
         self.player_manager.reset()
         map_builder = MapBuilder(self.generator)
         map_builder.build()
-        AbilityManager = MODE["manager"]
-        self.ability_manager = AbilityManager(self.board)
+        self.ability_manager = MODE_ABILITY_MANAGERS[mode.MODE](self.board)
         self.chose_send()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
         self.position = None
@@ -73,7 +72,7 @@ class Game:
         elif key == TICK:
             if self.chose_count == self.pcount:
                 self.tick()
-        elif key in CONTEXT["all_ability_codes"]:
+        elif key in self.ability_options:
             new_data = [
                 self.board.id_dict[d] if d in self.board.id_dict else d for d in data
             ]
@@ -84,6 +83,8 @@ class Game:
             self.board.id_dict[data[0]].click(
                 self.player_manager.player_dict[acting_player], key
             )
+        else:
+            print("NOT ALLOWED")
 
     def tick(self):
         if (
@@ -168,6 +169,10 @@ class Game:
                 self.ability_manager.update_ability()
             elif id := self.board.click_edge():
                 self.network.send((button, CONTEXT["main_player"].id, id))
+
+    @property
+    def ability_options(self):
+        return ABILITY_OPTIONS[mode.MODE]
 
 
 if __name__ == "__main__":

@@ -1,9 +1,11 @@
-from constants import COLOR_DICT, CONTEXT, MODE
+from constants import COLOR_DICT, CONTEXT
+from modeConstants import MODE_PLAYERS
+import mode
 
 
 class PlayerManager:
     def __init__(self, player_count, main_player_number):
-        PlayerClass = MODE["player"]
+        PlayerClass = MODE_PLAYERS[mode.MODE]
         self.player_dict = {
             i: PlayerClass(COLOR_DICT[i], i) for i in range(player_count)
         }
@@ -78,3 +80,12 @@ class PlayerManager:
     @property
     def opening_moves(self):
         return sum([player.count for player in self.player_dict.values()])
+    
+
+class SoloPlayerManager(PlayerManager):
+
+    def __init__(self):
+        super().__init__(1, 0)
+
+    def check_over(self):
+        self.check_capital_win()

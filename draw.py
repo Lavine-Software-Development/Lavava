@@ -24,7 +24,7 @@ from constants import (
     SIZE,
     CONTEXT,
 )
-
+import mode
 
 class Draw:
     def __init__(self, board, ability_manager, player_manager):
@@ -151,7 +151,7 @@ class Draw:
                 self.ability_manager.mode == "default" and btn.key == 2
             )
             loading = False
-            if CONTEXT["mode"] == 2:
+            if mode.MODE == 2:
                 if not self.ability_manager.full(btn.key):
                     loading = True
             self.draw_button(
@@ -429,7 +429,7 @@ class Draw:
 
     def blit_numbers(self):
         py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))
-        if CONTEXT["mode"] != 2:
+        if mode.MODE != 2:
             self.screen.blit(
                 self.font.render(
                     str(int(CONTEXT["main_player"].money)),

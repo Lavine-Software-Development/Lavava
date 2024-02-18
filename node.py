@@ -8,13 +8,12 @@ from constants import (
     AUTO_ATTACK,
     AUTO_EXPAND,
     CONTEXT,
-    MODE,
     BLACK,
     BROWN,
 )
 from nodeState import DefaultState, MineState
 from nodeEffect import EffectType, Poisoned, Enraged, Burning
-
+import mode
 
 class Node:
     def __init__(self, id, pos):
@@ -53,12 +52,14 @@ class Node:
         if state_name == "default":
             return DefaultState(self.id)
         elif state_name == "mine":
-            if data is True and CONTEXT["mode"] == 3:
+            if data is True and mode.MODE == 3:
                 self.port_count = 3
             return MineState(self.id, self.absorbing, data)
         elif state_name == "capital":
-            self.owner.capital_handover(self)
-            CapitalStateType = MODE["capital"]
+            from modeConstants import CAPITAL_TYPES
+            CapitalStateType = CAPITAL_TYPES[mode.MODE]
+            if self.owner:
+                self.owner.capital_handover(self)
             return CapitalStateType(self.id)
         else:
             return DefaultState(self.id)
