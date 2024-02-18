@@ -51,9 +51,9 @@ class DefaultPlayer:
 
     def capital_handover(self, capital, gain=True):
         if gain:
-            self.capitals[capital.node.id] = capital
+            self.capitals[capital.id] = capital
         else:
-            del self.capitals[capital.node.id]
+            del self.capitals[capital.id]
 
     def check_capital_win(self):
         return self.capital_count == CAPITAL_WIN_COUNT

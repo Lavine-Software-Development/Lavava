@@ -6,7 +6,6 @@ from constants import (
     GROWTH_STOP,
     GREY,
     TRANSFER_RATE,
-    CONTEXT,
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
 )
@@ -36,7 +35,7 @@ class AbstractState(ABC):
         return TRANSFER_RATE * multiplier * value
 
     @abstractmethod
-    def capture_event(self):
+    def capture_event(self, player):
         pass
 
     @abstractmethod
@@ -51,6 +50,9 @@ class AbstractState(ABC):
     @property
     def full_size(self):
         return GROWTH_STOP
+    
+    def can_grow(self, value):
+        return value < self.full_size
 
 
 class DefaultState(AbstractState):
@@ -63,7 +65,7 @@ class DefaultState(AbstractState):
             change *= -1
         return change
 
-    def capture_event(self):
+    def capture_event(self, player=None):
         return lambda value: value * -1
 
     def killed(self, value):
@@ -75,7 +77,7 @@ class CapitalState(DefaultState):
         super().__init__(id)
         self.capitalized = False
         self.acceptBridge = False
-        self.shrink_count = math.ceil(
+        self.shrink_count = math.floor(
             (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED)
         )
 
@@ -83,21 +85,30 @@ class CapitalState(DefaultState):
         if not self.capitalized:
             return self.shrink()
         return 0
+    
+    def can_grow(self, value):
+        if not self.capitalized:
+            return True
+        return super().can_grow(value)
 
     def shrink(self):
         if self.shrink_count == 0:
             self.capitalized = True
-            CONTEXT["main_player"].capital_handover(self)
             return 0
         self.shrink_count -= 1
         return CAPITAL_SHRINK_SPEED
 
-    def capture_event(self):
-        CONTEXT["main_player"].capital_handover(self, False)
+    def capture_event(self, player):
+        player.capital_handover(self, False)
         return super().capture_event()
 
     def killed(self, value):
         return value < 0
+    
+    def accept_intake(self, contested, value):
+        if self.capitalized:
+            return value < self.full_size or contested
+        return False
 
 
 class StartingCapitalState(CapitalState):
@@ -109,10 +120,10 @@ class StartingCapitalState(CapitalState):
     def grow(self, multiplier):
         return 0
 
-    def capture_event(self):
+    def capture_event(self, player):
         if self.is_owned:
-            CONTEXT['main_player'].capital_handover(self, False)
-        return super().capture_event()
+            player.capital_handover(self, False)
+        return super().capture_event(player)
 
 
 class MineState(AbstractState):
@@ -134,8 +145,8 @@ class MineState(AbstractState):
     def killed(self, value):
         return value >= self.bubble
 
-    def capture_event(self):
-        CONTEXT["main_player"].change_tick(self.bonus)
+    def capture_event(self, player):
+        player.change_tick(self.bonus)
         return lambda value: MINIMUM_TRANSFER_VALUE
 
     def size_factor(self, value):

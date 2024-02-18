@@ -58,6 +58,7 @@ class Node:
         elif state_name == "capital":
             from modeConstants import CAPITAL_TYPES
             CapitalStateType = CAPITAL_TYPES[mode.MODE]
+            self.owner.capital_handover(self)
             return CapitalStateType(self.id)
         else:
             return DefaultState(self.id)
@@ -140,7 +141,7 @@ class Node:
                 edge.enrage()
 
     def grow(self):
-        if self.value < self.state.full_size:
+        if self.state.can_grow(self.value):
             self.value += self.state.grow(self.grow_multiplier)
         self.effects_tick()
 
@@ -153,6 +154,7 @@ class Node:
 
         if expired_effects:
             for key in expired_effects:
+                self.effects[key].complete()
                 self.effects.pop(key)
             self.calculate_interactions()
 
@@ -166,8 +168,6 @@ class Node:
             self.capture(player)
         if player.raged:
             self.spread_rage()
-        # if self.state_name == 'mine':
-        #     print(self.owner.id)
 
     def accept_delivery(self, player):
         return self.state.accept_intake(player != self.owner, self.value)
@@ -182,7 +182,7 @@ class Node:
         self.owner = player
 
     def capture(self, player):
-        self.value = self.state.capture_event()(self.value)
+        self.value = self.state.capture_event(player)(self.value)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()
