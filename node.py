@@ -58,7 +58,8 @@ class Node:
         elif state_name == "capital":
             from modeConstants import CAPITAL_TYPES
             CapitalStateType = CAPITAL_TYPES[mode.MODE]
-            self.owner.capital_handover(self)
+            if self.owner:
+                self.owner.capital_handover(self)
             return CapitalStateType(self.id)
         else:
             return DefaultState(self.id)
