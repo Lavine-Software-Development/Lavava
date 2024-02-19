@@ -13,6 +13,9 @@ from constants import (
     TICK,
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
+    OVERRIDE_RESTART_CODE,
+    RESTART_CODE,
+    FORFEIT_CODE,
 )
 from modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
 import sys
@@ -108,8 +111,10 @@ class Game:
 
     def keydown(self, event):
         if event.type == p.KEYDOWN:
-            if CONTEXT["main_player"].victory:
-                if event.key == p.K_r:
+            if event.key == OVERRIDE_RESTART_CODE:
+                self.restart_send()
+            elif CONTEXT["main_player"].victory:
+                if event.key == RESTART_CODE:
                     self.restart_send()
             else:
                 if event.key in self.ability_manager.abilities:
@@ -118,7 +123,7 @@ class Game:
                             (self.ability_manager.mode, CONTEXT["main_player"].id, 0)
                         )
                         self.ability_manager.update_ability()
-                elif event.key == p.K_x:
+                elif event.key == FORFEIT_CODE:
                     self.eliminate_send()
 
     def main_loop(self):
