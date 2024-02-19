@@ -29,7 +29,6 @@ import mode
 class Draw:
     def __init__(self, board, ability_manager, player_manager):
         self.set_data(board, ability_manager, player_manager)
-        self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
@@ -49,6 +48,7 @@ class Draw:
         self.player_manager = player_manager
         self.abilities = ability_manager.abilities
         self.ability_manager = ability_manager
+        self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
 
     def _generate_darker_color(self, color):
         return tuple(max(c - 50, 0) for c in color)
