@@ -180,5 +180,6 @@ def choose_abilities_ui():
         pygame.display.flip()
         clock.tick(60)
 
+    pygame.display.quit()
     pygame.quit()
     return [SPAWN_CODE] + list(selected_boxes)

@@ -7,6 +7,9 @@ from randomGenerator import RandomGenerator
 from playerManager import PlayerManager
 from constants import (
     CONTEXT,
+    FORFEIT_CODE,
+    OVERRIDE_RESTART_CODE,
+    RESTART_CODE,
     RESTART_GAME_VAL,
     ELIMINATE_VAL,
     ABILITIES_CHOSEN_VAL,
@@ -22,8 +25,6 @@ import mode
 
 class Game:
     def __init__(self):
-
-        self.running = True
         self.chose_count = 0
 
         self.setup()
@@ -39,7 +40,6 @@ class Game:
         self.main_loop()
 
     def setup(self):
-
         self.network = Network(self.action)
 
         player_num = int(self.network.data[0])
@@ -59,11 +59,14 @@ class Game:
         self.chose_send()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
         self.position = None
+        self.running = True
 
     def action(self, key, acting_player, data):
         if key == RESTART_GAME_VAL:
+            self.running = False
             self.start_game()
             self.drawer.set_data(self.board, self.ability_manager, self.player_manager)
+            self.main_loop()
         elif key == ELIMINATE_VAL:
             self.player_manager.eliminate(acting_player)
             self.board.eliminate(self.player_manager.player_dict[acting_player])
@@ -108,8 +111,10 @@ class Game:
 
     def keydown(self, event):
         if event.type == p.KEYDOWN:
-            if CONTEXT["main_player"].victory:
-                if event.key == p.K_r:
+            if event.key == OVERRIDE_RESTART_CODE:
+                self.restart_send()
+            elif CONTEXT["main_player"].victory:
+                if event.key == RESTART_CODE:
                     self.restart_send()
             else:
                 if event.key in self.ability_manager.abilities:
@@ -118,7 +123,7 @@ class Game:
                             (self.ability_manager.mode, CONTEXT["main_player"].id, 0)
                         )
                         self.ability_manager.update_ability()
-                elif event.key == p.K_x:
+                elif event.key == FORFEIT_CODE:
                     self.eliminate_send()
 
     def main_loop(self):
@@ -148,11 +153,11 @@ class Game:
                                 self.board.check_highlight(
                                     event.pos, self.ability_manager
                                 )
+                if self.drawer.showing and self.running:
+                    self.drawer.wipe()
+                    self.drawer.blit(self.position)
 
-                self.drawer.wipe()
-                self.drawer.blit(self.position)
-
-        self.network.stop()
+        # self.network.stop()
         self.drawer.close_window()
         sys.exit()
 

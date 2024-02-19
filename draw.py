@@ -28,7 +28,6 @@ import mode
 
 class Draw:
     def __init__(self, board, ability_manager, player_manager):
-        py.init()
         self.set_data(board, ability_manager, player_manager)
         self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
         self.font = py.font.Font(None, 60)
@@ -41,6 +40,8 @@ class Draw:
         py.display.set_caption("Lavava")
 
     def set_data(self, board, ability_manager, player_manager):
+        py.init()
+        self.showing = True
         self.board = board
         self.edges = board.edges
         self.nodes = board.nodes
@@ -600,5 +601,6 @@ class Draw:
         self.height = height
 
     def close_window(self):
+        self.showing = False
         py.display.quit()
         py.quit()
