@@ -29,7 +29,10 @@ class Poisoned(AbstractNodeEffect):
     def count(self):
         if self.counter == POISON_SPREAD_DELAY:
             self.spread_poison()
-        super().count()
+        return super().count()
+    
+    def spread_poison(self):
+        
 
 
 class NodeEnraged(AbstractNodeEffect):

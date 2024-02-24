@@ -1,5 +1,4 @@
 from constants import (
-    RAGE_TICKS,
     BRIDGE_CODE,
     D_BRIDGE_CODE,
     SPAWN_CODE,
@@ -51,7 +50,7 @@ def spawn_effect(data, player):
 
 def poison_effect(data, player):
     node = data[0]
-    node.set_state("poisoned")
+    node.set_state("poison")
 
 
 def burn_effect(data, player):

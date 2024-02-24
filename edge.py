@@ -1,6 +1,5 @@
 from constants import (
     EDGE,
-    RAGE_TICKS,
     MINIMUM_TRANSFER_VALUE,
     BEGIN_TRANSFER_VALUE,
     AUTO_ATTACK,
