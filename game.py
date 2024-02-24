@@ -7,6 +7,9 @@ from randomGenerator import RandomGenerator
 from playerManager import PlayerManager
 from constants import (
     CONTEXT,
+    FORFEIT_CODE,
+    OVERRIDE_RESTART_CODE,
+    RESTART_CODE,
     RESTART_GAME_VAL,
     ELIMINATE_VAL,
     ABILITIES_CHOSEN_VAL,
@@ -25,9 +28,9 @@ import mode
 
 class Game:
     def __init__(self):
-
-        self.running = True
+        p.init()
         self.chose_count = 0
+        self.running = True
 
         self.setup()
 
@@ -37,12 +40,11 @@ class Game:
 
         self.start_game()
 
-        self.drawer = Draw(self.board, self.ability_manager, self.player_manager)
+        self.drawer = Draw()
 
         self.main_loop()
 
     def setup(self):
-
         self.network = Network(self.action)
 
         player_num = int(self.network.data[0])
@@ -58,15 +60,13 @@ class Game:
         self.player_manager.reset()
         map_builder = MapBuilder(self.generator)
         map_builder.build()
-        self.ability_manager = MODE_ABILITY_MANAGERS[mode.MODE](self.board)
-        self.chose_send()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
         self.position = None
+        self.in_start = True
 
     def action(self, key, acting_player, data):
         if key == RESTART_GAME_VAL:
             self.start_game()
-            self.drawer.set_data(self.board, self.ability_manager, self.player_manager)
         elif key == ELIMINATE_VAL:
             self.player_manager.eliminate(acting_player)
             self.board.eliminate(self.player_manager.player_dict[acting_player])
@@ -128,34 +128,40 @@ class Game:
 
     def main_loop(self):
         while self.running:
-            if self.chose_count < self.pcount:
-                self.drawer.blit(self.position, True)
+            if self.in_start:
+                self.ability_manager = MODE_ABILITY_MANAGERS[mode.MODE](self.board)
+                self.chose_send()
+                self.drawer.set_data(self.board, self.ability_manager, self.player_manager)
+                self.in_start = False
             else:
-                for event in p.event.get():
-                    if event.type == p.QUIT:
-                        self.running = False
+                if self.chose_count < self.pcount:
+                    self.drawer.blit(self.position, True)
+                else:
+                    for event in p.event.get():
+                        if event.type == p.QUIT:
+                            self.eliminate_send()
+                            self.running = False
 
-                    elif event.type == p.VIDEORESIZE:
-                        width, height = event.w, event.h
-                        for node in self.board.nodes:
-                            node.relocate(width, height)
-                        self.drawer.relocate(width, height)
+                        elif event.type == p.VIDEORESIZE:
+                            width, height = event.w, event.h
+                            for node in self.board.nodes:
+                                node.relocate(width, height)
+                            self.drawer.relocate(width, height)
 
-                    if not CONTEXT["main_player"].eliminated:
-                        self.keydown(event)
+                        if not CONTEXT["main_player"].eliminated:
+                            self.keydown(event)
 
-                        if not CONTEXT["main_player"].victory:
-                            if event.type == p.MOUSEBUTTONDOWN:
-                                self.mouse_button_down_event(event.button)
+                            if not CONTEXT["main_player"].victory:
+                                if event.type == p.MOUSEBUTTONDOWN:
+                                    self.mouse_button_down_event(event.button)
 
-                            elif event.type == p.MOUSEMOTION:
-                                self.position = event.pos
-                                self.board.check_highlight(
-                                    event.pos, self.ability_manager
-                                )
-
-                self.drawer.wipe()
-                self.drawer.blit(self.position)
+                                elif event.type == p.MOUSEMOTION:
+                                    self.position = event.pos
+                                    self.board.check_highlight(
+                                        event.pos, self.ability_manager
+                                    )
+                    self.drawer.wipe()
+                    self.drawer.blit(self.position)
 
         self.network.stop()
         self.drawer.close_window()

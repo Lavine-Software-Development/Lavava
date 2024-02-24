@@ -27,10 +27,7 @@ from constants import (
 import mode
 
 class Draw:
-    def __init__(self, board, ability_manager, player_manager):
-        py.init()
-        self.set_data(board, ability_manager, player_manager)
-        self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
+    def __init__(self):
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
@@ -38,9 +35,9 @@ class Draw:
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
 
-        py.display.set_caption("Lavava")
-
     def set_data(self, board, ability_manager, player_manager):
+        self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
+        py.display.set_caption("Lavava")
         self.board = board
         self.edges = board.edges
         self.nodes = board.nodes
