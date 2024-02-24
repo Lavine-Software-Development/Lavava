@@ -15,7 +15,7 @@ class DefaultPlayer:
         self.name = color[1]
         self.id = id
         self.points = 0
-        self.rage_count = 0
+        self.effects = set()
         self.default_values()
 
     def enrage(self):
@@ -39,8 +39,11 @@ class DefaultPlayer:
         self.points += self.count
 
     def update(self):
-        if self.raged:
-            self.rage_count -= 1
+        self.effects = filter(lambda effect : (effect.count()), self.effects)
+
+    def pass_on_effects(self, node):
+        for effect in self.effects:
+            effect.spread(node)
 
     def win(self):
         self.victory = True

@@ -12,7 +12,7 @@ from constants import (
     EDGE,
     DYNAMIC_EDGE,
 )
-
+from playerEffect import PlayerEnraged
 
 def make_bridge(buy_new_edge, bridge_type):
     def bridge_effect(data, player):
@@ -33,8 +33,7 @@ def make_nuke(remove_node):
 def make_rage(rage):
     def rage_effect(data, player):
         rage(player)
-        player.effects["rage"] = RAGE_TICKS
-
+        player.effects.add(PlayerEnraged())
     return rage_effect
 
 

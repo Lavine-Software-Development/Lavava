@@ -19,13 +19,10 @@ class Edge:
         self.update_nodes()
         self.state = "one-way"
         self.type = EDGE
-        self.rage_count = 0
+        self.effects = {}
 
     def __str__(self):
         return str(self.id)
-
-    def enrage(self):
-        self.rage_count = RAGE_TICKS
 
     def update_nodes(self):
         self.to_node.new_edge(self, "incoming")
@@ -57,9 +54,6 @@ class Edge:
             self.flow()
             if not self.popped:
                 self.pop()
-
-        if self.raged:
-            self.rage_count -= 0.1
 
     def flow_allowed(self):
         return self.to_node.accept_delivery(self.owner)
@@ -109,14 +103,6 @@ class Edge:
                 return self.from_node.color
             return self.from_node.color
         return (50, 50, 50)
-
-    @property
-    def raged(self):
-        return self.rage_count > 0
-
-    @property
-    def currently_raging(self):
-        return self.raged and self.from_node.owner and self.from_node.owner.raged
 
     def opposite(self, node):
         if node == self.from_node:

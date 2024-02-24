@@ -65,10 +65,10 @@ class Node:
             return DefaultState(self.id)
 
     def new_effect(self, effect_name):
-        if effect_name == "poison":
-            return Poisoned(self.spread_poison)
-        elif effect_name == "rage":
-            return Enraged()
+        if effect_name == 'poison':
+            return Poisoned(self, self.spread_poison)
+        elif effect_name == 'rage':
+            return NodeEnraged(self)
 
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1
@@ -136,28 +136,14 @@ class Node:
             ):
                 edge.to_node.set_state("poisoned")
 
-    def spread_rage(self):
-        for edge in self.outgoing:
-            if not edge.raged:
-                edge.enrage()
-
     def grow(self):
         if self.state.can_grow(self.value):
             self.value += self.state.grow(self.grow_multiplier)
         self.effects_tick()
 
     def effects_tick(self):
-        expired_effects = set()
-        for key, effect in self.effects.items():
-            effect.count()
-            if effect.expired:
-                expired_effects.add(key)
-
-        if expired_effects:
-            for key in expired_effects:
-                self.effects[key].complete()
-                self.effects.pop(key)
-            self.calculate_interactions()
+        self.effects = filter(lambda effect : (effect.count()), self.effects)
+        self.calculate_interactions()
 
     def delivery(self, amount, player):
         self.value += self.state.intake(
@@ -167,8 +153,6 @@ class Node:
             self.owner = player
         if self.state.killed(self.value):
             self.capture(player)
-        if player.raged:
-            self.spread_rage()
 
     def accept_delivery(self, player):
         return self.state.accept_intake(player != self.owner, self.value)
@@ -181,6 +165,7 @@ class Node:
             self.owner.count -= 1
         player.count += 1
         self.owner = player
+        player.pass_on_effects(self)
 
     def capture(self, player):
         self.value = self.state.capture_event(player)(self.value)
