@@ -20,8 +20,8 @@ class Node:
         self.value = 0
         self.owner = None
         self.item_type = NODE
-        self.incoming = []
-        self.outgoing = []
+        self.incoming = set()
+        self.outgoing = set()
         self.id = id
         self.pos = pos
         self.type = NODE
@@ -36,9 +36,9 @@ class Node:
 
     def new_edge(self, edge, dir):
         if dir == "incoming":
-            self.incoming.append(edge)
+            self.incoming.add(edge)
         else:
-            self.outgoing.append(edge)
+            self.outgoing.add(edge)
 
     def set_state(self, status_name, data=None):
         if status_name in STATE_NAMES:
@@ -46,7 +46,6 @@ class Node:
             self.state_name = status_name
         elif status_name in EFFECT_NAMES:
             self.effects[status_name] = self.new_effect(status_name)
-        print("settting state: ", status_name)
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
@@ -142,21 +141,34 @@ class Node:
     def grow(self):
         if self.state.can_grow(self.value):
             self.value += self.state.grow(self.grow_multiplier)
-        self.effects_tick()
+        self.effects_update()
 
+    def effects_update(self):
+
+        removed_effects = self.effects_tick()
+
+        if removed_effects:
+            self.calculate_interactions()
+
+        self.spread_effects()
+    
     def effects_tick(self):
-        # Identify effects to remove
         effects_to_remove = [key for key, effect in self.effects.items() if not effect.count()]
-        # Call complete() on effects to be removed
         for key in effects_to_remove:
             self.effects[key].complete()
-        # Remove the identified effects from the dictionary
         for key in effects_to_remove:
             del self.effects[key]
 
-        if effects_to_remove:
-            print("Effects removed: ", effects_to_remove)
-            self.calculate_interactions()
+        return effects_to_remove
+
+    def spread_effects(self):
+        for key, effect in self.effects.items():
+            if effect.can_spread_func(effect):
+                print("spread at: ", effect.counter)
+                for edge in self.edges:
+                    neighbor = edge.opposite(self)
+                    if key not in neighbor.effects and effect.spread_criteria_func(edge, neighbor):
+                        neighbor.set_state(key)
 
     def delivery(self, amount, player):
         self.value += self.state.intake(
@@ -207,7 +219,7 @@ class Node:
 
     @property
     def edges(self):
-        return self.incoming + self.outgoing
+        return self.incoming | self.outgoing
 
     @property
     def current_incoming(self):
