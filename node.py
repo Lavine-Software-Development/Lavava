@@ -1,6 +1,7 @@
 from constants import (
     NODE,
     PORT_NODE,
+    ZOMBIE_NODE,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     STATE_NAMES,
@@ -11,7 +12,7 @@ from constants import (
     BLACK,
     BROWN,
 )
-from nodeState import DefaultState, MineState
+from nodeState import DefaultState, MineState, ZombieState
 from nodeEffect import EffectType, Poisoned, Enraged, Burning
 import mode
 
@@ -55,6 +56,8 @@ class Node:
             if data is True and mode.MODE == 3:
                 self.port_count = 3
             return MineState(self.id, self.absorbing, data)
+        elif state_name == "zombie":
+            return ZombieState(self.id)
         elif state_name == "capital":
             from modeConstants import CAPITAL_TYPES
             CapitalStateType = CAPITAL_TYPES[mode.MODE]
@@ -167,8 +170,8 @@ class Node:
             self.owner = player
         if self.state.killed(self.value):
             self.capture(player)
-        if player.raged:
-            self.spread_rage()
+        # if player.raged:
+        #     self.spread_rage()
 
     def accept_delivery(self, player):
         return self.state.accept_intake(player != self.owner, self.value)
@@ -176,11 +179,13 @@ class Node:
     def send_amount(self):
         return self.state.expel(self.expel_multiplier, self.value)
 
-    def update_ownerships(self, player):
+    def update_ownerships(self, player=None):
         if self.owner is not None and self.owner != player:
             self.owner.count -= 1
-        player.count += 1
+        if player is not None:
+            player.count += 1
         self.owner = player
+
 
     def capture(self, player):
         self.value = self.state.capture_event(player)(self.value)
@@ -189,6 +194,7 @@ class Node:
         self.expand()
         if self.state.reset_on_capture:
             self.set_default_state()
+
 
     def absorbing(self):
         for edge in self.current_incoming:
@@ -228,6 +234,15 @@ class Node:
         if self.owner:
             return self.owner.color
         return BLACK
+
+
+class ZombieNode(Node):
+    def __init__(self, id, pos):
+        super().__init__(id, pos)
+        self.item_type = ZOMBIE_NODE
+
+    def make_zombie(self):
+        self.value = self.state.full_size
 
 
 class PortNode(Node):

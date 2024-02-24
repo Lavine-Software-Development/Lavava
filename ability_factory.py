@@ -8,6 +8,7 @@ from constants import (
     BURN_CODE,
     FREEZE_CODE,
     RAGE_CODE,
+    ZOMBIE_CODE,
     EDGE,
 )
 from ability import Ability
@@ -19,6 +20,7 @@ from ability_validators import (
     dynamic_edge_own_either,
     no_click,
     unowned_node,
+    my_node,
 )
 from ability_return import make_new_edge
 from powerBox_factory import make_boxes
@@ -51,56 +53,5 @@ def make_abilities(board):
             FREEZE_CODE, dynamic_edge_own_either, 1, boxes[FREEZE_CODE], None, EDGE
         ),
         RAGE_CODE: Ability(RAGE_CODE, no_click, 0, boxes[RAGE_CODE]),
+        ZOMBIE_CODE: Ability(ZOMBIE_CODE, my_node, 1, boxes[ZOMBIE_CODE])
     }
-
-
-# def make_abilities(player, board):
-
-#     boxes = make_boxes(player.default_color)
-
-#     def spawn():
-#         return {
-#             SPAWN_CODE: Ability(SPAWN_CODE, unowned_node, 1, boxes['SpawnBox'])
-#         }
-
-#     def bridge():
-#         return {
-#             BRIDGE_CODE: Ability(BRIDGE_CODE, new_edge_validator(board.check_new_edge), 2, boxes['BridgeBox'], make_new_edge(board.new_edge_id))
-#         }
-
-#     def d_bridge():
-#         return {
-#             D_BRIDGE_CODE: Ability(D_BRIDGE_CODE, new_edge_validator(board.check_new_edge), 2, boxes['D-BridgeBox'], make_new_edge(board.new_edge_id))
-#         }
-
-#     def poison():
-#         return {
-#             POISON_CODE: Ability(POISON_CODE, standard_node_attack, 1, boxes['PoisonBox'])
-#         }
-
-#     def nuke():
-#         return {
-#             NUKE_CODE: Ability(NUKE_CODE, standard_node_attack, 1, boxes['NukeBox'])
-#         }
-
-#     def capital():
-#         return {
-#             CAPITAL_CODE: Ability(CAPITAL_CODE, capital_logic, 1, boxes['CapitalBox'])
-#         }
-
-#     def burn():
-#         return {
-#             BURN_CODE: Ability(POISON_CODE, standard_port_node, 1, boxes['PoisonBox'])
-#         }
-
-#     def freeze():
-#         return {
-#             FREEZE_CODE: Ability(NUKE_CODE, dynamic_edge_own_either, 1, boxes['NukeBox'])
-#         }
-
-#     if CONTEXT['mode'] == 1:
-#         return spawn() | bridge() | d_bridge() | poison() | nuke() | capital() | freeze()
-#     elif CONTEXT['mode'] == 2:
-#         return spawn() | bridge() | d_bridge() | poison() | nuke() | freeze()
-#     elif CONTEXT['mode'] == 3:
-# return spawn() | bridge() | d_bridge() | poison() | nuke() | capital() | freeze() | burn()

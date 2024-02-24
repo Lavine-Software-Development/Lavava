@@ -8,12 +8,13 @@ MIN_ANGLE = 15
 
 NODE = "node"
 PORT_NODE = "port node"
+ZOMBIE_NODE = "zombie node"
 EDGE = 3000
 DYNAMIC_EDGE = 3500
 
 MODES = {1: "Money", 2: "Reload", 3: "Ports"}
 
-STATE_NAMES = {"default", "capital", "mine"}
+STATE_NAMES = {"default", "capital", "mine", "zombie"}
 EFFECT_NAMES = {"burn", "poison", "rage"}
 
 SCREEN_WIDTH = 1000
@@ -58,6 +59,7 @@ COLOR_DICT = {
 
 GROWTH_RATE = 0.15
 GROWTH_STOP = 250
+ZOMBIE_FULL_SIZE = 250
 
 TRANSFER_RATE = 0.02
 MINIMUM_TRANSFER_VALUE = 8
@@ -149,6 +151,9 @@ RAGE_TOTAL = 4
 RAGE_TICKS = 200
 RAGE_MULTIPLIER = 2.5
 
+ZOMBIE_COST = 10
+ZOMBIE_CODE = 122
+
 DEFAULT_ABILITY_CODE = SPAWN_CODE
 RESTART_CODE = 114
 FORFEIT_CODE = 120
@@ -165,6 +170,7 @@ LETTER_TO_CODE = {
     "N": NUKE_CODE,
     "C": CAPITAL_CODE,
     "R": RAGE_CODE,
+    "Z": ZOMBIE_CODE,
 }
 
 ALL_ABILITIES = {
@@ -177,6 +183,7 @@ ALL_ABILITIES = {
     CAPITAL_CODE,
     BURN_CODE,
     RAGE_CODE,
+    ZOMBIE_CODE,
 }
 
 RELOAD_ABILITIES = {
@@ -251,6 +258,7 @@ FREEZE_BREAKDOWN = {
     "total": FREEZE_TOTAL,
 }
 CAPITAL_BREAKDOWN = {"letter": "C", "name": "Capital", "cost": CAPITAL_COST}
+ZOMBIE_BREAKDOWN = {"letter": "Z", "name": "Zombie", "cost": ZOMBIE_COST}
 BURN_BREAKDOWN = {"letter": "B", "name": "Burn", "cost": BURN_COST}
 RAGE_BREAKDOWN = {
     "letter": "R",
@@ -269,4 +277,5 @@ BREAKDOWNS = {
     CAPITAL_CODE: CAPITAL_BREAKDOWN,
     BURN_CODE: BURN_BREAKDOWN,
     RAGE_CODE: RAGE_BREAKDOWN,
+    ZOMBIE_CODE: ZOMBIE_BREAKDOWN,
 }

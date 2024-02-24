@@ -5,9 +5,11 @@ from constants import (
     MINE_DICT,
     GROWTH_STOP,
     GREY,
+    BLACK,
     TRANSFER_RATE,
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
+    ZOMBIE_FULL_SIZE,
 )
 from abc import ABC, abstractmethod
 import math
@@ -72,6 +74,15 @@ class DefaultState(AbstractState):
         return value < 0
 
 
+class ZombieState(DefaultState):
+
+    def grow(self, multiplier):
+        return 0
+
+    def intake(self, amount, multiplier, contested):
+        return super().intake(amount, multiplier, contested) / 2
+
+
 class CapitalState(DefaultState):
     def __init__(self, id):
         super().__init__(id)
@@ -133,7 +144,7 @@ class MineState(AbstractState):
         self.absorbing_func = absorbing_func
         self.swap_status = BELOW_SWAP_STATUS
 
-    def grow(self, multipler):
+    def grow(self, multiplier):
         return 0
 
     def intake(self, amount, multiplier, contested):

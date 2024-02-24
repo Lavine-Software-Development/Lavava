@@ -187,6 +187,7 @@ class Draw:
         else:
             py.draw.lines(self.screen, color, True, star_points)
 
+
     def edge_highlight(self, dy, dx, magnitude, length_factor, start, end, spacing):
         # Calculate the angle of rotation
         angle = math.degrees(math.atan2(dy, dx))
