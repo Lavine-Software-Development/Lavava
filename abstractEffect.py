@@ -13,14 +13,14 @@ class AbstractEffect(ABC):
         pass
 
 
-class AbstractNodeEffect(ABC):
+class AbstractNodeEffect(AbstractEffect):
 
     def __init__(self, expiry_time, effect_type):
         super().__init__(expiry_time)
         self.effect_type = effect_type
 
 
-class AbstractPlayerEffect(ABC):
+class AbstractPlayerEffect(AbstractEffect):
 
     @abstractmethod
     def spread(self, node):

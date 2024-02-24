@@ -12,7 +12,7 @@ from constants import (
     BROWN,
 )
 from nodeState import DefaultState, MineState
-from nodeEffect import EffectType, Poisoned, Enraged, Burning
+from nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
 import mode
 
 class Node:
@@ -25,7 +25,7 @@ class Node:
         self.id = id
         self.pos = pos
         self.type = NODE
-        self.effects = {}
+        self.effects = set()
         self.expel_multiplier = 1
         self.intake_multiplier = 1
         self.grow_multiplier = 1
@@ -45,7 +45,7 @@ class Node:
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
         elif status_name in EFFECT_NAMES:
-            self.effects[status_name] = self.new_effect(status_name)
+            self.effects.add(self.new_effect(status_name))
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
@@ -66,13 +66,13 @@ class Node:
 
     def new_effect(self, effect_name):
         if effect_name == 'poison':
-            return Poisoned(self, self.spread_poison)
+            return Poisoned(self.spread_poison)
         elif effect_name == 'rage':
-            return NodeEnraged(self)
+            return NodeEnraged()
 
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1
-        for effect in self.effects.values():
+        for effect in self.effects:
             if effect.effect_type == EffectType.GROW:
                 inter_grow *= effect.effect()
             elif effect.effect_type == EffectType.INTAKE:
