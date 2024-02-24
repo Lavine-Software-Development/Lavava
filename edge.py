@@ -18,7 +18,7 @@ class Edge:
         self.update_nodes()
         self.state = "one-way"
         self.type = EDGE
-        self.effects = {}
+        self.effects = set()
 
     def __str__(self):
         return str(self.id)

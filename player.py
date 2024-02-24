@@ -39,7 +39,7 @@ class DefaultPlayer:
         self.points += self.count
 
     def update(self):
-        self.effects = filter(lambda effect : (effect.count()), self.effects)
+        self.effects = set(filter(lambda effect : (effect.count()), self.effects))
 
     def pass_on_effects(self, node):
         for effect in self.effects:
