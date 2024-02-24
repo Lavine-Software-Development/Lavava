@@ -6,8 +6,8 @@ import mode
 
 # Constants
 WINDOW_WIDTH = 800  # Adjust as needed
-WINDOW_HEIGHT = 500  # Adjust as needed
-BOX_SIZE = 100  # Size of each ability box
+WINDOW_HEIGHT = 800  # Adjust as needed
+BOX_SIZE = 200  # Size of each ability box
 COLUMNS = 3
 ROWS = 3
 PADDING = 50  # Padding between boxes
@@ -96,8 +96,8 @@ def draw_x(screen, position, size, color):
     x_end_pos = x + 2 * (width // 4)
     y_end_pos = y + 2 * (length // 4)
 
-    pygame.draw.line(screen, color, (x, y), (x_end_pos, y_end_pos), 10)
-    pygame.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 10)
+    pygame.draw.line(screen, color, (x, y), (x_end_pos, y_end_pos), 20)
+    pygame.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
 
 
 def draw_shape(screen, shape, x, y, light_color):

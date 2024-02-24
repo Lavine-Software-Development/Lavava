@@ -110,6 +110,8 @@ class Draw:
                 btn_size,
                 lighter_color,
             )
+        elif shape == "x":
+            self.draw_x((position[0] + btn_size // 4, position[1] + btn_size // 4), (btn_size, btn_size), lighter_color)
 
         if loading:
             py.draw.rect(
@@ -162,6 +164,20 @@ class Draw:
                 loading,
             )
             y_position += int(ABILITY_GAP * self.height)  # Vertical gap between buttons
+
+    def draw_x(self, position, size, color):
+        screen = self.screen
+        x = position[0]
+        y = position[1]
+
+        width = size[0]
+        length = size[1]
+
+        x_end_pos = x + 2 * (width // 4)
+        y_end_pos = y + 2 * (length // 4)
+
+        py.draw.line(screen, color, (x, y), (x_end_pos, y_end_pos), 20)
+        py.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
 
     def draw_star(self, position, size, color, filled=True):
         inner_radius = size // 6
