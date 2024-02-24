@@ -1,5 +1,4 @@
 from constants import (
-    RAGE_TICKS,
     GREY,
     NODE_COUNT,
     CAPITAL_WIN_COUNT,
