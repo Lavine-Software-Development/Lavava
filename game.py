@@ -16,9 +16,6 @@ from constants import (
     TICK,
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
-    OVERRIDE_RESTART_CODE,
-    RESTART_CODE,
-    FORFEIT_CODE,
 )
 from modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
 import sys
