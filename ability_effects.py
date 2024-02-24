@@ -1,5 +1,4 @@
 from constants import (
-    RAGE_TICKS,
     BRIDGE_CODE,
     D_BRIDGE_CODE,
     SPAWN_CODE,
@@ -32,7 +31,7 @@ def make_nuke(remove_node):
 
 def make_rage(rage):
     def rage_effect(data, player):
-        rage(player)
+        rage(player, 'rage')
         player.effects.add(PlayerEnraged())
     return rage_effect
 
@@ -51,7 +50,7 @@ def spawn_effect(data, player):
 
 def poison_effect(data, player):
     node = data[0]
-    node.set_state("poisoned")
+    node.set_state("poison")
 
 
 def burn_effect(data, player):
@@ -74,5 +73,5 @@ def make_ability_effects(board):
         BURN_CODE: burn_effect,
         POISON_CODE: poison_effect,
         CAPITAL_CODE: capital_effect,
-        RAGE_CODE: make_rage(board.rage),
+        RAGE_CODE: make_rage(board.board_wide_effect),
     }

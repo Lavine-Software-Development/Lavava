@@ -264,7 +264,7 @@ class Draw:
             )
 
             if edge.flowing:
-                if edge.currently_raging:
+                if 'rage' in edge.effects:
                     py.draw.polygon(self.screen, PURPLE, [point1, point2, point3])
                 else:
                     py.draw.polygon(self.screen, color, [point1, point2, point3])
@@ -293,7 +293,7 @@ class Draw:
                 start[1] + i * spacing * dy + 5 * dy,
             )
             if edge.flowing:
-                if edge.currently_raging:
+                if 'rage' in edge.effects:
                     py.draw.circle(
                         self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius
                     )
@@ -367,7 +367,7 @@ class Draw:
                 )
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
-            if spot.state_name == "poisoned":
+            if 'poison' in spot.effects:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
@@ -387,9 +387,9 @@ class Draw:
                     spot.size / 1.5,
                 )  # Size of the ports
                 port_color = BROWN
-                if spot.on_fire:
+                if 'burn' in spot.effects:
                     port_color = STRONG_ORANGE
-                    percentage = (BURN_TICKS - spot.effects['burn'].counter) / BURN_TICKS
+                    percentage = spot.effects['burn'].counter / BURN_TICKS
                     port_width *= percentage
                 port_count = spot.port_count  # Number of ports
                 angle_step = 2 * math.pi / port_count  # Angle step for each port

@@ -26,10 +26,13 @@ class Board:
         self.highlighted = None
         self.highlighted_color = None
 
-    def rage(self, player):
+    def board_wide_effect(self, player, effect):
         for edge in self.edges:
             if edge.can_be_controlled_by(player):
-                edge.enrage()
+                edge.effects.add(effect)
+        for node in self.nodes:
+            if node.owner == player:
+                node.set_state(effect)
 
     def reset(self, nodes, edges):
         self.nodes = nodes
