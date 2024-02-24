@@ -18,13 +18,6 @@ class DefaultPlayer:
         self.effects = set()
         self.default_values()
 
-    def enrage(self):
-        self.rage_count = RAGE_TICKS
-
-    @property
-    def raged(self):
-        return self.rage_count > 0
-
     def default_values(self):
         self.count = 0
         self.begun = False
