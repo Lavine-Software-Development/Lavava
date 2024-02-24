@@ -27,8 +27,7 @@ from constants import (
 import mode
 
 class Draw:
-    def __init__(self, board, ability_manager, player_manager):
-        self.set_data(board, ability_manager, player_manager)
+    def __init__(self):
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
@@ -36,11 +35,9 @@ class Draw:
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
 
-        py.display.set_caption("Lavava")
-
     def set_data(self, board, ability_manager, player_manager):
-        py.init()
-        self.showing = True
+        self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
+        py.display.set_caption("Lavava")
         self.board = board
         self.edges = board.edges
         self.nodes = board.nodes
@@ -48,7 +45,6 @@ class Draw:
         self.player_manager = player_manager
         self.abilities = ability_manager.abilities
         self.ability_manager = ability_manager
-        self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
 
     def _generate_darker_color(self, color):
         return tuple(max(c - 50, 0) for c in color)
@@ -601,6 +597,5 @@ class Draw:
         self.height = height
 
     def close_window(self):
-        self.showing = False
         py.display.quit()
         py.quit()
