@@ -1,17 +1,18 @@
 from edge import Edge
 from constants import DYNAMIC_EDGE
 
+
 class DynamicEdge(Edge):
     def __init__(self, node1, node2, id):
         super().__init__(node1, node2, id)
-        self.state = 'two-way'
+        self.state = "two-way"
         self.item_type = DYNAMIC_EDGE
 
     def update_nodes(self):
-        self.to_node.new_edge(self, 'incoming')
-        self.from_node.new_edge(self, 'outgoing')
-        self.to_node.new_edge(self, 'outgoing')
-        self.from_node.new_edge(self, 'incoming')
+        self.to_node.new_edge(self, "incoming")
+        self.from_node.new_edge(self, "outgoing")
+        self.to_node.new_edge(self, "outgoing")
+        self.from_node.new_edge(self, "incoming")
 
     def click_swap(self):
         self.on = True
@@ -22,7 +23,7 @@ class DynamicEdge(Edge):
         self.swap_direction()
 
     def swap_direction(self):
-        if self.state == 'two-way':
+        if self.state == "two-way":
             temp = self.to_node
             self.to_node = self.from_node
             self.from_node = temp
@@ -38,7 +39,7 @@ class DynamicEdge(Edge):
                 self.click_swap()
 
     def check_status(self):
-        if self.from_node.owner is None and self.to_node.owner != None:
+        if self.from_node.owner is None and self.to_node.owner is not None:
             self.natural_swap()
 
     def update(self):
@@ -61,14 +62,12 @@ class DynamicEdge(Edge):
                     self.natural_swap()
 
     def freeze(self):
-        self.state = 'one-way'
+        self.state = "one-way"
 
     def controlled_by(self, player):
-        return super().controlled_by(player) or (self.to_node.owner == player and self.from_node.owner is None)
+        return super().controlled_by(player) or (
+            self.to_node.owner == player and self.from_node.owner is None
+        )
 
     def can_be_controlled_by(self, player):
         return self.to_node.owner == player or self.to_node.owner == player
-    
-
-
-    

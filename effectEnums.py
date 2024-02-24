@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class EffectType(Enum):
     NONE = 0
     GROW = 1

@@ -1,9 +1,21 @@
-from constants import *
-from nodeState import *
-from nodeEffect import *
+from constants import (
+    NODE,
+    PORT_NODE,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    STATE_NAMES,
+    EFFECT_NAMES,
+    AUTO_ATTACK,
+    AUTO_EXPAND,
+    CONTEXT,
+    BLACK,
+    BROWN,
+)
+from nodeState import DefaultState, MineState
+from nodeEffect import EffectType, Poisoned, Enraged, Burning
+import mode
 
 class Node:
-
     def __init__(self, id, pos):
         self.value = 0
         self.owner = None
@@ -23,7 +35,7 @@ class Node:
         return str(self.id)
 
     def new_edge(self, edge, dir):
-        if dir == 'incoming':
+        if dir == "incoming":
             self.incoming.append(edge)
         else:
             self.outgoing.append(edge)
@@ -37,15 +49,20 @@ class Node:
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
-        if state_name == 'default':
+        if state_name == "default":
             return DefaultState(self.id)
         elif state_name == "mine":
-            if data == True and CONTEXT['mode'] == 3:
+            if data is True and mode.MODE == 3:
                 self.port_count = 3
             return MineState(self.id, self.absorbing, data)
         elif state_name == "capital":
-            CapitalStateType = MODE['capital']
+            from modeConstants import CAPITAL_TYPES
+            CapitalStateType = CAPITAL_TYPES[mode.MODE]
+            if self.owner:
+                self.owner.capital_handover(self)
             return CapitalStateType(self.id)
+        else:
+            return DefaultState(self.id)
 
     def new_effect(self, effect_name):
         if effect_name == 'poison':
@@ -56,7 +73,7 @@ class Node:
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1
         for effect in self.effects.values():
-            if effect.effect_type == EffectType.GROW: 
+            if effect.effect_type == EffectType.GROW:
                 inter_grow *= effect.effect()
             elif effect.effect_type == EffectType.INTAKE:
                 inter_intake *= effect.effect()
@@ -67,7 +84,7 @@ class Node:
         self.expel_multiplier = inter_expel
 
     def set_default_state(self):
-        self.set_state('default')
+        self.set_state("default")
 
     def click(self, clicker, button):
         if button == 1:
@@ -79,7 +96,7 @@ class Node:
         pass
 
     def left_click(self, clicker):
-        if self.owner == None:
+        if self.owner is None:
             if clicker.buy_node():
                 self.capture(clicker)
 
@@ -107,15 +124,20 @@ class Node:
         self.pos = (self.pos_x_per * width, self.pos_y_per * height)
 
     def owned_and_alive(self):
-        return self.owner != None and not self.owner.eliminated
+        return self.owner is not None and not self.owner.eliminated
 
     def spread_poison(self):
         for edge in self.outgoing:
-            if edge.to_node != self and edge.on and not edge.contested and edge.to_node.state_name == 'default':
-                edge.to_node.set_state('poisoned')
+            if (
+                edge.to_node != self
+                and edge.on
+                and not edge.contested
+                and edge.to_node.state_name == "default"
+            ):
+                edge.to_node.set_state("poisoned")
 
     def grow(self):
-        if self.value < self.state.full_size:
+        if self.state.can_grow(self.value):
             self.value += self.state.grow(self.grow_multiplier)
         self.effects_tick()
 
@@ -124,7 +146,9 @@ class Node:
         self.calculate_interactions()
 
     def delivery(self, amount, player):
-        self.value += self.state.intake(amount, self.intake_multiplier, player != self.owner)
+        self.value += self.state.intake(
+            amount, self.intake_multiplier, player != self.owner
+        )
         if self.state.flow_ownership:
             self.owner = player
         if self.state.killed(self.value):
@@ -137,14 +161,14 @@ class Node:
         return self.state.expel(self.expel_multiplier, self.value)
 
     def update_ownerships(self, player):
-        if self.owner != None and self.owner != player:
+        if self.owner is not None and self.owner != player:
             self.owner.count -= 1
         player.count += 1
         self.owner = player
         player.pass_on_effects(self)
 
     def capture(self, player):
-        self.value = self.state.capture_event()(self.value)
+        self.value = self.state.capture_event(player)(self.value)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()
@@ -182,7 +206,7 @@ class Node:
 
     @property
     def size(self):
-        return int(5+self.state.size_factor(self.value)*18)
+        return int(5 + self.state.size_factor(self.value) * 18)
 
     @property
     def color(self):
@@ -192,7 +216,6 @@ class Node:
 
 
 class PortNode(Node):
-
     def __init__(self, id, pos, port_count):
         super().__init__(id, pos)
         self.item_type = PORT_NODE
@@ -204,7 +227,7 @@ class PortNode(Node):
 
     def new_effect(self, effect_name):
         if effect_name == 'burn':
-            return Burning(self, self.lose_ports)
+            return Burning(self.lose_ports)
         else:
             return super().new_effect(effect_name)
 
@@ -212,17 +235,17 @@ class PortNode(Node):
         return self.port_count > 0 and not self.on_fire and self.state.acceptBridge
 
     def new_edge(self, edge, dir):
-        if CONTEXT['started'] and edge not in self.edges and dir == 'outgoing':
+        if CONTEXT["started"] and edge not in self.edges and dir == "outgoing":
             self.port_count -= 1
         super().new_edge(edge, dir)
 
     @property
     def on_fire(self):
-        return 'burn' in self.effects
+        return "burn" in self.effects
 
     def grow(self):
         if self.on_fire:
-            self.burning -= 1
+            self.effects['burn'].count()
             if not self.on_fire:
                 self.lose_ports()
         super().grow()
@@ -237,5 +260,3 @@ class PortNode(Node):
         elif self.is_port:
             return BROWN
         return BLACK
-
-    

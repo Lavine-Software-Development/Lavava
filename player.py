@@ -1,7 +1,15 @@
-from constants import *
+from constants import (
+    RAGE_TICKS,
+    GREY,
+    NODE_COUNT,
+    CAPITAL_WIN_COUNT,
+    START_MONEY,
+    START_MONEY_RATE,
+    CAPITAL_BONUS,
+)
+
 
 class DefaultPlayer:
-
     def __init__(self, color, id):
         self.default_color = color[0]
         self.name = color[1]
@@ -9,6 +17,13 @@ class DefaultPlayer:
         self.points = 0
         self.effects = set()
         self.default_values()
+
+    def enrage(self):
+        self.rage_count = RAGE_TICKS
+
+    @property
+    def raged(self):
+        return self.rage_count > 0
 
     def default_values(self):
         self.count = 0
@@ -39,10 +54,10 @@ class DefaultPlayer:
 
     def capital_handover(self, capital, gain=True):
         if gain:
-            self.capitals[capital.node.id] = capital
+            self.capitals[capital.id] = capital
         else:
-            del self.capitals[capital.node.id]
-        
+            del self.capitals[capital.id]
+
     def check_capital_win(self):
         return self.capital_count == CAPITAL_WIN_COUNT
 
@@ -52,7 +67,6 @@ class DefaultPlayer:
 
 
 class MoneyPlayer(DefaultPlayer):
-
     def default_values(self):
         self.money = START_MONEY
         self.tick_production = START_MONEY_RATE
@@ -79,5 +93,3 @@ class MoneyPlayer(DefaultPlayer):
     @property
     def production_per_second(self):
         return self.tick_production * 10
-
-    

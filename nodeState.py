@@ -1,12 +1,19 @@
-from constants import GROWTH_RATE, MINIMUM_TRANSFER_VALUE, \
-    CAPITAL_SHRINK_SPEED, MINE_DICT, GROWTH_STOP, GREY, TRANSFER_RATE, \
-     CONTEXT, GROWTH_STOP, STANDARD_SWAP_STATUS, BELOW_SWAP_STATUS
+from constants import (
+    GROWTH_RATE,
+    MINIMUM_TRANSFER_VALUE,
+    CAPITAL_SHRINK_SPEED,
+    MINE_DICT,
+    GROWTH_STOP,
+    GREY,
+    TRANSFER_RATE,
+    STANDARD_SWAP_STATUS,
+    BELOW_SWAP_STATUS,
+)
 from abc import ABC, abstractmethod
 import math
 
 
 class AbstractState(ABC):
-
     def __init__(self, id, reset_on_capture, flow_ownership):
         self.id = id
         self.reset_on_capture = reset_on_capture
@@ -28,7 +35,7 @@ class AbstractState(ABC):
         return TRANSFER_RATE * multiplier * value
 
     @abstractmethod
-    def capture_event(self):
+    def capture_event(self, player):
         pass
 
     @abstractmethod
@@ -36,17 +43,19 @@ class AbstractState(ABC):
         pass
 
     def size_factor(self, value):
-        if value<5:
+        if value < 5:
             return 0
-        return max(math.log10(value/10)/2+value/1000+0.15,0)
+        return max(math.log10(value / 10) / 2 + value / 1000 + 0.15, 0)
 
     @property
     def full_size(self):
         return GROWTH_STOP
+    
+    def can_grow(self, value):
+        return value < self.full_size
 
 
 class DefaultState(AbstractState):
-
     def __init__(self, id):
         super().__init__(id, False, False)
 
@@ -56,7 +65,7 @@ class DefaultState(AbstractState):
             change *= -1
         return change
 
-    def capture_event(self):
+    def capture_event(self, player=None):
         return lambda value: value * -1
 
     def killed(self, value):
@@ -64,52 +73,60 @@ class DefaultState(AbstractState):
 
 
 class CapitalState(DefaultState):
-
     def __init__(self, id):
-        super().__init__(id, True, False)
+        super().__init__(id)
         self.capitalized = False
         self.acceptBridge = False
-        self.shrink_count = math.ceil((GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED))
+        self.shrink_count = math.floor(
+            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED)
+        )
 
     def grow(self, multiplier):
         if not self.capitalized:
             return self.shrink()
         return 0
+    
+    def can_grow(self, value):
+        if not self.capitalized:
+            return True
+        return super().can_grow(value)
 
     def shrink(self):
         if self.shrink_count == 0:
             self.capitalized = True
-            CONTEXT['main_player'].capital_handover(self)
             return 0
         self.shrink_count -= 1
         return CAPITAL_SHRINK_SPEED
 
-    def capture_event(self):
-        CONTEXT['main_player'].capital_handover(self, False)
+    def capture_event(self, player):
+        player.capital_handover(self, False)
         return super().capture_event()
 
     def killed(self, value):
         return value < 0
+    
+    def accept_intake(self, contested, value):
+        if self.capitalized:
+            return value < self.full_size or contested
+        return False
 
 
 class StartingCapitalState(CapitalState):
-
-    def __init__(self, id, capital_handover, is_owned=True):
-        super().__init__(id, True, False)
+    def __init__(self, id, is_owned=True):
+        AbstractState.__init__(self, id, True, False)
         self.capitalized = True
         self.is_owned = is_owned
 
     def grow(self, multiplier):
         return 0
 
-    def capture_event(self):
+    def capture_event(self, player):
         if self.is_owned:
-            self.capital_handover(self, False)
-        return DefaultState.capture(self)
+            player.capital_handover(self, False)
+        return super().capture_event(player)
 
 
 class MineState(AbstractState):
-
     def __init__(self, id, absorbing_func, island):
         super().__init__(id, True, True)
         self.bonus, self.bubble, self.ring_color = MINE_DICT[island]
@@ -127,13 +144,13 @@ class MineState(AbstractState):
 
     def killed(self, value):
         return value >= self.bubble
-        
-    def capture_event(self):
-        CONTEXT['main_player'].change_tick(self.bonus)
+
+    def capture_event(self, player):
+        player.change_tick(self.bonus)
         return lambda value: MINIMUM_TRANSFER_VALUE
 
     def size_factor(self, value):
-        return super().size_factor(self.bubble)/2
+        return super().size_factor(self.bubble) / 2
 
     @property
     def color(self):

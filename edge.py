@@ -1,7 +1,13 @@
-from constants import *
+from constants import (
+    EDGE,
+    RAGE_TICKS,
+    MINIMUM_TRANSFER_VALUE,
+    BEGIN_TRANSFER_VALUE,
+    AUTO_ATTACK,
+)
+
 
 class Edge:
-
     def __init__(self, to_node, from_node, id):
         self.item_type = EDGE
         self.to_node = to_node
@@ -11,7 +17,7 @@ class Edge:
         self.flowing = False
         self.popped = False
         self.update_nodes()
-        self.state = 'one-way'
+        self.state = "one-way"
         self.type = EDGE
         self.effects = {}
 
@@ -19,15 +25,15 @@ class Edge:
         return str(self.id)
 
     def update_nodes(self):
-        self.to_node.new_edge(self, 'incoming')
-        self.from_node.new_edge(self, 'outgoing')
+        self.to_node.new_edge(self, "incoming")
+        self.from_node.new_edge(self, "outgoing")
 
     def click(self, clicker, button):
         if button == 1 and self.controlled_by(clicker):
             self.switch()
 
     def switch(self, specified=None):
-        if specified == None:
+        if specified is None:
             self.on = not self.on
         else:
             self.on = specified
@@ -35,7 +41,11 @@ class Edge:
             self.popped = True
 
     def update(self):
-        if not self.on or self.from_node.value < MINIMUM_TRANSFER_VALUE or not self.flow_allowed():
+        if (
+            not self.on
+            or self.from_node.value < MINIMUM_TRANSFER_VALUE
+            or not self.flow_allowed()
+        ):
             self.flowing = False
         elif self.from_node.value > BEGIN_TRANSFER_VALUE:
             self.flowing = True
@@ -50,7 +60,7 @@ class Edge:
 
     def pop(self):
         self.popped = True
-        if not self.contested or not AUTO_ATTACK: 
+        if not self.contested or not AUTO_ATTACK:
             self.on = False
 
     def flow(self):
@@ -76,11 +86,11 @@ class Edge:
 
     @property
     def duo_ownership(self):
-        return self.to_node.owner != None and self.from_node.owner != None
+        return self.to_node.owner is not None and self.from_node.owner is not None
 
     @property
     def contested(self):
-        return self.duo_ownership and self.to_node.owner !=  self.from_node.owner
+        return self.duo_ownership and self.to_node.owner != self.from_node.owner
 
     @property
     def owner(self):
@@ -98,4 +108,3 @@ class Edge:
         if node == self.from_node:
             return self.to_node
         return self.from_node
-    

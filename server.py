@@ -4,14 +4,16 @@ from batch import Batch
 import sys
 import time
 from threading import Thread
-from constants import *
+
 
 class Server:
     def __init__(self, port):
-        self.server = '0.0.0.0'
+        self.server = "0.0.0.0"
         self.port = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.waiting_players = None  # Stores the waiting players with the game code as the key
+        self.waiting_players = (
+            None  # Stores the waiting players with the game code as the key
+        )
         self.games = {}  # Stores the active games with the game code as the key
 
         try:
@@ -47,7 +49,7 @@ class Server:
             if self.waiting_players:
                 conn.sendall("JOINED".encode())
                 self.waiting_players.add_player(conn)
-                
+
                 if self.waiting_players.is_ready():
                     print("Game is ready to start")
                     self.waiting_players.build()
@@ -79,7 +81,7 @@ class Server:
                         connection.sendall(data)
             except socket.error as e:
                 print(e)
-        
+
         print("Lost connection")
         conn.close()
 
@@ -87,8 +89,9 @@ class Server:
         while True:
             conn, addr = self.s.accept()
             print("Connected to:", addr)
-            
+
             start_new_thread(self.threaded_client, (conn,))
+
 
 if __name__ == "__main__":
     server = Server(5555)

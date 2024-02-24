@@ -1,8 +1,15 @@
-from constants import *
+from constants import (
+    DEFAULT_ABILITY_CODE,
+    BREAKDOWNS,
+    SPAWN_RELOAD,
+    RAGE_CODE,
+    CONTEXT,
+    SPAWN_CODE,
+)
 from abc import ABC, abstractmethod
-from ability import *
 from ability_factory import make_abilities
 from chooseUI import choose_abilities_ui
+
 
 class AbstractAbilityManager(ABC):
     def __init__(self, board):
@@ -51,35 +58,44 @@ class AbstractAbilityManager(ABC):
     def box(self):
         return self.ability.box
 
+
 class MoneyAbilityManager(AbstractAbilityManager):
     def __init__(self, board):
         super().__init__(board)
-        self.costs = {code: BREAKDOWNS[code]['cost'] for code in self.ability_codes}
+        self.costs = {code: BREAKDOWNS[code]["cost"] for code in self.ability_codes}
         self.set_box_numbers(self.costs)
 
     def select(self, key):
         self.abilities[self.mode].wipe()
         if self.mode == key:
             self.mode = DEFAULT_ABILITY_CODE
-        elif CONTEXT['main_player'].money >= self.costs[key]:
+        elif CONTEXT["main_player"].money >= self.costs[key]:
             return self.switch_to(key)
         return False
 
     def update_ability(self):
-        CONTEXT['main_player'].money -= self.costs[self.mode]
-        if self.costs[self.mode] > CONTEXT['main_player'].money or self.mode == RAGE_CODE:
+        CONTEXT["main_player"].money -= self.costs[self.mode]
+        if (
+            self.costs[self.mode] > CONTEXT["main_player"].money
+            or self.mode == RAGE_CODE
+        ):
             self.mode = DEFAULT_ABILITY_CODE
 
     def default_validate(self):
-        return CONTEXT['main_player'].money >= self.costs[SPAWN_CODE]
+        return CONTEXT["main_player"].money >= self.costs[SPAWN_CODE]
+
 
 class ReloadAbilityManager(AbstractAbilityManager):
     def __init__(self, board):
         super().__init__(board)
-        self.load_count = {code: 0 for code in self.ability_codes}
+        self.load_count = {code: 0.0 for code in self.ability_codes}
         self.load_count[SPAWN_CODE] = SPAWN_RELOAD
-        self.remaining_usage = {code: BREAKDOWNS[code]['total'] for code in self.ability_codes}
-        self.full_reload = {code: BREAKDOWNS[code]['reload'] for code in self.ability_codes}
+        self.remaining_usage = {
+            code: BREAKDOWNS[code]["total"] for code in self.ability_codes
+        }
+        self.full_reload = {
+            code: BREAKDOWNS[code]["reload"] for code in self.ability_codes
+        }
         self.set_box_numbers(self.remaining_usage)
 
     def select(self, key):

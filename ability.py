@@ -1,8 +1,10 @@
-from constants import *
+from constants import NODE
+
 
 class Ability:
-
-    def __init__(self, key, validation_func, click_count, box, return_func=None, click_type=NODE):
+    def __init__(
+        self, key, validation_func, click_count, box, return_func=None, click_type=NODE
+    ):
         self.key = key
         self.validation_func = validation_func
         self.click_count = click_count
