@@ -391,6 +391,10 @@ class Draw:
                 py.draw.circle(
                     self.screen, spot.state.ring_color, spot.pos, spot.size + 6, 6
                 )
+            elif spot.state_name == "zombie":
+                py.draw.rect(self.screen, spot.color,
+                             (spot.pos[0] - spot.size // 2, spot.pos[1] - spot.size // 2,
+                              spot.size, spot.size))
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
             if 'poison' in spot.effects:

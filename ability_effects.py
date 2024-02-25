@@ -52,8 +52,8 @@ def spawn_effect(data, player):
 
 def zombie_effect(data, player):
     node = data[0]
-    node.set_state("zombie")
     node.capture(None)
+    node.set_state("zombie")
     node.value = ZOMBIE_FULL_SIZE
 
 

@@ -76,6 +76,9 @@ class DefaultState(AbstractState):
 
 class ZombieState(DefaultState):
 
+    def __init__(self, id):
+        AbstractState.__init__(self, id, True, False)
+
     def grow(self, multiplier):
         return 0
 
