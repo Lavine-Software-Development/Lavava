@@ -122,7 +122,7 @@ def draw_shape(screen, shape, x, y, light_color):
         draw_x(screen, (x + (BOX_SIZE // 4), y + (BOX_SIZE // 4)), (BOX_SIZE, BOX_SIZE), light_color)
 
 
-def draw_message(screen, selected_boxes):
+def draw_message(screen, selected_boxes, start_count):
     font_size = 90  # Example size, adjust as needed for your UI
     font = pygame.font.Font(None, font_size)
     message = ""
@@ -132,7 +132,7 @@ def draw_message(screen, selected_boxes):
         message = "Press Enter"
         color = GREEN
     else:
-        remaining = 4 - len(
+        remaining = start_count - len(
             selected_boxes
         )  # Replace 4 with the constant if you have one
         message = f"Pick {remaining}"
@@ -150,7 +150,7 @@ def choose_abilities_ui():
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = pygame.time.Clock()
     # Create boxes
-    from modeConstants import ABILITY_OPTIONS
+    from modeConstants import ABILITY_OPTIONS, DEFAULT_SPAWN, ABILITY_COUNT
     boxes = {key: val for key, val in make_boxes().items() if key in ABILITY_OPTIONS[mode.MODE]}
     boxes.pop(SPAWN_CODE)
     selected_boxes = set()
@@ -182,20 +182,22 @@ def choose_abilities_ui():
                         if code in selected_boxes:
                             selected_boxes.remove(code)
                         elif (
-                            len(selected_boxes) < 4
+                            len(selected_boxes) < ABILITY_COUNT[mode.MODE]
                         ):  # Assuming a constant for max abilities
                             selected_boxes.add(code)
                         break
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN and len(selected_boxes) == 4:
+                if event.key == pygame.K_RETURN and len(selected_boxes) == ABILITY_COUNT[mode.MODE]:
                     running = False
                 if event.key == pygame.K_ESCAPE:
                     running = False
 
         screen.fill(WHITE)
         draw_boxes(screen, boxes, selected_boxes, mouse_pos, box_rects)
-        draw_message(screen, selected_boxes)
+        draw_message(screen, selected_boxes, ABILITY_COUNT[mode.MODE])
         pygame.display.flip()
         clock.tick(60)
 
-    return [SPAWN_CODE] + list(selected_boxes)
+    if DEFAULT_SPAWN[mode.MODE]:
+        return [SPAWN_CODE] + list(selected_boxes)
+    return list(selected_boxes)
