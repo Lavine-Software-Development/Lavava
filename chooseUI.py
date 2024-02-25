@@ -100,6 +100,13 @@ def draw_x(screen, position, size, color):
     pygame.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
 
 
+def draw_cross(screen, position, size, color):
+    pygame.draw.line(screen, color, (position[0], position[1] + size[1] // 2),
+                     (position[0] + size[0], position[1] + size[1] // 2), 20)
+    pygame.draw.line(screen, color, (position[0] + size[0] // 2, position[1]),
+                     (position[0] + size[0] // 2, position[1] + size[1]), 20)
+
+
 def draw_shape(screen, shape, x, y, light_color):
     # This function will handle drawing the shape within a given box
     center = (x + BOX_SIZE // 2, y + BOX_SIZE // 2)
@@ -120,6 +127,8 @@ def draw_shape(screen, shape, x, y, light_color):
         draw_star(screen, center, star_size, light_color)
     elif shape == "x":
         draw_x(screen, (x + (BOX_SIZE // 4), y + (BOX_SIZE // 4)), (BOX_SIZE, BOX_SIZE), light_color)
+    elif shape == "cross":
+        draw_cross(screen, (x + BOX_SIZE // 4, y + BOX_SIZE // 4), (BOX_SIZE // 2, BOX_SIZE // 2), light_color)
 
 
 def draw_message(screen, selected_boxes, start_count):

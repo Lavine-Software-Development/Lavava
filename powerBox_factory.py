@@ -31,7 +31,7 @@ def make_boxes():
         D_BRIDGE_CODE: PowerBox("D-Bridge", YELLOW, "circle"),
         NUKE_CODE: PowerBox("Nuke", BLACK, "x"),
         CAPITAL_CODE: PowerBox("Capital", PINK, "star"),
-        RAGE_CODE: PowerBox("Rage", GREEN, "star"),
+        RAGE_CODE: PowerBox("Rage", GREEN, "cross"),
         SPAWN_CODE: PowerBox(
             "Spawn", CONTEXT["main_player"].default_color, "circle", ""
         ),

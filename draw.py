@@ -113,6 +113,8 @@ class Draw:
             )
         elif shape == "x":
             self.draw_x((position[0] + btn_size // 4, position[1] + btn_size // 4), (btn_size, btn_size), lighter_color)
+        elif shape == "cross":
+            self.draw_cross((position[0] + btn_size // 4, position[1] + btn_size // 4), (btn_size // 2, btn_size // 2), lighter_color)
 
         if loading:
             py.draw.rect(
@@ -179,6 +181,12 @@ class Draw:
 
         py.draw.line(screen, color, (x, y), (x_end_pos, y_end_pos), 20)
         py.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
+    
+    def draw_cross(self, position, size, color):
+        py.draw.line(self.screen, color, (position[0], position[1] + size[1] // 2),
+                     (position[0] + size[0], position[1] + size[1] // 2), 20)
+        py.draw.line(self.screen, color, (position[0] + size[0] // 2, position[1]),
+                     (position[0] + size[0] // 2, position[1] + size[1]), 20)
 
     def draw_star(self, position, size, color, filled=True):
         inner_radius = size // 6
