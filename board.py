@@ -14,10 +14,12 @@ from constants import (
 from helpers import distance_point_to_segment, do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
+from gameStateEnums import GameStateEnum as GSE
 
 
 class Board:
-    def __init__(self):
+    def __init__(self, gs):
+        self.gs = gs
         self.nodes = []
         self.edges = []
         self.edge_dict = defaultdict(set)
@@ -46,7 +48,7 @@ class Board:
 
     def check_highlight(self, position, ability_manager):
         self.highlighted = self.hover(position, ability_manager)
-        if not CONTEXT["started"]:
+        if self.gs.state.value < GSE.PLAY.value:
             self.highlighted_color = CONTEXT["main_player"].default_color
         else:
             self.highlighted_color = ability_manager.box_col
@@ -55,7 +57,7 @@ class Board:
         ability = ability_manager.ability
         if id := self.find_node(position):
             if (not ability) or ability.click_type == NODE:
-                if not CONTEXT["started"] and self.id_dict[id].owner is None:
+                if self.gs.state.value < GSE.PLAY.value and self.id_dict[id].owner is None:
                     return self.id_dict[id]
                 elif ability and ability.validate(self.id_dict[id]):
                     return self.id_dict[id]

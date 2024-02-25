@@ -4,7 +4,8 @@ import mode
 
 
 class PlayerManager:
-    def __init__(self, player_count, main_player_number):
+    def __init__(self, player_count, main_player_number, gs):
+        self.gs = gs
         PlayerClass = MODE_PLAYERS[mode.MODE]
         self.player_dict = {
             i: PlayerClass(COLOR_DICT[i], i) for i in range(player_count)
@@ -74,7 +75,7 @@ class PlayerManager:
                 self.timer = 3
             return True
 
-        CONTEXT["started"] = True
+        self.gs.next()
         return False
 
     @property
@@ -84,8 +85,8 @@ class PlayerManager:
 
 class SoloPlayerManager(PlayerManager):
 
-    def __init__(self):
-        super().__init__(1, 0)
+    def __init__(self, gs):
+        super().__init__(1, 0, gs)
 
     def check_over(self):
         self.check_capital_win()
