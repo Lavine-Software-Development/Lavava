@@ -5,10 +5,10 @@ import math
 import mode
 
 # Constants
-WINDOW_WIDTH = 800  # Adjust as needed
+WINDOW_WIDTH = 1067  # Adjust as needed
 WINDOW_HEIGHT = 800  # Adjust as needed
 BOX_SIZE = 200  # Size of each ability box
-COLUMNS = 3
+COLUMNS = 4
 ROWS = 3
 PADDING = 50  # Padding between boxes
 BOX_PADDING = 18  # Padding around each box
@@ -161,7 +161,8 @@ def choose_abilities_ui():
     # Create boxes
     from modeConstants import ABILITY_OPTIONS, DEFAULT_SPAWN, ABILITY_COUNT
     boxes = {key: val for key, val in make_boxes().items() if key in ABILITY_OPTIONS[mode.MODE]}
-    boxes.pop(SPAWN_CODE)
+    if DEFAULT_SPAWN[mode.MODE]:
+        boxes.pop(SPAWN_CODE)
     selected_boxes = set()
 
     # Calculate positions for boxes and store them as Pygame Rects for easy collision detection

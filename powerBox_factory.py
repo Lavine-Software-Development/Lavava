@@ -24,6 +24,9 @@ from constants import (
 
 def make_boxes():
     return {
+        SPAWN_CODE: PowerBox(
+            "Spawn", CONTEXT["main_player"].default_color, "circle", ""
+        ),
         BRIDGE_CODE: PowerBox("Bridge", YELLOW, "triangle", "A"),
         POISON_CODE: PowerBox("Poison", PURPLE, "circle"),
         FREEZE_CODE: PowerBox("Freeze", LIGHT_BLUE, "triangle"),
@@ -32,8 +35,5 @@ def make_boxes():
         NUKE_CODE: PowerBox("Nuke", BLACK, "x"),
         CAPITAL_CODE: PowerBox("Capital", PINK, "star"),
         RAGE_CODE: PowerBox("Rage", GREEN, "cross"),
-        SPAWN_CODE: PowerBox(
-            "Spawn", CONTEXT["main_player"].default_color, "circle", ""
-        ),
         ZOMBIE_CODE: PowerBox("Zombie", RED, "square"),
     }
