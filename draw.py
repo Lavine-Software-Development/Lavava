@@ -5,7 +5,8 @@ from constants import (
     SCREEN_HEIGHT,
     ABILITY_SIZE,
     ABILITY_FONT,
-    ABILITY_GAP,
+    VERTICAL_ABILITY_GAP,
+    HORIZONTAL_ABILITY_GAP,
     FONT_GAP,
     BLACK,
     WHITE,
@@ -143,7 +144,7 @@ class Draw:
         self.screen.blit(cost_text, (position[0] + 10, position[1] + 10))
 
     def draw_buttons(self):
-        y_position = int(ABILITY_START_HEIGHT * self.height)
+        y_position = int(VERTICAL_ABILITY_GAP * self.height / 6)
         for btn in self.abilities.values():
             btn_box = btn.box
             selected = self.ability_manager.mode == btn.key or (
@@ -159,11 +160,11 @@ class Draw:
                 btn_box.name,
                 btn_box.display_num,
                 btn_box.letter,
-                (self.width - int(ABILITY_GAP * self.height), y_position),
+                (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
                 selected,
                 loading,
             )
-            y_position += int(ABILITY_GAP * self.height)  # Vertical gap between buttons
+            y_position += int(VERTICAL_ABILITY_GAP * self.height)  # Vertical gap between buttons
 
     def draw_x(self, position, size, color):
         screen = self.screen

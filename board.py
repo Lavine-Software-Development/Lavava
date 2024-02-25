@@ -5,7 +5,7 @@ from constants import (
     DYNAMIC_EDGE,
     GREY,
     SCREEN_WIDTH,
-    ABILITY_GAP,
+    HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
     EDGE_COUNT,
     CONTEXT,
@@ -49,24 +49,18 @@ class Board:
         if not CONTEXT["started"]:
             self.highlighted_color = CONTEXT["main_player"].default_color
         else:
-            self.highlighted_color = ability_manager.box.color
-
-    def validate(self, ability_manager, id):
-        if ability_manager.mode == DEFAULT_ABILITY_CODE:
-            if not ability_manager.default_validate():
-                return False
-        return ability_manager.ability.validate(self.id_dict[id])
+            self.highlighted_color = ability_manager.box_col
 
     def hover(self, position, ability_manager):
         ability = ability_manager.ability
         if id := self.find_node(position):
-            if ability.click_type == NODE:
+            if (not ability) or ability.click_type == NODE:
                 if not CONTEXT["started"] and self.id_dict[id].owner is None:
                     return self.id_dict[id]
-                elif self.validate(ability_manager, id):
+                elif ability and ability.validate(self.id_dict[id]):
                     return self.id_dict[id]
         elif id := self.find_edge(position):
-            if ability.click_type == EDGE and self.validate(ability_manager, id):
+            if ability and ability.click_type == EDGE and ability.validate(self.id_dict[id]):
                 return self.id_dict[id]
             elif self.id_dict[id].controlled_by(CONTEXT["main_player"]) or (
                 self.id_dict[id].to_node.owner == CONTEXT["main_player"]
@@ -94,7 +88,7 @@ class Board:
         far_right_x = far_right_node.pos[0]
 
         original_width = far_right_x - far_left_x
-        new_width = SCREEN_WIDTH * (1 - ABILITY_GAP)
+        new_width = SCREEN_WIDTH * (1 - HORIZONTAL_ABILITY_GAP)
         scaling_factor = new_width / original_width if original_width != 0 else 1
 
         for node in self.nodes:
