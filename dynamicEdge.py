@@ -8,11 +8,11 @@ class DynamicEdge(Edge):
         self.state = "two-way"
         self.item_type = DYNAMIC_EDGE
 
-    def update_nodes(self):
-        self.to_node.new_edge(self, "incoming")
-        self.from_node.new_edge(self, "outgoing")
-        self.to_node.new_edge(self, "outgoing")
-        self.from_node.new_edge(self, "incoming")
+    def update_nodes(self, initial=False):
+        self.to_node.new_edge(self, "incoming", initial)
+        self.from_node.new_edge(self, "outgoing", initial)
+        self.to_node.new_edge(self, "outgoing", initial)
+        self.from_node.new_edge(self, "incoming", initial)
 
     def click_swap(self):
         self.on = True

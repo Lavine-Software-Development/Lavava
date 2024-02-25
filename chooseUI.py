@@ -146,7 +146,8 @@ def draw_message(screen, selected_boxes, start_count):
     # Blit the message onto the screen
     screen.blit(text, text_rect)
 
-def choose_abilities_ui():
+def choose_abilities_ui(gs):
+    gs.next()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = pygame.time.Clock()
     # Create boxes
@@ -198,6 +199,7 @@ def choose_abilities_ui():
         pygame.display.flip()
         clock.tick(60)
 
+    gs.next()
     if DEFAULT_SPAWN[mode.MODE]:
         return [SPAWN_CODE] + list(selected_boxes)
     return list(selected_boxes)

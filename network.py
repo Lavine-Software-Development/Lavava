@@ -8,8 +8,12 @@ import random
 
 
 class SoloNetwork:
-    def __init__(self, action_callback):
+    def __init__(self, action_callback, gs):
         self.action_callback = action_callback
+
+        self.gs = gs
+        self.gs.next()
+
         self.running = True
 
         self.get_user_input_and_board()
@@ -45,12 +49,12 @@ class SoloNetwork:
             
 
 class Network(SoloNetwork):
-    def __init__(self, action_callback):
+    def __init__(self, action_callback, gs):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = None
         self.port = 5555
 
-        super().__init__(action_callback)
+        super().__init__(action_callback, gs)
 
     def get_user_input_for_game(self):
         server_keys = "/".join(SERVERS.keys())

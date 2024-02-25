@@ -15,7 +15,7 @@ class Edge:
         self.on = False
         self.flowing = False
         self.popped = False
-        self.update_nodes()
+        self.update_nodes(True)
         self.state = "one-way"
         self.type = EDGE
         self.effects = set()
@@ -23,9 +23,9 @@ class Edge:
     def __str__(self):
         return str(self.id)
 
-    def update_nodes(self):
-        self.to_node.new_edge(self, "incoming")
-        self.from_node.new_edge(self, "outgoing")
+    def update_nodes(self, initial=False):
+        self.to_node.new_edge(self, "incoming", initial)
+        self.from_node.new_edge(self, "outgoing", initial)
 
     def click(self, clicker, button):
         if button == 1 and self.controlled_by(clicker):

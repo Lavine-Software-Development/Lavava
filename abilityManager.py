@@ -11,8 +11,8 @@ from chooseUI import choose_abilities_ui
 
 
 class AbstractAbilityManager(ABC):
-    def __init__(self, board):
-        self.ability_codes = choose_abilities_ui()
+    def __init__(self, board, gs):
+        self.ability_codes = choose_abilities_ui(gs)
         self.abilities = self.create_abilities(board)
         self.mode = None
 
@@ -61,8 +61,8 @@ class AbstractAbilityManager(ABC):
 
 
 class MoneyAbilityManager(AbstractAbilityManager):
-    def __init__(self, board):
-        super().__init__(board)
+    def __init__(self, board, gs):
+        super().__init__(board, gs)
         self.costs = {code: BREAKDOWNS[code]["cost"] for code in self.ability_codes}
         self.set_box_numbers(self.costs)
 
@@ -85,8 +85,8 @@ class MoneyAbilityManager(AbstractAbilityManager):
 
 
 class ReloadAbilityManager(AbstractAbilityManager):
-    def __init__(self, board):
-        super().__init__(board)
+    def __init__(self, board, gs):
+        super().__init__(board, gs)
         self.load_count = {code: 0.0 for code in self.ability_codes}
         self.load_count[SPAWN_CODE] = SPAWN_RELOAD
         self.remaining_usage = {

@@ -7,7 +7,6 @@ from constants import (
     EFFECT_NAMES,
     AUTO_ATTACK,
     AUTO_EXPAND,
-    CONTEXT,
     BLACK,
     BROWN,
 )
@@ -34,7 +33,7 @@ class Node:
     def __str__(self):
         return str(self.id)
 
-    def new_edge(self, edge, dir):
+    def new_edge(self, edge, dir, initial):
         if dir == "incoming":
             self.incoming.add(edge)
         else:
@@ -66,6 +65,7 @@ class Node:
         else:
             return DefaultState(self.id)
 
+
     def new_effect(self, effect_name):
         if effect_name == 'poison':
             return Poisoned(self.spread_poison)
@@ -84,7 +84,6 @@ class Node:
         self.grow_multiplier = inter_grow
         self.intake_multiplier = inter_intake
         self.expel_multiplier = inter_expel
-        print(self.grow_multiplier, self.intake_multiplier, self.expel_multiplier)
 
     def set_default_state(self):
         self.set_state("default")
@@ -263,10 +262,10 @@ class PortNode(Node):
     def acceptBridge(self):
         return self.port_count > 0 and 'burn' not in self.effects and self.state.acceptBridge
 
-    def new_edge(self, edge, dir):
-        if CONTEXT["started"] and edge not in self.edges and dir == "outgoing":
+    def new_edge(self, edge, dir, initial):
+        if not initial and edge not in self.edges and dir == "outgoing":
             self.port_count -= 1
-        super().new_edge(edge, dir)
+        super().new_edge(edge, dir, initial)
 
     def lose_ports(self):
         self.port_count = 0
