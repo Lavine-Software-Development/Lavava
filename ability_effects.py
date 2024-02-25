@@ -8,8 +8,10 @@ from constants import (
     POISON_CODE,
     CAPITAL_CODE,
     RAGE_CODE,
+    ZOMBIE_CODE,
     EDGE,
     DYNAMIC_EDGE,
+    ZOMBIE_FULL_SIZE,
 )
 from playerEffect import PlayerEnraged
 
@@ -48,6 +50,13 @@ def spawn_effect(data, player):
     node.capture(player)
 
 
+def zombie_effect(data, player):
+    node = data[0]
+    node.set_state("zombie")
+    node.capture(None)
+    node.value = ZOMBIE_FULL_SIZE
+
+
 def poison_effect(data, player):
     node = data[0]
     node.set_state("poison")
@@ -73,5 +82,6 @@ def make_ability_effects(board):
         BURN_CODE: burn_effect,
         POISON_CODE: poison_effect,
         CAPITAL_CODE: capital_effect,
+        ZOMBIE_CODE: zombie_effect,
         RAGE_CODE: make_rage(board.board_wide_effect),
     }

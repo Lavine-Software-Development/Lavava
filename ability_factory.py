@@ -8,6 +8,7 @@ from constants import (
     BURN_CODE,
     FREEZE_CODE,
     RAGE_CODE,
+    ZOMBIE_CODE,
     EDGE,
 )
 from ability import Ability
@@ -19,6 +20,7 @@ from ability_validators import (
     dynamic_edge_own_either,
     no_click,
     unowned_node,
+    my_node,
 )
 from ability_return import make_new_edge
 from powerBox_factory import make_boxes
@@ -51,4 +53,5 @@ def make_abilities(board):
             FREEZE_CODE, dynamic_edge_own_either, 1, boxes[FREEZE_CODE], None, EDGE
         ),
         RAGE_CODE: Ability(RAGE_CODE, no_click, 0, boxes[RAGE_CODE]),
+        ZOMBIE_CODE: Ability(ZOMBIE_CODE, my_node, 1, boxes[ZOMBIE_CODE])
     }

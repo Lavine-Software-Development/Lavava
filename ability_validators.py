@@ -13,6 +13,10 @@ def standard_node_attack(data):
         and node.state_name not in ["capital", "mine"]
     )
 
+def my_node(data):
+    node = data[0]
+    return node.owner == CONTEXT["main_player"]
+
 
 def dynamic_edge_own_either(data):
     edge = data[0]

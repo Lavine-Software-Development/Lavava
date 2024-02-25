@@ -6,11 +6,11 @@ import mode
 
 # Constants
 WINDOW_WIDTH = 800  # Adjust as needed
-WINDOW_HEIGHT = 500  # Adjust as needed
-BOX_SIZE = 170  # Size of each ability box
-COLUMNS = 4
-ROWS = 2
-PADDING = 25  # Padding between boxes
+WINDOW_HEIGHT = 800  # Adjust as needed
+BOX_SIZE = 200  # Size of each ability box
+COLUMNS = 3
+ROWS = 3
+PADDING = 50  # Padding between boxes
 BOX_PADDING = 18  # Padding around each box
 
 # Initialization
@@ -86,6 +86,19 @@ def draw_star(screen, position, size, color):
 
     pygame.draw.polygon(screen, color, star_points)
 
+def draw_x(screen, position, size, color):
+    x = position[0]
+    y = position[1]
+
+    width = size[0]
+    length = size[1]
+
+    x_end_pos = x + 2 * (width // 4)
+    y_end_pos = y + 2 * (length // 4)
+
+    pygame.draw.line(screen, color, (x, y), (x_end_pos, y_end_pos), 20)
+    pygame.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
+
 
 def draw_shape(screen, shape, x, y, light_color):
     # This function will handle drawing the shape within a given box
@@ -105,6 +118,8 @@ def draw_shape(screen, shape, x, y, light_color):
     elif shape == "star":
         star_size = BOX_SIZE * 0.8  # Adjust the size as needed
         draw_star(screen, center, star_size, light_color)
+    elif shape == "x":
+        draw_x(screen, (x + (BOX_SIZE // 4), y + (BOX_SIZE // 4)), (BOX_SIZE, BOX_SIZE), light_color)
 
 
 def draw_message(screen, selected_boxes):
@@ -142,11 +157,16 @@ def choose_abilities_ui():
 
     # Calculate positions for boxes and store them as Pygame Rects for easy collision detection
     box_rects = []
+    horizontal_spacing = (WINDOW_WIDTH - (BOX_SIZE * COLUMNS)) / (COLUMNS + 1)
+    vertical_spacing = (WINDOW_HEIGHT - (BOX_SIZE * ROWS)) / (ROWS + 3)
     for index, (code, box) in enumerate(boxes.items()):
         column = index % COLUMNS
         row = index // COLUMNS
-        x = PADDING + (BOX_SIZE + PADDING) * column
-        y = PADDING + (BOX_SIZE + PADDING) * row
+        x = horizontal_spacing + (BOX_SIZE + horizontal_spacing) * column
+        y = vertical_spacing + (BOX_SIZE + vertical_spacing) * row
+
+        # x = PADDING + (BOX_SIZE + PADDING) * column
+        # y = PADDING + (BOX_SIZE + PADDING) * row
         rect = pygame.Rect(x, y, BOX_SIZE, BOX_SIZE)
         box_rects.append((code, rect))
 
