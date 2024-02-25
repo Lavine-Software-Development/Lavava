@@ -1,12 +1,20 @@
-from constants import *
+from constants import (
+    GREY,
+    NODE_COUNT,
+    CAPITAL_WIN_COUNT,
+    START_MONEY,
+    START_MONEY_RATE,
+    CAPITAL_BONUS,
+)
+
 
 class DefaultPlayer:
-
     def __init__(self, color, id):
         self.default_color = color[0]
         self.name = color[1]
         self.id = id
         self.points = 0
+        self.effects = set()
         self.default_values()
 
     def default_values(self):
@@ -23,7 +31,11 @@ class DefaultPlayer:
         self.points += self.count
 
     def update(self):
-        pass
+        self.effects = set(filter(lambda effect : (effect.count()), self.effects))
+
+    def pass_on_effects(self, node):
+        for effect in self.effects:
+            effect.spread(node)
 
     def win(self):
         self.victory = True
@@ -34,10 +46,10 @@ class DefaultPlayer:
 
     def capital_handover(self, capital, gain=True):
         if gain:
-            self.capitals[capital.node.id] = capital
+            self.capitals[capital.id] = capital
         else:
-            del self.capitals[capital.node.id]
-        
+            del self.capitals[capital.id]
+
     def check_capital_win(self):
         return self.capital_count == CAPITAL_WIN_COUNT
 
@@ -47,11 +59,13 @@ class DefaultPlayer:
 
 
 class MoneyPlayer(DefaultPlayer):
-
     def default_values(self):
         self.money = START_MONEY
         self.tick_production = START_MONEY_RATE
         super().default_values()
+
+    def change_tick(self, amount):
+        self.tick_production += amount
 
     def capital_handover(self, capital, gain=True):
         if gain:
@@ -66,9 +80,8 @@ class MoneyPlayer(DefaultPlayer):
 
     def update(self):
         self.money += self.tick_production
+        super().update()
 
     @property
     def production_per_second(self):
         return self.tick_production * 10
-
-    

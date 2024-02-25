@@ -1,27 +1,59 @@
 import socket
 import threading
-from constants import *
+import time
+from constants import MODES
+from server_constants import SERVERS
 import ast
+import random
 
-class Network:
+
+class SoloNetwork:
+    def __init__(self, action_callback):
+        self.action_callback = action_callback
+        self.running = True
+
+        self.get_user_input_and_board()
+
+    def get_user_input_and_board(self):
+        while self.running:
+            self.get_user_input_for_game()
+            if self.receive_board():
+                threading.Thread(target=self.listen).start()
+                break
+
+    def get_user_input_for_game(self):
+        game_modes = ", ".join(f"{key} - {val}" for key, val in MODES.items())
+        game_type = int(input(f"Enter game type. {game_modes}: "))
+        if game_type in MODES:
+            self.game_type = int(game_type)
+
+    def receive_board(self):
+        self.board_generator_value = int(random.randint(0, 10000))
+        return True
+
+    def send(self, data):
+        self.action_callback(*data[:2], data[2:])
+
+    def listen(self):
+        time.sleep(1)
+        while self.running:
+            self.action_callback(0, 0, 0)
+            time.sleep(0.1)
+
+    def stop(self):
+        self.running = False
+            
+
+class Network(SoloNetwork):
     def __init__(self, action_callback):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = None
         self.port = 5555
-        self.action_callback = action_callback
-        self.running = True
 
-        self.get_user_input_and_connect()
-
-    def get_user_input_and_connect(self):
-        while self.running:
-            self.get_user_input_for_game()
-            if self.connect_and_receive_board():
-                threading.Thread(target=self.listen_for_data).start()
-                break
+        super().__init__(action_callback)
 
     def get_user_input_for_game(self):
-        server_keys = '/'.join(SERVERS.keys())
+        server_keys = "/".join(SERVERS.keys())
         self.server = input(f"Input Server IP Address ({server_keys} for DEFAULT): ")
         if self.server in SERVERS:
             self.server = SERVERS[self.server]
@@ -35,13 +67,13 @@ class Network:
 
         if user_input == "h":
             player_count = input("Enter the number of players for the game: ")
-            game_modes = ', '.join(f'{key} - {val}' for key, val in MODES.items())
+            game_modes = ", ".join(f"{key} - {val}" for key, val in MODES.items())
             game_type = input(f"Enter game type. {game_modes}: ")
             self.init_data = f"HOST,{player_count},{game_type}"
         else:
             self.init_data = f"JOIN,{0},{0}"
 
-    def connect_and_receive_board(self):
+    def receive_board(self):
         if self.establish_connection():
             return self.receive_board_data()
 
@@ -74,21 +106,23 @@ class Network:
         try:
             head = data[:2]
             tail = data[2:]
-            message = '(' + ','.join(map(str, head)) + ',[' + ','.join(map(str, tail)) + '])'
+            message = (
+                "(" + ",".join(map(str, head)) + ",[" + ",".join(map(str, tail)) + "])"
+            )
             self.client.send(message.encode())
         except socket.error as e:
             print(e)
 
-    def listen_for_data(self):
-        buffer = ''
+    def listen(self):
+        buffer = ""
         while self.running:
             try:
                 chunk = self.client.recv(32).decode()
                 buffer += chunk
 
-                while '(' in buffer and ')' in buffer:
-                    start_index = buffer.find('(')
-                    end_index = buffer.find(')') + 1 
+                while "(" in buffer and ")" in buffer:
+                    start_index = buffer.find("(")
+                    end_index = buffer.find(")") + 1
                     response = buffer[start_index:end_index]
 
                     data_tuple = ast.literal_eval(response)
@@ -103,12 +137,6 @@ class Network:
                 break
 
     def stop(self):
-        self.running = False
+        super().stop()
         self.client.close()
 
-if __name__ == "__main__":
-    # replace with your actual callbacks
-    def action_callback(): pass 
-    def tick_callback(): pass 
-
-    Network(action_callback, tick_callback)

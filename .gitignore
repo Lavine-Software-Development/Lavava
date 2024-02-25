@@ -1,2 +1,5 @@
 __pycache__/
 env/
+server_constants.py
+.idea/
+new_env/
