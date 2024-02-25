@@ -16,6 +16,7 @@ from constants import (
     TICK,
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
+    SPAWN_CODE
 )
 from modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
 import sys
@@ -146,7 +147,8 @@ class Game:
                             self.drawer.relocate(width, height)
 
                         if not CONTEXT["main_player"].eliminated:
-                            self.keydown(event)
+                            if CONTEXT["started"]:
+                                self.keydown(event)
 
                             if not CONTEXT["main_player"].victory:
                                 if event.type == p.MOUSEBUTTONDOWN:
@@ -166,17 +168,21 @@ class Game:
 
     def mouse_button_down_event(self, button):
         if self.board.highlighted:
-            if (
-                data := self.ability_manager.use_ability(
-                    self.board.highlighted, self.board.highlighted_color
-                )
-            ) and button != STANDARD_RIGHT_CLICK:
-                self.network.send(
-                    (self.ability_manager.mode, CONTEXT["main_player"].id, *data)
-                )
-                self.ability_manager.update_ability()
-            elif id := self.board.click_edge():
-                self.network.send((button, CONTEXT["main_player"].id, id))
+            if not CONTEXT["started"]:
+                print(self.board.highlighted)
+                self.network.send((SPAWN_CODE, CONTEXT["main_player"].id, self.board.highlighted.id))
+            else:
+                if (
+                    data := self.ability_manager.use_ability(
+                        self.board.highlighted, self.board.highlighted_color
+                    )
+                ) and button != STANDARD_RIGHT_CLICK:
+                    self.network.send(
+                        (self.ability_manager.mode, CONTEXT["main_player"].id, *data)
+                    )
+                    self.ability_manager.update_ability()
+                elif id := self.board.click_edge():
+                    self.network.send((button, CONTEXT["main_player"].id, id))
 
     @property
     def ability_options(self):

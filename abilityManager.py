@@ -15,7 +15,7 @@ class AbstractAbilityManager(ABC):
     def __init__(self, board):
         self.ability_codes = choose_abilities_ui()
         self.abilities = self.create_abilities(board)
-        self.mode = DEFAULT_ABILITY_CODE
+        self.mode = self.ability_codes[0]
 
     def set_box_numbers(self, stat):
         for ability in self.abilities.values():

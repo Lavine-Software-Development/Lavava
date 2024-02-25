@@ -45,8 +45,11 @@ class Board:
         self.extra_edges = 2
 
     def check_highlight(self, position, ability_manager):
-        self.highlighted_color = ability_manager.box.color
         self.highlighted = self.hover(position, ability_manager)
+        if not CONTEXT["started"]:
+            self.highlighted_color = CONTEXT["main_player"].default_color
+        else:
+            self.highlighted_color = ability_manager.box.color
 
     def validate(self, ability_manager, id):
         if ability_manager.mode == DEFAULT_ABILITY_CODE:
@@ -57,8 +60,11 @@ class Board:
     def hover(self, position, ability_manager):
         ability = ability_manager.ability
         if id := self.find_node(position):
-            if ability.click_type == NODE and self.validate(ability_manager, id):
-                return self.id_dict[id]
+            if ability.click_type == NODE:
+                if not CONTEXT["started"] and self.id_dict[id].owner is None:
+                    return self.id_dict[id]
+                elif self.validate(ability_manager, id):
+                    return self.id_dict[id]
         elif id := self.find_edge(position):
             if ability.click_type == EDGE and self.validate(ability_manager, id):
                 return self.id_dict[id]

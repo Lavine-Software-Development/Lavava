@@ -1,7 +1,6 @@
 from constants import (
     NODE,
     PORT_NODE,
-    ZOMBIE_NODE,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     STATE_NAMES,
@@ -66,7 +65,6 @@ class Node:
             return CapitalStateType(self.id)
         else:
             return DefaultState(self.id)
-
 
     def new_effect(self, effect_name):
         if effect_name == 'poison':
