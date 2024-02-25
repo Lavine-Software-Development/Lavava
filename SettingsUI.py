@@ -9,7 +9,19 @@ from constants import GREY, BLACK, WHITE, LIGHT_GREY
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 800
 
+
+def is_point_in_circle(point, circle_center, circle_radius):
+    # Calculate the distance between the point and the circle's center
+    dx = point[0] - circle_center[0]
+    dy = point[1] - circle_center[1]
+    distance_squared = dx ** 2 + dy ** 2
+
+    # Check if the distance is less than or equal to the radius squared
+    return distance_squared <= circle_radius ** 2
 def settings_ui():
+
+    host_settings_info = ["HOST", 0, 0]
+    join_settings_info = ["JOIN"]
 
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = pygame.time.Clock()
@@ -20,10 +32,26 @@ def settings_ui():
     host_button = pygame.Rect(0, 0, screen_width // 2, 100)
     join_button = pygame.Rect(screen_width // 2, 0, screen_width // 2, 100)
 
+    default_button = pygame.Rect(100, screen_height // 2 + 100, 150, 100)
+    reload_button = pygame.Rect(screen_width // 2 - 75, screen_height // 2 + 100, 150, 100)
+    ports_button = pygame.Rect(screen_width - 250, screen_height // 2 + 100, 150, 100)
+    done_button = pygame.Rect(screen_width - 100, screen_height - 100, 100, 50)
+
+    input_box = pygame.Rect(screen_width // 2 - 100, screen_height // 2, 200, 50)
+
+    two_players_button_center = (screen_width // 2, 200)
+    three_players_button_center = (screen_width // 2 + 150, 200)
+    four_players_button_center = (screen_width // 2 + 300, 200)
+
     host_selected = False
     join_selected = False
 
-    current_screen = 'Menu'
+    done_selected = False
+
+    gameplay_selected = None
+    num_players_selected = 0
+
+    # ip_address = ""
 
     running = True
     while running:
@@ -35,20 +63,45 @@ def settings_ui():
                 if host_button.collidepoint(event.pos):
                     if join_selected:
                         join_selected = False
+                        gameplay_selected = None
                     host_selected = True
                 elif join_button.collidepoint(event.pos):
                     if host_selected:
                         host_selected = False
                     join_selected = True
+                    gameplay_selected = None
+                elif host_selected:
+                    if default_button.collidepoint(event.pos):
+                        gameplay_selected = "Default"
+                        host_settings_info[2] = 1
+                    elif reload_button.collidepoint(event.pos):
+                        gameplay_selected = "Reload"
+                        host_settings_info[2] = 2
+                    elif ports_button.collidepoint(event.pos):
+                        gameplay_selected = "Ports"
+                        host_settings_info[2] = 3
 
-
-                # if current_screen == "Menu" and host_button.collidepoint(event.pos):
-                #     current_screen = "Host"
-                # elif current_screen == "Menu" and join_button.collidepoint(event.pos):
-                #     current_screen = "Join"
-                # elif current_screen == "Host" or current_screen == "Join":
-                #     if back_button.collidepoint(event.pos):
-                #         current_screen = "Menu"
+                    if is_point_in_circle(event.pos, two_players_button_center, 10):
+                        num_players_selected = 2
+                        host_settings_info[1] = 2
+                    elif is_point_in_circle(event.pos, three_players_button_center, 10):
+                        num_players_selected = 3
+                        host_settings_info[1] = 3
+                    elif is_point_in_circle(event.pos, four_players_button_center, 10):
+                        num_players_selected = 4
+                        host_settings_info[1] = 4
+                    # ip_address = ''
+                # elif join_selected:
+                    # if event.type == pygame.KEYDOWN:
+                    #     if event.key == pygame.K_RETURN:
+                    #         ip_address = ''  # Reset text
+                    #     elif event.key == pygame.K_BACKSPACE:
+                    #         ip_address = ip_address[:-1]
+                    #     else:
+                    #         ip_address += event.unicode
+                    #         print(ip_address)
+                if done_button.collidepoint(event.pos):
+                    done_selected = True
 
         screen.fill(WHITE)
 
@@ -56,16 +109,74 @@ def settings_ui():
             pygame.draw.rect(screen, LIGHT_GREY, host_button)
             pygame.draw.rect(screen, GREY, join_button)
 
-            num_players_label_pos = (screen_width // 2 - 100, 200)
+            num_players_label_pos = (200, 200)
             num_players_font_size = 26
             num_players_font = pygame.font.Font(None, num_players_font_size)
             num_players_text = num_players_font.render("Select the number of players:", True, BLACK)
             screen.blit(num_players_text, num_players_text.get_rect(center=num_players_label_pos))
 
-            number_of_players_button = pygame.draw.circle(screen, GREY, ())
+            two_player_button = pygame.draw.circle(screen, GREY, (screen_width // 2, 200), 10)
+            three_player_button = pygame.draw.circle(screen, GREY, (screen_width // 2 + 150, 200), 10)
+            four_player_button = pygame.draw.circle(screen, GREY, (screen_width // 2 + 300, 200), 10)
+
+            if num_players_selected == 2:
+                pygame.draw.circle(screen, BLACK, (screen_width // 2, 200), 5)
+            elif num_players_selected == 3:
+                pygame.draw.circle(screen, BLACK, (screen_width // 2 + 150, 200), 5)
+            elif num_players_selected == 4:
+                pygame.draw.circle(screen, BLACK, (screen_width // 2 + 300, 200), 5)
+
+            player_size_font_size = 30  # Larger size for titles
+            player_size_font = pygame.font.Font(None, player_size_font_size)
+
+            player_text = player_size_font.render("2", True, BLACK)
+            two_player_center = two_player_button.center
+            screen.blit(player_text, player_text.get_rect(center=(two_player_center[0], two_player_center[1] - 20)))
+
+            player_text = player_size_font.render("3", True, BLACK)
+            three_player_center = three_player_button.center
+            screen.blit(player_text, player_text.get_rect(center=(three_player_center[0], three_player_center[1] - 20)))
+
+            player_text = player_size_font.render("4", True, BLACK)
+            four_player_center = four_player_button.center
+            screen.blit(player_text, player_text.get_rect(center=(four_player_center[0], four_player_center[1] - 20)))
+
+            gameplay_label_pos = (screen_width // 2, screen_height // 2)
+            gameplay_label_font_size = 26
+            gameplay_label_font = pygame.font.Font(None, gameplay_label_font_size)
+            gameplay_label_text = gameplay_label_font.render("Select the type of gameplay:", True, BLACK)
+            screen.blit(gameplay_label_text, gameplay_label_text.get_rect(center=gameplay_label_pos))
+
+            if gameplay_selected == "Default":
+                pygame.draw.rect(screen, LIGHT_GREY, default_button)
+            else:
+                pygame.draw.rect(screen, GREY, default_button)
+            gameplay_label_text = gameplay_label_font.render("Default", True, BLACK)
+            screen.blit(gameplay_label_text, gameplay_label_text.get_rect(center=default_button.center))
+
+            if gameplay_selected == "Reload":
+                pygame.draw.rect(screen, LIGHT_GREY, reload_button)
+            else:
+                pygame.draw.rect(screen, GREY, reload_button)
+            gameplay_label_text = gameplay_label_font.render("Reload", True, BLACK)
+            screen.blit(gameplay_label_text, gameplay_label_text.get_rect(center=reload_button.center))
+
+            if gameplay_selected == "Ports":
+                pygame.draw.rect(screen, LIGHT_GREY, ports_button)
+            else:
+                pygame.draw.rect(screen, GREY, ports_button)
+            gameplay_label_text = gameplay_label_font.render("Ports", True, BLACK)
+            screen.blit(gameplay_label_text, gameplay_label_text.get_rect(center=ports_button.center))
+
         elif (join_selected):
             pygame.draw.rect(screen, GREY, host_button)
             pygame.draw.rect(screen, LIGHT_GREY, join_button)
+
+            pygame.draw.rect(screen, GREY, input_box)
+            # ip_label_font_size = 26
+            # ip_label_font = pygame.font.Font(None, ip_label_font_size)
+            # ip_text = ip_label_font.render(ip_address, True, BLACK)
+            # screen.blit(ip_text, ip_text.get_rect(center=input_box.center))
         else:
             pygame.draw.rect(screen, GREY, host_button)
             pygame.draw.rect(screen, GREY, join_button)
@@ -81,63 +192,19 @@ def settings_ui():
         screen.blit(host_text, host_text.get_rect(center=host_button.center))
         screen.blit(join_text, join_text.get_rect(center=join_button.center))
 
-        # if current_screen == "Menu":
-        #     game_option_label_pos = (host_button.x - 150, host_button.y + 20)
-        #     game_option_font_size = 30  # Larger size for titles
-        #     game_option_font = pygame.font.Font(None, game_option_font_size)
-        #
-        #     pygame.draw.rect(screen, GREY, host_button)
-        #     pygame.draw.rect(screen, GREY, join_button)
-        #
-        #     host_text = host_font.render("Host", True, BLACK)
-        #     join_text = join_font.render("Join", True, BLACK)
-        #     screen.blit(host_text, host_text.get_rect(center=host_button.center))
-        #     screen.blit(join_text, join_text.get_rect(center=join_button.center))
-        #
-        #     game_option_text = game_option_font.render("Choose one option:", True, BLACK)
-        #     screen.blit(game_option_text, game_option_text.get_rect(center=game_option_label_pos))
-        # else:
-        #     back_button = pygame.Rect(screen_width - 250, screen_height - 100, 150, 40)
-        #
-        #     back_font_size = 26
-        #     back_font = pygame.font.Font(None, back_font_size)
-        #     # Draw "Back" button for "Host" or "Join" screens
-        #     pygame.draw.rect(screen, GREY, back_button)
-        #     back_text = back_font.render("Back", True, BLACK)
-        #     screen.blit(back_text, back_text.get_rect(center=back_button.center))
-        #
-        #     if current_screen == "Host":
-        #         player_font_size = 26
-        #         player_font = pygame.font.Font(None, player_font_size)
-        #
-        #         two_player_button = pygame.Rect(500, 100, 40, 40)
-        #         three_player_button = pygame.Rect(600, 100, 40, 40)
-        #         four_player_button = pygame.Rect(700, 100, 40, 40)
-        #
-        #         player_size_label_pos = (two_player_button.x - 200, two_player_button.y + 20)
-        #         player_size_font_size = 30  # Larger size for titles
-        #         player_size_font = pygame.font.Font(None, player_size_font_size)
-        #
-        #         pygame.draw.rect(screen, GREY, two_player_button)
-        #         pygame.draw.rect(screen, GREY, three_player_button)
-        #         pygame.draw.rect(screen, GREY, four_player_button)
-        #
-        #         player_text = player_font.render("1", True, BLACK)
-        #         screen.blit(player_text, player_text.get_rect(center=two_player_button.center))
-        #
-        #         player_text = player_font.render("2", True, BLACK)
-        #         screen.blit(player_text, player_text.get_rect(center=three_player_button.center))
-        #
-        #         player_text = player_font.render("3", True, BLACK)
-        #         screen.blit(player_text, player_text.get_rect(center=four_player_button.center))
-        #
-        #         player_size_text = player_size_font.render("Choose the number of players:", True, BLACK)
-        #         screen.blit(player_size_text, player_size_text.get_rect(center=player_size_label_pos))
-
-
+        done_font_size = 26
+        done_font = pygame.font.Font(None, done_font_size)
+        done_text = done_font.render("Done", True, BLACK)
+        pygame.draw.rect(screen, GREY, done_button)
+        screen.blit(done_text, done_text.get_rect(center=done_button.center))
 
         pygame.display.flip()
         clock.tick(60)
 
+        if done_selected:
+            if host_selected:
+                return host_selected, None
+            elif join_selected:
+                return join_settings_info, ip_address
     pygame.quit()
     sys.exit()
