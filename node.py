@@ -193,8 +193,8 @@ class Node:
             self.owner.count -= 1
         if player is not None:
             player.count += 1
+            player.pass_on_effects(self)
         self.owner = player
-        player.pass_on_effects(self)
 
 
     def capture(self, player):
@@ -244,16 +244,7 @@ class Node:
         if self.owner:
             return self.owner.color
         return BLACK
-
-
-class ZombieNode(Node):
-    def __init__(self, id, pos):
-        super().__init__(id, pos)
-        self.item_type = ZOMBIE_NODE
-
-    def make_zombie(self):
-        self.value = self.state.full_size
-
+    
 
 class PortNode(Node):
     def __init__(self, id, pos, port_count):
