@@ -1,5 +1,4 @@
 from constants import (
-    RAGE_TICKS,
     GREY,
     NODE_COUNT,
     CAPITAL_WIN_COUNT,
@@ -15,15 +14,8 @@ class DefaultPlayer:
         self.name = color[1]
         self.id = id
         self.points = 0
-        self.rage_count = 0
+        self.effects = set()
         self.default_values()
-
-    def enrage(self):
-        self.rage_count = RAGE_TICKS
-
-    @property
-    def raged(self):
-        return self.rage_count > 0
 
     def default_values(self):
         self.count = 0
@@ -39,8 +31,11 @@ class DefaultPlayer:
         self.points += self.count
 
     def update(self):
-        if self.raged:
-            self.rage_count -= 1
+        self.effects = set(filter(lambda effect : (effect.count()), self.effects))
+
+    def pass_on_effects(self, node):
+        for effect in self.effects:
+            effect.spread(node)
 
     def win(self):
         self.victory = True

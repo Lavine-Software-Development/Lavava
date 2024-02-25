@@ -13,7 +13,7 @@ from constants import (
     BROWN,
 )
 from nodeState import DefaultState, MineState, ZombieState
-from nodeEffect import EffectType, Poisoned, Enraged, Burning
+from nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
 import mode
 
 class Node:
@@ -21,8 +21,8 @@ class Node:
         self.value = 0
         self.owner = None
         self.item_type = NODE
-        self.incoming = []
-        self.outgoing = []
+        self.incoming = set()
+        self.outgoing = set()
         self.id = id
         self.pos = pos
         self.type = NODE
@@ -37,9 +37,9 @@ class Node:
 
     def new_edge(self, edge, dir):
         if dir == "incoming":
-            self.incoming.append(edge)
+            self.incoming.add(edge)
         else:
-            self.outgoing.append(edge)
+            self.outgoing.add(edge)
 
     def set_state(self, status_name, data=None):
         if status_name in STATE_NAMES:
@@ -67,24 +67,26 @@ class Node:
         else:
             return DefaultState(self.id)
 
+
     def new_effect(self, effect_name):
-        if effect_name == "poison":
+        if effect_name == 'poison':
             return Poisoned(self.spread_poison)
-        elif effect_name == "rage":
-            return Enraged()
+        elif effect_name == 'rage':
+            return NodeEnraged()
 
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1
         for effect in self.effects.values():
             if effect.effect_type == EffectType.GROW:
-                inter_grow *= effect.effect()
+                inter_grow *= effect.effect(inter_grow)
             elif effect.effect_type == EffectType.INTAKE:
-                inter_intake *= effect.effect()
+                inter_intake *= effect.effect(inter_intake)
             elif effect.effect_type == EffectType.EXPEL:
-                inter_expel *= effect.effect()
+                inter_expel *= effect.effect(inter_expel)
         self.grow_multiplier = inter_grow
         self.intake_multiplier = inter_intake
         self.expel_multiplier = inter_expel
+        print(self.grow_multiplier, self.intake_multiplier, self.expel_multiplier)
 
     def set_default_state(self):
         self.set_state("default")
@@ -137,30 +139,39 @@ class Node:
                 and not edge.contested
                 and edge.to_node.state_name == "default"
             ):
-                edge.to_node.set_state("poisoned")
-
-    def spread_rage(self):
-        for edge in self.outgoing:
-            if not edge.raged:
-                edge.enrage()
+                edge.to_node.set_state("poison")
 
     def grow(self):
         if self.state.can_grow(self.value):
             self.value += self.state.grow(self.grow_multiplier)
-        self.effects_tick()
+        self.effects_update()
 
-    def effects_tick(self):
-        expired_effects = set()
-        for key, effect in self.effects.items():
-            effect.count()
-            if effect.expired:
-                expired_effects.add(key)
+    def effects_update(self):
 
-        if expired_effects:
-            for key in expired_effects:
-                self.effects[key].complete()
-                self.effects.pop(key)
+        removed_effects = self.effects_tick()
+
+        if removed_effects:
             self.calculate_interactions()
+
+        self.spread_effects()
+    
+    def effects_tick(self):
+        effects_to_remove = [key for key, effect in self.effects.items() if not effect.count()]
+        for key in effects_to_remove:
+            self.effects[key].complete()
+        for key in effects_to_remove:
+            del self.effects[key]
+
+        return effects_to_remove
+
+    def spread_effects(self):
+        for key, effect in self.effects.items():
+            if effect.can_spread_func(effect):
+                print("spread at: ", effect.counter)
+                for edge in self.edges:
+                    neighbor = edge.opposite(self)
+                    if key not in neighbor.effects and effect.spread_criteria_func(edge, neighbor):
+                        neighbor.set_state(key)
 
     def delivery(self, amount, player):
         self.value += self.state.intake(
@@ -170,8 +181,6 @@ class Node:
             self.owner = player
         if self.state.killed(self.value):
             self.capture(player)
-        # if player.raged:
-        #     self.spread_rage()
 
     def accept_delivery(self, player):
         return self.state.accept_intake(player != self.owner, self.value)
@@ -185,6 +194,7 @@ class Node:
         if player is not None:
             player.count += 1
         self.owner = player
+        player.pass_on_effects(self)
 
 
     def capture(self, player):
@@ -215,7 +225,7 @@ class Node:
 
     @property
     def edges(self):
-        return self.incoming + self.outgoing
+        return self.incoming | self.outgoing
 
     @property
     def current_incoming(self):
@@ -262,23 +272,12 @@ class PortNode(Node):
             return super().new_effect(effect_name)
 
     def acceptBridge(self):
-        return self.port_count > 0 and not self.on_fire and self.state.acceptBridge
+        return self.port_count > 0 and 'burn' not in self.effects and self.state.acceptBridge
 
     def new_edge(self, edge, dir):
         if CONTEXT["started"] and edge not in self.edges and dir == "outgoing":
             self.port_count -= 1
         super().new_edge(edge, dir)
-
-    @property
-    def on_fire(self):
-        return "burn" in self.effects
-
-    def grow(self):
-        if self.on_fire:
-            self.effects['burn'].count()
-            if not self.on_fire:
-                self.lose_ports()
-        super().grow()
 
     def lose_ports(self):
         self.port_count = 0
