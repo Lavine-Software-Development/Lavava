@@ -146,7 +146,7 @@ class Draw:
         self.screen.blit(cost_text, (position[0] + 10, position[1] + 10))
 
     def draw_buttons(self):
-        y_position = int(VERTICAL_ABILITY_GAP * self.height / 6)
+        y_position = int(VERTICAL_ABILITY_GAP * self.height / 6 + 75)
         for btn in self.abilities.values():
             btn_box = btn.box
             selected = self.ability_manager.mode == btn.key or (
@@ -454,31 +454,31 @@ class Draw:
                     # Blit the rotated port surface onto the screen
                     self.screen.blit(rotated_port, rotated_rect.topleft)
 
-    def blit_numbers(self):
+    def blit_numbers(self, board):
         py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))
         if mode.MODE != 2:
             self.screen.blit(
                 self.font.render(
                     str(int(CONTEXT["main_player"].money)),
                     True,
-                    CONTEXT["main_player"].color,
+                    (205, 204, 0),
                 ),
-                (20, 20),
+                (self.width - 150, 20),
             )
             self.screen.blit(
-                self.small_font.render(
-                    f"{CONTEXT['main_player'].production_per_second:.0f}",
+                self.smaller_font.render(
+                    f"{CONTEXT['main_player'].production_per_second:.0f}/s",
                     True,
                     (205, 204, 0),
                 ),
-                (23, 60),
+                (self.width - 50, 25),
             )
         for i in range(len(self.players)):
             self.screen.blit(
                 self.small_font.render(
-                    str(int(self.players[i].count)), True, self.players[i].color
+                    f"{board.percent_energy}%", True, self.players[i].color
                 ),
-                (self.width / 3 + i * 150, 20),
+                (self.width - 150 + i * 50, 65),
             )
             if self.players[i].capital_count > 0:
                 self.screen.blit(
@@ -519,7 +519,7 @@ class Draw:
                     self.font.render(
                         f"{self.player_manager.timer + 1:.0f}", True, BLACK
                     ),
-                    (self.width - 300, 20),
+                    (20, 20),
                 )
             else:
                 self.screen.blit(
@@ -528,20 +528,20 @@ class Draw:
                         True,
                         CONTEXT["main_player"].color,
                     ),
-                    (self.width - 300, 20),
+                    (20, 20),
                 )
         elif CONTEXT["main_player"].eliminated:
             self.screen.blit(
                 self.font.render("ELIMINATED", True, CONTEXT["main_player"].color),
                 (self.width - 450, 20),
             )
-        else:
-            self.screen.blit(
-                self.small_font.render(
-                    "X to Forfeit", True, CONTEXT["main_player"].color
-                ),
-                (self.width - 450, 20),
-            )
+        # else:
+        #     self.screen.blit(
+        #         self.small_font.render(
+        #             "X to Forfeit", True, CONTEXT["main_player"].color
+        #         ),
+        #         (self.width - 450, 20),
+        #     )
 
     def blit_waiting(self):
         self.screen.blit(
@@ -600,7 +600,7 @@ class Draw:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 
-    def blit(self, mouse_pos, waiting=False):
+    def blit(self, board, mouse_pos, waiting=False):
         self.screen.fill(WHITE)
         self.blit_nodes()
         self.blit_edges()
@@ -608,7 +608,7 @@ class Draw:
         if waiting:
             self.blit_waiting()
         else:
-            self.blit_numbers()
+            self.blit_numbers(board)
         self.draw_buttons()
         if (
             BRIDGE_CODE in self.abilities
