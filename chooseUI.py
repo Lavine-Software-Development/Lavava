@@ -5,10 +5,10 @@ import math
 import mode
 
 # Constants
-WINDOW_WIDTH = 800  # Adjust as needed
+WINDOW_WIDTH = 1067  # Adjust as needed
 WINDOW_HEIGHT = 800  # Adjust as needed
 BOX_SIZE = 200  # Size of each ability box
-COLUMNS = 3
+COLUMNS = 4
 ROWS = 3
 PADDING = 50  # Padding between boxes
 BOX_PADDING = 18  # Padding around each box
@@ -100,6 +100,13 @@ def draw_x(screen, position, size, color):
     pygame.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
 
 
+def draw_cross(screen, position, size, color):
+    pygame.draw.line(screen, color, (position[0], position[1] + size[1] // 2),
+                     (position[0] + size[0], position[1] + size[1] // 2), 20)
+    pygame.draw.line(screen, color, (position[0] + size[0] // 2, position[1]),
+                     (position[0] + size[0] // 2, position[1] + size[1]), 20)
+
+
 def draw_shape(screen, shape, x, y, light_color):
     # This function will handle drawing the shape within a given box
     center = (x + BOX_SIZE // 2, y + BOX_SIZE // 2)
@@ -120,6 +127,8 @@ def draw_shape(screen, shape, x, y, light_color):
         draw_star(screen, center, star_size, light_color)
     elif shape == "x":
         draw_x(screen, (x + (BOX_SIZE // 4), y + (BOX_SIZE // 4)), (BOX_SIZE, BOX_SIZE), light_color)
+    elif shape == "cross":
+        draw_cross(screen, (x + BOX_SIZE // 4, y + BOX_SIZE // 4), (BOX_SIZE // 2, BOX_SIZE // 2), light_color)
 
 
 def draw_message(screen, selected_boxes, start_count):
@@ -153,7 +162,8 @@ def choose_abilities_ui(gs):
     # Create boxes
     from modeConstants import ABILITY_OPTIONS, DEFAULT_SPAWN, ABILITY_COUNT
     boxes = {key: val for key, val in make_boxes().items() if key in ABILITY_OPTIONS[mode.MODE]}
-    boxes.pop(SPAWN_CODE)
+    if DEFAULT_SPAWN[mode.MODE]:
+        boxes.pop(SPAWN_CODE)
     selected_boxes = set()
 
     # Calculate positions for boxes and store them as Pygame Rects for easy collision detection

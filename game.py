@@ -164,7 +164,7 @@ class Game:
                                         event.pos, self.ability_manager
                                     )
                     self.drawer.wipe()
-                    self.drawer.blit(self.position)
+                    self.drawer.blit(self.board, self.position)
 
         self.network.stop()
         self.drawer.close_window()

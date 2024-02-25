@@ -207,3 +207,13 @@ class Board:
                 self.edges.remove(edge)
         self.id_dict.pop(node_id)
         self.nodes.remove(node)
+
+    @property
+    def percent_energy(self):
+        self_energy = 0
+        energy = 0.01
+        for node in self.nodes:
+            if node.owner == CONTEXT["main_player"]:
+                self_energy += node.value
+            energy += node.value
+        return int(self_energy * 100 / energy)
