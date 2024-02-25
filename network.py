@@ -8,9 +8,10 @@ import random
 
 
 class SoloNetwork:
-    def __init__(self, action_callback):
+    def __init__(self, action_callback, data):
         self.action_callback = action_callback
         self.running = True
+        self.data = data
 
         self.get_user_input_and_board()
 
@@ -22,10 +23,7 @@ class SoloNetwork:
                 break
 
     def get_user_input_for_game(self):
-        game_modes = ", ".join(f"{key} - {val}" for key, val in MODES.items())
-        game_type = int(input(f"Enter game type. {game_modes}: "))
-        if game_type in MODES:
-            self.game_type = int(game_type)
+        self.game_type = int(self.data[0])
 
     def receive_board(self):
         self.board_generator_value = int(random.randint(0, 10000))
@@ -45,31 +43,18 @@ class SoloNetwork:
             
 
 class Network(SoloNetwork):
-    def __init__(self, action_callback):
+    def __init__(self, action_callback, data, server):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = None
+        self.server = server
         self.port = 5555
 
-        super().__init__(action_callback)
+        super().__init__(action_callback, data)
 
     def get_user_input_for_game(self):
-        server_keys = "/".join(SERVERS.keys())
-        self.server = input(f"Input Server IP Address ({server_keys} for DEFAULT): ")
-        if self.server in SERVERS:
-            self.server = SERVERS[self.server]
         self.addr = (self.server, self.port)
-        while True:
-            user_input = input("Do you want to HOST or JOIN a game? (h/j): ").strip()
-            if user_input in ["h", "j"]:
-                break
-            else:
-                print("Invalid input. Please enter 'h' or 'j'.")
 
-        if user_input == "h":
-            player_count = input("Enter the number of players for the game: ")
-            game_modes = ", ".join(f"{key} - {val}" for key, val in MODES.items())
-            game_type = input(f"Enter game type. {game_modes}: ")
-            self.init_data = f"HOST,{player_count},{game_type}"
+        if self.data[0] == "HOST":
+            self.init_data = f"HOST,{self.data[1]},{self.data[2]}"
         else:
             self.init_data = f"JOIN,{0},{0}"
 
