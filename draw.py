@@ -454,7 +454,7 @@ class Draw:
                     # Blit the rotated port surface onto the screen
                     self.screen.blit(rotated_port, rotated_rect.topleft)
 
-    def blit_numbers(self, board):
+    def blit_numbers(self):
         py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))
         if mode.MODE != 2:
             self.screen.blit(
@@ -474,12 +474,13 @@ class Draw:
                 (self.width - 50, 25),
             )
         for i in range(len(self.players)):
-            self.screen.blit(
-                self.small_font.render(
-                    f"{board.percent_energy}%", True, self.players[i].color
-                ),
-                (self.width - 150 + i * 50, 65),
-            )
+            if self.board:
+                self.screen.blit(
+                    self.small_font.render(
+                        f"{self.board.percent_energy}%", True, self.players[i].color
+                    ),
+                    (self.width - 150 + i * 50, 65),
+                )
             if self.players[i].capital_count > 0:
                 self.screen.blit(
                     self.smaller_font.render(
@@ -608,7 +609,7 @@ class Draw:
         if waiting:
             self.blit_waiting()
         else:
-            self.blit_numbers(board)
+            self.blit_numbers()
         self.draw_buttons()
         if (
             BRIDGE_CODE in self.abilities
