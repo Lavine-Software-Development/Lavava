@@ -473,21 +473,19 @@ class Draw:
                 ),
                 (self.width - 50, 25),
             )
-        for i in range(len(self.players)):
-            if self.board:
-                self.screen.blit(
-                    self.small_font.render(
-                        f"{self.board.percent_energy}%", True, self.players[i].color
-                    ),
-                    (self.width - 150 + i * 50, 65),
-                )
-            if self.players[i].capital_count > 0:
-                self.screen.blit(
-                    self.smaller_font.render(
-                        str(int(self.players[i].capital_count)), True, PINK
-                    ),
-                    (self.width / 3 + i * 150 + 40, 20),
-                )
+            self.screen.blit(
+                self.small_font.render(
+                    f"{self.board.percent_energy}%", True, CONTEXT['main_player'].color
+                ),
+                (self.width - 150, 65),
+            )
+            # if self.players[i].capital_count > 0:
+            #     self.screen.blit(
+            #         self.smaller_font.render(
+            #             str(int(self.players[i].capital_count)), True, PINK
+            #         ),
+            #         (self.width / 3 + i * 150 + 40, 20),
+            #     )
 
         if self.player_manager.victor:
             self.screen.blit(
@@ -601,7 +599,7 @@ class Draw:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 
-    def blit(self, board, mouse_pos, waiting=False):
+    def blit(self, mouse_pos, waiting=False):
         self.screen.fill(WHITE)
         self.blit_nodes()
         self.blit_edges()
