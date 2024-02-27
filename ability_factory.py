@@ -8,6 +8,7 @@ from constants import (
     BURN_CODE,
     FREEZE_CODE,
     RAGE_CODE,
+    VISUALS,
     ZOMBIE_CODE,
     EDGE,
 )
@@ -23,11 +24,9 @@ from ability_validators import (
     my_node,
 )
 from ability_return import make_new_edge
-from powerBox_factory import make_boxes
-
 
 def make_abilities(board):
-    boxes = make_boxes()
+    boxes = VISUALS
 
     return {
         SPAWN_CODE: Ability(SPAWN_CODE, unowned_node, 1, boxes[SPAWN_CODE]),

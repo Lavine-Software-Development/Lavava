@@ -1,6 +1,5 @@
 import pygame
-from powerBox_factory import make_boxes
-from constants import GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, SPAWN_CODE
+from constants import BLACK, GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, SPAWN_CODE
 import math
 import mode
 
@@ -23,7 +22,7 @@ def _generate_lighter_color(color):
     return tuple(min(c + 50, 255) for c in color)
 
 
-def draw_boxes(screen, boxes, selected_boxes, mouse_pos, box_rects):
+def draw_boxes(screen, boxes, selected_boxes, mouse_pos, box_rects, credits):
     for code, rect in box_rects:
         box = boxes[code]
         # Check if the current box is under the mouse cursor
@@ -45,25 +44,39 @@ def draw_boxes(screen, boxes, selected_boxes, mouse_pos, box_rects):
             screen, box.shape, rect.x, rect.y, _generate_lighter_color(box.color)
         )
 
-        # Set up the font
+        # Set up the fonts
         number_font_size = 42  # Example size, adjust as needed for your UI
         number_font = pygame.font.Font(None, number_font_size)
 
         name_font_size = 36  # Example size, adjust as needed for your UI
         name_font = pygame.font.Font(None, name_font_size)
 
+        count_font_size = 48  # Slightly bigger for box.count
+        count_font = pygame.font.Font(None, count_font_size)
+
         # Render the ability name and blit it at the bottom center of the box
-        text = name_font.render(box.name, True, WHITE)
+        text = name_font.render(box.ab.name, True, WHITE)
         text_rect = text.get_rect(
             center=(rect.x + rect.width / 2, rect.y + rect.height - name_font_size + 15)
         )
         screen.blit(text, text_rect)
 
         # Render the display_num and blit it at the top left of the box
-        cost_text = number_font.render(str(box.display_num), True, WHITE)
+        if credits:
+            cost_text = draw_count_and_credits()
+        else:
+            cost_text = number_font.render(str(box.ab.cost), True, WHITE)
+
         cost_text_rect = cost_text.get_rect(topleft=(rect.x + 10, rect.y + 10))
         screen.blit(cost_text, cost_text_rect)
 
+def draw_count_and_credits():
+    cost_text = 
+    # If credits, also display box.count dead center of the box
+    count_text = count_font.render(str(box.count), True, BLACK)
+    count_text_rect = count_text.get_rect(center=(rect.centerx, rect.centery))
+    screen.blit(count_text, count_text_rect)
+    return number_font.render(str(box.ab.credits), True, WHITE)
 
 def draw_star(screen, position, size, color):
     inner_radius = size // 6
@@ -155,13 +168,13 @@ def draw_message(screen, selected_boxes, start_count):
     # Blit the message onto the screen
     screen.blit(text, text_rect)
 
-def choose_abilities_ui(gs):
+def choose_abilities_ui(boxes, gs, credits):
     gs.next()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = pygame.time.Clock()
     # Create boxes
-    from modeConstants import ABILITY_OPTIONS, DEFAULT_SPAWN, ABILITY_COUNT
-    boxes = {key: val for key, val in make_boxes().items() if key in ABILITY_OPTIONS[mode.MODE]}
+    from modeConstants import DEFAULT_SPAWN, ABILITY_COUNT
+    
     if DEFAULT_SPAWN[mode.MODE]:
         boxes.pop(SPAWN_CODE)
     selected_boxes = set()
@@ -192,10 +205,12 @@ def choose_abilities_ui(gs):
                     if rect.collidepoint(event.pos):
                         if code in selected_boxes:
                             selected_boxes.remove(code)
+                            boxes[code].count -= 1
                         elif (
                             len(selected_boxes) < ABILITY_COUNT[mode.MODE]
                         ):  # Assuming a constant for max abilities
                             selected_boxes.add(code)
+                            boxes[code].count += 1
                         break
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN and len(selected_boxes) == ABILITY_COUNT[mode.MODE]:
@@ -204,7 +219,7 @@ def choose_abilities_ui(gs):
                     running = False
 
         screen.fill(WHITE)
-        draw_boxes(screen, boxes, selected_boxes, mouse_pos, box_rects)
+        draw_boxes(screen, boxes, selected_boxes, mouse_pos, box_rects, credits)
         draw_message(screen, selected_boxes, ABILITY_COUNT[mode.MODE])
         pygame.display.flip()
         clock.tick(60)

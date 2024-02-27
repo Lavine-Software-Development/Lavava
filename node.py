@@ -10,7 +10,7 @@ from constants import (
     BLACK,
     BROWN,
 )
-from nodeState import DefaultState, MineState, ZombieState
+from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
 from nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
 import mode
 
@@ -57,11 +57,11 @@ class Node:
         elif state_name == "zombie":
             return ZombieState(self.id)
         elif state_name == "capital":
-            from modeConstants import CAPITAL_TYPES
-            CapitalStateType = CAPITAL_TYPES[mode.MODE]
             if self.owner:
                 self.owner.capital_handover(self)
-            return CapitalStateType(self.id)
+            if data:
+                return StartingCapitalState(self.id)
+            return CapitalState(self.id)
         else:
             return DefaultState(self.id)
 

@@ -4,15 +4,22 @@ from constants import (
     RAGE_CODE,
     CONTEXT,
     SPAWN_CODE,
+    VISUALS,
 )
 from abc import ABC, abstractmethod
 from ability_factory import make_abilities
 from chooseUI import choose_abilities_ui
-
+import mode
 
 class AbstractAbilityManager(ABC):
-    def __init__(self, board, gs):
-        self.ability_codes = choose_abilities_ui(gs)
+    def __init__(self, board, gs, credits=False):
+        from modeConstants import ABILITY_OPTIONS
+        boxes = {key: val for key, val in VISUALS.items() if key in ABILITY_OPTIONS[mode.MODE]}
+        for box in boxes.values():
+            if box.color[0] is None:
+                box.color = CONTEXT["main_player"].default_color
+
+        self.ability_codes = choose_abilities_ui(boxes, gs, credits)
         self.abilities = self.create_abilities(board)
         self.mode = None
 
@@ -62,8 +69,8 @@ class AbstractAbilityManager(ABC):
 
 class MoneyAbilityManager(AbstractAbilityManager):
     def __init__(self, board, gs):
+        self.costs = {code: BREAKDOWNS[code].cost for code in self.ability_codes}
         super().__init__(board, gs)
-        self.costs = {code: BREAKDOWNS[code]["cost"] for code in self.ability_codes}
         self.set_box_numbers(self.costs)
 
     def select(self, key):
@@ -86,14 +93,14 @@ class MoneyAbilityManager(AbstractAbilityManager):
 
 class ReloadAbilityManager(AbstractAbilityManager):
     def __init__(self, board, gs):
-        super().__init__(board, gs)
+        super().__init__(board, gs, True)
         self.load_count = {code: 0.0 for code in self.ability_codes}
         self.load_count[SPAWN_CODE] = SPAWN_RELOAD
         self.remaining_usage = {
-            code: BREAKDOWNS[code]["total"] for code in self.ability_codes
+            code: BREAKDOWNS[code].credits for code in self.ability_codes
         }
         self.full_reload = {
-            code: BREAKDOWNS[code]["reload"] for code in self.ability_codes
+            code: BREAKDOWNS[code].reload for code in self.ability_codes
         }
         self.set_box_numbers(self.remaining_usage)
 
