@@ -53,9 +53,7 @@ class Board:
         if self.highlighted and not self.highlighted_color:
             if self.default_highlight_color(ability_manager):
                 self.highlighted_color = CONTEXT["main_player"].default_color
-                print(self.highlighted.type, "RRRRRR")
             else:
-                print(ability_manager.ability.click_type, self.highlighted.type)
                 self.highlighted_color = ability_manager.box_col
 
     # Still gross
@@ -202,23 +200,16 @@ class Board:
         self.id_dict[newEdge.id] = newEdge
         self.extra_edges += 5
 
-    def safe_remove(self, lst, value):
-        try:
-            lst.remove(value)
-        except ValueError:
-            pass
-
-    def remove_node(self, node_id):
-        node = self.id_dict[node_id]
+    def remove_node(self, node):
         node.owner.count -= 1
         for edge in node.outgoing | node.incoming:
             opp = edge.opposite(node)
-            self.safe_remove(opp.incoming, edge)
-            self.safe_remove(opp.incoming, edge)
+            opp.incoming.discard(edge)
+            opp.outgoing.discard(edge)
             if edge.id in self.id_dict:
                 self.id_dict.pop(edge.id)
                 self.edges.remove(edge)
-        self.id_dict.pop(node_id)
+        self.id_dict.pop(node.id)
         self.nodes.remove(node)
 
     @property
