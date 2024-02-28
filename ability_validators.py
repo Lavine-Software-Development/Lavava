@@ -8,7 +8,7 @@ def no_click(data):
 def standard_node_attack(data):
     node = data[0]
     return (
-        node.owner == CONTEXT["main_player"]
+        node.owner != CONTEXT["main_player"]
         and node.owner is not None
         and node.state_name not in ["capital", "mine"]
     )
@@ -64,6 +64,6 @@ def new_edge_validator(check_new_edge):
     def new_edge_ports(data):
         return data[0].port_count > 0 and new_edge_standard(data)
 
-    if mode.MODE == 3:
+    if mode.MODE in (2, 3):
         return new_edge_ports
     return new_edge_standard

@@ -46,13 +46,25 @@ class Board:
         }
         self.extra_edges = 2
 
+    ## Gross code. Needs to be refactored
     def check_highlight(self, position, ability_manager):
+        self.highlighted_color = None
         self.highlighted = self.hover(position, ability_manager)
-        if self.gs.state.value < GSE.PLAY.value:
-            self.highlighted_color = CONTEXT["main_player"].default_color
-        else:
-            self.highlighted_color = ability_manager.box_col
+        if self.highlighted and not self.highlighted_color:
+            if self.default_highlight_color(ability_manager):
+                self.highlighted_color = CONTEXT["main_player"].default_color
+                print(self.highlighted.type, "RRRRRR")
+            else:
+                print(ability_manager.ability.click_type, self.highlighted.type)
+                self.highlighted_color = ability_manager.box_col
 
+    # Still gross
+    def default_highlight_color(self, ability_manager):
+        return (self.gs.state.value < GSE.PLAY.value) \
+        or (not ability_manager.ability) \
+        or (ability_manager.ability.click_type != self.highlighted.type) \
+
+    # Still gross
     def hover(self, position, ability_manager):
         ability = ability_manager.ability
         if id := self.find_node(position):
@@ -71,6 +83,7 @@ class Board:
                 self.highlighted_color = GREY
                 return self.id_dict[id]
         return None
+    ## Gross code ends here (I hope)
 
     def click_edge(self):
         if self.highlighted and self.highlighted.type == EDGE:
@@ -198,7 +211,7 @@ class Board:
     def remove_node(self, node_id):
         node = self.id_dict[node_id]
         node.owner.count -= 1
-        for edge in node.outgoing + node.incoming:
+        for edge in node.outgoing | node.incoming:
             opp = edge.opposite(node)
             self.safe_remove(opp.incoming, edge)
             self.safe_remove(opp.incoming, edge)
