@@ -25,10 +25,10 @@ from ability_validators import (
 )
 from ability_return import make_new_edge
 
-def make_abilities(board):
+def make_abilities(board, codes):
     boxes = VISUALS
 
-    return {
+    all = {
         SPAWN_CODE: Ability(SPAWN_CODE, unowned_node, 1, boxes[SPAWN_CODE]),
         BRIDGE_CODE: Ability(
             BRIDGE_CODE,
@@ -54,3 +54,5 @@ def make_abilities(board):
         RAGE_CODE: Ability(RAGE_CODE, no_click, 0, boxes[RAGE_CODE]),
         ZOMBIE_CODE: Ability(ZOMBIE_CODE, my_node, 1, boxes[ZOMBIE_CODE])
     }
+
+    return {key: all[key] for key in codes}

@@ -8,29 +8,21 @@ from constants import (
 )
 from abc import ABC, abstractmethod
 from ability_factory import make_abilities
-from chooseUI import choose_abilities_ui
+from chooseUI import ChooseUI, ChooseReloadUI
 import mode
 
 class AbstractAbilityManager(ABC):
-    def __init__(self, board, gs, credits=False):
+    def __init__(self, board, gs, ui_class):
         from modeConstants import ABILITY_OPTIONS
-        boxes = {key: val for key, val in VISUALS.items() if key in ABILITY_OPTIONS[mode.MODE]}
-        for box in boxes.values():
+        self.boxes = {key: val for key, val in VISUALS.items() if key in ABILITY_OPTIONS[mode.MODE]}
+        for box in self.boxes.values():
             if box.color[0] is None:
                 box.color = CONTEXT["main_player"].default_color
 
-        self.ability_codes = choose_abilities_ui(boxes, gs, credits)
-        self.abilities = self.create_abilities(board)
+        UI = ui_class(self.boxes, gs)
+        self.ability_codes = UI.choose_abilities()
+        self.abilities = make_abilities(board, self.ability_codes)
         self.mode = None
-
-    def set_box_numbers(self, stat):
-        for ability in self.abilities.values():
-            ability.box.set_stat_func(lambda key=ability.key: stat[key])
-
-    def create_abilities(self, board):
-        codes = self.ability_codes
-        all_dict = make_abilities(board)
-        return {k: all_dict[k] for k in codes}
 
     def use_ability(self, item, color):
         if not self.ability:
@@ -54,6 +46,10 @@ class AbstractAbilityManager(ABC):
     def update_ability(self):
         pass
 
+    @abstractmethod
+    def display_nums(self):
+        pass
+
     @property
     def ability(self):
         if not self.mode:
@@ -69,9 +65,8 @@ class AbstractAbilityManager(ABC):
 
 class MoneyAbilityManager(AbstractAbilityManager):
     def __init__(self, board, gs):
+        super().__init__(board, gs, ChooseUI)
         self.costs = {code: BREAKDOWNS[code].cost for code in self.ability_codes}
-        super().__init__(board, gs)
-        self.set_box_numbers(self.costs)
 
     def select(self, key):
         if self.ability:
@@ -90,22 +85,25 @@ class MoneyAbilityManager(AbstractAbilityManager):
         ):
             self.mode = None
 
+    @property
+    def display_nums(self):
+        return self.costs
+
 
 class ReloadAbilityManager(AbstractAbilityManager):
     def __init__(self, board, gs):
-        super().__init__(board, gs, True)
+        super().__init__(board, gs, ChooseReloadUI)
         self.load_count = {code: 0.0 for code in self.ability_codes}
-        self.load_count[SPAWN_CODE] = SPAWN_RELOAD
         self.remaining_usage = {
-            code: BREAKDOWNS[code].credits for code in self.ability_codes
+            code: self.boxes[code].count for code in self.ability_codes
         }
         self.full_reload = {
             code: BREAKDOWNS[code].reload for code in self.ability_codes
         }
-        self.set_box_numbers(self.remaining_usage)
 
     def select(self, key):
-        self.abilities[self.mode].wipe()
+        if self.ability:
+            self.abilities[self.mode].wipe()
         if self.mode == key:
             self.mode = None
         elif self.full(key):
@@ -125,3 +123,7 @@ class ReloadAbilityManager(AbstractAbilityManager):
 
     def full(self, key):
         return self.load_count[key] >= self.full_reload[key]
+    
+    @property
+    def display_nums(self):
+        return self.remaining_usage

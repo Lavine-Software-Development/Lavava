@@ -147,7 +147,7 @@ class Draw:
 
     def draw_buttons(self):
         y_position = int(VERTICAL_ABILITY_GAP * self.height / 6 + 75)
-        for btn in self.abilities.values():
+        for key, btn in self.abilities.items():
             btn_box = btn.box
             selected = self.ability_manager.mode == btn.key or (
                 self.ability_manager.mode == "default" and btn.key == 2
@@ -159,9 +159,9 @@ class Draw:
             self.draw_button(
                 btn_box.shape,
                 btn_box.color,
-                btn_box.name,
-                btn_box.display_num,
-                btn_box.letter,
+                btn_box.ab.name,
+                self.ability_manager.display_nums[key],
+                btn_box.ab.letter,
                 (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
                 selected,
                 loading,

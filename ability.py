@@ -8,6 +8,7 @@ class Ability:
         self.key = key
         self.validation_func = validation_func
         self.click_count = click_count
+        self.box = box
         self.return_func = return_func
         self.click_type = click_type
         self.clicks = []
