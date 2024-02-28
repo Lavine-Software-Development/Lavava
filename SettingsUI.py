@@ -4,7 +4,6 @@ import pygame
 
 from constants import GREY, BLACK, WHITE, LIGHT_GREY
 
-
 # CONSTANTS
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 800
@@ -18,8 +17,9 @@ def is_point_in_circle(point, circle_center, circle_radius):
 
     # Check if the distance is less than or equal to the radius squared
     return distance_squared <= circle_radius ** 2
-def settings_ui():
 
+
+def settings_ui():
     host_settings_info = ["HOST", 0, 0]
     join_settings_info = ["JOIN"]
 
@@ -37,8 +37,6 @@ def settings_ui():
     ports_button = pygame.Rect(screen_width - 250, screen_height // 2 + 100, 150, 100)
     done_button = pygame.Rect(screen_width - 100, screen_height - 100, 100, 50)
 
-    input_box = pygame.Rect(screen_width // 2 - 100, screen_height // 2, 200, 50)
-
     two_players_button_center = (screen_width // 2, 200)
     three_players_button_center = (screen_width // 2 + 150, 200)
     four_players_button_center = (screen_width // 2 + 300, 200)
@@ -48,10 +46,13 @@ def settings_ui():
 
     done_selected = False
 
+    ip_input_box_color = LIGHT_GREY
+    ip_input_box = pygame.Rect(100, screen_height // 2, screen_width - 200, 40)
+    typing_to_input_box = False
+    ip_address = ''
+
     gameplay_selected = None
     num_players_selected = 0
-
-    # ip_address = ""
 
     running = True
     while running:
@@ -65,11 +66,13 @@ def settings_ui():
                         join_selected = False
                         gameplay_selected = None
                     host_selected = True
+                    ip_address = ''
                 elif join_button.collidepoint(event.pos):
                     if host_selected:
                         host_selected = False
                     join_selected = True
                     gameplay_selected = None
+                    host_settings_info = ["HOST", 0, 0]
                 elif host_selected:
                     if default_button.collidepoint(event.pos):
                         gameplay_selected = "Default"
@@ -90,22 +93,28 @@ def settings_ui():
                     elif is_point_in_circle(event.pos, four_players_button_center, 10):
                         num_players_selected = 4
                         host_settings_info[1] = 4
-                    # ip_address = ''
-                # elif join_selected:
-                    # if event.type == pygame.KEYDOWN:
-                    #     if event.key == pygame.K_RETURN:
-                    #         ip_address = ''  # Reset text
-                    #     elif event.key == pygame.K_BACKSPACE:
-                    #         ip_address = ip_address[:-1]
-                    #     else:
-                    #         ip_address += event.unicode
-                    #         print(ip_address)
-                if done_button.collidepoint(event.pos):
-                    done_selected = True
+
+                    if done_button.collidepoint(event.pos) and host_settings_info[1] != 0 and host_settings_info[2] != 0:
+                        done_selected = True
+                elif join_selected:
+                    if ip_input_box.collidepoint(event.pos):
+                        typing_to_input_box = True
+                    else:
+                        typing_to_input_box = False
+
+                    if done_button.collidepoint(event.pos) and ip_address != '':
+                        done_selected = True
+
+            if event.type == pygame.KEYDOWN:
+                if join_selected and typing_to_input_box is True:
+                    if event.key == pygame.K_BACKSPACE:
+                        ip_address = ip_address[:-1]
+                    else:
+                        ip_address += event.unicode
 
         screen.fill(WHITE)
 
-        if (host_selected):
+        if host_selected:
             pygame.draw.rect(screen, LIGHT_GREY, host_button)
             pygame.draw.rect(screen, GREY, join_button)
 
@@ -119,11 +128,11 @@ def settings_ui():
             three_player_button = pygame.draw.circle(screen, GREY, (screen_width // 2 + 150, 200), 10)
             four_player_button = pygame.draw.circle(screen, GREY, (screen_width // 2 + 300, 200), 10)
 
-            if num_players_selected == 2:
+            if num_players_selected == 2 and host_settings_info[1] == 2:
                 pygame.draw.circle(screen, BLACK, (screen_width // 2, 200), 5)
-            elif num_players_selected == 3:
+            elif num_players_selected == 3 and host_settings_info[1] == 3:
                 pygame.draw.circle(screen, BLACK, (screen_width // 2 + 150, 200), 5)
-            elif num_players_selected == 4:
+            elif num_players_selected == 4 and host_settings_info[1] == 4:
                 pygame.draw.circle(screen, BLACK, (screen_width // 2 + 300, 200), 5)
 
             player_size_font_size = 30  # Larger size for titles
@@ -168,15 +177,16 @@ def settings_ui():
             gameplay_label_text = gameplay_label_font.render("Ports", True, BLACK)
             screen.blit(gameplay_label_text, gameplay_label_text.get_rect(center=ports_button.center))
 
-        elif (join_selected):
+        elif join_selected:
             pygame.draw.rect(screen, GREY, host_button)
             pygame.draw.rect(screen, LIGHT_GREY, join_button)
 
-            pygame.draw.rect(screen, GREY, input_box)
-            # ip_label_font_size = 26
-            # ip_label_font = pygame.font.Font(None, ip_label_font_size)
-            # ip_text = ip_label_font.render(ip_address, True, BLACK)
-            # screen.blit(ip_text, ip_text.get_rect(center=input_box.center))
+            ip_font = pygame.font.Font(None, 32)
+            ip_text = ip_font.render(ip_address, True, BLACK)
+            if typing_to_input_box:
+                screen.blit(ip_text, (ip_input_box.x + 5, ip_input_box.y + 5))
+            pygame.draw.rect(screen, ip_input_box_color, ip_input_box, 2)
+
         else:
             pygame.draw.rect(screen, GREY, host_button)
             pygame.draw.rect(screen, GREY, join_button)
@@ -195,16 +205,17 @@ def settings_ui():
         done_font_size = 26
         done_font = pygame.font.Font(None, done_font_size)
         done_text = done_font.render("Done", True, BLACK)
+
         pygame.draw.rect(screen, GREY, done_button)
         screen.blit(done_text, done_text.get_rect(center=done_button.center))
-
         pygame.display.flip()
         clock.tick(60)
 
         if done_selected:
             if host_selected:
-                return host_selected, None
+                return host_settings_info, None
             elif join_selected:
                 return join_settings_info, ip_address
+
     pygame.quit()
     sys.exit()
