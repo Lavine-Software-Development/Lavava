@@ -4,15 +4,15 @@ from network import SoloNetwork
 from playerManager import SoloPlayerManager
 from randomGenerator import RandomGenerator
 import mode
+from SettingsUI import settings_ui
 
 
 class SoloGame(Game):
 
     def setup(self):
-
+        data = settings_ui()
         self.gs = GameState()
-
-        self.network = SoloNetwork(self.action, self.gs)
+        self.network = SoloNetwork(self.action, self.gs, data)
 
         self.player_num = 0
         self.pcount = 1
