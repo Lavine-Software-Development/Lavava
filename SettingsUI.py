@@ -216,6 +216,3 @@ def settings_ui():
                 return host_settings_info, None
             elif join_selected:
                 return join_settings_info, ip_address
-
-    pygame.quit()
-    sys.exit()
