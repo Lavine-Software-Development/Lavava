@@ -1,5 +1,5 @@
 import pygame
-from constants import BLACK, GREEN, LIGHT_GREEN, START_CREDITS, WHITE, MEDIUM_GREEN, SPAWN_CODE
+from constants import BLACK, GREEN, LIGHT_GREEN, START_CREDITS, WHITE, MEDIUM_GREEN, SPAWN_CODE, DARK_GRAY
 import math
 import mode
 
@@ -32,6 +32,8 @@ class ChooseUI:
 
         self.count_font_size = 48  # Slightly bigger for box.count
         self.count_font = pygame.font.Font(None, self.count_font_size)
+
+        self.reset_button_rect = pygame.Rect(10, WINDOW_HEIGHT - 60, 100, 50)
     
     def choose_abilities(self):
     
@@ -64,6 +66,8 @@ class ChooseUI:
                         if rect.collidepoint(event.pos):
                             self.click_box(code, event.button)
                             break
+                        if self.reset_button_rect.collidepoint(event.pos):
+                            self.reset_boxes()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN and self.complete_check():
                         running = False
@@ -131,6 +135,14 @@ class ChooseUI:
 
             self.draw_numbers(rect, box)
 
+        pygame.draw.rect(self.screen, DARK_GRAY, self.reset_button_rect)  # Draw the button
+        reset_text = self.name_font.render('Reset', True, WHITE)
+        reset_text_rect = reset_text.get_rect(center=self.reset_button_rect.center)
+        if self.reset_button_rect.collidepoint(mouse_pos):
+            pygame.draw.rect(
+                self.screen, BLACK, self.reset_button_rect.inflate(BOX_PADDING, BOX_PADDING)
+            )
+        self.screen.blit(reset_text, reset_text_rect)
     
     def draw_numbers(self, rect, box):
         cost_text = self.number_font.render(str(box.ab.cost), True, WHITE)
@@ -224,6 +236,9 @@ class ChooseUI:
         # Blit the message onto the screen
         self.screen.blit(text, text_rect)
 
+    def reset_boxes(self):
+        self.selected_boxes.clear() 
+
     @property
     def message(self):
         return f"Pick {4 - len(self.selected_boxes)}"
@@ -237,6 +252,10 @@ class ChooseReloadUI(ChooseUI):
     def __init__(self, boxes, gs):
         self.credits = START_CREDITS
         super().__init__(boxes, gs)
+        for key, box in boxes.items():
+            if box.count > 0:
+                self.credits -= box.ab.credits * box.count
+                self.selected_boxes.add(key)
 
     def draw_numbers(self, rect, box):
         count_text = self.count_font.render(str(box.count), True, BLACK)
@@ -264,6 +283,13 @@ class ChooseReloadUI(ChooseUI):
             self.credits += self.boxes[code].ab.credits
             if self.boxes[code].count == 0:
                 self.selected_boxes.remove(code)
+
+    def reset_boxes(self):
+        # Reset all counts to 0 and remove all from selected_boxes
+        for key, box in self.boxes.items():
+            box.count = 0  # Reset count
+        self.credits = START_CREDITS
+        super().reset_boxes()
 
     @property
     def message(self):

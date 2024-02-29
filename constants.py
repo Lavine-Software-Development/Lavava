@@ -68,6 +68,7 @@ PURPLE = (153, 51, 255)
 PINK = (255, 51, 153)
 LIGHT_BLUE = (173, 216, 230)
 BROWN = (150, 75, 0)
+DARK_GRAY = (64, 64, 64)
 
 COLOR_DICT = {
     0: (RED, "   RED "),
