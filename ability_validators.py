@@ -62,7 +62,9 @@ def new_edge_validator(check_new_edge):
             )
 
     def new_edge_ports(data):
-        return data[0].port_count > 0 and new_edge_standard(data)
+        if all([node.port_count > 0 for node in data]):
+            return new_edge_standard(data)
+        return False
 
     # Gross. This logic should be in modeConstants, and imported here.
     if mode.MODE in (2, 3):

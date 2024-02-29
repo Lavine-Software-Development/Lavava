@@ -263,7 +263,7 @@ class PortNode(Node):
         return self.port_count > 0 and 'burn' not in self.effects and self.state.acceptBridge
 
     def new_edge(self, edge, dir, initial):
-        if not initial and edge not in self.edges and dir == "outgoing":
+        if not initial and edge not in self.edges:
             self.port_count -= 1
         super().new_edge(edge, dir, initial)
 
