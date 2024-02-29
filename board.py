@@ -14,10 +14,12 @@ from constants import (
 from helpers import distance_point_to_segment, do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
+from gameStateEnums import GameStateEnum as GSE
 
 
 class Board:
-    def __init__(self):
+    def __init__(self, gs):
+        self.gs = gs
         self.nodes = []
         self.edges = []
         self.edge_dict = defaultdict(set)
@@ -44,18 +46,28 @@ class Board:
         }
         self.extra_edges = 2
 
+    ## Gross code. Needs to be refactored
     def check_highlight(self, position, ability_manager):
+        self.highlighted_color = None
         self.highlighted = self.hover(position, ability_manager)
-        if not CONTEXT["started"]:
-            self.highlighted_color = CONTEXT["main_player"].default_color
-        else:
-            self.highlighted_color = ability_manager.box_col
+        if self.highlighted and not self.highlighted_color:
+            if self.default_highlight_color(ability_manager):
+                self.highlighted_color = CONTEXT["main_player"].default_color
+            else:
+                self.highlighted_color = ability_manager.box_col
 
+    # Still gross
+    def default_highlight_color(self, ability_manager):
+        return (self.gs.state.value < GSE.PLAY.value) \
+        or (not ability_manager.ability) \
+        or (ability_manager.ability.click_type != self.highlighted.type) \
+
+    # Still gross
     def hover(self, position, ability_manager):
         ability = ability_manager.ability
         if id := self.find_node(position):
             if (not ability) or ability.click_type == NODE:
-                if not CONTEXT["started"] and self.id_dict[id].owner is None:
+                if self.gs.state.value < GSE.PLAY.value and self.id_dict[id].owner is None:
                     return self.id_dict[id]
                 elif ability and ability.validate(self.id_dict[id]):
                     return self.id_dict[id]
@@ -69,6 +81,7 @@ class Board:
                 self.highlighted_color = GREY
                 return self.id_dict[id]
         return None
+    ## Gross code ends here (I hope)
 
     def click_edge(self):
         if self.highlighted and self.highlighted.type == EDGE:
@@ -187,21 +200,24 @@ class Board:
         self.id_dict[newEdge.id] = newEdge
         self.extra_edges += 5
 
-    def safe_remove(self, lst, value):
-        try:
-            lst.remove(value)
-        except ValueError:
-            pass
-
-    def remove_node(self, node_id):
-        node = self.id_dict[node_id]
+    def remove_node(self, node):
         node.owner.count -= 1
-        for edge in node.outgoing + node.incoming:
+        for edge in node.outgoing | node.incoming:
             opp = edge.opposite(node)
-            self.safe_remove(opp.incoming, edge)
-            self.safe_remove(opp.incoming, edge)
+            opp.incoming.discard(edge)
+            opp.outgoing.discard(edge)
             if edge.id in self.id_dict:
                 self.id_dict.pop(edge.id)
                 self.edges.remove(edge)
-        self.id_dict.pop(node_id)
+        self.id_dict.pop(node.id)
         self.nodes.remove(node)
+
+    @property
+    def percent_energy(self):
+        self_energy = 0
+        energy = 0.01
+        for node in self.nodes:
+            if node.owner == CONTEXT["main_player"]:
+                self_energy += node.value
+            energy += node.value
+        return int(self_energy * 100 / energy)

@@ -24,6 +24,8 @@ from ability_effects import make_ability_effects
 import mode
 from SettingsUI import settings_ui
 
+from game_state import GameState
+from gameStateEnums import GameStateEnum as GSE
 
 class Game:
     def __init__(self):
@@ -31,9 +33,11 @@ class Game:
         self.chose_count = 0
         self.running = True
 
+        self.gs = GameState()
+
         self.setup()
 
-        self.board = Board()
+        self.board = Board(self.gs)
 
         self.ability_effects = make_ability_effects(self.board)
 
@@ -45,17 +49,17 @@ class Game:
 
     def setup(self):
         data, server = settings_ui()
-        self.network = Network(self.action, data, server)
+        self.network = Network(self.action, self.gs, data, server)
 
         player_num = int(self.network.data[0])
         self.pcount = int(self.network.data[2])
         mode.MODE = int(self.network.data[4])
         self.generator = RandomGenerator(int(self.network.data[6:]))
 
-        self.player_manager = PlayerManager(self.pcount, player_num)
+        self.player_manager = PlayerManager(self.pcount, player_num, self.gs)
 
     def start_game(self):
-        CONTEXT["started"] = False
+        self.gs.restart()
         self.chose_count = 0
         self.player_manager.reset()
         map_builder = MapBuilder(self.generator)
@@ -129,7 +133,7 @@ class Game:
     def main_loop(self):
         while self.running:
             if self.in_start:
-                self.ability_manager = MODE_ABILITY_MANAGERS[mode.MODE](self.board)
+                self.ability_manager = MODE_ABILITY_MANAGERS[mode.MODE](self.board, self.gs)
                 self.chose_send()
                 self.drawer.set_data(self.board, self.ability_manager, self.player_manager)
                 self.in_start = False
@@ -149,7 +153,7 @@ class Game:
                             self.drawer.relocate(width, height)
 
                         if not CONTEXT["main_player"].eliminated:
-                            if CONTEXT["started"]:
+                            if self.gs.state is GSE.PLAY:
                                 self.keydown(event)
 
                             if not CONTEXT["main_player"].victory:
@@ -170,7 +174,7 @@ class Game:
 
     def mouse_button_down_event(self, button):
         if self.board.highlighted:
-            if not CONTEXT["started"]:
+            if self.gs.state.value < GSE.PLAY.value:
                 print(self.board.highlighted)
                 self.network.send((SPAWN_CODE, CONTEXT["main_player"].id, self.board.highlighted.id))
             else:
