@@ -22,6 +22,9 @@ from modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
 import sys
 from ability_effects import make_ability_effects
 import mode
+
+import SettingsUI
+
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GSE
 
@@ -46,7 +49,7 @@ class Game:
         self.main_loop()
 
     def setup(self):
-
+        SettingsUI.settings_ui()
         self.network = Network(self.action, self.gs)
 
         player_num = int(self.network.data[0])
