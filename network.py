@@ -5,7 +5,7 @@ from constants import MODES
 from server_constants import SERVERS
 import ast
 import random
-
+import requests
 
 class SoloNetwork:
     def __init__(self, action_callback, data):
@@ -46,6 +46,9 @@ class Network(SoloNetwork):
     def __init__(self, action_callback, data, server):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = server
+        if server is None:
+            response = requests.get('https://httpbin.org/ip')
+            self.server = response.json()['origin']
         self.port = 5555
 
         super().__init__(action_callback, data)
