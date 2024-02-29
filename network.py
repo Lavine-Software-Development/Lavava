@@ -3,6 +3,7 @@ import threading
 import time
 import ast
 import random
+from server import start_server
 
 class SoloNetwork:
 
@@ -55,9 +56,9 @@ class Network(SoloNetwork):
     def get_user_input_for_game(self):
         self.addr = (self.server, self.port)
 
-        print(self.data)
-        print(self.addr)
         if self.data[0] == "HOST":
+            server_thread = threading.Thread(target=start_server)
+            server_thread.start()
             self.init_data = f"HOST,{self.data[1]},{self.data[2]}"
         else:
             self.init_data = f"JOIN,{0},{0}"
