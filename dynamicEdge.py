@@ -3,8 +3,8 @@ from constants import DYNAMIC_EDGE
 
 
 class DynamicEdge(Edge):
-    def __init__(self, node1, node2, id):
-        super().__init__(node1, node2, id)
+    def __init__(self, node1, node2, id, initial=False):
+        super().__init__(node1, node2, id, initial)
         self.state = "two-way"
         self.item_type = DYNAMIC_EDGE
 

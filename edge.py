@@ -7,7 +7,7 @@ from constants import (
 
 
 class Edge:
-    def __init__(self, to_node, from_node, id):
+    def __init__(self, to_node, from_node, id, initial=False):
         self.item_type = EDGE
         self.to_node = to_node
         self.from_node = from_node
@@ -15,7 +15,7 @@ class Edge:
         self.on = False
         self.flowing = False
         self.popped = False
-        self.update_nodes(True)
+        self.update_nodes(initial)
         self.state = "one-way"
         self.type = EDGE
         self.effects = set()
@@ -23,7 +23,7 @@ class Edge:
     def __str__(self):
         return str(self.id)
 
-    def update_nodes(self, initial=False):
+    def update_nodes(self, initial):
         self.to_node.new_edge(self, "incoming", initial)
         self.from_node.new_edge(self, "outgoing", initial)
 

@@ -4,6 +4,7 @@ from constants import (
     CAPITAL_START_COUNT,
     CAPITAL_ISLAND_COUNT,
     PORT_LAYOUT,
+    NODE
 )
 from node import Node, PortNode
 
@@ -53,19 +54,20 @@ def starter_capitals(nodes):
     for node in nodes:
         if len(node.edges) != 0:
             if (
-                sum(1 for edge in node.incoming if edge.state == "one-way")
+                (node.item_type == NODE or not node.is_port)
+                and sum(1 for edge in node.incoming if edge.state == "one-way")
                 and capitals < CAPITAL_START_COUNT
                 and not any(
                     1 for neigh in node.neighbors if neigh.state_name == "capital"
                 )
             ):
-                node.set_state("capital")
+                node.set_state("capital", True)
                 node.value = 100
                 capitals += 1
             return_nodes.append(node)
         else:
-            if islands < CAPITAL_ISLAND_COUNT:
-                node.set_state("capital")
+            if islands < CAPITAL_ISLAND_COUNT and (node.item_type == NODE or node.is_port):
+                node.set_state("capital", True)
                 node.value = 100
                 islands += 1
                 return_nodes.append(node)

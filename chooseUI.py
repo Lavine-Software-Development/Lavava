@@ -1,6 +1,5 @@
 import pygame
-from powerBox_factory import make_boxes
-from constants import GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, SPAWN_CODE
+from constants import BLACK, GREEN, LIGHT_GREEN, START_CREDITS, WHITE, MEDIUM_GREEN, SPAWN_CODE, DARK_GRAY
 import math
 import mode
 
@@ -13,203 +12,288 @@ ROWS = 3
 PADDING = 50  # Padding between boxes
 BOX_PADDING = 18  # Padding around each box
 
-# Initialization
 
-def _generate_darker_color(color):
-    return tuple(max(c - 50, 0) for c in color)
+class ChooseUI:
+
+    def __init__(self, boxes, gs):
+        gs.next()
+        self.boxes = boxes
+        self.box_rects = []
+        self.selected_boxes = set()
+        self.gs = gs
+        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.clock = pygame.time.Clock()
+
+        self.number_font_size = 42  # Example size, adjust as needed for your UI
+        self.number_font = pygame.font.Font(None, self.number_font_size)
+
+        self.name_font_size = 36  # Example size, adjust as needed for your UI
+        self.name_font = pygame.font.Font(None, self.name_font_size)
+
+        self.count_font_size = 48  # Slightly bigger for box.count
+        self.count_font = pygame.font.Font(None, self.count_font_size)
+
+        self.reset_button_rect = pygame.Rect(10, WINDOW_HEIGHT - 60, 100, 50)
+    
+    def choose_abilities(self):
+    
+        # Create boxes
+        from modeConstants import DEFAULT_SPAWN, ABILITY_COUNT
+        
+        if DEFAULT_SPAWN[mode.MODE]:
+            self.boxes.pop(SPAWN_CODE)
+
+        # Calculate positions for boxes and store them as Pygame Rects for easy collision detection
+        horizontal_spacing = (WINDOW_WIDTH - (BOX_SIZE * COLUMNS)) / (COLUMNS + 1)
+        vertical_spacing = (WINDOW_HEIGHT - (BOX_SIZE * ROWS)) / (ROWS + 3)
+        for index, (code, box) in enumerate(self.boxes.items()):
+            column = index % COLUMNS
+            row = index // COLUMNS
+            x = horizontal_spacing + (BOX_SIZE + horizontal_spacing) * column
+            y = vertical_spacing + (BOX_SIZE + vertical_spacing) * row
+
+            rect = pygame.Rect(x, y, BOX_SIZE, BOX_SIZE)
+            self.box_rects.append((code, rect))
+
+        running = True
+        while running:
+            mouse_pos = pygame.mouse.get_pos()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for code, rect in self.box_rects:
+                        if rect.collidepoint(event.pos):
+                            self.click_box(code, event.button)
+                            break
+                        if self.reset_button_rect.collidepoint(event.pos):
+                            self.reset_boxes()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN and self.complete_check():
+                        running = False
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+
+            self.screen.fill(WHITE)
+            self.draw_boxes(mouse_pos)
+            self.draw_message()
+            pygame.display.flip()
+            self.clock.tick(60)
+
+        self.gs.next()
+        if DEFAULT_SPAWN[mode.MODE]:
+            return [SPAWN_CODE] + list(self.selected_boxes)
+        return list(self.selected_boxes)
+
+    def click_box(self, code, click):
+
+        from modeConstants import ABILITY_COUNT
+
+        if code in self.selected_boxes:
+            self.selected_boxes.remove(code)
+        elif len(self.selected_boxes) < ABILITY_COUNT[mode.MODE]:
+            self.selected_boxes.add(code)
+
+    def _generate_darker_color(self, color):
+        return tuple(max(c - 50, 0) for c in color)
 
 
-def _generate_lighter_color(color):
-    return tuple(min(c + 50, 255) for c in color)
+    def _generate_lighter_color(self, color):
+        return tuple(min(c + 50, 255) for c in color)
 
 
-def draw_boxes(screen, boxes, selected_boxes, mouse_pos, box_rects):
-    for code, rect in box_rects:
-        box = boxes[code]
-        # Check if the current box is under the mouse cursor
-        is_hovered = rect.collidepoint(mouse_pos)
-        is_selected = code in selected_boxes
+    def draw_boxes(self, mouse_pos):
+        for code, rect in self.box_rects:
+            box = self.boxes[code]
+            # Check if the current box is under the mouse cursor
+            is_hovered = rect.collidepoint(mouse_pos)
+            is_selected = code in self.selected_boxes
 
-        # Draw the outer box with padding if hovered or selected
-        if is_selected or is_hovered:
-            outer_color = GREEN if is_selected else LIGHT_GREEN
-            pygame.draw.rect(
-                screen, outer_color, rect.inflate(BOX_PADDING, BOX_PADDING)
+            # Draw the outer box with padding if hovered or selected
+            if is_selected or is_hovered:
+                outer_color = GREEN if is_selected else LIGHT_GREEN
+                pygame.draw.rect(
+                    self.screen, outer_color, rect.inflate(BOX_PADDING, BOX_PADDING)
+                )
+
+            # Draw the inner box
+            pygame.draw.rect(self.screen, self._generate_darker_color(box.color), rect)
+
+            # Drawing the shape inside the box
+            self.draw_shape(
+                box.shape, rect.x, rect.y, self._generate_lighter_color(box.color)
             )
 
-        # Draw the inner box
-        pygame.draw.rect(screen, _generate_darker_color(box.color), rect)
+            # Set up the fonts
 
-        # Drawing the shape inside the box
-        draw_shape(
-            screen, box.shape, rect.x, rect.y, _generate_lighter_color(box.color)
-        )
+            # Render the ability name and blit it at the bottom center of the box
+            text = self.name_font.render(box.ab.name, True, WHITE)
+            text_rect = text.get_rect(
+                center=(rect.x + rect.width / 2, rect.y + rect.height - self.name_font_size + 15)
+            )
+            self.screen.blit(text, text_rect)
 
-        # Set up the font
-        number_font_size = 42  # Example size, adjust as needed for your UI
-        number_font = pygame.font.Font(None, number_font_size)
+            self.draw_numbers(rect, box)
 
-        name_font_size = 36  # Example size, adjust as needed for your UI
-        name_font = pygame.font.Font(None, name_font_size)
+        pygame.draw.rect(self.screen, DARK_GRAY, self.reset_button_rect)  # Draw the button
+        reset_text = self.name_font.render('Reset', True, WHITE)
+        reset_text_rect = reset_text.get_rect(center=self.reset_button_rect.center)
+        if self.reset_button_rect.collidepoint(mouse_pos):
+            pygame.draw.rect(
+                self.screen, BLACK, self.reset_button_rect.inflate(BOX_PADDING, BOX_PADDING)
+            )
+        self.screen.blit(reset_text, reset_text_rect)
+    
+    def draw_numbers(self, rect, box):
+        cost_text = self.number_font.render(str(box.ab.cost), True, WHITE)
 
-        # Render the ability name and blit it at the bottom center of the box
-        text = name_font.render(box.name, True, WHITE)
-        text_rect = text.get_rect(
-            center=(rect.x + rect.width / 2, rect.y + rect.height - name_font_size + 15)
-        )
-        screen.blit(text, text_rect)
-
-        # Render the display_num and blit it at the top left of the box
-        cost_text = number_font.render(str(box.display_num), True, WHITE)
         cost_text_rect = cost_text.get_rect(topleft=(rect.x + 10, rect.y + 10))
-        screen.blit(cost_text, cost_text_rect)
+        self.screen.blit(cost_text, cost_text_rect)
+
+    def draw_star(self, position, size, color):
+        inner_radius = size // 6
+        outer_radius = size // 3
+        star_points = []
+
+        for i in range(5):
+            angle = math.radians(i * 72 + 55)  # Start at top point
+
+            # Outer points
+            x = position[0] + outer_radius * math.cos(angle)
+            y = position[1] + outer_radius * math.sin(angle)
+            star_points.append((x, y))
+
+            # Inner points
+            angle += math.radians(36)  # Halfway between outer points
+            x = position[0] + inner_radius * math.cos(angle)
+            y = position[1] + inner_radius * math.sin(angle)
+            star_points.append((x, y))
+
+        pygame.draw.polygon(self.screen, color, star_points)
+
+    def draw_x(self, position, size, color):
+        x = position[0]
+        y = position[1]
+
+        width = size[0]
+        length = size[1]
+
+        x_end_pos = x + 2 * (width // 4)
+        y_end_pos = y + 2 * (length // 4)
+
+        pygame.draw.line(self.screen, color, (x, y), (x_end_pos, y_end_pos), 20)
+        pygame.draw.line(self.screen, color, (x, y_end_pos), (x_end_pos, y), 20)
 
 
-def draw_star(screen, position, size, color):
-    inner_radius = size // 6
-    outer_radius = size // 3
-    star_points = []
+    def draw_cross(self, position, size, color):
+        pygame.draw.line(self.screen, color, (position[0], position[1] + size[1] // 2),
+                        (position[0] + size[0], position[1] + size[1] // 2), 20)
+        pygame.draw.line(self.screen, color, (position[0] + size[0] // 2, position[1]),
+                        (position[0] + size[0] // 2, position[1] + size[1]), 20)
 
-    for i in range(5):
-        angle = math.radians(i * 72 + 55)  # Start at top point
-
-        # Outer points
-        x = position[0] + outer_radius * math.cos(angle)
-        y = position[1] + outer_radius * math.sin(angle)
-        star_points.append((x, y))
-
-        # Inner points
-        angle += math.radians(36)  # Halfway between outer points
-        x = position[0] + inner_radius * math.cos(angle)
-        y = position[1] + inner_radius * math.sin(angle)
-        star_points.append((x, y))
-
-    pygame.draw.polygon(screen, color, star_points)
-
-def draw_x(screen, position, size, color):
-    x = position[0]
-    y = position[1]
-
-    width = size[0]
-    length = size[1]
-
-    x_end_pos = x + 2 * (width // 4)
-    y_end_pos = y + 2 * (length // 4)
-
-    pygame.draw.line(screen, color, (x, y), (x_end_pos, y_end_pos), 20)
-    pygame.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
+    def draw_shape(self, shape, x, y, light_color):
+        # This function will handle drawing the shape within a given box
+        center = (x + BOX_SIZE // 2, y + BOX_SIZE // 2)
+        if shape == "circle":
+            pygame.draw.circle(self.screen, light_color, center, BOX_SIZE // 3.5)
+        elif shape == "square":
+            rect = (x + BOX_SIZE // 4, y + BOX_SIZE // 4, BOX_SIZE // 2, BOX_SIZE // 2)
+            pygame.draw.rect(self.screen, light_color, rect)
+        elif shape == "triangle":
+            points = [
+                (center[0], y + BOX_SIZE // 4),
+                (x + BOX_SIZE // 4, y + 3 * BOX_SIZE // 4),
+                (x + 3 * BOX_SIZE // 4, y + 3 * BOX_SIZE // 4),
+            ]
+            pygame.draw.polygon(self.screen, light_color, points)
+        elif shape == "star":
+            star_size = BOX_SIZE * 0.8  # Adjust the size as needed
+            self.draw_star(center, star_size, light_color)
+        elif shape == "x":
+            self.draw_x((x + (BOX_SIZE // 4), y + (BOX_SIZE // 4)), (BOX_SIZE, BOX_SIZE), light_color)
+        elif shape == "cross":
+            self.draw_cross((x + BOX_SIZE // 4, y + BOX_SIZE // 4), (BOX_SIZE // 2, BOX_SIZE // 2), light_color)
 
 
-def draw_cross(screen, position, size, color):
-    pygame.draw.line(screen, color, (position[0], position[1] + size[1] // 2),
-                     (position[0] + size[0], position[1] + size[1] // 2), 20)
-    pygame.draw.line(screen, color, (position[0] + size[0] // 2, position[1]),
-                     (position[0] + size[0] // 2, position[1] + size[1]), 20)
+    def draw_message(self):
+        font_size = 90  # Example size, adjust as needed for your UI
+        font = pygame.font.Font(None, font_size)
+        message = ""
+        color = MEDIUM_GREEN
+
+        if self.complete_check() :
+            message = "Press Enter"
+            color = GREEN
+        else:
+            message = self.message
+
+        # Render the message and center it at the bottom of the screen
+        text = font.render(message, True, color)
+        text_rect = text.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() - 50)
+        )  # 50 pixels from the bottom
+
+        # Blit the message onto the screen
+        self.screen.blit(text, text_rect)
+
+    def reset_boxes(self):
+        self.selected_boxes.clear() 
+
+    @property
+    def message(self):
+        return f"Pick {4 - len(self.selected_boxes)}"
+    
+    def complete_check(self):
+        return len(self.selected_boxes) == 4
 
 
-def draw_shape(screen, shape, x, y, light_color):
-    # This function will handle drawing the shape within a given box
-    center = (x + BOX_SIZE // 2, y + BOX_SIZE // 2)
-    if shape == "circle":
-        pygame.draw.circle(screen, light_color, center, BOX_SIZE // 3.5)
-    elif shape == "square":
-        rect = (x + BOX_SIZE // 4, y + BOX_SIZE // 4, BOX_SIZE // 2, BOX_SIZE // 2)
-        pygame.draw.rect(screen, light_color, rect)
-    elif shape == "triangle":
-        points = [
-            (center[0], y + BOX_SIZE // 4),
-            (x + BOX_SIZE // 4, y + 3 * BOX_SIZE // 4),
-            (x + 3 * BOX_SIZE // 4, y + 3 * BOX_SIZE // 4),
-        ]
-        pygame.draw.polygon(screen, light_color, points)
-    elif shape == "star":
-        star_size = BOX_SIZE * 0.8  # Adjust the size as needed
-        draw_star(screen, center, star_size, light_color)
-    elif shape == "x":
-        draw_x(screen, (x + (BOX_SIZE // 4), y + (BOX_SIZE // 4)), (BOX_SIZE, BOX_SIZE), light_color)
-    elif shape == "cross":
-        draw_cross(screen, (x + BOX_SIZE // 4, y + BOX_SIZE // 4), (BOX_SIZE // 2, BOX_SIZE // 2), light_color)
+class ChooseReloadUI(ChooseUI):
 
+    def __init__(self, boxes, gs):
+        self.credits = START_CREDITS
+        super().__init__(boxes, gs)
+        for key, box in boxes.items():
+            if box.count > 0:
+                self.credits -= box.ab.credits * box.count
+                self.selected_boxes.add(key)
 
-def draw_message(screen, selected_boxes, start_count):
-    font_size = 90  # Example size, adjust as needed for your UI
-    font = pygame.font.Font(None, font_size)
-    message = ""
-    color = MEDIUM_GREEN
+    def draw_numbers(self, rect, box):
+        count_text = self.count_font.render(str(box.count), True, BLACK)
+        count_text_rect = count_text.get_rect(center=(rect.centerx, rect.centery))
+        self.screen.blit(count_text, count_text_rect)
+        credit_text = self.number_font.render(str(box.ab.credits), True, WHITE)
 
-    if len(selected_boxes) == 4:
-        message = "Press Enter"
-        color = GREEN
-    else:
-        remaining = start_count - len(
-            selected_boxes
-        )  # Replace 4 with the constant if you have one
-        message = f"Pick {remaining}"
+        cost_text_rect = credit_text.get_rect(topleft=(rect.x + 10, rect.y + 10))
+        self.screen.blit(credit_text, cost_text_rect)
 
-    # Render the message and center it at the bottom of the screen
-    text = font.render(message, True, color)
-    text_rect = text.get_rect(
-        center=(screen.get_width() // 2, screen.get_height() - 50)
-    )  # 50 pixels from the bottom
+    def click_box(self, code, click):
 
-    # Blit the message onto the screen
-    screen.blit(text, text_rect)
+        from modeConstants import ABILITY_COUNT
 
-def choose_abilities_ui(gs):
-    gs.next()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    clock = pygame.time.Clock()
-    # Create boxes
-    from modeConstants import ABILITY_OPTIONS, DEFAULT_SPAWN, ABILITY_COUNT
-    boxes = {key: val for key, val in make_boxes().items() if key in ABILITY_OPTIONS[mode.MODE]}
-    if DEFAULT_SPAWN[mode.MODE]:
-        boxes.pop(SPAWN_CODE)
-    selected_boxes = set()
+        if click == 1 and self.credits >= self.boxes[code].ab.credits:
+            if code not in self.selected_boxes:
+                if len(self.selected_boxes) < ABILITY_COUNT[mode.MODE]:
+                    self.selected_boxes.add(code)
+                else:
+                    return
+            self.boxes[code].count += 1
+            self.credits -= self.boxes[code].ab.credits
+        elif click == 3 and code in self.selected_boxes:
+            self.boxes[code].count -= 1
+            self.credits += self.boxes[code].ab.credits
+            if self.boxes[code].count == 0:
+                self.selected_boxes.remove(code)
 
-    # Calculate positions for boxes and store them as Pygame Rects for easy collision detection
-    box_rects = []
-    horizontal_spacing = (WINDOW_WIDTH - (BOX_SIZE * COLUMNS)) / (COLUMNS + 1)
-    vertical_spacing = (WINDOW_HEIGHT - (BOX_SIZE * ROWS)) / (ROWS + 3)
-    for index, (code, box) in enumerate(boxes.items()):
-        column = index % COLUMNS
-        row = index // COLUMNS
-        x = horizontal_spacing + (BOX_SIZE + horizontal_spacing) * column
-        y = vertical_spacing + (BOX_SIZE + vertical_spacing) * row
+    def reset_boxes(self):
+        # Reset all counts to 0 and remove all from selected_boxes
+        for key, box in self.boxes.items():
+            box.count = 0  # Reset count
+        self.credits = START_CREDITS
+        super().reset_boxes()
 
-        # x = PADDING + (BOX_SIZE + PADDING) * column
-        # y = PADDING + (BOX_SIZE + PADDING) * row
-        rect = pygame.Rect(x, y, BOX_SIZE, BOX_SIZE)
-        box_rects.append((code, rect))
-
-    running = True
-    while running:
-        mouse_pos = pygame.mouse.get_pos()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for code, rect in box_rects:
-                    if rect.collidepoint(event.pos):
-                        if code in selected_boxes:
-                            selected_boxes.remove(code)
-                        elif (
-                            len(selected_boxes) < ABILITY_COUNT[mode.MODE]
-                        ):  # Assuming a constant for max abilities
-                            selected_boxes.add(code)
-                        break
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN and len(selected_boxes) == ABILITY_COUNT[mode.MODE]:
-                    running = False
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-        screen.fill(WHITE)
-        draw_boxes(screen, boxes, selected_boxes, mouse_pos, box_rects)
-        draw_message(screen, selected_boxes, ABILITY_COUNT[mode.MODE])
-        pygame.display.flip()
-        clock.tick(60)
-
-    gs.next()
-    if DEFAULT_SPAWN[mode.MODE]:
-        return [SPAWN_CODE] + list(selected_boxes)
-    return list(selected_boxes)
+    @property
+    def message(self):
+        return f"{self.credits} Credits"
+    
+    def complete_check(self):
+        return self.credits == 0

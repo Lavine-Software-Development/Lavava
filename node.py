@@ -10,7 +10,7 @@ from constants import (
     BLACK,
     BROWN,
 )
-from nodeState import DefaultState, MineState, ZombieState
+from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
 from nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
 import mode
 
@@ -57,11 +57,11 @@ class Node:
         elif state_name == "zombie":
             return ZombieState(self.id)
         elif state_name == "capital":
-            from modeConstants import CAPITAL_TYPES
-            CapitalStateType = CAPITAL_TYPES[mode.MODE]
             if self.owner:
                 self.owner.capital_handover(self)
-            return CapitalStateType(self.id)
+            if data:
+                return StartingCapitalState(self.id)
+            return CapitalState(self.id)
         else:
             return DefaultState(self.id)
 
@@ -263,7 +263,7 @@ class PortNode(Node):
         return self.port_count > 0 and 'burn' not in self.effects and self.state.acceptBridge
 
     def new_edge(self, edge, dir, initial):
-        if not initial and edge not in self.edges and dir == "outgoing":
+        if not initial and edge not in self.edges:
             self.port_count -= 1
         super().new_edge(edge, dir, initial)
 
