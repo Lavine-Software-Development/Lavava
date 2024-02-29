@@ -1,5 +1,4 @@
-import sys
-
+import socket
 import pygame
 
 from constants import GREY, BLACK, WHITE, LIGHT_GREY
@@ -17,6 +16,19 @@ def is_point_in_circle(point, circle_center, circle_radius):
 
     # Check if the distance is less than or equal to the radius squared
     return distance_squared <= circle_radius ** 2
+
+
+def get_local_ip():
+    try:
+        # Create a socket connection to determine the local IP address
+        # The address '8.8.8.8' and port 80 are used here as an example and do not need to be reachable
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+        return local_ip
+    except Exception as e:
+        print(f"Error getting local IP address: {e}")
+        return None
 
 
 def settings_ui():
@@ -213,6 +225,7 @@ def settings_ui():
 
         if done_selected:
             if host_selected:
-                return host_settings_info, None
+                my_local_ip = get_local_ip()
+                return host_settings_info, my_local_ip
             elif join_selected:
                 return join_settings_info, ip_address
