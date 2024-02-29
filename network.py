@@ -6,6 +6,7 @@ from server_constants import SERVERS
 import ast
 import random
 import requests
+import sys
 
 class SoloNetwork:
 
@@ -50,7 +51,8 @@ class SoloNetwork:
 class Network(SoloNetwork):
     def __init__(self, action_callback, gs, data, server):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = server
+        self.server = str(server)
+        print(self.server)
         if server is None:
             response = requests.get('https://httpbin.org/ip')
             self.server = response.json()['origin']
@@ -62,6 +64,7 @@ class Network(SoloNetwork):
         self.addr = (self.server, self.port)
 
         if self.data[0] == "HOST":
+            print(self.data)
             self.init_data = f"HOST,{self.data[1]},{self.data[2]}"
         else:
             self.init_data = f"JOIN,{0},{0}"
