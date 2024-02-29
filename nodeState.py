@@ -76,6 +76,9 @@ class DefaultState(AbstractState):
 
 class ZombieState(DefaultState):
 
+    def __init__(self, id):
+        AbstractState.__init__(self, id, True, False)
+
     def grow(self, multiplier):
         return 0
 
@@ -84,8 +87,8 @@ class ZombieState(DefaultState):
 
 
 class CapitalState(DefaultState):
-    def __init__(self, id):
-        super().__init__(id)
+    def __init__(self, id, reset=True):
+        AbstractState.__init__(self, id, reset, False)
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
@@ -110,6 +113,7 @@ class CapitalState(DefaultState):
         return CAPITAL_SHRINK_SPEED
 
     def capture_event(self, player):
+        print("how")
         player.capital_handover(self, False)
         return super().capture_event()
 
@@ -123,8 +127,8 @@ class CapitalState(DefaultState):
 
 
 class StartingCapitalState(CapitalState):
-    def __init__(self, id, is_owned=True):
-        AbstractState.__init__(self, id, True, False)
+    def __init__(self, id, is_owned=False):
+        super().__init__(id, False)
         self.capitalized = True
         self.is_owned = is_owned
 
@@ -132,9 +136,11 @@ class StartingCapitalState(CapitalState):
         return 0
 
     def capture_event(self, player):
+        print("here")
         if self.is_owned:
+            print("not here")
             player.capital_handover(self, False)
-        return super().capture_event(player)
+        return DefaultState.capture_event(player)
 
 
 class MineState(AbstractState):

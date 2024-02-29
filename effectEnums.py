@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class EffectType(Enum):
-    NONE = 0
-    GROW = 1
-    EXPEL = 2
-    INTAKE = 3
+    NONE = auto()
+    GROW = auto()
+    EXPEL = auto()
+    INTAKE = auto()

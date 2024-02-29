@@ -26,7 +26,7 @@ def make_bridge(buy_new_edge, bridge_type):
 def make_nuke(remove_node):
     def nuke_effect(data, player):
         node = data[0]
-        remove_node(node.id)
+        remove_node(node)
 
     return nuke_effect
 
@@ -52,8 +52,8 @@ def spawn_effect(data, player):
 
 def zombie_effect(data, player):
     node = data[0]
-    node.set_state("zombie")
     node.capture(None)
+    node.set_state("zombie")
     node.value = ZOMBIE_FULL_SIZE
 
 

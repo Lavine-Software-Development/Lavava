@@ -113,6 +113,8 @@ class Draw:
             )
         elif shape == "x":
             self.draw_x((position[0] + btn_size // 4, position[1] + btn_size // 4), (btn_size, btn_size), lighter_color)
+        elif shape == "cross":
+            self.draw_cross((position[0] + btn_size // 4, position[1] + btn_size // 4), (btn_size // 2, btn_size // 2), lighter_color)
 
         if loading:
             py.draw.rect(
@@ -144,8 +146,8 @@ class Draw:
         self.screen.blit(cost_text, (position[0] + 10, position[1] + 10))
 
     def draw_buttons(self):
-        y_position = int(VERTICAL_ABILITY_GAP * self.height / 6)
-        for btn in self.abilities.values():
+        y_position = int(VERTICAL_ABILITY_GAP * self.height / 6 + 75)
+        for key, btn in self.abilities.items():
             btn_box = btn.box
             selected = self.ability_manager.mode == btn.key or (
                 self.ability_manager.mode == "default" and btn.key == 2
@@ -157,9 +159,9 @@ class Draw:
             self.draw_button(
                 btn_box.shape,
                 btn_box.color,
-                btn_box.name,
-                btn_box.display_num,
-                btn_box.letter,
+                btn_box.ab.name,
+                self.ability_manager.display_nums[key],
+                btn_box.ab.letter,
                 (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
                 selected,
                 loading,
@@ -179,6 +181,12 @@ class Draw:
 
         py.draw.line(screen, color, (x, y), (x_end_pos, y_end_pos), 20)
         py.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
+    
+    def draw_cross(self, position, size, color):
+        py.draw.line(self.screen, color, (position[0], position[1] + size[1] // 2),
+                     (position[0] + size[0], position[1] + size[1] // 2), 20)
+        py.draw.line(self.screen, color, (position[0] + size[0] // 2, position[1]),
+                     (position[0] + size[0] // 2, position[1] + size[1]), 20)
 
     def draw_star(self, position, size, color, filled=True):
         inner_radius = size // 6
@@ -383,6 +391,10 @@ class Draw:
                 py.draw.circle(
                     self.screen, spot.state.ring_color, spot.pos, spot.size + 6, 6
                 )
+            elif spot.state_name == "zombie":
+                py.draw.rect(self.screen, spot.color,
+                             (spot.pos[0] - spot.size // 2, spot.pos[1] - spot.size // 2,
+                              spot.size, spot.size))
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
             if 'poison' in spot.effects:
@@ -449,32 +461,31 @@ class Draw:
                 self.font.render(
                     str(int(CONTEXT["main_player"].money)),
                     True,
-                    CONTEXT["main_player"].color,
+                    (205, 204, 0),
                 ),
-                (20, 20),
+                (self.width - 150, 20),
             )
             self.screen.blit(
-                self.small_font.render(
-                    f"{CONTEXT['main_player'].production_per_second:.0f}",
+                self.smaller_font.render(
+                    f"{CONTEXT['main_player'].production_per_second:.0f}/s",
                     True,
                     (205, 204, 0),
                 ),
-                (23, 60),
+                (self.width - 50, 25),
             )
-        for i in range(len(self.players)):
             self.screen.blit(
                 self.small_font.render(
-                    str(int(self.players[i].count)), True, self.players[i].color
+                    f"{self.board.percent_energy}%", True, CONTEXT['main_player'].color
                 ),
-                (self.width / 3 + i * 150, 20),
+                (self.width - 150, 65),
             )
-            if self.players[i].capital_count > 0:
-                self.screen.blit(
-                    self.smaller_font.render(
-                        str(int(self.players[i].capital_count)), True, PINK
-                    ),
-                    (self.width / 3 + i * 150 + 40, 20),
-                )
+            # if self.players[i].capital_count > 0:
+            #     self.screen.blit(
+            #         self.smaller_font.render(
+            #             str(int(self.players[i].capital_count)), True, PINK
+            #         ),
+            #         (self.width / 3 + i * 150 + 40, 20),
+            #     )
 
         if self.player_manager.victor:
             self.screen.blit(
@@ -507,7 +518,7 @@ class Draw:
                     self.font.render(
                         f"{self.player_manager.timer + 1:.0f}", True, BLACK
                     ),
-                    (self.width - 300, 20),
+                    (20, 20),
                 )
             else:
                 self.screen.blit(
@@ -516,20 +527,20 @@ class Draw:
                         True,
                         CONTEXT["main_player"].color,
                     ),
-                    (self.width - 300, 20),
+                    (20, 20),
                 )
         elif CONTEXT["main_player"].eliminated:
             self.screen.blit(
                 self.font.render("ELIMINATED", True, CONTEXT["main_player"].color),
                 (self.width - 450, 20),
             )
-        else:
-            self.screen.blit(
-                self.small_font.render(
-                    "X to Forfeit", True, CONTEXT["main_player"].color
-                ),
-                (self.width - 450, 20),
-            )
+        # else:
+        #     self.screen.blit(
+        #         self.small_font.render(
+        #             "X to Forfeit", True, CONTEXT["main_player"].color
+        #         ),
+        #         (self.width - 450, 20),
+        #     )
 
     def blit_waiting(self):
         self.screen.blit(
