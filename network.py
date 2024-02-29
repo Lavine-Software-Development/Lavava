@@ -1,11 +1,9 @@
 import socket
 import threading
 import time
-from constants import MODES
-from server_constants import SERVERS
 import ast
 import random
-import requests
+from server import start_server
 
 class SoloNetwork:
 
@@ -50,10 +48,7 @@ class SoloNetwork:
 class Network(SoloNetwork):
     def __init__(self, action_callback, gs, data, server):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = server
-        if server is None:
-            response = requests.get('https://httpbin.org/ip')
-            self.server = response.json()['origin']
+        self.server = str(server)
         self.port = 5555
 
         super().__init__(action_callback, gs, data)
@@ -62,6 +57,8 @@ class Network(SoloNetwork):
         self.addr = (self.server, self.port)
 
         if self.data[0] == "HOST":
+            server_thread = threading.Thread(target=start_server)
+            server_thread.start()
             self.init_data = f"HOST,{self.data[1]},{self.data[2]}"
         else:
             self.init_data = f"JOIN,{0},{0}"

@@ -93,6 +93,6 @@ class Server:
             start_new_thread(self.threaded_client, (conn,))
 
 
-if __name__ == "__main__":
+def start_server():
     server = Server(5555)
     server.run()
