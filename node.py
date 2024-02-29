@@ -13,6 +13,8 @@ from constants import (
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
 from nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
 import mode
+import random
+from math import pi
 
 class Node:
     def __init__(self, id, pos):
@@ -248,6 +250,8 @@ class PortNode(Node):
         super().__init__(id, pos)
         self.item_type = PORT_NODE
         self.port_count = port_count
+        self.angle = random.uniform(0, 2 * pi)
+        self.angle_dif = random.uniform(0.5, 6.0)
 
     @property
     def is_port(self):

@@ -26,6 +26,7 @@ from constants import (
     CONTEXT,
 )
 import mode
+import random
 
 class Draw:
     def __init__(self):
@@ -422,11 +423,10 @@ class Draw:
                     percentage = spot.effects['burn'].counter / BURN_TICKS
                     port_width *= percentage
                 port_count = spot.port_count  # Number of ports
-                angle_step = 2 * math.pi / port_count  # Angle step for each port
 
                 for i in range(port_count):
                     # Angle for this port
-                    angle = i * angle_step
+                    angle = spot.angle + (i * spot.angle_dif)
                     # Calculate the center of the port rectangle
                     port_center_x = spot.pos[0] + (
                         spot.size + port_height / 2
