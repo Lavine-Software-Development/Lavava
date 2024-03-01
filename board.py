@@ -77,7 +77,7 @@ class Board:
                 return self.id_dict[id]
             elif self.id_dict[id].controlled_by(CONTEXT["main_player"]) or (
                 self.id_dict[id].to_node.owner == CONTEXT["main_player"]
-                and self.id_dict[id].to_node.full
+                and self.id_dict[id].to_node.full()
             ):
                 self.highlighted_color = GREY
                 return self.id_dict[id]

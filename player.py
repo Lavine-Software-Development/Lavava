@@ -55,7 +55,7 @@ class DefaultPlayer:
 
     @property
     def capital_count(self):
-        return len([c for c in self.capitals.values() if c.full])
+        return len([c for c in self.capitals.values() if c.full()])
 
 
 class MoneyPlayer(DefaultPlayer):

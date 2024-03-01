@@ -28,7 +28,7 @@ def capital_logic(data):
     if (
         node.owner == CONTEXT["main_player"]
         and node.state_name != "capital"
-        and node.full
+        and node.full()
     ):
         neighbor_capital = False
         for neighbor in node.neighbors:

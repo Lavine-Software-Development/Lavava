@@ -62,7 +62,7 @@ class Node:
             if self.owner:
                 self.owner.capital_handover(self)
             if data:
-                return StartingCapitalState(self.id)
+                return StartingCapitalState(self.id, self.full)
             return CapitalState(self.id)
         else:
             return DefaultState(self.id)
@@ -218,7 +218,6 @@ class Node:
     def swap_status(self):
         return self.state.swap_status
 
-    @property
     def full(self):
         return self.value >= self.state.full_size
 
