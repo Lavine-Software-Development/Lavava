@@ -166,7 +166,6 @@ class Node:
     def spread_effects(self):
         for key, effect in self.effects.items():
             if effect.can_spread_func(effect):
-                print("spread at: ", effect.counter)
                 for edge in self.edges:
                     neighbor = edge.opposite(self)
                     if key not in neighbor.effects and effect.spread_criteria_func(edge, neighbor):

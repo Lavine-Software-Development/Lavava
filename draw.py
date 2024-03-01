@@ -11,6 +11,7 @@ from constants import (
     BLACK,
     WHITE,
     GREEN,
+    DARK_GREEN,
     YELLOW,
     PURPLE,
     PINK,
@@ -291,8 +292,8 @@ class Draw:
             )
 
             if edge.flowing:
-                if 'rage' in edge.effects:
-                    py.draw.polygon(self.screen, PURPLE, [point1, point2, point3])
+                if 'rage' in edge.from_node.effects:
+                    py.draw.polygon(self.screen, DARK_GREEN, [point1, point2, point3])
                 else:
                     py.draw.polygon(self.screen, color, [point1, point2, point3])
             else:
@@ -320,9 +321,9 @@ class Draw:
                 start[1] + i * spacing * dy + 5 * dy,
             )
             if edge.flowing:
-                if 'rage' in edge.effects:
+                if 'rage' in edge.from_node.effects:
                     py.draw.circle(
-                        self.screen, PURPLE, (int(pos[0]), int(pos[1])), circle_radius
+                        self.screen, DARK_GREEN, (int(pos[0]), int(pos[1])), circle_radius
                     )
                 else:
                     py.draw.circle(
@@ -400,6 +401,8 @@ class Draw:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
             if 'poison' in spot.effects:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
+            if 'rage' in spot.effects:
+                py.draw.circle(self.screen, DARK_GREEN, spot.pos, spot.size - 2, 3)
             if spot.full():
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
                 if spot.state_name == "capital":
