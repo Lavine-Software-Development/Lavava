@@ -195,15 +195,13 @@ class Node:
             player.pass_on_effects(self)
         self.owner = player
 
-
     def capture(self, player):
-        self.value = self.state.capture_event(player)(self.value)
+        self.value = self.state.capture_event(player, self.owner)(self.value)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()
         if self.state.reset_on_capture:
             self.set_default_state()
-
 
     def absorbing(self):
         for edge in self.current_incoming:
