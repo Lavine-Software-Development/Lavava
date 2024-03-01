@@ -10,9 +10,8 @@ from SettingsUI import settings_ui
 class SoloGame(Game):
 
     def setup(self):
-        data = settings_ui()
         self.gs = GameState()
-        self.network = SoloNetwork(self.action, self.gs, data)
+        self.network = SoloNetwork(self.action, self.gs, [2])
 
         self.player_num = 0
         self.pcount = 1

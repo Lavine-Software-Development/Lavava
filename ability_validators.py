@@ -28,7 +28,7 @@ def capital_logic(data):
     if (
         node.owner == CONTEXT["main_player"]
         and node.state_name != "capital"
-        and node.full
+        and node.full()
     ):
         neighbor_capital = False
         for neighbor in node.neighbors:
@@ -47,7 +47,7 @@ def standard_port_node(data):
 
 def unowned_node(data):
     node = data[0]
-    return node.owner is None and node.state_name not in ["mine"]
+    return node.owner is None and node.state_name == "default"
 
 
 def new_edge_validator(check_new_edge):

@@ -26,6 +26,7 @@ from constants import (
     CONTEXT,
 )
 import mode
+import random
 
 class Draw:
     def __init__(self):
@@ -399,7 +400,7 @@ class Draw:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
             if 'poison' in spot.effects:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
-            if spot.full:
+            if spot.full():
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
                 if spot.state_name == "capital":
                     py.draw.circle(self.screen, PINK, spot.pos, spot.size + 6, 4)
@@ -422,11 +423,10 @@ class Draw:
                     percentage = spot.effects['burn'].counter / BURN_TICKS
                     port_width *= percentage
                 port_count = spot.port_count  # Number of ports
-                angle_step = 2 * math.pi / port_count  # Angle step for each port
 
                 for i in range(port_count):
                     # Angle for this port
-                    angle = i * angle_step
+                    angle = spot.angle + (i * spot.angle_dif)
                     # Calculate the center of the port rectangle
                     port_center_x = spot.pos[0] + (
                         spot.size + port_height / 2
@@ -456,6 +456,7 @@ class Draw:
 
     def blit_numbers(self):
         py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))
+        # Gross
         if mode.MODE != 2:
             self.screen.blit(
                 self.font.render(
@@ -473,19 +474,19 @@ class Draw:
                 ),
                 (self.width - 50, 25),
             )
-            self.screen.blit(
-                self.small_font.render(
-                    f"{self.board.percent_energy}%", True, CONTEXT['main_player'].color
-                ),
-                (self.width - 150, 65),
-            )
-            # if self.players[i].capital_count > 0:
-            #     self.screen.blit(
-            #         self.smaller_font.render(
-            #             str(int(self.players[i].capital_count)), True, PINK
-            #         ),
-            #         (self.width / 3 + i * 150 + 40, 20),
-            #     )
+        self.screen.blit(
+            self.small_font.render(
+                f"{self.board.percent_energy}%", True, CONTEXT['main_player'].color
+            ),
+            (self.width - 150, 65),
+        )
+        # if CONTEXT['main_player'].capital_count > 0:
+        self.screen.blit(
+            self.small_font.render(
+                str(int(CONTEXT['main_player'].capital_count)), True, PINK
+            ),
+            (self.width - (self.width / 43), 20),
+        )
 
         if self.player_manager.victor:
             self.screen.blit(

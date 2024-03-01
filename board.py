@@ -67,7 +67,8 @@ class Board:
         ability = ability_manager.ability
         if id := self.find_node(position):
             if (not ability) or ability.click_type == NODE:
-                if self.gs.state.value < GSE.PLAY.value and self.id_dict[id].owner is None:
+                if self.gs.state.value < GSE.PLAY.value and self.id_dict[id].owner is None \
+                      and self.id_dict[id].state_name == 'default':
                     return self.id_dict[id]
                 elif ability and ability.validate(self.id_dict[id]):
                     return self.id_dict[id]
@@ -76,7 +77,7 @@ class Board:
                 return self.id_dict[id]
             elif self.id_dict[id].controlled_by(CONTEXT["main_player"]) or (
                 self.id_dict[id].to_node.owner == CONTEXT["main_player"]
-                and self.id_dict[id].to_node.full
+                and self.id_dict[id].to_node.full()
             ):
                 self.highlighted_color = GREY
                 return self.id_dict[id]

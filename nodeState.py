@@ -37,7 +37,7 @@ class AbstractState(ABC):
         return TRANSFER_RATE * multiplier * value
 
     @abstractmethod
-    def capture_event(self, player):
+    def capture_event(self, offense=None, defense=None):
         pass
 
     @abstractmethod
@@ -67,7 +67,7 @@ class DefaultState(AbstractState):
             change *= -1
         return change
 
-    def capture_event(self, player=None):
+    def capture_event(self, offense=None, defense=None):
         return lambda value: value * -1
 
     def killed(self, value):
@@ -112,9 +112,9 @@ class CapitalState(DefaultState):
         self.shrink_count -= 1
         return CAPITAL_SHRINK_SPEED
 
-    def capture_event(self, player):
-        print("how")
-        player.capital_handover(self, False)
+    def capture_event(self, offense=None, defense=None):
+        if defense:
+            defense.capital_handover(self, False)
         return super().capture_event()
 
     def killed(self, value):
@@ -127,20 +127,18 @@ class CapitalState(DefaultState):
 
 
 class StartingCapitalState(CapitalState):
-    def __init__(self, id, is_owned=False):
+    def __init__(self, id, full_func, is_owned=False):
         super().__init__(id, False)
+        self.full = full_func
         self.capitalized = True
         self.is_owned = is_owned
 
     def grow(self, multiplier):
         return 0
 
-    def capture_event(self, player):
-        print("here")
-        if self.is_owned:
-            print("not here")
-            player.capital_handover(self, False)
-        return DefaultState.capture_event(player)
+    def capture_event(self, offense, defense=None):
+        offense.capital_handover(self)
+        return DefaultState.capture_event(offense)
 
 
 class MineState(AbstractState):

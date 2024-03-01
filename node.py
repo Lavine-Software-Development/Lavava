@@ -13,6 +13,8 @@ from constants import (
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
 from nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
 import mode
+import random
+from math import pi
 
 class Node:
     def __init__(self, id, pos):
@@ -60,7 +62,7 @@ class Node:
             if self.owner:
                 self.owner.capital_handover(self)
             if data:
-                return StartingCapitalState(self.id)
+                return StartingCapitalState(self.id, self.full)
             return CapitalState(self.id)
         else:
             return DefaultState(self.id)
@@ -193,15 +195,13 @@ class Node:
             player.pass_on_effects(self)
         self.owner = player
 
-
     def capture(self, player):
-        self.value = self.state.capture_event(player)(self.value)
+        self.value = self.state.capture_event(player, self.owner)(self.value)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()
         if self.state.reset_on_capture:
             self.set_default_state()
-
 
     def absorbing(self):
         for edge in self.current_incoming:
@@ -216,7 +216,6 @@ class Node:
     def swap_status(self):
         return self.state.swap_status
 
-    @property
     def full(self):
         return self.value >= self.state.full_size
 
@@ -248,6 +247,8 @@ class PortNode(Node):
         super().__init__(id, pos)
         self.item_type = PORT_NODE
         self.port_count = port_count
+        self.angle = random.uniform(0, 2 * pi)
+        self.angle_dif = random.uniform(0.5, 6.0)
 
     @property
     def is_port(self):

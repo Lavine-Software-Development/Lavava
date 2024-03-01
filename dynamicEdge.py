@@ -35,7 +35,7 @@ class DynamicEdge(Edge):
             # if you don't own both sides, you can only swap when full
             if self.owned:
                 self.click_swap()
-            elif self.to_node.full:
+            elif self.to_node.full():
                 self.click_swap()
 
     def check_status(self):
@@ -53,7 +53,7 @@ class DynamicEdge(Edge):
             from_status = self.from_node.swap_status
             if from_status < to_status:
                 self.natural_swap()
-            elif to_status == from_status and not self.from_node.full:
+            elif to_status == from_status and not self.from_node.full():
                 to_value = self.to_node.value
                 from_value = self.from_node.value
                 if self.flowing:
