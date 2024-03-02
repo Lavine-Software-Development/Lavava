@@ -8,5 +8,3 @@ class PlayerEnraged(AbstractPlayerEffect):
 
     def spread(self, node):
         node.set_state('rage')
-        for edge in node.outgoing:
-            edge.effects.add('rage')

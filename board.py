@@ -29,9 +29,6 @@ class Board:
         self.highlighted_color = None
 
     def board_wide_effect(self, player, effect):
-        for edge in self.edges:
-            if edge.can_be_controlled_by(player):
-                edge.effects.add(effect)
         for node in self.nodes:
             if node.owner == player:
                 node.set_state(effect)
@@ -220,5 +217,6 @@ class Board:
         for node in self.nodes:
             if node.owner == CONTEXT["main_player"]:
                 self_energy += node.value
-            energy += node.value
+            if node.owned_and_alive():
+                energy += node.value
         return int(self_energy * 100 / energy)

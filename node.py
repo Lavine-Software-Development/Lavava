@@ -141,9 +141,15 @@ class Node:
                 edge.to_node.set_state("poison")
 
     def grow(self):
-        if self.state.can_grow(self.value):
+        if self.can_grow():
             self.value += self.state.grow(self.grow_multiplier)
         self.effects_update()
+
+    def can_grow(self):
+        ## Gross mention of poison
+        ## I could cycle thro
+        if self.state.can_grow(self.value) or 'poison' in self.effects:
+            return True
 
     def effects_update(self):
 
@@ -166,7 +172,6 @@ class Node:
     def spread_effects(self):
         for key, effect in self.effects.items():
             if effect.can_spread_func(effect):
-                print("spread at: ", effect.counter)
                 for edge in self.edges:
                     neighbor = edge.opposite(self)
                     if key not in neighbor.effects and effect.spread_criteria_func(edge, neighbor):
