@@ -56,7 +56,7 @@ class Draw:
         return tuple(min(c + 50, 255) for c in color)
 
     def draw_button(
-        self, shape, color, name, cost, letter, position, selected, loading=False
+        self, shape, color, name, cost, letter, position, selected, reload_completion, loading=False
     ):
         btn_size = ABILITY_SIZE * self.height
         border_thickness = 5
@@ -117,10 +117,8 @@ class Draw:
             self.draw_x((position[0] + btn_size // 4, position[1] + btn_size // 4), (btn_size, btn_size), lighter_color)
         elif shape == "cross":
             self.draw_cross((position[0] + btn_size // 4, position[1] + btn_size // 4), (btn_size // 2, btn_size // 2), lighter_color)
-
-        if loading:
-            py.draw.rect(
-                self.screen, BLACK, (position[0], position[1], btn_size, btn_size)
+        py.draw.rect(
+                self.screen, BLACK, (position[0], position[1], btn_size, btn_size - (btn_size * reload_completion))
             )
 
         # Drawing text (name and cost)
@@ -158,6 +156,7 @@ class Draw:
             if mode.MODE == 2:
                 if not self.ability_manager.full(btn.key):
                     loading = True
+            reload_percent = self.ability_manager.percent_complete(btn.key)
             self.draw_button(
                 btn_box.shape,
                 btn_box.color,
@@ -166,6 +165,7 @@ class Draw:
                 btn_box.ab.letter,
                 (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
                 selected,
+                reload_percent,
                 loading,
             )
             y_position += int(VERTICAL_ABILITY_GAP * self.height)  # Vertical gap between buttons

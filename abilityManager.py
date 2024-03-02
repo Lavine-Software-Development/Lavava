@@ -122,6 +122,9 @@ class ReloadAbilityManager(AbstractAbilityManager):
     def full(self, key):
         return self.load_count[key] >= self.full_reload[key]
     
+    def percent_complete(self, key): 
+        return min(1, self.load_count[key] / self.full_reload[key])
+        
     @property
     def display_nums(self):
         return self.remaining_usage
