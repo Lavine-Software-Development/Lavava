@@ -217,5 +217,6 @@ class Board:
         for node in self.nodes:
             if node.owner == CONTEXT["main_player"]:
                 self_energy += node.value
-            energy += node.value
+            if node.owned_and_alive():
+                energy += node.value
         return int(self_energy * 100 / energy)
