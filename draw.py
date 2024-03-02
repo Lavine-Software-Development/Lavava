@@ -429,7 +429,7 @@ class Draw:
 
                 for i in range(port_count):
                     # Angle for this port
-                    angle = spot.angle + (i * spot.angle_dif)
+                    angle = spot.ports_angles[i]
                     # Calculate the center of the port rectangle
                     port_center_x = spot.pos[0] + (
                         spot.size + port_height / 2

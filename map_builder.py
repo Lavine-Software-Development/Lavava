@@ -5,6 +5,7 @@ from constants import (
     EDGE_COUNT,
     ONE_WAY_COUNT,
     MAX_EDGE_LENGTH,
+    PORT_NODE,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     MIN_ANGLE,

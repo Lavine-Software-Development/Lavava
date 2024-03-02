@@ -10,12 +10,13 @@ from constants import (
     EDGE_COUNT,
     CONTEXT,
     NODE,
+    PORT_NODE
 )
 from helpers import distance_point_to_segment, do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from gameStateEnums import GameStateEnum as GSE
-
+import mode
 
 class Board:
     def __init__(self, gs):
@@ -38,10 +39,20 @@ class Board:
         self.edges = edges
         self.edge_dict = defaultdict(set)
         self.expand_nodes()
+        # Gross. Mode Ports as a boolean could be used in multiple places
+        self.set_all_ports()
+        if self.nodes[0].item_type == PORT_NODE:
+            for node in self.nodes:
+                node.set_port_angles()
         self.id_dict = {node.id: node for node in self.nodes} | {
             edge.id: edge for edge in self.edges
         }
         self.extra_edges = 2
+
+    def set_all_ports(self):
+        if self.nodes[0].item_type == PORT_NODE:
+            for node in self.nodes:
+                    node.set_port_angles()
 
     ## Gross code. Needs to be refactored
     def check_highlight(self, position, ability_manager):
