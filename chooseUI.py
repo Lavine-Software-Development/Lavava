@@ -69,7 +69,7 @@ class ChooseUI:
                         if self.reset_button_rect.collidepoint(event.pos):
                             self.reset_boxes()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN and self.complete_check():
+                    if event.key == pygame.K_RETURN:
                         running = False
                     if event.key == pygame.K_ESCAPE:
                         running = False
