@@ -290,28 +290,34 @@ class PortNode(Node):
         `min_angular_distance` is the minimum angular distance between ports and between ports and edges.
         Returns a list of two angles for the ports.
         """
-        edge_angles = self.calculate_edge_angles()
-        valid_angles = self.find_valid_angles(edge_angles, min_angular_distance)
 
-        opts = []
-        if len(valid_angles) == 1:
-            opts = valid_angles[0]
-        elif len(valid_angles) > 1:
-            opts = sorted(valid_angles, key=len, reverse=True)[:2]
-            if len(opts[0]) > len(opts[1]) * 2:
-                opts = [opts[0]]
+        # choose two randomly spaced out angles
+        first = random.uniform(0, pi)
+        second = first + pi
+        self.ports_angles = [first, second]
 
-            rf = len(opts) // 3
-            rs = (len(opts) // 3) * 2
-            self.ports_angles = [opts[rf], opts[rs]]
-        elif len(valid_angles) > 1:
+        # edge_angles = self.calculate_edge_angles()
+        # valid_angles = self.find_valid_angles(edge_angles, min_angular_distance)
+
+        # opts = []
+        # if len(valid_angles) == 1:
+        #     opts = valid_angles[0]
+        # elif len(valid_angles) > 1:
+        #     opts = sorted(valid_angles, key=len, reverse=True)[:2]
+        #     if len(opts[0]) > len(opts[1]) * 2:
+        #         opts = [opts[0]]
+
+        #     rf = len(opts) // 3
+        #     rs = (len(opts) // 3) * 2
+        #     self.ports_angles = [opts[rf], opts[rs]]
+        # elif len(valid_angles) > 1:
 
             
-            self.ports_angles = [opts[0][len(opts[0]) // 2], opts[1][len(opts[1]) // 2]]
+        #     self.ports_angles = [opts[0][len(opts[0]) // 2], opts[1][len(opts[1]) // 2]]
             
-        else:
-            # Fallback if no valid angles found - consider a more sophisticated approach
-            self.ports_angles = [random.uniform(0, 2 * pi), random.uniform(0, 2 * pi)]
+        # else:
+        #     # Fallback if no valid angles found - consider a more sophisticated approach
+        #     self.ports_angles = [random.uniform(0, 2 * pi), random.uniform(0, 2 * pi)]
 
     def calculate_edge_angles(self):
         """
