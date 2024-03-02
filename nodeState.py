@@ -16,10 +16,11 @@ import math
 
 
 class AbstractState(ABC):
-    def __init__(self, id, reset_on_capture, flow_ownership):
+    def __init__(self, id, reset_on_capture, flow_ownership, update_on_new_owner):
         self.id = id
         self.reset_on_capture = reset_on_capture
         self.flow_ownership = flow_ownership
+        self.update_on_new_owner = update_on_new_owner
         self.acceptBridge = True
         self.swap_status = STANDARD_SWAP_STATUS
 
@@ -37,7 +38,7 @@ class AbstractState(ABC):
         return TRANSFER_RATE * multiplier * value
 
     @abstractmethod
-    def capture_event(self, offense=None, defense=None):
+    def capture_event(self):
         pass
 
     @abstractmethod
@@ -59,7 +60,7 @@ class AbstractState(ABC):
 
 class DefaultState(AbstractState):
     def __init__(self, id):
-        super().__init__(id, False, False)
+        super().__init__(id, False, False, False)
 
     def intake(self, amount, multiplier, contested):
         change = amount * multiplier
@@ -67,7 +68,7 @@ class DefaultState(AbstractState):
             change *= -1
         return change
 
-    def capture_event(self, offense=None, defense=None):
+    def capture_event(self):
         return lambda value: value * -1
 
     def killed(self, value):
@@ -77,7 +78,7 @@ class DefaultState(AbstractState):
 class ZombieState(DefaultState):
 
     def __init__(self, id):
-        AbstractState.__init__(self, id, True, False)
+        AbstractState.__init__(self, id, True, False, False)
 
     def grow(self, multiplier):
         return 0
@@ -87,8 +88,8 @@ class ZombieState(DefaultState):
 
 
 class CapitalState(DefaultState):
-    def __init__(self, id, reset=True):
-        AbstractState.__init__(self, id, reset, False)
+    def __init__(self, id, reset=True, update_on_new_owner=False):
+        AbstractState.__init__(self, id, reset, False, update_on_new_owner)
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
@@ -112,11 +113,6 @@ class CapitalState(DefaultState):
         self.shrink_count -= 1
         return CAPITAL_SHRINK_SPEED
 
-    def capture_event(self, offense=None, defense=None):
-        if defense:
-            defense.capital_handover(self, False)
-        return super().capture_event()
-
     def killed(self, value):
         return value < 0
     
@@ -127,23 +123,18 @@ class CapitalState(DefaultState):
 
 
 class StartingCapitalState(CapitalState):
-    def __init__(self, id, full_func, is_owned=False):
-        super().__init__(id, False)
-        self.full = full_func
+    def __init__(self, id, is_owned=False):
+        super().__init__(id, False, True)
         self.capitalized = True
         self.is_owned = is_owned
 
     def grow(self, multiplier):
         return 0
 
-    def capture_event(self, offense, defense=None):
-        offense.capital_handover(self)
-        return DefaultState.capture_event(offense)
-
 
 class MineState(AbstractState):
     def __init__(self, id, absorbing_func, island):
-        super().__init__(id, True, True)
+        super().__init__(id, True, True, False)
         self.bonus, self.bubble, self.ring_color = MINE_DICT[island]
         self.absorbing_func = absorbing_func
         self.swap_status = BELOW_SWAP_STATUS
@@ -160,8 +151,7 @@ class MineState(AbstractState):
     def killed(self, value):
         return value >= self.bubble
 
-    def capture_event(self, player):
-        player.change_tick(self.bonus)
+    def capture_event(self):
         return lambda value: MINIMUM_TRANSFER_VALUE
 
     def size_factor(self, value):

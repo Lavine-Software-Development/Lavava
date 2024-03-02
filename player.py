@@ -23,7 +23,7 @@ class DefaultPlayer:
         self.eliminated = False
         self.victory = False
         self.color = self.default_color
-        self.capitals = {}
+        self.full_capital_count = 0
 
     def eliminate(self):
         self.eliminated = True
@@ -44,18 +44,11 @@ class DefaultPlayer:
     def display(self):
         print(f"{self.name}|| {self.points}")
 
-    def capital_handover(self, capital, gain=True):
-        if gain:
-            self.capitals[capital.id] = capital
-        else:
-            del self.capitals[capital.id]
+    def capital_handover(self, gain):
+        pass
 
     def check_capital_win(self):
-        return self.capital_count == CAPITAL_WIN_COUNT
-
-    @property
-    def capital_count(self):
-        return len([c for c in self.capitals.values() if c.full()])
+        return self.full_capital_count == CAPITAL_WIN_COUNT
 
 
 class MoneyPlayer(DefaultPlayer):
@@ -67,12 +60,12 @@ class MoneyPlayer(DefaultPlayer):
     def change_tick(self, amount):
         self.tick_production += amount
 
-    def capital_handover(self, capital, gain=True):
+    def capital_handover(self, gain):
         if gain:
             self.tick_production += CAPITAL_BONUS
         else:
             self.tick_production -= CAPITAL_BONUS
-        super().capital_handover(capital, gain)
+        super().capital_handover(gain)
 
     def eliminate(self):
         self.money = 0
