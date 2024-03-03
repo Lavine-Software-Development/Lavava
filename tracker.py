@@ -37,9 +37,16 @@ class Tracker:
 
     def update(self, node):
         if node.state_name == 'capital':
-            self.capital_owners[node.id].capital_handover(False)
-            node.owner.capital_handover(True)
+            if self.capital_owners[node.id]:
+                self.capital_owners[node.id].capital_handover(False)
+            if node.owner:
+                node.owner.capital_handover(True)
             self.capital_owners[node.id] = node.owner
         else:
             print("Should Not Occur. Should only UPDATE Capital in Tracker")
+
+    def reset(self):
+        self.tracked_id_states.clear()
+        self.mines.clear()
+        self.capital_owners.clear()
 

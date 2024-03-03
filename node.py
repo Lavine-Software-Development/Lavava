@@ -32,7 +32,7 @@ class Node:
         self.intake_multiplier = 1
         self.grow_multiplier = 1
         self.set_default_state()
-        self.udpated = False
+        self.updated = False
 
     def __str__(self):
         return str(self.id)
@@ -52,7 +52,7 @@ class Node:
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
-        self.udpated = True
+        self.updated = True
         if state_name == "default":
             return DefaultState(self.id)
         elif state_name == "mine":
@@ -204,7 +204,7 @@ class Node:
             self.updated = True
 
     def capture(self, player):
-        self.value = self.state.capture_event(player, self.owner)(self.value)
+        self.value = self.state.capture_event()(self.value)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()

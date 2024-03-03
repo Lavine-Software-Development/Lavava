@@ -16,7 +16,6 @@ from helpers import distance_point_to_segment, do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from gameStateEnums import GameStateEnum as GSE
-import mode
 from tracker import Tracker
 
 
@@ -50,7 +49,10 @@ class Board:
         for node in nodes:
             self.tracker.node(node)
             node.updated = False
-            if node.state_name == "capital":
+
+        for id in self.tracker.tracked_id_states:
+            node = self.id_dict[id]
+            if node.state_name == "capital" and node.owner:
                 self.player_capitals[node.owner].add(node)
 
     def reset(self, nodes, edges):
@@ -67,7 +69,9 @@ class Board:
             edge.id: edge for edge in self.edges
         }
         self.extra_edges = 2
-        self.tracked_nodes = defaultdict(dict)
+        self.tracker.reset()
+        self.player_capitals.clear()
+        self.track_starting_states()
 
     def set_all_ports(self):
         if self.nodes[0].item_type == PORT_NODE:
@@ -165,7 +169,7 @@ class Board:
             self.track_state_changes(updated_nodes)
 
         for player in self.player_capitals:
-            player.full_capital_count = len([n.full for n in self.player_capitals[player]])
+            player.full_capital_count = len([n for n in self.player_capitals[player] if n.full()])
 
     def find_node(self, position):
         for node in self.nodes:

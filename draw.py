@@ -483,10 +483,9 @@ class Draw:
             ),
             (self.width - 150, 65),
         )
-        # if CONTEXT['main_player'].capital_count > 0:
         self.screen.blit(
             self.small_font.render(
-                str(int(CONTEXT['main_player'].capital_count)), True, PINK
+                str(int(CONTEXT['main_player'].full_capital_count)), True, PINK
             ),
             (self.width - (self.width / 43), 20),
         )
