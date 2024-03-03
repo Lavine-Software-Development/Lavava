@@ -10,13 +10,14 @@ from constants import (
     EDGE_COUNT,
     CONTEXT,
     NODE,
-    PORT_NODE
+    PORT_NODE,
 )
 from helpers import distance_point_to_segment, do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from gameStateEnums import GameStateEnum as GSE
-import mode
+from tracker import Tracker
+
 
 class Board:
     def __init__(self, gs):
@@ -28,11 +29,31 @@ class Board:
         self.extra_edges = 2
         self.highlighted = None
         self.highlighted_color = None
+        self.tracker = Tracker()
+        self.player_capitals = defaultdict(set)
 
     def board_wide_effect(self, player, effect):
         for node in self.nodes:
             if node.owner == player:
                 node.set_state(effect)
+
+    def track_starting_states(self):
+        for node in self.nodes:
+            if node.state_name != "default":
+                self.tracker.node(node)
+
+    def track_state_changes(self, nodes):
+
+        self.player_capitals.clear()
+
+        for node in nodes:
+            self.tracker.node(node)
+            node.updated = False
+
+        for id in self.tracker.tracked_id_states:
+            node = self.id_dict[id]
+            if node.state_name == "capital" and node.owner:
+                self.player_capitals[node.owner].add(node)
 
     def reset(self, nodes, edges):
         self.nodes = nodes
@@ -48,11 +69,14 @@ class Board:
             edge.id: edge for edge in self.edges
         }
         self.extra_edges = 2
+        self.tracker.reset()
+        self.player_capitals.clear()
+        self.track_starting_states()
 
     def set_all_ports(self):
         if self.nodes[0].item_type == PORT_NODE:
             for node in self.nodes:
-                    node.set_port_angles()
+                node.set_port_angles()
 
     ## Gross code. Needs to be refactored
     def check_highlight(self, position, ability_manager):
@@ -66,22 +90,31 @@ class Board:
 
     # Still gross
     def default_highlight_color(self, ability_manager):
-        return (self.gs.state.value < GSE.PLAY.value) \
-        or (not ability_manager.ability) \
-        or (ability_manager.ability.click_type != self.highlighted.type) \
+        return (
+            (self.gs.state.value < GSE.PLAY.value)
+            or (not ability_manager.ability)
+            or (ability_manager.ability.click_type != self.highlighted.type)
+        )
 
     # Still gross
     def hover(self, position, ability_manager):
         ability = ability_manager.ability
         if id := self.find_node(position):
             if (not ability) or ability.click_type == NODE:
-                if self.gs.state.value < GSE.PLAY.value and self.id_dict[id].owner is None \
-                      and self.id_dict[id].state_name == 'default':
+                if (
+                    self.gs.state.value < GSE.PLAY.value
+                    and self.id_dict[id].owner is None
+                    and self.id_dict[id].state_name == "default"
+                ):
                     return self.id_dict[id]
                 elif ability and ability.validate(self.id_dict[id]):
                     return self.id_dict[id]
         elif id := self.find_edge(position):
-            if ability and ability.click_type == EDGE and ability.validate(self.id_dict[id]):
+            if (
+                ability
+                and ability.click_type == EDGE
+                and ability.validate(self.id_dict[id])
+            ):
                 return self.id_dict[id]
             elif self.id_dict[id].controlled_by(CONTEXT["main_player"]) or (
                 self.id_dict[id].to_node.owner == CONTEXT["main_player"]
@@ -90,6 +123,7 @@ class Board:
                 self.highlighted_color = GREY
                 return self.id_dict[id]
         return None
+
     ## Gross code ends here (I hope)
 
     def click_edge(self):
@@ -120,12 +154,22 @@ class Board:
             node.set_pos_per()
 
     def update(self):
+        updated_nodes = []
+
         for spot in self.nodes:
             if spot.owned_and_alive():  # keep
                 spot.grow()
+            if spot.updated:
+                updated_nodes.append(spot)
 
         for edge in self.edges:
             edge.update()
+
+        if updated_nodes:
+            self.track_state_changes(updated_nodes)
+
+        for player in self.player_capitals:
+            player.full_capital_count = len([n for n in self.player_capitals[player] if n.full()])
 
     def find_node(self, position):
         for node in self.nodes:

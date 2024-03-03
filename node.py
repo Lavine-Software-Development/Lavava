@@ -32,6 +32,7 @@ class Node:
         self.intake_multiplier = 1
         self.grow_multiplier = 1
         self.set_default_state()
+        self.updated = False
 
     def __str__(self):
         return str(self.id)
@@ -51,6 +52,7 @@ class Node:
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
+        self.updated = True
         if state_name == "default":
             return DefaultState(self.id)
         elif state_name == "mine":
@@ -60,10 +62,8 @@ class Node:
         elif state_name == "zombie":
             return ZombieState(self.id)
         elif state_name == "capital":
-            if self.owner:
-                self.owner.capital_handover(self)
             if data:
-                return StartingCapitalState(self.id, self.full)
+                return StartingCapitalState(self.id)
             return CapitalState(self.id)
         else:
             return DefaultState(self.id)
@@ -148,7 +148,7 @@ class Node:
 
     def can_grow(self):
         ## Gross mention of poison
-        ## I could cycle thro
+        ## I could cycle through all effects
         if self.state.can_grow(self.value) or 'poison' in self.effects:
             return True
 
@@ -200,9 +200,11 @@ class Node:
             player.count += 1
             player.pass_on_effects(self)
         self.owner = player
+        if self.state.update_on_new_owner:
+            self.updated = True
 
     def capture(self, player):
-        self.value = self.state.capture_event(player, self.owner)(self.value)
+        self.value = self.state.capture_event()(self.value)
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()
@@ -246,6 +248,10 @@ class Node:
         if self.owner:
             return self.owner.color
         return BLACK
+    
+    # @property
+    # def owner_id(self):
+    #     return self.owner.id if self.owner else None
     
 
 class PortNode(Node):
