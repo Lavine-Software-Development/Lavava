@@ -1,4 +1,4 @@
-from gameStateEnums import GameStateEnum as GSE
+from Server.gameStateEnums import GameStateEnum as GSE
 
 class GameState:
 

@@ -2,10 +2,10 @@ import pygame as p
 from network import Network
 from board import Board
 from draw import Draw
-from map_builder import MapBuilder
-from randomGenerator import RandomGenerator
+from Server.map_builder import MapBuilder
+from Server.randomGenerator import RandomGenerator
 from playerManager import PlayerManager
-from constants import (
+from Server.constants import (
     CONTEXT,
     FORFEIT_CODE,
     OVERRIDE_RESTART_CODE,
@@ -20,12 +20,12 @@ from constants import (
 )
 from modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
 import sys
-from ability_effects import make_ability_effects
-import mode
+from Server.ability_effects import make_ability_effects
+import Server.mode as mode
 from SettingsUI import settings_ui
 
 from game_state import GameState
-from gameStateEnums import GameStateEnum as GSE
+from Server.gameStateEnums import GameStateEnum as GSE
 
 class Game:
     def __init__(self):

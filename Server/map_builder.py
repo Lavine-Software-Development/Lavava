@@ -5,7 +5,6 @@ from constants import (
     EDGE_COUNT,
     ONE_WAY_COUNT,
     MAX_EDGE_LENGTH,
-    PORT_NODE,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     MIN_ANGLE,
@@ -13,17 +12,16 @@ from constants import (
 from helpers import do_intersect, angle_between_edges
 from edge import Edge
 from dynamicEdge import DynamicEdge
-from modeConstants import STARTING_NODES, STARTING_NODES_STATES
-import mode
+from map_builder_helpers import starter_port_nodes, starter_capitals
+from random import randint
 
 class MapBuilder:
-    def __init__(self, generator):
+    def __init__(self):
         self.nodes = []
         self.edges = []
         self.node_objects = []
         self.edge_objects = []
         self.edgeDict = defaultdict(set)
-        self.generator = generator
 
     def build(self):
         self.make_nodes()
@@ -34,10 +32,10 @@ class MapBuilder:
         count = 0
         while count < NODE_COUNT:
             spot = [
-                self.generator.randint(
+                randint(
                     int(SCREEN_WIDTH / 10), int(9 * SCREEN_WIDTH / 10)
                 ),
-                self.generator.randint(
+                randint(
                     int(SCREEN_HEIGHT / 10), int(9 * SCREEN_HEIGHT / 10)
                 ),
             ]
@@ -61,11 +59,11 @@ class MapBuilder:
         count = 0
 
         while count < EDGE_COUNT:
-            num1 = self.generator.randint(0, NODE_COUNT - 1)
-            num2 = self.generator.randint(0, NODE_COUNT - 1)
+            num1 = randint(0, NODE_COUNT - 1)
+            num2 = randint(0, NODE_COUNT - 1)
 
             while num2 == num1:
-                num2 = self.generator.randint(0, NODE_COUNT - 1)
+                num2 = randint(0, NODE_COUNT - 1)
 
             combo = (min(num1, num2), max(num1, num2))
 
@@ -155,8 +153,8 @@ class MapBuilder:
 
     @property
     def starter_states(self):
-        return STARTING_NODES_STATES[mode.MODE]
+        return starter_capitals
     
     @property
     def node_function(self):
-        return STARTING_NODES[mode.MODE]
+        return starter_port_nodes

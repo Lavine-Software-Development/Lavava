@@ -1,17 +1,14 @@
-from constants import COLOR_DICT, CONTEXT
-from modeConstants import MODE_PLAYERS
-import mode
+from player import DefaultPlayer
+from constants import COLOR_DICT
 
 
 class PlayerManager:
-    def __init__(self, player_count, main_player_number, gs):
+    def __init__(self, player_count, gs):
         self.gs = gs
-        PlayerClass = MODE_PLAYERS[mode.MODE]
         self.player_dict = {
-            i: PlayerClass(COLOR_DICT[i], i) for i in range(player_count)
+            i: DefaultPlayer(COLOR_DICT[i], i) for i in range(player_count)
         }
         self.player_points = {i: 0 for i in range(player_count)}
-        CONTEXT["main_player"] = self.player_dict[main_player_number]
         self.remaining = {i for i in range(player_count)}
         self.victor = None
         self.timer = 60
@@ -77,6 +74,9 @@ class PlayerManager:
 
         self.gs.next()
         return False
+    
+    def chosen(self, player, data):
+        self.player_dict[player].chosen(data)
 
     @property
     def opening_moves(self):
@@ -86,7 +86,7 @@ class PlayerManager:
 class SoloPlayerManager(PlayerManager):
 
     def __init__(self, gs):
-        super().__init__(1, 0, gs)
+        super().__init__(1, gs)
 
     def check_over(self):
         self.check_capital_win()

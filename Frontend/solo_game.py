@@ -2,8 +2,8 @@ from game import Game
 from game_state import GameState
 from network import SoloNetwork
 from playerManager import SoloPlayerManager
-from randomGenerator import RandomGenerator
-import mode
+from Server.randomGenerator import RandomGenerator
+import Server.mode as mode
 from SettingsUI import settings_ui
 
 

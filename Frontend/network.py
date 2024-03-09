@@ -3,7 +3,7 @@ import threading
 import time
 import ast
 import random
-from server import start_server
+from Server.server import start_server
 
 class SoloNetwork:
 

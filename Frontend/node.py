@@ -1,5 +1,6 @@
+from dataclasses import dataclass
 from numpy import sort
-from constants import (
+from Server.constants import (
     NODE,
     PORT_NODE,
     SCREEN_WIDTH,
@@ -11,9 +12,9 @@ from constants import (
     BLACK,
     BROWN,
 )
-from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
-from nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
-import mode
+from Server.nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
+from Server.nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
+import Server.mode as mode
 import random
 from math import pi, atan2
 

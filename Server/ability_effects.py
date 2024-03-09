@@ -40,8 +40,6 @@ def make_rage(rage):
 
 def freeze_effect(data, player):
     edge = data[0]
-    # if player != edge.from_node.owner:
-    #     edge.swap_direction()
     edge.freeze()
 
 

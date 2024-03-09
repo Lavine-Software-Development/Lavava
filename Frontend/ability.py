@@ -1,4 +1,4 @@
-from constants import NODE
+from Server.constants import NODE
 
 
 class Ability:

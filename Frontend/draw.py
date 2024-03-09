@@ -1,6 +1,6 @@
 import math
 import pygame as py
-from constants import (
+from Server.constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     ABILITY_SIZE,
@@ -26,7 +26,7 @@ from constants import (
     SIZE,
     CONTEXT,
 )
-import mode
+import Server.mode as mode
 import random
 
 class Draw:

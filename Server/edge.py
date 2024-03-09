@@ -1,3 +1,4 @@
+from jsonable import Jsonable
 from constants import (
     EDGE,
     MINIMUM_TRANSFER_VALUE,
@@ -6,7 +7,7 @@ from constants import (
 )
 
 
-class Edge:
+class Edge(Jsonable):
     def __init__(self, to_node, from_node, id, initial=False):
         self.item_type = EDGE
         self.to_node = to_node

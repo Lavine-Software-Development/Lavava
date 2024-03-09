@@ -1,4 +1,4 @@
-from constants import (
+from Server.constants import (
     SPAWN_CODE,
     BRIDGE_CODE,
     D_BRIDGE_CODE,

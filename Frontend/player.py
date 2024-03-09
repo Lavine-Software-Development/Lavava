@@ -1,4 +1,4 @@
-from constants import (
+from Server.constants import (
     GREY,
     NODE_COUNT,
     CAPITAL_WIN_COUNT,
@@ -19,7 +19,7 @@ class DefaultPlayer:
 
     def default_values(self):
         self.count = 0
-        self.begun = False
+        self.ready = False
         self.eliminated = False
         self.victory = False
         self.color = self.default_color
@@ -49,6 +49,9 @@ class DefaultPlayer:
 
     def check_capital_win(self):
         return self.full_capital_count == CAPITAL_WIN_COUNT
+    
+    def chosen(self, data):
+        self.ready = True
 
 
 class MoneyPlayer(DefaultPlayer):

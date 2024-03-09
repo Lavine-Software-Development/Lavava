@@ -13,4 +13,4 @@ class RandomGenerator:
 
     def update_seed(self):
         self.seed = int(self.seed * 1.1) % (2**32)
-        self.random.seed(self.seed)
+        random.seed(self.seed)

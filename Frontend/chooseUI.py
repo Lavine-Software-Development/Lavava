@@ -1,7 +1,7 @@
 import pygame
-from constants import BLACK, GREEN, LIGHT_GREEN, START_CREDITS, WHITE, MEDIUM_GREEN, SPAWN_CODE, DARK_GRAY
+from Server.constants import BLACK, GREEN, LIGHT_GREEN, START_CREDITS, WHITE, MEDIUM_GREEN, SPAWN_CODE, DARK_GRAY
 import math
-import mode
+import Server.mode as mode
 
 # Constants
 WINDOW_WIDTH = 1067  # Adjust as needed

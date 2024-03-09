@@ -1,4 +1,4 @@
-from constants import (
+from Server.constants import (
     BREAKDOWNS,
     RAGE_CODE,
     CONTEXT,
@@ -7,7 +7,7 @@ from constants import (
 from abc import ABC, abstractmethod
 from ability_factory import make_abilities
 from chooseUI import ChooseUI, ChooseReloadUI
-import mode
+import Server.mode as mode
 
 class AbstractAbilityManager(ABC):
     def __init__(self, board, gs, ui_class):

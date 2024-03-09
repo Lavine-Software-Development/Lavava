@@ -1,5 +1,5 @@
-from constants import CONTEXT
-import mode
+from Server.constants import CONTEXT
+import Server.mode as mode
 
 def no_click(data):
     return False
