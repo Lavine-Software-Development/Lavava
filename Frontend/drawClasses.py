@@ -35,6 +35,7 @@ class Edge:
 
 @dataclass
 class GameState:
+    my_player: int
     started: bool = False
     over: bool = False
     timer: int = 60
