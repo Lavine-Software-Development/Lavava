@@ -35,7 +35,7 @@ class Node(Jsonable):
         self.set_default_state()
         self.updated = False
 
-        self.start_values = {'pos', 'state_name', 'item_type'}
+        self.start_values = {'pos', 'state_name'}
         self.tick_values = {'value', 'owner', 'effects', 'state_name'}
 
     def __str__(self):
@@ -265,7 +265,7 @@ class PortNode(Node):
         self.port_count = port_count
         self.ports_angles = []
 
-        self.start_values = self.start_values | {'port_count', 'ports_angles'}
+        self.start_values = self.start_values | {'port_count'}
 
     def start_serialization(self):
         return (self.pos, self.state_name, self.port_count)

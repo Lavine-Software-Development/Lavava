@@ -8,6 +8,8 @@ class DynamicEdge(Edge):
         self.state = "two-way"
         self.item_type = DYNAMIC_EDGE
 
+        self.tick_values = self.tick_values | {'to_node'}
+
     def update_nodes(self, initial=False):
         self.to_node.new_edge(self, "incoming", initial)
         self.from_node.new_edge(self, "outgoing", initial)

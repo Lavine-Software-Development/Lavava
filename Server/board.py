@@ -24,8 +24,8 @@ class Board:
         self.player_capitals = defaultdict(set)
     
     def start_json(self):
-        nodes_json = [node.to_json() for node in self.nodes]
-        edges_json = [edge.to_json() for edge in self.edges]
+        nodes_json = {k: v for node in self.nodes for k, v in node.start_json.items()}
+        edges_json = {k: v for edge in self.edges for k, v in edge.start_json.items()}
         return {
             "nodes": nodes_json,
             "edges": edges_json

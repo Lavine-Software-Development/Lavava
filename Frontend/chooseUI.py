@@ -1,7 +1,7 @@
 import pygame
-from Server.constants import BLACK, GREEN, LIGHT_GREEN, START_CREDITS, WHITE, MEDIUM_GREEN, SPAWN_CODE, DARK_GRAY
+from constants import BLACK, GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, SPAWN_CODE, DARK_GRAY
 import math
-import Server.mode as mode
+# import mode as mode
 
 # Constants
 WINDOW_WIDTH = 1067  # Adjust as needed
@@ -15,12 +15,12 @@ BOX_PADDING = 18  # Padding around each box
 
 class ChooseUI:
 
-    def __init__(self, boxes, gs):
-        gs.next()
+    def __init__(self, boxes):
+        # gs.next()
         self.boxes = boxes
         self.box_rects = []
         self.selected_boxes = set()
-        self.gs = gs
+        # self.gs = gs
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
 
@@ -38,10 +38,10 @@ class ChooseUI:
     def choose_abilities(self):
     
         # Create boxes
-        from modeConstants import DEFAULT_SPAWN, ABILITY_COUNT
+        # from modeConstants import DEFAULT_SPAWN, ABILITY_COUNT
         
-        if DEFAULT_SPAWN[mode.MODE]:
-            self.boxes.pop(SPAWN_CODE)
+        # if DEFAULT_SPAWN[mode.MODE]:
+        #     self.boxes.pop(SPAWN_CODE)
 
         # Calculate positions for boxes and store them as Pygame Rects for easy collision detection
         horizontal_spacing = (WINDOW_WIDTH - (BOX_SIZE * COLUMNS)) / (COLUMNS + 1)
@@ -80,18 +80,19 @@ class ChooseUI:
             pygame.display.flip()
             self.clock.tick(60)
 
-        self.gs.next()
-        if DEFAULT_SPAWN[mode.MODE]:
-            return [SPAWN_CODE] + list(self.selected_boxes)
+        # self.gs.next()
+        # if DEFAULT_SPAWN[mode.MODE]:
+        #     return [SPAWN_CODE] + list(self.selected_boxes)
         return list(self.selected_boxes)
 
     def click_box(self, code, click):
 
-        from modeConstants import ABILITY_COUNT
+        # from modeConstants import ABILITY_COUNT
 
         if code in self.selected_boxes:
             self.selected_boxes.remove(code)
-        elif len(self.selected_boxes) < ABILITY_COUNT[mode.MODE]:
+        # elif len(self.selected_boxes) < ABILITY_COUNT[mode.MODE]:
+        elif len(self.selected_boxes) < 4:
             self.selected_boxes.add(code)
 
     def _generate_darker_color(self, color):
@@ -249,9 +250,10 @@ class ChooseUI:
 
 class ChooseReloadUI(ChooseUI):
 
-    def __init__(self, boxes, gs):
-        self.credits = START_CREDITS
-        super().__init__(boxes, gs)
+    def __init__(self, boxes):
+        # self.credits = START_CREDITS
+        self.credits = 16
+        super().__init__(boxes)
         for key, box in boxes.items():
             if box.count > 0:
                 self.credits -= box.ab.credits * box.count
@@ -268,11 +270,12 @@ class ChooseReloadUI(ChooseUI):
 
     def click_box(self, code, click):
 
-        from modeConstants import ABILITY_COUNT
+        # from modeConstants import ABILITY_COUNT
 
         if click == 1 and self.credits >= self.boxes[code].ab.credits:
             if code not in self.selected_boxes:
-                if len(self.selected_boxes) < ABILITY_COUNT[mode.MODE]:
+                # if len(self.selected_boxes) < ABILITY_COUNT[mode.MODE]:
+                if len(self.selected_boxes) < 4:
                     self.selected_boxes.add(code)
                 else:
                     return

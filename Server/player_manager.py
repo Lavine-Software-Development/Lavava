@@ -13,6 +13,12 @@ class PlayerManager:
         self.victor = None
         self.timer = 60
 
+    def start_json(self):
+        # for each player, return their id and color
+        return {
+                player: self.player_dict[player].color for player in self.player_dict
+        }
+
     def reset(self):
         for player in self.player_dict.values():
             player.default_values()

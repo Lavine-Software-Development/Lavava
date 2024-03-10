@@ -1,10 +1,12 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
+
 
 @dataclass
 class Port:
     angle: float
     burn_percent: float = 0.0
+
 
 @dataclass
 class OtherPlayer:
@@ -12,26 +14,32 @@ class OtherPlayer:
     color: tuple
     ready: bool = False
     eliminated: bool = False
-    victor : bool = False
+    victor: bool = False
+
 
 @dataclass
 class MyPlayer(OtherPlayer):
     score: float = 0.0
 
+
 @dataclass
 class Node:
-    value: int
     pos: tuple
     ports: list[Port]
+    state: str
+    effects: set = field(default_factory=set)
+    value: int = 0
     owner: Optional[OtherPlayer] = None
+
 
 @dataclass
 class Edge:
     from_node: Node
     to_node: Node
-    on: bool
-    flowing: bool
     dynamic: bool
+    on: bool = False
+    flowing: bool = False
+
 
 @dataclass
 class GameState:
@@ -39,6 +47,3 @@ class GameState:
     started: bool = False
     over: bool = False
     timer: int = 60
-
-
-    

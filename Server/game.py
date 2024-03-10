@@ -7,6 +7,16 @@ from player_manager import PlayerManager
 from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, ABILITIES_CHOSEN_VAL, TICK, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK
 from ability_effects import make_ability_effects
 
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+frontend_dir = os.path.join(parent_dir, 'Frontend')
+sys.path.append(frontend_dir)
+
+from networkJson import Main
+
 class ServerGame:
     def __init__(self, player_count, mode_num, random_seed):
 
@@ -18,12 +28,19 @@ class ServerGame:
         self.player_manager = PlayerManager(player_count, self.gs)
         self.restart()
 
+    def start_json(self):
+        return {
+            "board": self.board.start_json(),
+            "players": self.player_manager.start_json(),
+        }
+
     def restart(self):
         self.gs.restart()
         self.player_manager.reset()
         map_builder = MapBuilder()
         map_builder.build()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
+        Main(self.start_json())
 
     def action(self, key, acting_player, data):
         if key == RESTART_GAME_VAL:
