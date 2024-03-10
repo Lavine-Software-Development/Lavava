@@ -22,12 +22,6 @@ class Board:
         self.extra_edges = 2
         self.tracker = Tracker()
         self.player_capitals = defaultdict(set)
-
-    def start_serialize(self):
-        return {
-            "nodes": {node.id: node.start_serialize() for node in self.nodes},
-            "edges": {edge.id: edge.start_serialize() for edge in self.edges},
-        }
     
     def start_json(self):
         nodes_json = [node.to_json() for node in self.nodes]

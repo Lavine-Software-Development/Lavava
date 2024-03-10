@@ -20,6 +20,9 @@ class Edge(Jsonable):
         self.state = "one-way"
         self.type = EDGE
 
+        self.start_values = {'to_node', 'from_node', 'state'}
+        self.tick_values = {'on', 'flowing', 'state'}
+
     def __str__(self):
         return str(self.id)
 
