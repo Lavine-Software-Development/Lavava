@@ -32,6 +32,7 @@ class ServerGame:
         return {
             "board": self.board.start_json(),
             "players": self.player_manager.start_json(),
+            "player_id": 0
         }
 
     def restart(self):

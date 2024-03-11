@@ -35,8 +35,8 @@ class Node(Jsonable):
         self.set_default_state()
         self.updated = False
 
-        self.start_values = {'pos', 'state_name'}
-        self.tick_values = {'value', 'owner', 'effects', 'state_name'}
+        self.start_values = {'pos', 'state_visual_id'}
+        self.tick_values = {'value', 'owner', 'effects', 'state_visual_id'}
 
     def __str__(self):
         return str(self.id)
@@ -51,6 +51,7 @@ class Node(Jsonable):
         if status_name in STATE_NAMES:
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
+            self.state_visual_id = self.state.visual_id
         elif status_name in EFFECT_NAMES:
             self.effects[status_name] = self.new_effect(status_name)
         self.calculate_interactions()

@@ -96,6 +96,7 @@ class ChooseUI:
             self.selected_boxes.add(code)
 
     def _generate_darker_color(self, color):
+        print(color)
         return tuple(max(c - 50, 0) for c in color)
 
 

@@ -1,12 +1,12 @@
 import math
 import pygame as py
-from Server.constants import (
+from constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     ABILITY_SIZE,
     ABILITY_FONT,
-    VERTICAL_ABILITY_GAP,
-    HORIZONTAL_ABILITY_GAP,
+    # VERTICAL_ABILITY_GAP,
+    # HORIZONTAL_ABILITY_GAP,
     FONT_GAP,
     BLACK,
     WHITE,
@@ -20,15 +20,12 @@ from Server.constants import (
     STRONG_ORANGE,
     BRIDGE_CODE,
     D_BRIDGE_CODE,
-    PORT_NODE,
     BURN_TICKS,
     SIZE,
-    CONTEXT,
 )
 
-class Draw:
+class Draw2:
     def __init__(self):
-        py.init()
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
@@ -36,15 +33,17 @@ class Draw:
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
 
-    def set_data(self, board, ability_manager, game_state):
+    def set_data(self, main_player ,players, nodes, edges, ability_manager):
         self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
         py.display.set_caption("Lavava")
-        self.board = board
-        self.edges = board.edges
-        self.nodes = board.nodes
-        self.game_state = game_state
-        self.abilities = ability_manager.abilities
-        self.ability_manager = ability_manager
+        # self.board = board
+        self.main_player = main_player
+        self.players = players
+        self.edges = edges
+        self.nodes = nodes
+        # self.game_state = game_state
+        # self.abilities = ability_manager.abilities
+        # self.ability_manager = ability_manager
 
     def _generate_darker_color(self, color):
         return tuple(max(c - 50, 0) for c in color)
@@ -143,29 +142,30 @@ class Draw:
         self.screen.blit(cost_text, (position[0] + 10, position[1] + 10))
 
     def draw_buttons(self):
-        y_position = int(VERTICAL_ABILITY_GAP * self.height / 6 + 75)
-        for key, btn in self.abilities.items():
-            btn_box = btn.box
-            selected = self.ability_manager.mode == btn.key or (
-                self.ability_manager.mode == "default" and btn.key == 2
-            )
-            loading = False
-            if mode.MODE == 2:
-                if not self.ability_manager.full(btn.key):
-                    loading = True
-            reload_percent = self.ability_manager.percent_complete(btn.key)
-            self.draw_button(
-                btn_box.shape,
-                btn_box.color,
-                btn_box.ab.name,
-                self.ability_manager.display_nums[key],
-                btn_box.ab.letter,
-                (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
-                selected,
-                reload_percent,
-                loading,
-            )
-            y_position += int(VERTICAL_ABILITY_GAP * self.height)  # Vertical gap between buttons
+        pass
+        # y_position = int(VERTICAL_ABILITY_GAP * self.height / 6 + 75)
+        # for key, btn in self.abilities.items():
+        #     btn_box = btn.box
+        #     selected = self.ability_manager.mode == btn.key or (
+        #         self.ability_manager.mode == "default" and btn.key == 2
+        #     )
+        #     loading = False
+        #     if mode.MODE == 2:
+        #         if not self.ability_manager.full(btn.key):
+        #             loading = True
+        #     reload_percent = self.ability_manager.percent_complete(btn.key)
+        #     self.draw_button(
+        #         btn_box.shape,
+        #         btn_box.color,
+        #         btn_box.ab.name,
+        #         self.ability_manager.display_nums[key],
+        #         btn_box.ab.letter,
+        #         (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
+        #         selected,
+        #         reload_percent,
+        #         loading,
+        #     )
+        #     y_position += int(VERTICAL_ABILITY_GAP * self.height)  # Vertical gap between buttons
 
     def draw_x(self, position, size, color):
         screen = self.screen
@@ -180,7 +180,7 @@ class Draw:
 
         py.draw.line(screen, color, (x, y), (x_end_pos, y_end_pos), 20)
         py.draw.line(screen, color, (x, y_end_pos), (x_end_pos, y), 20)
-    
+
     def draw_cross(self, position, size, color):
         py.draw.line(self.screen, color, (position[0], position[1] + size[1] // 2),
                      (position[0] + size[0], position[1] + size[1] // 2), 20)
@@ -230,20 +230,20 @@ class Draw:
         line_end_x = int(width - height / 2) - spacing
 
         # Draw the lines
-        py.draw.line(
-            capsule_surface,
-            self.board.highlighted_color,
-            (line_start_x, 2),
-            (line_end_x, 2),
-            2,
-        )
-        py.draw.line(
-            capsule_surface,
-            self.board.highlighted_color,
-            (line_start_x, height - 2),
-            (line_end_x, height - 2),
-            2,
-        )
+        # py.draw.line(
+        #     capsule_surface,
+        #     self.board.highlighted_color,
+        #     (line_start_x, 2),
+        #     (line_end_x, 2),
+        #     2,
+        # )
+        # py.draw.line(
+        #     capsule_surface,
+        #     self.board.highlighted_color,
+        #     (line_start_x, height - 2),
+        #     (line_end_x, height - 2),
+        #     2,
+        # )
 
         # Rotate the surface containing the capsule
         rotated_surface = py.transform.rotate(
@@ -296,8 +296,8 @@ class Draw:
             else:
                 py.draw.lines(self.screen, color, True, [point1, point2, point3])
 
-        if self.board.highlighted == edge:
-            self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
+        # if self.board.highlighted == edge:
+        #     self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
 
     def draw_circle(self, edge, color, start, end, circle_radius=3, spacing=6):
         length_factor = 1.5
@@ -331,8 +331,8 @@ class Draw:
                     self.screen, color, (int(pos[0]), int(pos[1])), circle_radius, 1
                 )
 
-        if self.board.highlighted == edge:
-            self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
+        # if self.board.highlighted == edge:
+        #     self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
 
         point1 = pos
         point2 = (
@@ -348,7 +348,7 @@ class Draw:
 
     def blit_edges(self):
         for edge in self.edges:
-            if edge.state == "one-way":
+            if edge.dynamic == "one-way":
                 self.draw_arrow(edge, edge.color, edge.from_node.pos, edge.to_node.pos)
             else:
                 self.draw_circle(edge, edge.color, edge.from_node.pos, edge.to_node.pos)
@@ -404,15 +404,15 @@ class Draw:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
                 if spot.state_name == "capital":
                     py.draw.circle(self.screen, PINK, spot.pos, spot.size + 6, 4)
-            if self.board.highlighted == spot:
-                py.draw.circle(
-                    self.screen,
-                    self.board.highlighted_color,
-                    spot.pos,
-                    spot.size + 5,
-                    3,
-                )
-            if spot.owner and spot.item_type == PORT_NODE and spot.is_port:
+            # if self.board.highlighted == spot:
+            #     py.draw.circle(
+            #         self.screen,
+            #         self.board.highlighted_color,
+            #         spot.pos,
+            #         spot.size + 5,
+            #         3,
+            #     )
+            if spot.owner and spot.is_port:
                 port_width, port_height = (
                     spot.size * 1.5,
                     spot.size / 1.5,
@@ -457,67 +457,67 @@ class Draw:
     def blit_numbers(self):
         py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))
         # Gross
-        if mode.MODE != 2:
-            self.screen.blit(
-                self.font.render(
-                    str(int(CONTEXT["main_player"].money)),
-                    True,
-                    (205, 204, 0),
-                ),
-                (self.width - 150, 20),
-            )
-            self.screen.blit(
-                self.smaller_font.render(
-                    f"{CONTEXT['main_player'].production_per_second:.0f}/s",
-                    True,
-                    (205, 204, 0),
-                ),
-                (self.width - 50, 25),
-            )
-        self.screen.blit(
-            self.small_font.render(
-                f"{self.board.percent_energy}%", True, CONTEXT['main_player'].color
-            ),
-            (self.width - 150, 65),
-        )
-        self.screen.blit(
-            self.small_font.render(
-                str(int(CONTEXT['main_player'].full_capital_count)), True, PINK
-            ),
-            (self.width - (self.width / 43), 20),
-        )
+        # if mode.MODE != 2:
+        #     self.screen.blit(
+        #         self.font.render(
+        #             str(int(CONTEXT["main_player"].money)),
+        #             True,
+        #             (205, 204, 0),
+        #         ),
+        #         (self.width - 150, 20),
+        #     )
+        #     self.screen.blit(
+        #         self.smaller_font.render(
+        #             f"{CONTEXT['main_player'].production_per_second:.0f}/s",
+        #             True,
+        #             (205, 204, 0),
+        #         ),
+        #         (self.width - 50, 25),
+        #     )
+        # self.screen.blit(
+        #     self.small_font.render(
+        #         f"{self.board.percent_energy}%", True, CONTEXT['main_player'].color
+        #     ),
+        #     (self.width - 150, 65),
+        # )
+        # self.screen.blit(
+        #     self.small_font.render(
+        #         str(int(CONTEXT['main_player'].full_capital_count)), True, PINK
+        #     ),
+        #     (self.width - (self.width / 43), 20),
+        # )
 
-        if self.player_manager.victor:
-            self.screen.blit(
-                self.font.render(
-                    f"Player {self.player_manager.victor.id} Wins!",
-                    True,
-                    self.player_manager.victor.color,
-                ),
-                (self.width - 450, 20),
-            )
-        elif self.player_manager.timer > 0:
-            if self.player_manager.timer < 4:
-                self.screen.blit(
-                    self.font.render(
-                        f"{self.player_manager.timer + 1:.0f}", True, BLACK
-                    ),
-                    (20, 20),
-                )
-            else:
-                self.screen.blit(
-                    self.font.render(
-                        f"{self.player_manager.timer + 1:.0f}",
-                        True,
-                        CONTEXT["main_player"].color,
-                    ),
-                    (20, 20),
-                )
-        elif CONTEXT["main_player"].eliminated:
-            self.screen.blit(
-                self.font.render("ELIMINATED", True, CONTEXT["main_player"].color),
-                (self.width - 450, 20),
-            )
+        # if self.player_manager.victor:
+        #     self.screen.blit(
+        #         self.font.render(
+        #             f"Player {self.player_manager.victor.id} Wins!",
+        #             True,
+        #             self.player_manager.victor.color,
+        #         ),
+        #         (self.width - 450, 20),
+        #     )
+        # elif self.player_manager.timer > 0:
+        #     if self.player_manager.timer < 4:
+        #         self.screen.blit(
+        #             self.font.render(
+        #                 f"{self.player_manager.timer + 1:.0f}", True, BLACK
+        #             ),
+        #             (20, 20),
+        #         )
+        #     else:
+        #         self.screen.blit(
+        #             self.font.render(
+        #                 f"{self.player_manager.timer + 1:.0f}",
+        #                 True,
+        #                 CONTEXT["main_player"].color,
+        #             ),
+        #             (20, 20),
+        #         )
+        # elif CONTEXT["main_player"].eliminated:
+        #     self.screen.blit(
+        #         self.font.render("ELIMINATED", True, CONTEXT["main_player"].color),
+        #         (self.width - 450, 20),
+        #     )
         # else:
         #     self.screen.blit(
         #         self.small_font.render(
@@ -583,26 +583,26 @@ class Draw:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 
-    def blit(self, mouse_pos, waiting=False):
+    def blit(self):
         self.screen.fill(WHITE)
         self.blit_nodes()
         self.blit_edges()
         self.blit_capital_stars()
-        if waiting:
-            self.blit_waiting()
-        else:
-            self.blit_numbers()
-        self.draw_buttons()
-        if (
-            BRIDGE_CODE in self.abilities
-            and len(self.abilities[BRIDGE_CODE].clicks) >= 1
-        ):
-            self.edge_build(mouse_pos, 1)
-        if (
-            D_BRIDGE_CODE in self.abilities
-            and len(self.abilities[D_BRIDGE_CODE].clicks) >= 1
-        ):
-            self.edge_build(mouse_pos, 2)
+        # if waiting:
+        #     self.blit_waiting()
+        # else:
+        #     self.blit_numbers()
+        # self.draw_buttons()
+        # if (
+        #     BRIDGE_CODE in self.abilities
+        #     and len(self.abilities[BRIDGE_CODE].clicks) >= 1
+        # ):
+        #     self.edge_build(mouse_pos, 1)
+        # if (
+        #     D_BRIDGE_CODE in self.abilities
+        #     and len(self.abilities[D_BRIDGE_CODE].clicks) >= 1
+        # ):
+        #     self.edge_build(mouse_pos, 2)
         py.display.update()
 
     def relocate(self, width, height):

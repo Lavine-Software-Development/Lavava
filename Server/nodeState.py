@@ -21,6 +21,7 @@ class AbstractState(ABC):
         self.update_on_new_owner = update_on_new_owner
         self.acceptBridge = True
         self.swap_status = STANDARD_SWAP_STATUS
+        self.visual_id = 0
 
     def grow(self, multiplier):
         return GROWTH_RATE * multiplier
@@ -59,6 +60,7 @@ class AbstractState(ABC):
 class DefaultState(AbstractState):
     def __init__(self, id):
         super().__init__(id, False, False, False)
+        self.visual_id = 0
 
     def intake(self, amount, multiplier, contested):
         change = amount * multiplier
@@ -77,6 +79,7 @@ class ZombieState(DefaultState):
 
     def __init__(self, id):
         AbstractState.__init__(self, id, True, False, False)
+        self.visual_id = 1
 
     def grow(self, multiplier):
         return 0
@@ -93,6 +96,7 @@ class CapitalState(DefaultState):
         self.shrink_count = math.floor(
             (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED)
         )
+        self.visual_id = 2
 
     def grow(self, multiplier):
         if not self.capitalized:
@@ -133,7 +137,7 @@ class StartingCapitalState(CapitalState):
 class MineState(AbstractState):
     def __init__(self, id, absorbing_func, island):
         super().__init__(id, True, True, False)
-        self.bonus, self.bubble, self.ring_color = MINE_DICT[island]
+        self.bonus, self.bubble, self.ring_color, self.visual_id = MINE_DICT[island]
         self.absorbing_func = absorbing_func
         self.swap_status = BELOW_SWAP_STATUS
 
