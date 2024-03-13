@@ -1,9 +1,8 @@
-import copy
 import socket
 import pygame
 import pyperclip
 
-from Server.constants import BLUE, DARK_GRAY, GREY, BLACK, WHITE, LIGHT_GREY
+from constants import GREY, BLACK, WHITE, LIGHT_GREY
 
 # CONSTANTS
 WINDOW_WIDTH = 800

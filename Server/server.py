@@ -4,7 +4,7 @@ from batch import Batch
 import sys
 import time
 from threading import Thread
-
+import json
 
 class Server:
     def __init__(self, port):
@@ -38,8 +38,12 @@ class Server:
             time.sleep(0.1)
 
     def threaded_client(self, conn):
+
         data = conn.recv(1024).decode()
-        is_host, player_count, mode = data.split(",")
+        json_data = json.loads(data)
+        is_host = json_data["type"]
+        player_count = json_data["players"]
+        mode = json_data["mode"]
 
         if is_host == "HOST":
             player_count = int(player_count)
@@ -59,16 +63,18 @@ class Server:
             else:
                 conn.sendall("FAIL".encode())
 
-    def start_game(self, game):
-        tick_thread = Thread(target=self.send_ticks, args=(game,))
-        tick_thread.daemon = True
-        tick_thread.start()
+    def start_game(self, batch):
 
-        for i, conn in enumerate(game.connections):
-            start_new_thread(self.threaded_client_in_game, (i, conn, game))
+        # tick_thread = Thread(target=self.send_ticks, args=(game,))
+        # tick_thread.daemon = True
+        # tick_thread.start()
 
-    def threaded_client_in_game(self, player, conn, game):
-        conn.send(game.repr(player).encode())
+        for i, conn in enumerate(batch.connections):
+            start_new_thread(self.threaded_client_in_game, (i, conn, batch))
+
+    def threaded_client_in_game(self, player, conn, batch):
+        conn.send(batch.repr(player).encode())
+        print("Sent start data to player")
         while True:
             try:
                 data = conn.recv(32)
@@ -93,6 +99,5 @@ class Server:
             start_new_thread(self.threaded_client, (conn,))
 
 
-def start_server():
-    server = Server(5555)
-    server.run()
+server = Server(5555)
+server.run()

@@ -5,13 +5,32 @@ from port_position import opposite
 from chooseUI import ChooseReloadUI
 from draw2 import Draw2
 from state_dictionary import state_dict
+from SettingsUI import settings_ui
+from temp_network import Network
 
 class Main:
 
-    def __init__(self, start_data: dict):
+    def __init__(self):
         py.init()
 
-        # start_data = Network(self.update)
+        data, server = settings_ui()
+        self.network = Network(self.start, self.update, data, server)
+
+        self.run()
+
+    # def setup(self):
+    #     data, server = settings_ui()
+    #     self.network = Network(self.action, self.gs, data, server)
+
+    def make_ports(self, count):
+        angles = opposite()[:count]
+        return [Port(angle) for angle in angles]
+    
+    def update(self):
+        pass
+
+    def start(self, start_data):
+
         pi = start_data["player_id"]
         p = start_data["players"]
         n, e = start_data["board"]["nodes"], start_data["board"]["edges"]
@@ -32,15 +51,6 @@ class Main:
         self.ability_codes = []
         self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_codes)
 
-        self.run()
-
-    def make_ports(self, count):
-        angles = opposite()[:count]
-        return [Port(angle) for angle in angles]
-    
-    def update(self):
-        pass
-
     def run(self):
         while True:
             for event in py.event.get():
@@ -52,3 +62,7 @@ class Main:
 
             self.drawer.blit()
             py.display.flip()
+
+
+if __name__ == "__main__":
+    Main()
