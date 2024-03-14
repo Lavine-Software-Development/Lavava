@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
+from imp import reload
 from typing import Optional
 import math
+
+from numpy import int128
 
 from constants import BROWN, BLACK, GREY, GROWTH_STOP
 
@@ -84,6 +87,15 @@ class Edge:
         if self.on:
             return self.from_node.color
         return (50, 50, 50)
+    
+@dataclass
+class Ability:
+    name: str
+    color: tuple
+    cost: int
+    credits: int
+    reload: int
+    count: int
 
 @dataclass
 class GameState:

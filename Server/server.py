@@ -83,7 +83,7 @@ class Server:
                     break
                 else:
                     print("Received: ", data.decode())
-                    for connection in game.connections:
+                    for connection in batch.connections:
                         connection.sendall(data)
             except socket.error as e:
                 print(e)

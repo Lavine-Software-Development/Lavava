@@ -14,7 +14,7 @@ class Main:
         py.init()
 
         data, server = settings_ui()
-        self.network = Network(self.start, self.update, data, server)
+        self.network = Network(self.setup, self.update, self.ability_setup, data, server)
 
         self.run()
 
@@ -29,7 +29,10 @@ class Main:
     def update(self):
         pass
 
-    def start(self, start_data):
+    def ability_setup(self):
+        pass
+
+    def setup(self, start_data):
 
         pi = start_data["player_id"]
         p = start_data["players"]
@@ -47,9 +50,9 @@ class Main:
             if box.color[0] is None:
                 box.color = self.my_player.color
         ui = ChooseReloadUI(self.boxes)
-        # self.ability_codes = ui.choose_abilities()
-        self.ability_codes = []
-        self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_codes)
+        self.ability_codes = ui.choose_abilities()
+
+        self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_codes) 
 
     def run(self):
         while True:

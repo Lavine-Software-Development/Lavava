@@ -5,6 +5,7 @@ import ast
 import random
 import sys 
 import json
+from json_helpers import convert_keys_to_int
 
 class SoloNetwork:
 
@@ -39,30 +40,35 @@ class SoloNetwork:
     #     while self.running:
     #         self.action_callback(0, 0, 0)
     #         time.sleep(0.1)
-
-    # def stop(self):
-    #     self.running = False
             
 
-class Network(SoloNetwork):
-    def __init__(self, setup, update, data, server):
+class Network():
+    def __init__(self, setup, ability_setup, update, data, server):
+
+        self.setup_callback = setup
+        self.update_callback = update
+
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         self.server = str(server)
         self.port = 5555
-
-        super().__init__(setup, update, data)
-
-    def get_user_input_for_game(self):
         self.addr = (self.server, self.port)
 
-        if self.data[0] == "HOST":
-            self.init_data = json.dumps({"type": "HOST", "players": self.data[1], "mode": self.data[2]})
+        self.setup_user(data)
+
+        while True:
+            if self.establish_connection():
+                break
+
+        self.receive_board_data()
+
+        threading.Thread(target=self.listen).start()
+
+    def setup_user(self, data):
+        if data[0] == "HOST":
+            self.init_data = json.dumps({"type": "HOST", "players": data[1], "mode": data[2]})
         else:
             self.init_data = json.dumps({"type": "JOIN", "players": 0, "mode": 0})
-
-    def receive_board(self):
-        if self.establish_connection():
-            return self.receive_board_data()
 
     def establish_connection(self):
         try:
@@ -83,13 +89,12 @@ class Network(SoloNetwork):
     def receive_board_data(self):
         try:
             data = self.client.recv(10000).decode()
-            print(data)
-            sys.exit()
-            # return True
+            data_dict = convert_keys_to_int(json.loads(data))
+            self.setup_callback(data_dict)
+            return True
         except:
             print("Failed to receive board data.")
-            sys.exit()
-            # return False
+            return False
 
     def send(self, data):
         try:
@@ -102,47 +107,20 @@ class Network(SoloNetwork):
         except socket.error as e:
             print(e)
 
-    # def listen(self):
-    #     buffer = ""
-    #     while self.running:
-    #         try:
-    #             chunk = self.client.recv(32).decode()
-    #             buffer += chunk
+    def listen(self):
+        while True:
+            try:
+                data = self.client.recv(1024).decode()  # Adjust buffer size if necessary
 
-    #             while "(" in buffer and ")" in buffer:
-    #                 start_index = buffer.find("(")
-    #                 end_index = buffer.find(")") + 1
-    #                 response = buffer[start_index:end_index]
+                data_dict = json.loads(data)
 
-    #                 data_tuple = ast.literal_eval(response)
-    #                 head = data_tuple[:2]
-    #                 tail = list(data_tuple[2])
-    #                 self.action_callback(*head, tail)
+                self.update_callback(data_dict)
 
-    #                 buffer = buffer[end_index:]
-
-    #         except socket.error as e:
-    #             print(e)
-    #             break
-
-    # def listen(self):
-    #     while self.running:
-    #         try:
-    #             # Receive data, assuming it's a complete JSON string.
-    #             data = self.client.recv(1024).decode()  # Adjust buffer size if necessary
-
-    #             # Parse the received JSON data into a dictionary
-    #             data_dict = json.loads(data)
-
-    #             # Pass the dictionary to the action callback
-    #             self.start_callback(data_dict)
-
-    #         except socket.error as e:
-    #             print(e)
-    #             break
-
+            except socket.error as e:
+                print(e)
+                break
 
     def stop(self):
-        super().stop()
+        self.running = False
         self.client.close()
 

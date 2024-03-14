@@ -16,6 +16,7 @@ class ServerGame:
         self.board = Board(self.gs)
         self.ability_effects = make_ability_effects(self.board)
         self.player_manager = PlayerManager(player_count, self.gs)
+        self.restart()
 
     def start_json(self):
         return {
@@ -29,7 +30,6 @@ class ServerGame:
         map_builder = MapBuilder()
         map_builder.build()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
-        return self.start_json()
 
     def action(self, key, acting_player, data):
         if key == RESTART_GAME_VAL:
