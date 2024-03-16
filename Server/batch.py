@@ -1,5 +1,4 @@
 import json
-import random
 from game import ServerGame
 
 class Batch:
@@ -13,7 +12,6 @@ class Batch:
 
     def build(self):
         self.game = ServerGame(self.player_count, self.mode)
-        self.seed = random.randint(0, 10000)
 
     def is_ready(self):
         return len(self.connections) == self.player_count
