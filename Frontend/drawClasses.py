@@ -1,9 +1,6 @@
 from dataclasses import dataclass, field
-from imp import reload
 from typing import Optional
 import math
-
-from numpy import int128
 
 from constants import BROWN, BLACK, GREY, GROWTH_STOP
 
@@ -89,13 +86,22 @@ class Edge:
         return (50, 50, 50)
     
 @dataclass
-class Ability:
+class AbilityVisual:
     name: str
+    shape: str
     color: tuple
+    
+@dataclass
+class Ability:
+    visual: AbilityVisual
+    code: str
     cost: int
-    credits: int
-    reload: int
-    count: int
+
+@dataclass
+class ReloadAbility(Ability):
+    reload: int = 0
+    percent: int = 0
+    count: int = 0
 
 @dataclass
 class GameState:
