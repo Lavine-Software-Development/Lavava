@@ -3,7 +3,7 @@ from constants import YELLOW, BLACK, PURPLE, LIGHT_BLUE, PINK, DARK_ORANGE, GREE
     ZOMBIE_CODE, CAPITAL_CODE, FREEZE_CODE, POISON_CODE, NUKE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, SPAWN_CODE
 
 SPAWN = AbilityVisual("Spawn", "circle", (None,))
-BRIDGE = AbilityVisual("Bridge", "triangle", YELLOW)
+BRIDGE = AbilityVisual("Bridge", "triangle", YELLOW, 'A')
 D_BRIDGE = AbilityVisual("D-Bridge", "circle", YELLOW)
 NUKE = AbilityVisual("Nuke", "x", BLACK)
 POISON = AbilityVisual("Poison", "circle", PURPLE)

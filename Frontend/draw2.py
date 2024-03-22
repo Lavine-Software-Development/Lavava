@@ -33,7 +33,9 @@ class Draw2:
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
 
-    def set_data(self, main_player ,players, nodes, edges, ability_manager):
+        
+
+    def set_data(self, main_player ,players, nodes, edges):
         self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
         py.display.set_caption("Lavava")
         # self.board = board

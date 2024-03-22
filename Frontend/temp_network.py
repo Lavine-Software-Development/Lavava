@@ -1,9 +1,5 @@
 import socket
 import threading
-import time
-import ast
-import random
-import sys 
 import json
 from json_helpers import convert_keys_to_int
 
@@ -43,7 +39,7 @@ class SoloNetwork:
             
 
 class Network():
-    def __init__(self, setup, ability_setup, update, data, server):
+    def __init__(self, setup, update, data, server):
 
         self.setup_callback = setup
         self.update_callback = update
@@ -59,10 +55,6 @@ class Network():
         while True:
             if self.establish_connection():
                 break
-
-        self.receive_board_data()
-
-        threading.Thread(target=self.listen).start()
 
     def setup_user(self, data):
         if data[0] == "HOST":
@@ -87,23 +79,18 @@ class Network():
             return False
 
     def receive_board_data(self):
-        try:
+        #try:
             data = self.client.recv(10000).decode()
             data_dict = convert_keys_to_int(json.loads(data))
             self.setup_callback(data_dict)
-            return True
-        except:
-            print("Failed to receive board data.")
-            return False
+            threading.Thread(target=self.listen).start()
+        #except:
+         #   print("Failed to receive board data.")
+          #  return False
 
     def send(self, data):
         try:
-            head = data[:2]
-            tail = data[2:]
-            message = (
-                "(" + ",".join(map(str, head)) + ",[" + ",".join(map(str, tail)) + "])"
-            )
-            self.client.send(message.encode())
+            self.client.send(json.dumps(data).encode())
         except socket.error as e:
             print(e)
 

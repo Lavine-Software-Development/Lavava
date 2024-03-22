@@ -83,3 +83,5 @@ def make_ability_effects(board):
         ZOMBIE_CODE: zombie_effect,
         RAGE_CODE: make_rage(board.board_wide_effect),
     }
+
+

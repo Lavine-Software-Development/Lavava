@@ -1,5 +1,5 @@
 from Server.constants import COLOR_DICT, CONTEXT
-from modeConstants import MODE_PLAYERS
+from Server.modeConstants import MODE_PLAYERS
 import Server.mode as mode
 
 

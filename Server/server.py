@@ -1,9 +1,9 @@
 import socket
 from _thread import start_new_thread
+from threading import Thread
 from batch import Batch
 import sys
 import time
-from threading import Thread
 import json
 
 class Server:
@@ -25,16 +25,15 @@ class Server:
         self.s.listen(10)
         print("Waiting for a connection, Server Started")
 
-    def send_ticks(self, game):
+    def send_ticks(self, batch):
         time.sleep(1)
-        tick_message = "(0,0,[])"
         while True:
-            for i, connection in enumerate(game.connections):
+            for i, connection in enumerate(batch.connections):
                 try:
-                    connection.sendall(tick_message.encode())
+                    connection.sendall(batch.tick_json(i).encode())
                 except OSError as e:
                     print(f"Error on connection {i}: {e}")
-                    del game.connections[i]
+                    del batch.connections[i]
             time.sleep(0.1)
 
     def threaded_client(self, conn):
@@ -65,9 +64,9 @@ class Server:
 
     def start_game(self, batch):
 
-        # tick_thread = Thread(target=self.send_ticks, args=(game,))
-        # tick_thread.daemon = True
-        # tick_thread.start()
+        tick_thread = Thread(target=self.send_ticks, args=(game,))
+        tick_thread.daemon = True
+        tick_thread.start()
 
         for i, conn in enumerate(batch.connections):
             start_new_thread(self.threaded_client_in_game, (i, conn, batch))
@@ -77,19 +76,25 @@ class Server:
         print("Sent start data to player")
         while True:
             try:
-                data = conn.recv(32)
+                data = json.loads(conn.recv(1000).decode())
                 if not data:
                     print("Disconnected")
                     break
                 else:
+
                     print("Received: ", data.decode())
-                    for connection in batch.connections:
-                        connection.sendall(data)
+                    # for connection in batch.connections:
+                    #     connection.sendall(data)
+                    if message := batch.process(player, data):
+                        self.problem(conn, message)
             except socket.error as e:
                 print(e)
 
         print("Lost connection")
         conn.close()
+
+    def problem(self, conn, message="Problem"):
+        conn.send(json.dumps({"COB": message}).encode())
 
     def run(self):
         while True:

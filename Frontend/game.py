@@ -18,7 +18,7 @@ from Server.constants import (
     STANDARD_RIGHT_CLICK,
     SPAWN_CODE
 )
-from modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
+from Server.modeConstants import MODE_ABILITY_MANAGERS, ABILITY_OPTIONS
 import sys
 from Server.ability_effects import make_ability_effects
 import Server.mode as mode

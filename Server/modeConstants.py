@@ -1,7 +1,7 @@
-from abilityManager import MoneyAbilityManager, ReloadAbilityManager
-from Server.map_builder_helpers import starter_capitals, starter_default_nodes, starter_mines, starter_port_nodes
+# from abilityManager import MoneyAbilityManager, ReloadAbilityManager
+from map_builder_helpers import starter_capitals, starter_default_nodes, starter_mines, starter_port_nodes
 from player import DefaultPlayer, MoneyPlayer
-from Server.constants import ALL_ABILITIES, BREAKDOWNS, BURN_CODE
+from constants import ALL_ABILITIES, BREAKDOWNS, BURN_CODE
 
 def reload_abilities():
     return {x for x in ALL_ABILITIES if BREAKDOWNS[x].reload}
@@ -22,7 +22,7 @@ class MKD(dict): # Multi Key Dictionary
             self.__setitem__(key, value)
 
 MODE_PLAYERS = MKD(((1, 3), MoneyPlayer), ((2), DefaultPlayer))
-MODE_ABILITY_MANAGERS = MKD(((1, 3), MoneyAbilityManager), (2, ReloadAbilityManager))
+# MODE_ABILITY_MANAGERS = MKD(((1, 3), MoneyAbilityManager), (2, ReloadAbilityManager))
 STARTING_NODES = MKD(((1), starter_default_nodes), ((2, 3), starter_port_nodes))
 STARTING_NODES_STATES = MKD(((1, 3), starter_mines), ((2), starter_capitals))
 ABILITY_DISPLAYS = MKD(((1, 3), "costs"), ((2), "total"))

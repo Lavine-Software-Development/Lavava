@@ -1,5 +1,5 @@
 import pygame
-from constants import BLACK, GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, SPAWN_CODE, DARK_GRAY
+from constants import BLACK, GREEN, LIGHT_GREEN, WHITE, MEDIUM_GREEN, DARK_GRAY
 import math
 # import mode as mode
 
@@ -118,17 +118,17 @@ class ChooseUI:
                 )
 
             # Draw the inner box
-            pygame.draw.rect(self.screen, self._generate_darker_color(box.color), rect)
+            pygame.draw.rect(self.screen, self._generate_darker_color(box.visual.color), rect)
 
             # Drawing the shape inside the box
             self.draw_shape(
-                box.shape, rect.x, rect.y, self._generate_lighter_color(box.color)
+                box.visual.shape, rect.x, rect.y, self._generate_lighter_color(box.visual.color)
             )
 
             # Set up the fonts
 
             # Render the ability name and blit it at the bottom center of the box
-            text = self.name_font.render(box.ab.name, True, WHITE)
+            text = self.name_font.render(box.visual.name, True, WHITE)
             text_rect = text.get_rect(
                 center=(rect.x + rect.width / 2, rect.y + rect.height - self.name_font_size + 15)
             )
@@ -146,7 +146,7 @@ class ChooseUI:
         self.screen.blit(reset_text, reset_text_rect)
     
     def draw_numbers(self, rect, box):
-        cost_text = self.number_font.render(str(box.ab.cost), True, WHITE)
+        cost_text = self.number_font.render(str(box.visual.cost), True, WHITE)
 
         cost_text_rect = cost_text.get_rect(topleft=(rect.x + 10, rect.y + 10))
         self.screen.blit(cost_text, cost_text_rect)
@@ -250,40 +250,37 @@ class ChooseUI:
 
 class ChooseReloadUI(ChooseUI):
 
-    def __init__(self, boxes):
-        # self.credits = START_CREDITS
-        self.credits = 16
+    def __init__(self, boxes, credits):
+        self.start_credits = credits
+        self.credits = credits
         super().__init__(boxes)
         for key, box in boxes.items():
             if box.count > 0:
-                self.credits -= box.ab.credits * box.count
+                self.credits -= box.credits * box.count
                 self.selected_boxes.add(key)
 
     def draw_numbers(self, rect, box):
         count_text = self.count_font.render(str(box.count), True, BLACK)
         count_text_rect = count_text.get_rect(center=(rect.centerx, rect.centery))
         self.screen.blit(count_text, count_text_rect)
-        credit_text = self.number_font.render(str(box.ab.credits), True, WHITE)
+        credit_text = self.number_font.render(str(box.credits), True, WHITE)
 
         cost_text_rect = credit_text.get_rect(topleft=(rect.x + 10, rect.y + 10))
         self.screen.blit(credit_text, cost_text_rect)
 
     def click_box(self, code, click):
 
-        # from modeConstants import ABILITY_COUNT
-
-        if click == 1 and self.credits >= self.boxes[code].ab.credits:
+        if click == 1 and self.credits >= self.boxes[code].credits:
             if code not in self.selected_boxes:
-                # if len(self.selected_boxes) < ABILITY_COUNT[mode.MODE]:
                 if len(self.selected_boxes) < 4:
                     self.selected_boxes.add(code)
                 else:
                     return
             self.boxes[code].count += 1
-            self.credits -= self.boxes[code].ab.credits
+            self.credits -= self.boxes[code].credits
         elif click == 3 and code in self.selected_boxes:
             self.boxes[code].count -= 1
-            self.credits += self.boxes[code].ab.credits
+            self.credits += self.boxes[code].credits
             if self.boxes[code].count == 0:
                 self.selected_boxes.remove(code)
 
@@ -291,7 +288,7 @@ class ChooseReloadUI(ChooseUI):
         # Reset all counts to 0 and remove all from selected_boxes
         for key, box in self.boxes.items():
             box.count = 0  # Reset count
-        self.credits = START_CREDITS
+        self.credits = self.start_credits
         super().reset_boxes()
 
     @property

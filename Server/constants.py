@@ -26,6 +26,8 @@ MAX_EDGE_LENGTH = 7
 ONE_WAY_COUNT = 17  # to 1
 MIN_ANGLE = 15
 
+TIME_AMOUNT = 0.1
+
 NODE = "node"
 PORT_NODE = "port node"
 EDGE = 'edge'

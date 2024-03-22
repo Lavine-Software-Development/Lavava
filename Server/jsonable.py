@@ -10,8 +10,6 @@ class Jsonable:
 
     def to_json(self, included=None):
         if included is None:
-            print(self.start_values)
-            # print(set(vars(self)) - {'id'})
             included = set(vars(self)) - {'id'}
             
         return {

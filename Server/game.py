@@ -1,37 +1,61 @@
-from game_state import GameState
+from player_state import PlayerState as PS
 from gameStateEnums import GameStateEnum as GS
 import mode
 from board import Board
 from map_builder import MapBuilder
-from player_manager import PlayerManager
-from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, ABILITIES_CHOSEN_VAL, TICK, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK
+from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, ABILITIES_CHOSEN_VAL, TICK, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, C
 from ability_effects import make_ability_effects
+from player import DefaultPlayer
 
 class ServerGame:
-    def __init__(self, player_count, mode_num):
+    def __init__(self, player_count, mode_num, gs):
 
         self.running = True
-        self.gs = GameState()
+        self.gs = gs
         mode.MODE = mode_num
         self.board = Board(self.gs)
         self.ability_effects = make_ability_effects(self.board)
-        self.player_manager = PlayerManager(player_count, self.gs)
+        self.player_dict = {
+            i: DefaultPlayer(i) for i in range(player_count)
+        }
         self.restart()
 
     def start_json(self):
         return {
-            "board": self.board.start_json(),
-            "players": self.player_manager.start_json(),
+            "board": self.board.start_json()
+        }
+    
+    def tick_json(self, player):
+        return {
+            "board": self.board.tick_json(),
+            "player": self.player_dict[player].tick_json
         }
 
     def restart(self):
-        self.gs.restart()
-        self.player_manager.reset()
+
+        for player in self.player_dict.values():
+            player.default_values()
+        self.remaining = {i for i in range(len(self.player_dict))}
+
+        self.timer = 60
+
         map_builder = MapBuilder()
         map_builder.build()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
 
+    def set_abilities(self, player, abilities):
+        self.player_dict[player].set_abilities(abilities, self.board)
+
+    @property
+    def all_player_abilities_set(self):
+        return all([p.ps.state == PS.ABILITIES_SET for p in self.player_dict.values()])
+    
+    @property
+    def all_player_starts_selected(self):
+        return all([p.start_selected for p in self.player_dict.values()])
+
     def action(self, key, acting_player, data):
+
         if key == RESTART_GAME_VAL:
             self.restart()
         elif key == ELIMINATE_VAL:

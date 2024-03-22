@@ -1,4 +1,4 @@
-from Server.constants import (
+from constants import (
     SPAWN_CODE,
     BRIDGE_CODE,
     D_BRIDGE_CODE,
@@ -10,7 +10,6 @@ from Server.constants import (
     RAGE_CODE,
     VISUALS,
     ZOMBIE_CODE,
-    EDGE,
 )
 from ability import Ability
 from ability_validators import (
@@ -23,13 +22,24 @@ from ability_validators import (
     unowned_node,
     my_node,
 )
-from ability_return import make_new_edge
+
+from ability_effects import (
+    spawn_effect,
+    make_bridge,
+    make_nuke,
+    make_rage,
+    freeze_effect,
+    zombie_effect,
+    burn_effect,
+    poison_effect,
+
+
 
 def make_abilities(board, codes):
     boxes = VISUALS
 
     all = {
-        SPAWN_CODE: Ability(SPAWN_CODE, unowned_node, 1, boxes[SPAWN_CODE]),
+        SPAWN_CODE: (unowned_node, spawn_effect),
         BRIDGE_CODE: Ability(
             BRIDGE_CODE,
             new_edge_validator(board.check_new_edge),

@@ -5,21 +5,19 @@ from Server.constants import (
     VISUALS,
 )
 from abc import ABC, abstractmethod
-from Server.ability_factory import make_abilities
-from chooseUI import ChooseUI, ChooseReloadUI
+from ability_factory import make_abilities
 import Server.mode as mode
 
 class AbstractAbilityManager(ABC):
-    def __init__(self, board, gs, ui_class):
+    def __init__(self, board, gs):
         from Server.modeConstants import ABILITY_OPTIONS
         self.boxes = {key: val for key, val in VISUALS.items() if key in ABILITY_OPTIONS[mode.MODE]}
         for box in self.boxes.values():
             if box.color[0] is None:
                 box.color = CONTEXT["main_player"].default_color
 
-        UI = ui_class(self.boxes, gs)
-        self.ability_codes = UI.choose_abilities()
-        self.abilities = make_abilities(board, self.ability_codes)
+        self.ability_options = 
+        self.abilities = make_abilities(board, self.ability_options)
         self.mode = None
 
     def use_ability(self, item, color):
@@ -63,7 +61,7 @@ class AbstractAbilityManager(ABC):
 
 class MoneyAbilityManager(AbstractAbilityManager):
     def __init__(self, board, gs):
-        super().__init__(board, gs, ChooseUI)
+        super().__init__(board, gs)
         self.costs = {code: BREAKDOWNS[code].cost for code in self.ability_codes}
 
     def select(self, key):
@@ -90,7 +88,7 @@ class MoneyAbilityManager(AbstractAbilityManager):
 
 class ReloadAbilityManager(AbstractAbilityManager):
     def __init__(self, board, gs):
-        super().__init__(board, gs, ChooseReloadUI)
+        super().__init__(board, gs)
         self.load_count = {code: 0.0 for code in self.ability_codes}
         self.remaining_usage = {
             code: self.boxes[code].count for code in self.ability_codes

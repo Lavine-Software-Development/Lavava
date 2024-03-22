@@ -3,28 +3,18 @@ from constants import COLOR_DICT
 
 
 class PlayerManager:
-    def __init__(self, player_count, gs):
-        self.gs = gs
-        self.player_dict = {
-            i: DefaultPlayer(COLOR_DICT[i], i) for i in range(player_count)
-        }
-        self.player_points = {i: 0 for i in range(player_count)}
-        self.remaining = {i for i in range(player_count)}
-        self.victor = None
+    def __init__(self, player_count):
         self.timer = 60
 
     def start_json(self):
         # for each player, return their id and color
-        return {
-                player: self.player_dict[player].color for player in self.player_dict
-        }
+        
+    
+    def set_abilities(self, player, abilities):
+        self.player_dict[player].set_abilities(abilities)
 
     def reset(self):
-        for player in self.player_dict.values():
-            player.default_values()
-        self.timer = 60
-        self.victor = None
-        self.remaining = {i for i in range(len(self.player_dict))}
+
 
     def update(self):
         for player in self.player_dict.values():

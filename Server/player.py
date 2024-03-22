@@ -1,34 +1,42 @@
+from jsonable import Jsonable
+from ability import ReloadAbility
 from constants import (
     GREY,
-    NODE_COUNT,
     CAPITAL_WIN_COUNT,
     START_MONEY,
     START_MONEY_RATE,
     CAPITAL_BONUS,
+    BREAKDOWNS
 )
+from ability_validators import make_ability_validators
+from ability_effects import make_ability_effects
+from player_state import PlayerState
 
-
-class DefaultPlayer:
-    def __init__(self, color, id):
-        self.default_color = color[0]
-        self.name = color[1]
+class DefaultPlayer(Jsonable):
+    def __init__(self, id):
         self.id = id
-        self.points = 0
-        self.effects = set()
         self.default_values()
+        self.tick_values = {'value', 'owner', 'effects', 'state_visual_id'}
+
+    def tick_json(self):
+        return {'abilities': {k: v.tick_json for k, v in self.abilities.items()}}
+
+    def set_abilities(self, abilities, board):
+        validators = make_ability_validators(board)
+        effects = make_ability_effects(board)
+        for ab in abilities:
+            self.abilities[ab] = ReloadAbility(validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
+        self.abilities_set = True
 
     def default_values(self):
-        self.count = 0
-        self.ready = False
-        self.eliminated = False
-        self.victory = False
-        self.color = self.default_color
+        self.abilities = dict()
+        self.effects = set()
+        self.ps = PlayerState()
         self.full_capital_count = 0
 
     def eliminate(self):
-        self.eliminated = True
+        self.ps.eliminate()
         self.color = GREY
-        self.points += self.count
 
     def update(self):
         self.effects = set(filter(lambda effect : (effect.count()), self.effects))
@@ -38,11 +46,7 @@ class DefaultPlayer:
             effect.spread(node)
 
     def win(self):
-        self.victory = True
-        self.points += NODE_COUNT
-
-    def display(self):
-        print(f"{self.name}|| {self.points}")
+        self.ps.victory()
 
     def capital_handover(self, gain):
         pass
@@ -50,9 +54,6 @@ class DefaultPlayer:
     def check_capital_win(self):
         return self.full_capital_count == CAPITAL_WIN_COUNT
     
-    def chosen(self, data):
-        self.ready = True
-
 
 class MoneyPlayer(DefaultPlayer):
     def default_values(self):

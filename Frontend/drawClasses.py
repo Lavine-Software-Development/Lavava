@@ -90,18 +90,27 @@ class AbilityVisual:
     name: str
     shape: str
     color: tuple
-    
-@dataclass
-class Ability:
-    visual: AbilityVisual
-    code: str
-    cost: int
+    code: str = ''
 
 @dataclass
-class ReloadAbility(Ability):
-    reload: int = 0
+class ReloadAbility:
+    visual: AbilityVisual
+    credits: int
+    reload: int
     percent: int = 0
     count: int = 0
+
+    @property
+    def selection_display_num(self):
+        return self.credits
+    
+    @property
+    def game_display_num(self):
+        return self.count
+    
+    @property
+    def centre_display_num(self):
+        return self.count
 
 @dataclass
 class GameState:
