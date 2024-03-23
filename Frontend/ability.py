@@ -27,7 +27,5 @@ class Ability:
         if self.complete_check():
             clicks = self.clicks
             self.wipe()
-            if self.return_func:
-                return self.return_func(clicks)
             return clicks
         return False

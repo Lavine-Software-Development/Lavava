@@ -1,60 +1,66 @@
-from Server.constants import CONTEXT
-import Server.mode as mode
+from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE
+
 
 def no_click(data):
     return False
 
-
-def standard_node_attack(data):
-    node = data[0]
-    return (
-        node.owner != CONTEXT["main_player"]
-        and node.owner is not None
-        and node.state_name not in ["capital", "mine"]
-    )
-
-def my_node(data):
-    node = data[0]
-    return node.owner == CONTEXT["main_player"]
-
-
-def dynamic_edge_own_either(data):
-    edge = data[0]
-    return edge.state == "two-way" and (edge.from_node.owner == CONTEXT["main_player"])
-
-
-def capital_logic(data):
-    node = data[0]
-    if (
-        node.owner == CONTEXT["main_player"]
-        and node.state_name != "capital"
-        and node.full()
-    ):
-        neighbor_capital = False
-        for neighbor in node.neighbors:
-            if neighbor.state_name == "capital":
-                neighbor_capital = True
-                break
-        if not neighbor_capital:
-            return True
-    return False
-
-
 def standard_port_node(data):
     node = data[0]
     return node.owner is not None and node.is_port and node.state_name not in ["mine"]
-
 
 def unowned_node(data):
     node = data[0]
     return node.owner is None and node.state_name == "default"
 
 
-def new_edge_validator(check_new_edge):
+def validators_needing_player(player):
+
+    def capital_logic(data):
+        node = data[0]
+        if (
+            node.owner == player
+            and node.state_name != "capital"
+            and node.full()
+        ):
+            neighbor_capital = False
+            for neighbor in node.neighbors:
+                if neighbor.state_name == "capital":
+                    neighbor_capital = True
+                    break
+            if not neighbor_capital:
+                return True
+        return False
+    
+    def standard_node_attack(data):
+        node = data[0]
+        return (
+            node.owner != player
+            and node.owner is not None
+            and node.state_name not in ["capital", "mine"]
+        )
+
+    def my_node(data):
+        node = data[0]
+        return node.owner == player
+
+    def dynamic_edge_own_either(data):
+        edge = data[0]
+        return edge.state == "two-way" and (edge.from_node.owner == player)
+    
+    return {
+        CAPITAL_CODE: capital_logic,
+        POISON_CODE: standard_node_attack,
+        NUKE_CODE: standard_node_attack,
+        FREEZE_CODE: dynamic_edge_own_either,
+        ZOMBIE_CODE: my_node
+    }
+
+
+def new_edge_validator(check_new_edge, player):
     def new_edge_standard(data):
         if len(data) == 1:
             first_node = data[0]
-            return first_node.owner == CONTEXT["main_player"]
+            return first_node.owner == player
         else:
             first_node, second_node = data[0], data[1]
             return first_node.id != second_node.id and check_new_edge(
@@ -66,7 +72,15 @@ def new_edge_validator(check_new_edge):
             return new_edge_standard(data)
         return False
 
-    # Gross. This logic should be in modeConstants, and imported here.
-    if mode.MODE in (2, 3):
-        return new_edge_ports
-    return new_edge_standard
+    return new_edge_ports
+
+
+def make_ability_validators(logic, player):
+    return {
+        SPAWN_CODE: unowned_node,
+        BRIDGE_CODE: new_edge_validator(logic.check_new_edge, player),
+        D_BRIDGE_CODE: new_edge_validator(logic.check_new_edge, player),
+        BURN_CODE: standard_port_node, 
+        RAGE_CODE: no_click,
+    } | validators_needing_player(player)
+

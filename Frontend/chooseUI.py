@@ -83,7 +83,7 @@ class ChooseUI:
         # self.gs.next()
         # if DEFAULT_SPAWN[mode.MODE]:
         #     return [SPAWN_CODE] + list(self.selected_boxes)
-        return list(self.selected_boxes)
+        # return list(self.selected_boxes)
 
     def click_box(self, code, click):
 

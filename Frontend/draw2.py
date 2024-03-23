@@ -22,6 +22,8 @@ from constants import (
     D_BRIDGE_CODE,
     BURN_TICKS,
     SIZE,
+    VERTICAL_ABILITY_GAP,
+    HORIZONTAL_ABILITY_GAP
 )
 
 class Draw2:
@@ -35,7 +37,7 @@ class Draw2:
 
         
 
-    def set_data(self, main_player ,players, nodes, edges):
+    def set_data(self, main_player ,players, nodes, edges, ability_manager):
         self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
         py.display.set_caption("Lavava")
         # self.board = board
@@ -44,8 +46,9 @@ class Draw2:
         self.edges = edges
         self.nodes = nodes
         # self.game_state = game_state
-        # self.abilities = ability_manager.abilities
-        # self.ability_manager = ability_manager
+        self.ability_manager = ability_manager
+        self.abilities = self.ability_manager.abilities
+
 
     def _generate_darker_color(self, color):
         return tuple(max(c - 50, 0) for c in color)
@@ -54,8 +57,7 @@ class Draw2:
         return tuple(min(c + 50, 255) for c in color)
 
     def draw_button(
-        self, shape, color, name, cost, letter, position, selected, reload_completion, loading=False
-    ):
+        self, shape, color, name, cost, letter, position, selected, reload_completion):
         btn_size = ABILITY_SIZE * self.height
         border_thickness = 5
 
@@ -122,6 +124,8 @@ class Draw2:
         # Drawing text (name and cost)
         font = py.font.Font(None, int(self.height * ABILITY_FONT))
 
+        if not letter:
+            letter = name[0]
         letter_text = font.render(letter, True, BLACK)  # White color
         self.screen.blit(
             letter_text,
@@ -144,30 +148,20 @@ class Draw2:
         self.screen.blit(cost_text, (position[0] + 10, position[1] + 10))
 
     def draw_buttons(self):
-        pass
-        # y_position = int(VERTICAL_ABILITY_GAP * self.height / 6 + 75)
-        # for key, btn in self.abilities.items():
-        #     btn_box = btn.box
-        #     selected = self.ability_manager.mode == btn.key or (
-        #         self.ability_manager.mode == "default" and btn.key == 2
-        #     )
-        #     loading = False
-        #     if mode.MODE == 2:
-        #         if not self.ability_manager.full(btn.key):
-        #             loading = True
-        #     reload_percent = self.ability_manager.percent_complete(btn.key)
-        #     self.draw_button(
-        #         btn_box.shape,
-        #         btn_box.color,
-        #         btn_box.ab.name,
-        #         self.ability_manager.display_nums[key],
-        #         btn_box.ab.letter,
-        #         (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
-        #         selected,
-        #         reload_percent,
-        #         loading,
-        #     )
-        #     y_position += int(VERTICAL_ABILITY_GAP * self.height)  # Vertical gap between buttons
+        y_position = int(VERTICAL_ABILITY_GAP * self.height / 6 + 75)
+        for key, btn in self.abilities.items():
+            btn_box = btn.visual
+            self.draw_button(
+                btn_box.shape,
+                btn_box.color,
+                btn_box.name,
+                btn.game_display_num,
+                btn_box.letter,
+                (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
+                self.ability_manager.mode == key,
+                btn.percent
+            )
+            y_position += int(VERTICAL_ABILITY_GAP * self.height)  # Vertical gap between buttons
 
     def draw_x(self, position, size, color):
         screen = self.screen
@@ -594,7 +588,7 @@ class Draw2:
         #     self.blit_waiting()
         # else:
         #     self.blit_numbers()
-        # self.draw_buttons()
+        self.draw_buttons()
         # if (
         #     BRIDGE_CODE in self.abilities
         #     and len(self.abilities[BRIDGE_CODE].clicks) >= 1

@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Optional
 import math
+from clickTypeEnum import ClickType
+from typing import Callable
 
 from constants import BROWN, BLACK, GREY, GROWTH_STOP
 
@@ -37,6 +39,7 @@ class MyPlayer(OtherPlayer):
 
 @dataclass
 class Node:
+    id: int
     pos: tuple
     ports: list[Port]
     state: State
@@ -73,6 +76,7 @@ class Node:
 
 @dataclass
 class Edge:
+    id: int
     from_node: Node
     to_node: Node
     dynamic: bool
@@ -90,14 +94,17 @@ class AbilityVisual:
     name: str
     shape: str
     color: tuple
-    code: str = ''
+    letter: str = ''
 
 @dataclass
 class ReloadAbility:
     visual: AbilityVisual
+    click_count: int
+    click_type: ClickType
+    verification_func: Callable[..., bool]
     credits: int
     reload: int
-    percent: int = 0
+    percent: float = 1.0
     count: int = 0
 
     @property
@@ -111,6 +118,10 @@ class ReloadAbility:
     @property
     def centre_display_num(self):
         return self.count
+    
+    @property
+    def selectable(self):
+        return self.count > 0 and self.percent == 1.0
 
 @dataclass
 class GameState:

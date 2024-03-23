@@ -172,49 +172,12 @@ class Board:
                 return edge.id
         return None
 
-    def check_new_edge(self, node_from, node_to):
-        if node_to == node_from:
-            return False
-        edge_set = {(edge.from_node.id, edge.to_node.id) for edge in self.edges}
-        if (node_to, node_from) in edge_set or (node_from, node_to) in edge_set:
-            return False
-        if not self.check_all_overlaps((node_to, node_from)):
-            return False
-        return True
-
     def new_edge_id(self, node_from):
         return (
             NODE_COUNT
             + EDGE_COUNT
             + self.extra_edges
             + self.id_dict[node_from].owner.id
-        )
-
-    def check_all_overlaps(self, edge):
-        edgeDict = defaultdict(set)
-        self.nodeDict = {node.id: (node.pos) for node in self.nodes}
-        for e in self.edges:
-            edgeDict[e.to_node.id].add(e.from_node.id)
-            edgeDict[e.from_node.id].add(e.to_node.id)
-
-        for key in edgeDict:
-            for val in edgeDict[key]:
-                if (
-                    edge[0] != val
-                    and edge[0] != key
-                    and edge[1] != val
-                    and edge[1] != key
-                ):
-                    if self.overlap(edge, (key, val)):
-                        return False
-        return True
-
-    def overlap(self, edge1, edge2):
-        return do_intersect(
-            self.nodeDict[edge1[0]],
-            self.nodeDict[edge1[1]],
-            self.nodeDict[edge2[0]],
-            self.nodeDict[edge2[1]],
         )
 
     def buy_new_edge(self, id, node_from, node_to, edge_type):

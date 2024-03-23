@@ -2,6 +2,7 @@ import json
 from game_state import GameState
 from game import ServerGame
 import json_abilities
+from json_helpers import convert_keys_to_int
 
 class Batch:
     def __init__(self, count, mode, conn):
@@ -35,8 +36,9 @@ class Batch:
         json.dumps(self.game.tick_json(player))
     
     def process(self, player, data):
+        data = convert_keys_to_int(data)
         if data['type'] == 'ability_start':
-            if json_abilities.validate_ability_selection(data):
+            if json_abilities.validate_ability_selection(data['body']):
                 self.game.set_abilities(player, data['body'])
                 return False
             else:

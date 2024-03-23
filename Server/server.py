@@ -64,9 +64,9 @@ class Server:
 
     def start_game(self, batch):
 
-        tick_thread = Thread(target=self.send_ticks, args=(game,))
-        tick_thread.daemon = True
-        tick_thread.start()
+        # tick_thread = Thread(target=self.send_ticks, args=(batch,))
+        # tick_thread.daemon = True
+        # tick_thread.start()
 
         for i, conn in enumerate(batch.connections):
             start_new_thread(self.threaded_client_in_game, (i, conn, batch))
@@ -82,7 +82,7 @@ class Server:
                     break
                 else:
 
-                    print("Received: ", data.decode())
+                    print("Received: ", data)
                     # for connection in batch.connections:
                     #     connection.sendall(data)
                     if message := batch.process(player, data):

@@ -6,8 +6,11 @@ from draw2 import Draw2
 from state_dictionary import state_dict
 from SettingsUI import settings_ui
 from temp_network import Network
-from default_abilities import VISUALS
+from default_abilities import VISUALS, CLICKS
 from default_colors import PLAYER_COLORS
+from abilityManager import AbstractAbilityManager
+from ability_validators import make_ability_validators
+from logic import Logic
 
 class Main:
 
@@ -37,9 +40,9 @@ class Main:
     def ability_setup(self):
         pass
 
-    def send_abilities(self):
-        chosen_abilities = {ab: self.boxes[ab].count for ab in self.boxes if self.boxes[ab].count > 0}
-        self.network.send({'type': 'ability_start'} | {'body': chosen_abilities})
+    def send_abilities(self, boxes):
+        self.chosen_abilities = {ab: boxes[ab].count for ab in boxes}
+        self.network.send({'type': 'ability_start'} | {'body': self.chosen_abilities})
 
     def setup(self, start_data):
 
@@ -50,19 +53,27 @@ class Main:
 
         self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
         self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
-        self.nodes = {id: Node(n[id]["pos"], self.make_ports(n[id]["port_count"]), state_dict[n[id]["state_visual_id"]]) for id in n}
-        self.edges = {id: Edge(self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["state"] != 'one-way') for id in e}
+        self.nodes = {id: Node(id, n[id]["pos"], self.make_ports(n[id]["port_count"]), state_dict[n[id]["state_visual_id"]]) for id in n}
+        self.edges = {id: Edge(id, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["state"] != 'one-way') for id in e}
 
-        self.boxes = {ab: ReloadAbility(VISUALS[ab], abi[ab]['credits'], abi[ab]['reload']) for ab in abi}
-        for box in self.boxes.values():
+        logic = Logic(self.nodes, self.edges)
+
+        av = make_ability_validators(logic, self.my_player)
+
+        boxes = {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload']) for ab in abi}
+        for box in boxes.values():
             if box.visual.color[0] is None:
                 box.visual.color = self.my_player.color
-        ui = ChooseReloadUI(self.boxes, credits)
-        ability_codes = ui.choose_abilities()
-        self.send_abilities()
+        ui = ChooseReloadUI(boxes, credits)
+        ui.choose_abilities()
+        chosen_boxes = {b: v for b, v in boxes.items() if v.count > 0}
 
-        self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values())
-        # self.can_draw = True
+        self.send_abilities(chosen_boxes)
+
+        self.ability_manager = AbstractAbilityManager(chosen_boxes, self.my_player.color)
+
+        self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_manager)
+        self.can_draw = True
 
     def run(self):
         while True:

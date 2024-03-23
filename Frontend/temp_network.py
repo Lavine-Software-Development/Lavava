@@ -97,7 +97,7 @@ class Network():
     def listen(self):
         while True:
             try:
-                data = self.client.recv(1024).decode()  # Adjust buffer size if necessary
+                data = self.client.recv(10000).decode()  # Adjust buffer size if necessary
 
                 data_dict = json.loads(data)
 

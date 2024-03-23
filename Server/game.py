@@ -1,9 +1,9 @@
-from player_state import PlayerState as PS
+from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GS
 import mode
 from board import Board
 from map_builder import MapBuilder
-from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, ABILITIES_CHOSEN_VAL, TICK, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, C
+from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, ABILITIES_CHOSEN_VAL, TICK, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK
 from ability_effects import make_ability_effects
 from player import DefaultPlayer
 
@@ -48,52 +48,52 @@ class ServerGame:
 
     @property
     def all_player_abilities_set(self):
-        return all([p.ps.state == PS.ABILITIES_SET for p in self.player_dict.values()])
+        return all([p.ps.state == PSE.ABILITIES_SELECTED for p in self.player_dict.values()])
     
     @property
     def all_player_starts_selected(self):
-        return all([p.start_selected for p in self.player_dict.values()])
+        return all([p.ps.state == PSE.START_SELECTED for p in self.player_dict.values()])
 
-    def action(self, key, acting_player, data):
+    # def action(self, key, acting_player, data):
 
-        if key == RESTART_GAME_VAL:
-            self.restart()
-        elif key == ELIMINATE_VAL:
-            self.player_manager.eliminate(acting_player)
-            self.board.eliminate(self.get_player(acting_player))
-        elif key == ABILITIES_CHOSEN_VAL:
-            self.player_manager.chosen(acting_player, data)
-        elif key == TICK:
-            if self.gs.state.value >= GS.START_SELECTION.value:
-                self.tick()
-        elif key in self.ability_options:
-            new_data = [
-                self.board.id_dict[d] if d in self.board.id_dict else d for d in data
-            ]
-            self.ability_effects[key](
-                new_data, self.get_player(acting_player)
-            )
-        elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-            self.board.click(data[0],
-                self.get_player(acting_player), key
-            )
-        else:
-            print("NOT ALLOWED")
+    #     if key == RESTART_GAME_VAL:
+    #         self.restart()
+    #     elif key == ELIMINATE_VAL:
+    #         self.player_manager.eliminate(acting_player)
+    #         self.board.eliminate(self.get_player(acting_player))
+    #     elif key == ABILITIES_CHOSEN_VAL:
+    #         self.player_manager.chosen(acting_player, data)
+    #     elif key == TICK:
+    #         if self.gs.state.value >= GS.START_SELECTION.value:
+    #             self.tick()
+    #     elif key in self.ability_options:
+    #         new_data = [
+    #             self.board.id_dict[d] if d in self.board.id_dict else d for d in data
+    #         ]
+    #         self.ability_effects[key](
+    #             new_data, self.get_player(acting_player)
+    #         )
+    #     elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
+    #         self.board.click(data[0],
+    #             self.get_player(acting_player), key
+    #         )
+    #     else:
+    #         print("NOT ALLOWED")
 
-    def tick(self):
-        if (
-            self.board
-            and not self.player_manager.victor
-            and not self.player_manager.update_timer()
-        ):
-            self.board.update()
-            self.player_manager.update()
-            self.player_manager.check_over()
+    # def tick(self):
+    #     if (
+    #         self.board
+    #         and not self.player_manager.victor
+    #         and not self.player_manager.update_timer()
+    #     ):
+    #         self.board.update()
+    #         self.player_manager.update()
+    #         self.player_manager.check_over()
 
-    @property
-    def ability_options(self):
-        return ALL_ABILITIES
+    # @property
+    # def ability_options(self):
+    #     return ALL_ABILITIES
     
-    def get_player(self, player_num):
-        return self.player_manager.player_dict[player_num]
+    # def get_player(self, player_num):
+    #     return self.player_manager.player_dict[player_num]
     
