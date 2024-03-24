@@ -3,7 +3,7 @@ from playerStateEnums import PlayerStateEnum as PSE
 class PlayerState:
 
     def __init__(self):
-        self._state = PSE.WAITING
+        self._state = PSE.ABILITY_SELECTION
 
     @property
     def state(self):
@@ -16,12 +16,18 @@ class PlayerState:
             self._state = new_state
             
     def next(self):
-        if self.state == PSE.WAITING:
-            self.state = PSE.ABILITIES_SELECTED
-        elif self.state == PSE.ABILITIES_SELECTED:
-            self.state = PSE.START_SELECTED
-        elif self.state == PSE.START_SELECTED:
-            self.state = PSE.PLAYING
+        if self.state == PSE.ABILITY_SELECTION:
+            self.state = PSE.ABILITY_WAITING
+        elif self.state == PSE.ABILITY_WAITING:
+            self.state = PSE.START_SELECTION
+        elif self.state == PSE.START_SELECTION:
+            self.state = PSE.START_WAITING
+        elif self.state == PSE.START_WAITING:
+            self.state = PSE.PLAY
+
+    @property
+    def value(self):
+        return self.state.value
 
     def eliminate(self):
         self.state = PSE.ELIMINATED
@@ -30,4 +36,4 @@ class PlayerState:
         self.state = PSE.VICTORY
 
     def restart(self):
-        self.state = PSE.WAITING
+        self.state = PSE.ABILITY_SELECTION

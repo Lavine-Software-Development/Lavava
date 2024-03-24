@@ -1,6 +1,5 @@
 from collections import defaultdict
 from Server.constants import (
-    DEFAULT_ABILITY_CODE,
     EDGE,
     DYNAMIC_EDGE,
     GREY,
@@ -12,7 +11,7 @@ from Server.constants import (
     NODE,
     PORT_NODE,
 )
-from Server.helpers import distance_point_to_segment, do_intersect
+from Server.helpers import distance_point_to_segment
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from Server.gameStateEnums import GameStateEnum as GSE
@@ -56,50 +55,6 @@ class Board:
                 node.set_port_angles()
 
     ## Gross code. Needs to be refactored
-    def check_highlight(self, position, ability_manager):
-        self.highlighted_color = None
-        self.highlighted = self.hover(position, ability_manager)
-        if self.highlighted and not self.highlighted_color:
-            if self.default_highlight_color(ability_manager):
-                self.highlighted_color = CONTEXT["main_player"].default_color
-            else:
-                self.highlighted_color = ability_manager.box_col
-
-    # Still gross
-    def default_highlight_color(self, ability_manager):
-        return (
-            (self.gs.state.value < GSE.PLAY.value)
-            or (not ability_manager.ability)
-            or (ability_manager.ability.click_type != self.highlighted.type)
-        )
-
-    # Still gross
-    def hover(self, position, ability_manager):
-        ability = ability_manager.ability
-        if id := self.find_node(position):
-            if (not ability) or ability.click_type == NODE:
-                if (
-                    self.gs.state.value < GSE.PLAY.value
-                    and self.id_dict[id].owner is None
-                    and self.id_dict[id].state_name == "default"
-                ):
-                    return self.id_dict[id]
-                elif ability and ability.validate(self.id_dict[id]):
-                    return self.id_dict[id]
-        elif id := self.find_edge(position):
-            if (
-                ability
-                and ability.click_type == EDGE
-                and ability.validate(self.id_dict[id])
-            ):
-                return self.id_dict[id]
-            elif self.id_dict[id].controlled_by(CONTEXT["main_player"]) or (
-                self.id_dict[id].to_node.owner == CONTEXT["main_player"]
-                and self.id_dict[id].to_node.full()
-            ):
-                self.highlighted_color = GREY
-                return self.id_dict[id]
-        return None
 
     ## Gross code ends here (I hope)
 

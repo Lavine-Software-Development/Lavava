@@ -6,6 +6,10 @@ class AbstractAbilityManager():
         self.default_color = default_color
         self.mode = None
         self.clicks = set()
+        self.hovering = None
+
+    def set_hover(self, item):
+        self.hovering = item
 
     def use_ability(self, item, color):
         if not self.ability:
@@ -39,7 +43,10 @@ class AbstractAbilityManager():
         return False
     
     def validate(self, item):
-        return self.ability.validation_func(self.clicks.union({item}))
+        if item.type == self.ability.click_type:
+            if self.ability.validation_func(self.clicks.union({item})):
+                return item, self.ability.visual.color
+        return False
 
     @property
     def ability(self):

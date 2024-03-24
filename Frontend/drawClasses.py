@@ -6,6 +6,7 @@ from typing import Callable
 
 from constants import BROWN, BLACK, GREY, GROWTH_STOP
 
+
 @dataclass
 class State:
     name: str
@@ -43,9 +44,10 @@ class Node:
     pos: tuple
     ports: list[Port]
     state: State
+    value: int
     effects: set = field(default_factory=set)
-    value: int = 0
     owner: Optional[OtherPlayer] = None
+    type: ClickType = ClickType.NODE
 
     @property
     def color(self):
@@ -71,6 +73,7 @@ class Node:
     def state_name(self):
         return self.state.name
     
+    @property
     def full(self):
         return self.value >= GROWTH_STOP
 
@@ -82,12 +85,19 @@ class Edge:
     dynamic: bool
     on: bool = False
     flowing: bool = False
+    type: ClickType = ClickType.EDGE
 
     @property
     def color(self):
         if self.on:
             return self.from_node.color
         return (50, 50, 50)
+    
+    def controlled_by(self, player):
+        if self.from_node.owner == player:
+            return True
+        return self.dynamic and self.to_node.owner == player and self.to_node.full
+
     
 @dataclass
 class AbilityVisual:

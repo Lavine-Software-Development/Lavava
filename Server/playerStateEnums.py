@@ -2,9 +2,11 @@ from enum import Enum, auto
 
 
 class PlayerStateEnum(Enum):
-    WAITING = auto()
-    ABILITIES_SELECTED = auto()
-    START_SELECTED = auto()
-    PLAYING = auto()
+    ABILITY_SELECTION = auto()
+    ABILITY_WAITING = auto()
+    START_SELECTION = auto()
+    START_WAITING = auto()
+    PLAY = auto()
     ELIMINATED = auto()
     VICTORY = auto()
+    GAME_OVER = auto()

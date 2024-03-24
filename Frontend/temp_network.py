@@ -98,14 +98,20 @@ class Network():
         while True:
             try:
                 data = self.client.recv(10000).decode()  # Adjust buffer size if necessary
-
-                data_dict = json.loads(data)
-
-                self.update_callback(data_dict)
+                # print(data)
+                
+                # Split the data string into individual JSON objects
+                json_objects = data.split('}}')
+                for obj_str in json_objects[:-1]:  # Exclude the last, likely incomplete, object
+                    obj_str += '}}'  # Add back the closing braces removed by split
+                    data_dict = convert_keys_to_int(json.loads(obj_str))
+                    
+                    self.update_callback(data_dict)
 
             except socket.error as e:
                 print(e)
                 break
+
 
     def stop(self):
         self.running = False

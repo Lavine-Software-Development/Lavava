@@ -1,10 +1,11 @@
 from enum import Enum, auto
 
-
-class GameStateEnum(Enum):
-    LOBBY = auto()
-    BUILDING_GAME = auto()
+class PlayerStateEnum(Enum):
     ABILITY_SELECTION = auto()
+    ABILITY_WAITING = auto()
     START_SELECTION = auto()
+    START_WAITING = auto()
     PLAY = auto()
+    ELIMINATED = auto()
+    VICTORY = auto()
     GAME_OVER = auto()

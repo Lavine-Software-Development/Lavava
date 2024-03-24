@@ -24,7 +24,7 @@ from Server.ability_effects import make_ability_effects
 import Server.mode as mode
 from SettingsUI import settings_ui
 
-from game_state import GameState
+from Frontend.player_state import GameState
 from Server.gameStateEnums import GameStateEnum as GSE
 
 class Game:

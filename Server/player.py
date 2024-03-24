@@ -12,21 +12,22 @@ from ability_validators import make_ability_validators
 from ability_effects import make_ability_effects
 from player_state import PlayerState
 
-class DefaultPlayer(Jsonable):
+class DefaultPlayer():
     def __init__(self, id):
         self.id = id
         self.default_values()
-        self.tick_values = {'value', 'owner', 'effects', 'state_visual_id'}
+        self.ps = PlayerState()
 
     def tick_json(self):
-        return {'abilities': {k: v.tick_json for k, v in self.abilities.items()}}
+        return {'abilities': 'poop', 'ps': self.ps.value}
+        # return {'abilities': {k: v.tick_json for k, v in self.abilities.items()}, 'ps': self.ps.value}
 
     def set_abilities(self, abilities, board):
         validators = make_ability_validators(board)
         effects = make_ability_effects(board)
         for ab in abilities:
             self.abilities[ab] = ReloadAbility(validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
-        self.abilities_set = True
+        self.ps.next()
 
     def default_values(self):
         self.abilities = dict()

@@ -1,5 +1,4 @@
 from game import Game
-from game_state import GameState
 from network import SoloNetwork
 from playerManager import SoloPlayerManager
 from Server.randomGenerator import RandomGenerator

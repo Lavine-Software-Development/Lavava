@@ -32,8 +32,11 @@ class Batch:
         game_dict["abilities"] = json_abilities.start_json()
         return json.dumps(game_dict)
     
+    def tick_ready(self, player):
+        return self.game.player_dict[player].ps.value >= 2
+    
     def tick_json(self, player):
-        json.dumps(self.game.tick_json(player))
+        return json.dumps(self.game.tick_json(player))
     
     def process(self, player, data):
         data = convert_keys_to_int(data)
@@ -44,6 +47,6 @@ class Batch:
             else:
                 self.game.set_abilities(player, {})
                 return "CHEATING: INVALID ABILITY SELECTION"
-        else:
+        elif data['type'] == 'ability':
             pass
             # self.game.action(data)

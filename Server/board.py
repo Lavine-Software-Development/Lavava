@@ -32,7 +32,7 @@ class Board:
         }
     
     def tick_json(self):
-        nodes_json = {k: v for node in self.nodes for k, v in node.tick.items()}
+        nodes_json = {k: v for node in self.nodes for k, v in node.tick_json.items()}
         edges_json = {k: v for edge in self.edges for k, v in edge.tick_json.items()}
         return {
             "nodes": nodes_json,

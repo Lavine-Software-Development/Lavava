@@ -35,7 +35,7 @@ class Node(Jsonable):
         self.set_default_state()
         self.updated = False
 
-        self.start_values = {'pos', 'state_visual_id'}
+        self.start_values = {'pos', 'state_visual_id', 'value'}
         self.tick_values = {'value', 'owner', 'effects', 'state_visual_id'}
 
     def __str__(self):

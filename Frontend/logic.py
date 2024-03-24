@@ -1,4 +1,5 @@
 from collections import defaultdict
+import math
 
 class Logic:
     
@@ -75,4 +76,21 @@ def orientation(p, q, r):
     if val == 0:
         return 0  # Collinear
     return 1 if val > 0 else 2  # Clockwise or Counterclockwise
+
+def distance_point_to_segment(px, py, x1, y1, x2, y2):
+    segment_length_sq = (x2 - x1) ** 2 + (y2 - y1) ** 2
+
+    if segment_length_sq < 1e-6:
+        return math.sqrt((px - x1) ** 2 + (py - y1) ** 2)
+
+    t = max(
+        0, min(1, ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / segment_length_sq)
+    )
+
+    closest_x = x1 + t * (x2 - x1)
+    closest_y = y1 + t * (y2 - y1)
+
+    distance = math.sqrt((px - closest_x) ** 2 + (py - closest_y) ** 2)
+    return distance
+
     

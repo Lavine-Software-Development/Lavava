@@ -29,12 +29,17 @@ class Server:
         time.sleep(1)
         while True:
             for i, connection in enumerate(batch.connections):
-                try:
-                    connection.sendall(batch.tick_json(i).encode())
-                except OSError as e:
-                    print(f"Error on connection {i}: {e}")
-                    del batch.connections[i]
-            time.sleep(0.1)
+                # try:
+                if batch.tick_ready(i):
+                    # print("Sending tick")
+                    batch_json = batch.tick_json(i)
+                    batch_tick = batch_json.encode()
+                    connection.sendall(batch_tick)
+                    # print(i, 'sent tick')
+                # except OSError as e:
+                #     print(f"Error on connection {i}: {e}")
+                #     del batch.connections[i]
+            time.sleep(1)
 
     def threaded_client(self, conn):
 
@@ -64,9 +69,9 @@ class Server:
 
     def start_game(self, batch):
 
-        # tick_thread = Thread(target=self.send_ticks, args=(batch,))
-        # tick_thread.daemon = True
-        # tick_thread.start()
+        tick_thread = Thread(target=self.send_ticks, args=(batch,))
+        tick_thread.daemon = True
+        tick_thread.start()
 
         for i, conn in enumerate(batch.connections):
             start_new_thread(self.threaded_client_in_game, (i, conn, batch))

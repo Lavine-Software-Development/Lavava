@@ -27,8 +27,8 @@ class ServerGame:
     
     def tick_json(self, player):
         return {
-            "board": self.board.tick_json(),
-            "player": self.player_dict[player].tick_json
+            # "board": self.board.tick_json(),
+            "player": self.player_dict[player].tick_json()
         }
 
     def restart(self):
@@ -45,14 +45,18 @@ class ServerGame:
 
     def set_abilities(self, player, abilities):
         self.player_dict[player].set_abilities(abilities, self.board)
+        if self.all_player_abilities_set:
+            self.gs.next()
+            for player in self.player_dict.values():
+                player.ps.next()
 
     @property
     def all_player_abilities_set(self):
-        return all([p.ps.state == PSE.ABILITIES_SELECTED for p in self.player_dict.values()])
+        return all([p.ps.state == PSE.ABILITY_WAITING for p in self.player_dict.values()])
     
     @property
     def all_player_starts_selected(self):
-        return all([p.ps.state == PSE.START_SELECTED for p in self.player_dict.values()])
+        return all([p.ps.state == PSE.START_WAITING for p in self.player_dict.values()])
 
     # def action(self, key, acting_player, data):
 
