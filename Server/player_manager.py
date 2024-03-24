@@ -15,18 +15,6 @@ class PlayerManager:
 
     def reset(self):
 
-
-    def update(self):
-        for player in self.player_dict.values():
-            if not player.eliminated:
-                player.update()
-                if player.count == 0:
-                    self.eliminate(player.id)
-
-    def eliminate(self, player):
-        self.remaining.remove(player)
-        self.player_dict[player].eliminate()
-
     def check_over(self):
         if len(self.remaining) == 1:
             self.win_and_end(self.player_dict[list(self.remaining)[0]])
@@ -59,17 +47,6 @@ class PlayerManager:
         for player in sorted_by_score:
             player.display()
         print()
-
-    def update_timer(self):
-        if self.timer > 0:
-            self.timer -= 0.1
-
-            if self.timer > 3 and self.opening_moves == len(self.remaining):
-                self.timer = 3
-            return True
-
-        self.gs.next()
-        return False
     
     def chosen(self, player, data):
         self.player_dict[player].chosen(data)

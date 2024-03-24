@@ -1,7 +1,9 @@
+from ast import main
 import math
 import pygame as py
 from clickTypeEnum import ClickType
 from constants import (
+    EDGE_HIGHLIGHT_SPACING,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     ABILITY_SIZE,
@@ -32,14 +34,14 @@ from constants import (
 from playerStateEnums import PlayerStateEnum as PSE
 
 class Draw2:
-    def __init__(self, ps):
+    def __init__(self, highlight):
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
         self.temp_line = None
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
-        self.ps = ps
+        self.highlight = highlight
 
     def set_data(self, main_player ,players, nodes, edges, ability_manager):
         self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
@@ -275,7 +277,7 @@ class Draw2:
                 py.draw.lines(self.screen, color, True, [point1, point2, point3])
 
         # if self.board.highlighted == edge:
-        #     self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
+             self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
 
     def draw_circle(self, edge, color, start, end):
         length_factor = 1.5
@@ -561,17 +563,19 @@ class Draw2:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 
-    def highlight(self, item, color):
-        if item.type == ClickType.NODE:
+    def highlighting(self):
+        if self.highlight.type == ClickType.NODE:
+            color = self.highlight.color or self.main_player.color
             py.draw.circle(
                 self.screen,
                 color,
-                item.pos,
-                item.size + 5,
+                self.highlight.item.pos,
+                self.highlight.item.size + 5,
                 3,
             )
         else:
-            start, end = item.from_node.pos, item.to_node.pos
+            color = self.highlight.color or GREY
+            start, end = self.highlight.item.from_node.pos, self.highlight.item.to_node.pos
             dx = end[0] - start[0]
             dy = end[1] - start[1]
             magnitude = math.sqrt(dx * dx + dy * dy)
@@ -584,6 +588,25 @@ class Draw2:
             width = magnitude  # Length of the row of triangles
             height = LENGTH_FACTOR * 2 + 15  # Height based on the triangle size with some padding
             capsule_surface = py.Surface((int(width), int(height)), py.SRCALPHA)
+
+            line_start_x = int(height / 2) + EDGE_HIGHLIGHT_SPACING
+            line_end_x = int(width - height / 2) - EDGE_HIGHLIGHT_SPACING
+
+            # Draw the lines
+            py.draw.line(
+                capsule_surface,
+                color,
+                (line_start_x, 2),
+                (line_end_x, 2),
+                2,
+            )
+            py.draw.line(
+                capsule_surface,
+                color,
+                (line_start_x, height - 2),
+                (line_end_x, height - 2),
+                2,
+            )
 
             # Rotate the surface containing the capsule
             # Negative because Pygame's rotation is counter-clockwise
@@ -600,15 +623,14 @@ class Draw2:
             self.screen.blit(rotated_surface, screen_pos)
 
 
-    def blit(self, highlight_data):
+    def blit(self, ps):
         self.screen.fill(WHITE)
         self.blit_nodes()
         self.blit_edges()
-        if highlight_data:
-            print("valid highlight data")
-            self.highlight(*highlight_data)
+        if self.highlight:
+            self.highlighting()
         self.blit_capital_stars()
-        if self.ps == PSE.START_WAITING:
+        if ps == PSE.START_WAITING:
             self.blit_waiting()
         else:
             self.blit_numbers()

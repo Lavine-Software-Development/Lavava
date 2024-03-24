@@ -28,9 +28,13 @@ class Server:
     def send_ticks(self, batch):
         time.sleep(1)
         while True:
+
+            if batch.tick_ready():
+                batch.tick()
+
             for i, connection in enumerate(batch.connections):
                 # try:
-                if batch.tick_ready(i):
+                if batch.send_ready(i):
                     # print("Sending tick")
                     batch_json = batch.tick_json(i)
                     batch_tick = batch_json.encode()

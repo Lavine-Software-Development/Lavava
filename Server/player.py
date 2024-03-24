@@ -19,8 +19,7 @@ class DefaultPlayer():
         self.ps = PlayerState()
 
     def tick_json(self):
-        return {'abilities': 'poop', 'ps': self.ps.value}
-        # return {'abilities': {k: v.tick_json for k, v in self.abilities.items()}, 'ps': self.ps.value}
+        return {'abilities': {k: v.tick_json for k, v in self.abilities.items()}, 'ps': self.ps.value}
 
     def set_abilities(self, abilities, board):
         validators = make_ability_validators(board)
@@ -28,6 +27,12 @@ class DefaultPlayer():
         for ab in abilities:
             self.abilities[ab] = ReloadAbility(validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
         self.ps.next()
+
+    def use_ability(self, key, data):
+        if self.abilities[key].can_use(data):
+            self.abilities[key].use(data)
+            return True
+        return False
 
     def default_values(self):
         self.abilities = dict()

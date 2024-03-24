@@ -29,3 +29,7 @@ class GameState:
 
     def restart(self):
         self.state = GSE.BUILDING_GAME
+
+    @property
+    def value(self):
+        return self.state.value

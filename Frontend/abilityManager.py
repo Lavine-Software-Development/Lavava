@@ -1,5 +1,9 @@
 # from abc import ABC, abstractmethod
 
+from drawClasses import IDItem
+from typing import Union, Tuple, Optional
+
+
 class AbstractAbilityManager():
     def __init__(self, abilities, default_color):
         self.abilities = abilities
@@ -11,13 +15,13 @@ class AbstractAbilityManager():
     def set_hover(self, item):
         self.hovering = item
 
-    def use_ability(self, item, color):
+    def use_ability(self, highlight):
         if not self.ability:
             return False
-        if self.ability.click_type == item.type and self.box_col == color:
-            self.clicks.add(item)
+        if highlight.usage == self.mode:
+            self.clicks.add(highlight.item)
             if self.complete_check():
-                clicks = self.clicks
+                clicks = {click.id for click in self.clicks}
                 self.wipe()
                 return clicks
             return False
@@ -42,23 +46,27 @@ class AbstractAbilityManager():
             return self.switch_to(key)
         return False
     
-    def validate(self, item):
-        if item.type == self.ability.click_type:
+    def validate(self, item: IDItem) -> Union[Tuple[IDItem, int], bool]:
+        if self.mode and item.type == self.ability.click_type:
             if self.ability.validation_func(self.clicks.union({item})):
-                return item, self.ability.visual.color
+                return item, self.mode
         return False
+    
+    def update(self, abilities):
+        for ab_code in abilities:
+            self.abilities[ab_code].parse(abilities[ab_code])
 
     @property
     def ability(self):
-        if not self.mode:
-            return None
-        return self.abilities[self.mode]
+        if self.mode:
+            return self.abilities[self.mode]
+        return None
  
     @property
     def box_col(self):
         if not self.ability:
             return self.default_color
-        return self.ability.box.color
+        return self.ability.visual.color
 
  
 # class MoneyAbilityManager(AbstractAbilityManager):

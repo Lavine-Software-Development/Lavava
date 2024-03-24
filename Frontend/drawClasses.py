@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from typing import Optional
 import math
+from parseable import Parseable
 from clickTypeEnum import ClickType
 from typing import Callable
 
 from constants import BROWN, BLACK, GREY, GROWTH_STOP
-
 
 @dataclass
 class State:
@@ -39,15 +39,18 @@ class MyPlayer(OtherPlayer):
     score: float = 0.0
 
 @dataclass
-class Node:
+class IDItem(Parseable):
     id: int
+    type: ClickType
+
+@dataclass
+class Node(IDItem):
     pos: tuple
     ports: list[Port]
     state: State
     value: int
     effects: set = field(default_factory=set)
     owner: Optional[OtherPlayer] = None
-    type: ClickType = ClickType.NODE
 
     @property
     def color(self):
@@ -78,14 +81,12 @@ class Node:
         return self.value >= GROWTH_STOP
 
 @dataclass
-class Edge:
-    id: int
+class Edge(IDItem):
     from_node: Node
     to_node: Node
     dynamic: bool
     on: bool = False
     flowing: bool = False
-    type: ClickType = ClickType.EDGE
 
     @property
     def color(self):
@@ -100,7 +101,7 @@ class Edge:
 
     
 @dataclass
-class AbilityVisual:
+class AbilityVisual(Parseable):
     name: str
     shape: str
     color: tuple
@@ -132,10 +133,3 @@ class ReloadAbility:
     @property
     def selectable(self):
         return self.count > 0 and self.percent == 1.0
-
-@dataclass
-class GameState:
-    my_player: int
-    started: bool = False
-    over: bool = False
-    timer: int = 60

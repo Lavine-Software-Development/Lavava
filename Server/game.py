@@ -1,9 +1,9 @@
+from Frontend.constants import SPAWN_CODE
 from playerStateEnums import PlayerStateEnum as PSE
-from gameStateEnums import GameStateEnum as GS
+from gameStateEnums import GameStateEnum as GSE
 import mode
 from board import Board
 from map_builder import MapBuilder
-from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, ABILITIES_CHOSEN_VAL, TICK, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK
 from ability_effects import make_ability_effects
 from player import DefaultPlayer
 
@@ -27,9 +27,30 @@ class ServerGame:
     
     def tick_json(self, player):
         return {
-            # "board": self.board.tick_json(),
+            "board": self.board.tick_json(),
             "player": self.player_dict[player].tick_json()
         }
+    
+    def effect(self, key, player_id, data):
+        player = self.player_dict[player_id]
+
+        if player.ps.state == PSE.START_SELECTION:
+            if key == SPAWN_CODE:
+                self.ability_effects[key](data, player)
+            else:
+                return False
+        else:  
+            new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
+            return player.use_ability(key, new_data)
+        
+    def click(self, key, player_id, item_id):
+        player = self.player_dict[player_id]
+        self.board.id_dict[item_id].click(player, key)
+    
+    def eliminate(self, player):
+        self.remaining.remove(player)
+        self.player_dict[player].eliminate()
+        self.board.eliminate(self.player_dict[player])
 
     def restart(self):
 
@@ -57,47 +78,28 @@ class ServerGame:
     @property
     def all_player_starts_selected(self):
         return all([p.ps.state == PSE.START_WAITING for p in self.player_dict.values()])
-
-    # def action(self, key, acting_player, data):
-
-    #     if key == RESTART_GAME_VAL:
-    #         self.restart()
-    #     elif key == ELIMINATE_VAL:
-    #         self.player_manager.eliminate(acting_player)
-    #         self.board.eliminate(self.get_player(acting_player))
-    #     elif key == ABILITIES_CHOSEN_VAL:
-    #         self.player_manager.chosen(acting_player, data)
-    #     elif key == TICK:
-    #         if self.gs.state.value >= GS.START_SELECTION.value:
-    #             self.tick()
-    #     elif key in self.ability_options:
-    #         new_data = [
-    #             self.board.id_dict[d] if d in self.board.id_dict else d for d in data
-    #         ]
-    #         self.ability_effects[key](
-    #             new_data, self.get_player(acting_player)
-    #         )
-    #     elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-    #         self.board.click(data[0],
-    #             self.get_player(acting_player), key
-    #         )
-    #     else:
-    #         print("NOT ALLOWED")
-
-    # def tick(self):
-    #     if (
-    #         self.board
-    #         and not self.player_manager.victor
-    #         and not self.player_manager.update_timer()
-    #     ):
-    #         self.board.update()
-    #         self.player_manager.update()
-    #         self.player_manager.check_over()
-
-    # @property
-    # def ability_options(self):
-    #     return ALL_ABILITIES
     
-    # def get_player(self, player_num):
-    #     return self.player_manager.player_dict[player_num]
+    def update_timer(self):
+        if self.timer > 0:
+            self.timer -= 0.1
+
+            if self.timer > 3 and self.all_player_starts_selected:
+                self.timer = 3
+            return True
+
+        self.gs.next()
+        return False
+
+    def tick(self):
+        if not self.update_timer():
+            self.board.update()
+            self.player_update()
+            # self.player_manager.check_over()
+
+    def player_update(self):
+        for player in self.player_dict.values():
+            if not player.ps.value < PSE.ELIMINATED.value:
+                player.update()
+                # if player.count == 0:
+                #     self.eliminate(player.id)
     
