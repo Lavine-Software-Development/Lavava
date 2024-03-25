@@ -1,7 +1,7 @@
 from game import Game
 from network import SoloNetwork
 from playerManager import SoloPlayerManager
-from Server.randomGenerator import RandomGenerator
+from Backend.randomGenerator import RandomGenerator
 import Server.mode as mode
 from SettingsUI import settings_ui
 

@@ -1,5 +1,6 @@
 from numpy import sort
-from Server.constants import (
+from jsonable import Jsonable
+from constants import (
     NODE,
     PORT_NODE,
     SCREEN_WIDTH,
@@ -11,13 +12,13 @@ from Server.constants import (
     BLACK,
     BROWN,
 )
-from Server.nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
-from Server.nodeEffect import EffectType, Poisoned, NodeEnraged, Burning
-import Server.mode as mode
+from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
+from nodeEffect import Poisoned, NodeEnraged, Burning
+from effectEnums import EffectType
 import random
 from math import pi, atan2
 
-class Node:
+class Node(Jsonable):
     def __init__(self, id, pos):
         self.value = 0
         self.owner = None
@@ -34,6 +35,9 @@ class Node:
         self.set_default_state()
         self.updated = False
 
+        self.start_values = {'pos', 'state_visual_id', 'value'}
+        self.tick_values = {'value', 'owner', 'effects', 'state_visual_id'}
+
     def __str__(self):
         return str(self.id)
 
@@ -47,6 +51,7 @@ class Node:
         if status_name in STATE_NAMES:
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
+            self.state_visual_id = self.state.visual_id
         elif status_name in EFFECT_NAMES:
             self.effects[status_name] = self.new_effect(status_name)
         self.calculate_interactions()
@@ -56,8 +61,8 @@ class Node:
         if state_name == "default":
             return DefaultState(self.id)
         elif state_name == "mine":
-            if data is True and mode.MODE == 3:
-                self.port_count = 3
+            # if data is True and mode.MODE == 3:
+            self.port_count = 3
             return MineState(self.id, self.absorbing, data)
         elif state_name == "zombie":
             return ZombieState(self.id)
@@ -260,6 +265,11 @@ class PortNode(Node):
         self.item_type = PORT_NODE
         self.port_count = port_count
         self.ports_angles = []
+
+        self.start_values = self.start_values | {'port_count'}
+
+    def start_serialization(self):
+        return (self.pos, self.state_name, self.port_count)
 
     @property
     def is_port(self):

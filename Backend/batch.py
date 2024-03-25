@@ -1,6 +1,5 @@
 import json
-from Frontend.constants import SPAWN_CODE
-from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, TICK, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
+from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
 from playerStateEnums import PlayerStateEnum as PS
@@ -20,7 +19,7 @@ class Batch:
 
     def build(self):
         self.gs.next()
-        self.game = ServerGame(self.player_count, self.mode, self.gs)
+        self.game = ServerGame(self.player_count, self.gs)
         self.gs.next()
 
     def is_ready(self):

@@ -1,6 +1,6 @@
 import mode
 from modeConstants import ABILITY_OPTIONS
-from constants import BREAKDOWNS, START_CREDITS
+from Backend.constants import BREAKDOWNS, START_CREDITS
 
 def start_json():
     return {'values': {

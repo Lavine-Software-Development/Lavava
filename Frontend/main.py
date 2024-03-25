@@ -1,7 +1,7 @@
-from typing import Any, Union, Tuple, Optional
+from typing import Any, Union, Tuple
 import pygame as py
-from Frontend.highlight import Highlight
-from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, EDGE_SWAP, STANDARD_RIGHT_CLICK
+from highlight import Highlight
+from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK
 from drawClasses import Node, Edge, Port, OtherPlayer, MyPlayer, ReloadAbility, IDItem
 from port_position import opposite
 from chooseUI import ChooseReloadUI
@@ -12,10 +12,9 @@ from temp_network import Network
 from default_abilities import VISUALS, CLICKS
 from default_colors import PLAYER_COLORS
 from abilityManager import AbstractAbilityManager
-from ability_validators import make_ability_validators
+from ability_validators import make_ability_validators, unowned_node
 from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
-from ability_validators import unowned_node
 from clickTypeEnum import ClickType
 
 class Main:

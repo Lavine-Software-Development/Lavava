@@ -1,4 +1,5 @@
-from Server.constants import (
+from jsonable import Jsonable
+from Backend.constants import (
     EDGE,
     MINIMUM_TRANSFER_VALUE,
     BEGIN_TRANSFER_VALUE,
@@ -6,7 +7,7 @@ from Server.constants import (
 )
 
 
-class Edge:
+class Edge(Jsonable):
     def __init__(self, to_node, from_node, id, initial=False):
         self.item_type = EDGE
         self.to_node = to_node
@@ -18,6 +19,9 @@ class Edge:
         self.update_nodes(initial)
         self.state = "one-way"
         self.type = EDGE
+
+        self.start_values = {'to_node', 'from_node', 'state'}
+        self.tick_values = {'on', 'flowing', 'state'}
 
     def __str__(self):
         return str(self.id)

@@ -277,7 +277,7 @@ class Draw2:
                 py.draw.lines(self.screen, color, True, [point1, point2, point3])
 
         # if self.board.highlighted == edge:
-             self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
+            #  self.edge_highlight(dy, dx, magnitude, length_factor, start, end, spacing)
 
     def draw_circle(self, edge, color, start, end):
         length_factor = 1.5

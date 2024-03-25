@@ -1,4 +1,3 @@
-\
 from drawClasses import State, MineState, CapitalState
 from constants import DARK_YELLOW, ISLAND_RESOURCE_BUBBLE, RESOURCE_BUBBLE, YELLOW
 

@@ -1,18 +1,15 @@
-from Frontend.constants import SPAWN_CODE
+from constants import SPAWN_CODE
 from playerStateEnums import PlayerStateEnum as PSE
-from gameStateEnums import GameStateEnum as GSE
-import mode
 from board import Board
 from map_builder import MapBuilder
 from ability_effects import make_ability_effects
 from player import DefaultPlayer
 
 class ServerGame:
-    def __init__(self, player_count, mode_num, gs):
+    def __init__(self, player_count, gs):
 
         self.running = True
         self.gs = gs
-        mode.MODE = mode_num
         self.board = Board(self.gs)
         self.ability_effects = make_ability_effects(self.board)
         self.player_dict = {

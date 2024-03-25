@@ -1,5 +1,5 @@
-from edge import Edge
-from Server.constants import DYNAMIC_EDGE
+from Backend.edge import Edge
+from Backend.constants import DYNAMIC_EDGE
 
 
 class DynamicEdge(Edge):
@@ -7,6 +7,8 @@ class DynamicEdge(Edge):
         super().__init__(node1, node2, id, initial)
         self.state = "two-way"
         self.item_type = DYNAMIC_EDGE
+
+        self.tick_values = self.tick_values | {'to_node'}
 
     def update_nodes(self, initial=False):
         self.to_node.new_edge(self, "incoming", initial)
