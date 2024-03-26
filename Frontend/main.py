@@ -17,9 +17,30 @@ from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
 
-def is_prim(t):
-    primitive_types = {int, float, str, bool, bytes}
-    return t in primitive_types
+
+class SafeNestedDict(dict):
+    def __getitem__(self, key):
+        if key in self:
+            # If the key exists, return a function that looks up another key in the nested dictionary.
+            # If the inner key doesn't exist, it will raise KeyError.
+            return lambda k: super().__getitem__(key)[k]
+        else:
+            # If the key doesn't exist, return a function that just returns the key it was given.
+            return lambda k: k
+
+def get_adjusted_type_hints(obj, globalns=None, localns=None, include_extras=False):
+    hints = get_type_hints(obj, globalns, localns, include_extras)
+    adjusted_hints = {}
+
+    for name, type_hint in hints.items():
+        # Check if this is an Optional or Union type with NoneType as one of the options
+        if hasattr(type_hint, '__origin__') and type_hint.__origin__ is Union and type(None) in type_hint.__args__:
+            # Assume there's exactly one non-NoneType, use it directly
+            adjusted_hints[name] = next(t for t in type_hint.__args__ if t is not type(None))
+        else:
+            adjusted_hints[name] = type_hint
+
+    return adjusted_hints
 
 class Main:
 
@@ -50,10 +71,13 @@ class Main:
         self.parse(self.edges, update_data['board']['edges'])
 
     def parse(self, items: dict[IDItem, Any], updates):
+
+        i_t = get_adjusted_type_hints(type(items[0]))
+        # update_types = {key: self.types[i_t[key]] for key in updates[0] if not is_prim(i_t[key])}
+
         for u in updates:
 
             obj = items[u]
-            oth = get_type_hints(type(obj))
 
             for key, val in updates[u]:
                 if hasattr(obj, key):
@@ -61,12 +85,8 @@ class Main:
 
                     if update_val is not None:
 
-                        desired_type = oth[key]
-                        if isinstance(desired_type, type(Optional)):
-                            desired_type = desired_type.__args__[0]
-
-                        if not is_prim(desired_type):
-                            update_val = self.types[type(val)][key]
+                        desired_type = i_t[key]
+                        update_val = self.types[desired_type](key)
                             
                     setattr(obj, key, update_val)
 
@@ -91,7 +111,7 @@ class Main:
         self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], self.make_ports(n[id]["port_count"]), state_dict[n[id]["state_visual_id"]], n[id]['value']) for id in n}
         self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
 
-        self.types = {OtherPlayer: self.players, Node: self.nodes, Edge: self.edges}
+        self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges})
 
         self.logic = Logic(self.nodes, self.edges)
 
