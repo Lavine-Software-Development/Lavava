@@ -18,13 +18,17 @@ class DefaultPlayer():
         self.ps = PlayerState()
 
     def tick_json(self):
-        return {'abilities': {k: v.tick_json for k, v in self.abilities.items()}, 'ps': self.ps.value}
+        ability_dict = dict()
+        for ab in self.abilities.values():
+            ability_dict.update(ab.tick_json)
+        return {'abilities': ability_dict, 'ps': self.ps.value}
 
     def set_abilities(self, abilities, board):
         validators = make_ability_validators(board, self)
         effects = make_ability_effects(board)
         for ab in abilities:
             self.abilities[ab] = ReloadAbility(ab, validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
+        print("set abilities player")
         self.ps.next()
 
     def use_ability(self, key, data):

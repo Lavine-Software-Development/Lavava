@@ -79,14 +79,10 @@ class Network():
             return False
 
     def receive_board_data(self):
-        #try:
-            data = self.client.recv(10000).decode()
-            data_dict = convert_keys_to_int(json.loads(data))
-            self.setup_callback(data_dict)
-            threading.Thread(target=self.listen).start()
-        #except:
-         #   print("Failed to receive board data.")
-          #  return False
+        data = self.client.recv(10000).decode()
+        data_dict = convert_keys_to_int(json.loads(data))
+        self.setup_callback(data_dict)
+        threading.Thread(target=self.listen).start()
             
     def simple_send(self, code):
         self.send({'code': code, 'body': {}})
@@ -101,7 +97,6 @@ class Network():
         while True:
             try:
                 data = self.client.recv(10000).decode()  # Adjust buffer size if necessary
-                # print(data)
                 
                 # Split the data string into individual JSON objects
                 json_objects = split_json_objects(data)
@@ -111,7 +106,6 @@ class Network():
                     self.update_callback(data_dict)
 
             except socket.error as e:
-                print(e)
                 break
 
 

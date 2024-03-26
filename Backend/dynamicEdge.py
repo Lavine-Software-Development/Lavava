@@ -8,7 +8,7 @@ class DynamicEdge(Edge):
         self.dynamic = True
         self.item_type = DYNAMIC_EDGE
 
-        # self.tick_values = self.tick_values | {"to_node"}
+        self.tick_values = self.tick_values | {"to_node", "from_node"}
 
     def update_nodes(self, initial=False):
         self.to_node.new_edge(self, "incoming", initial)

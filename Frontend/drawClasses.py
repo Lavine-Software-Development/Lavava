@@ -47,7 +47,7 @@ class IDItem(Parseable):
 class Node(IDItem):
     pos: tuple
     ports: list[Port]
-    state: State
+    state_visual: State
     value: int
     effects: set = field(default_factory=set)
     owner: Optional[OtherPlayer] = None
@@ -74,7 +74,7 @@ class Node(IDItem):
     
     @property
     def state_name(self):
-        return self.state.name
+        return self.state_visual.name
     
     @property
     def full(self):
@@ -115,8 +115,8 @@ class ReloadAbility:
     verification_func: Callable[..., bool]
     credits: int
     reload: int
-    percent: float = 1.0
     count: int = 0
+    percent: float = 1.0
 
     @property
     def selection_display_num(self):

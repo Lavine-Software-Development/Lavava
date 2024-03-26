@@ -16,7 +16,6 @@ BOX_PADDING = 18  # Padding around each box
 class ChooseUI:
 
     def __init__(self, boxes):
-        # gs.next()
         self.boxes = boxes
         self.box_rects = []
         self.selected_boxes = set()
@@ -80,7 +79,6 @@ class ChooseUI:
             pygame.display.flip()
             self.clock.tick(60)
 
-        # self.gs.next()
         # if DEFAULT_SPAWN[mode.MODE]:
         #     return [SPAWN_CODE] + list(self.selected_boxes)
         # return list(self.selected_boxes)

@@ -35,9 +35,8 @@ class Node(Jsonable):
         self.set_default_state()
         self.updated = False
 
-        self.start_values = {'pos', 'state_visual_id', 'value'}
-        self.tick_values = {'value', 'owner', 'effects'}
-        # self.tick_values = {'value', 'owner', 'effects', 'state_visual_id'}
+        self.start_values = {'pos', 'state_visual', 'value'}
+        self.tick_values = {'value', 'owner', 'effects', 'state_visual'}
 
     def __str__(self):
         return str(self.id)
@@ -52,7 +51,7 @@ class Node(Jsonable):
         if status_name in STATE_NAMES:
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
-            self.state_visual_id = self.state.visual_id
+            self.state_visual = self.state.visual_id
         elif status_name in EFFECT_NAMES:
             self.effects[status_name] = self.new_effect(status_name)
         self.calculate_interactions()
@@ -134,8 +133,11 @@ class Node(Jsonable):
     def relocate(self, width, height):
         self.pos = (self.pos_x_per * width, self.pos_y_per * height)
 
+    # def owned_and_alive(self):
+    #     return self.owner is not None and not self.owner.eliminate
+        
     def owned_and_alive(self):
-        return self.owner is not None and not self.owner.eliminated
+        return self.owner is not None
 
     def spread_poison(self):
         for edge in self.outgoing:

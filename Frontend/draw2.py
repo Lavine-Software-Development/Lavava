@@ -46,12 +46,10 @@ class Draw2:
     def set_data(self, main_player ,players, nodes, edges, ability_manager):
         self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
         py.display.set_caption("Lavava")
-        # self.board = board
         self.main_player = main_player
         self.players = players
         self.edges = edges
         self.nodes = nodes
-        # self.game_state = game_state
         self.ability_manager = ability_manager
         self.abilities = self.ability_manager.abilities
 
@@ -328,17 +326,15 @@ class Draw2:
 
     def blit_edges(self):
         for edge in self.edges:
-            if isinstance(edge.to_node, int):
-                print("uh oh", str(edge.to_node)) 
-            elif not edge.dynamic:
-                self.draw_arrow(edge, edge.color, edge.from_node.pos, edge.to_node.pos)
+            if not edge.dynamic:
+                self.draw_arrow(edge, edge.color, edge.to_node.pos, edge.from_node.pos)
             else:
                 self.draw_circle(edge, edge.color, edge.from_node.pos, edge.to_node.pos)
 
     def blit_nodes(self):
         for spot in self.nodes:
             if spot.state_name == "mine":
-                state = spot.state
+                state = spot.state_visual
                 if spot.owner is not None:
                     angle1 = 2 * math.pi * ((state.bubble - spot.value) / state.bubble)
                     py.draw.arc(
@@ -370,7 +366,7 @@ class Draw2:
                 else:
                     py.draw.circle(self.screen, GREY, spot.pos, spot.size)
                 py.draw.circle(
-                    self.screen, spot.state.ring_color, spot.pos, spot.size + 6, 6
+                    self.screen, spot.state_visual.ring_color, spot.pos, spot.size + 6, 6
                 )
             elif spot.state_name == "zombie":
                 py.draw.rect(self.screen, spot.color,
@@ -433,8 +429,8 @@ class Draw2:
                     # Blit the rotated port surface onto the screen
                     self.screen.blit(rotated_port, rotated_rect.topleft)
 
-    def blit_numbers(self):
-        py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))
+    def blit_numbers(self, time):
+        # py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))
         # Gross
         # if mode.MODE != 2:
         #     self.screen.blit(
@@ -475,23 +471,23 @@ class Draw2:
         #         ),
         #         (self.width - 450, 20),
         #     )
-        # elif self.player_manager.timer > 0:
-        #     if self.player_manager.timer < 4:
-        #         self.screen.blit(
-        #             self.font.render(
-        #                 f"{self.player_manager.timer + 1:.0f}", True, BLACK
-        #             ),
-        #             (20, 20),
-        #         )
-        #     else:
-        #         self.screen.blit(
-        #             self.font.render(
-        #                 f"{self.player_manager.timer + 1:.0f}",
-        #                 True,
-        #                 CONTEXT["main_player"].color,
-        #             ),
-        #             (20, 20),
-        #         )
+        if time > 0:
+            if time < 4:
+                self.screen.blit(
+                    self.font.render(
+                        f"{time + 1:.0f}", True, BLACK
+                    ),
+                    (20, 20),
+                )
+            else:
+                self.screen.blit(
+                    self.font.render(
+                        f"{time + 1:.0f}",
+                        True,
+                        self.main_player.color,
+                    ),
+                    (20, 20),
+                )
         # elif CONTEXT["main_player"].eliminated:
         #     self.screen.blit(
         #         self.font.render("ELIMINATED", True, CONTEXT["main_player"].color),
@@ -558,7 +554,7 @@ class Draw2:
 
     def blit_capital_stars(self):
         for spot in self.nodes:
-            if spot.state_name == "capital" and spot.state.capitalized:
+            if spot.state_name == "capital" and spot.state_visual.capitalized:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 
@@ -622,8 +618,8 @@ class Draw2:
             self.screen.blit(rotated_surface, screen_pos)
 
 
-    def blit(self, ps):
-        self.screen.fill(WHITE)
+    def blit(self, ps, time):
+        self.screen.fill(WHITE) 
         self.blit_nodes()
         self.blit_edges()
         if self.highlight:
@@ -632,7 +628,7 @@ class Draw2:
         if ps == PSE.START_WAITING:
             self.blit_waiting()
         else:
-            self.blit_numbers()
+            self.blit_numbers(time)
         self.draw_buttons()
         # if (
         #     BRIDGE_CODE in self.abilities

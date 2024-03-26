@@ -25,7 +25,8 @@ class ServerGame:
     def tick_json(self, player):
         return {
             "board": self.board.tick_json(),
-            "player": self.player_dict[player].tick_json()
+            "player": self.player_dict[player].tick_json(),
+            "timer": self.timer,
         }
     
     def effect(self, key, player_id, data):
@@ -35,6 +36,8 @@ class ServerGame:
             if key == SPAWN_CODE:
                 data_items = [self.board.id_dict[d] for d in data]
                 self.ability_effects[key](data_items, player)
+                print("spawn effect")
+                player.ps.next()
             else:
                 return False
         else:  
@@ -65,9 +68,13 @@ class ServerGame:
     def set_abilities(self, player, abilities):
         self.player_dict[player].set_abilities(abilities, self.board)
         if self.all_player_abilities_set:
+            print("set abilities game")
             self.gs.next()
-            for player in self.player_dict.values():
-                player.ps.next()
+            self.all_player_next()
+
+    def all_player_next(self):
+        for player in self.player_dict.values():
+            player.ps.next()
 
     @property
     def all_player_abilities_set(self):
@@ -81,11 +88,16 @@ class ServerGame:
         if self.timer > 0:
             self.timer -= 0.1
 
+            if self.timer <= 0:
+                print("timer zero")
+                self.gs.next()
+                self.all_player_next()
+
             if self.timer > 3 and self.all_player_starts_selected:
                 self.timer = 3
-            return True
 
-        self.gs.next()
+            return True
+        
         return False
 
     def tick(self):

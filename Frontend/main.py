@@ -1,8 +1,9 @@
 from typing import Any, Union, Tuple, get_type_hints, Optional
 import pygame as py
+from constants import BRIDGE_CODE, D_BRIDGE_CODE, FREEZE_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
-from drawClasses import Node, Edge, Port, OtherPlayer, MyPlayer, ReloadAbility, IDItem
+from drawClasses import Node, Edge, Port, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State
 from port_position import opposite
 from chooseUI import ChooseReloadUI
 from draw2 import Draw2
@@ -17,15 +18,14 @@ from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
 
-
 class SafeNestedDict(dict):
     def __getitem__(self, key):
         if key in self:
-            # If the key exists, return a function that looks up another key in the nested dictionary.
-            # If the inner key doesn't exist, it will raise KeyError.
-            return lambda k: super().__getitem__(key)[k]
+            # Directly access the dictionary to avoid recursion
+            nested_dict = dict.__getitem__(self, key)
+            return lambda k: nested_dict[k]
         else:
-            # If the key doesn't exist, return a function that just returns the key it was given.
+            # If the key doesn't exist, return a function that just returns the key it was given
             return lambda k: k
 
 def get_adjusted_type_hints(obj, globalns=None, localns=None, include_extras=False):
@@ -48,16 +48,20 @@ class Main:
         py.init() 
 
         self.ps = PSE.ABILITY_SELECTION
+        self.timer = 60
         self.highlight = Highlight()
 
         self.drawer = Draw2(self.highlight)
         self.can_draw = False
 
-        data, server = settings_ui()
+        data, server = self.settings()
         self.network = Network(self.setup, self.update, data, server)
         self.network.receive_board_data()
 
         self.run()
+
+    def settings(self):
+        return settings_ui()
 
     def make_ports(self, count):
         angles = opposite()[:count]
@@ -65,28 +69,30 @@ class Main:
     
     def update(self, update_data):
         self.ps = update_data['player']['ps']
-        self.ability_manager.update(update_data['player']['abilities'])
+        self.timer = update_data['timer']
 
+        self.parse(self.ability_manager.abilities, update_data['player']['abilities'])
         self.parse(self.nodes, update_data['board']['nodes'])
         self.parse(self.edges, update_data['board']['edges'])
 
-    def parse(self, items: dict[IDItem, Any], updates):
+    def parse(self, items: dict[IDItem, Any], updates, most_complex_item=None):
+        if most_complex_item is None:
+            # select an arbitrary item to get the type hints
+            most_complex_item = next(iter(items.values()))
 
-        i_t = get_adjusted_type_hints(type(items[0]))
+        i_t = get_adjusted_type_hints(type(most_complex_item))
         # update_types = {key: self.types[i_t[key]] for key in updates[0] if not is_prim(i_t[key])}
-
         for u in updates:
-
             obj = items[u]
 
-            for key, val in updates[u]:
+            for key, val in updates[u].items():
                 if hasattr(obj, key):
                     update_val = val
 
                     if update_val is not None:
 
                         desired_type = i_t[key]
-                        update_val = self.types[desired_type](key)
+                        update_val = self.types[desired_type](val)
                             
                     setattr(obj, key, update_val)
 
@@ -108,29 +114,29 @@ class Main:
 
         self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
         self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
-        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], self.make_ports(n[id]["port_count"]), state_dict[n[id]["state_visual_id"]], n[id]['value']) for id in n}
+        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], self.make_ports(n[id]["port_count"]), state_dict[n[id]["state_visual"]], n[id]['value']) for id in n}
         self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
 
-        self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges})
+        self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges, State: state_dict})
 
         self.logic = Logic(self.nodes, self.edges)
 
-        av = make_ability_validators(self.logic, self.my_player)
+        chosen_boxes = self.choose_abilities(abi, credits)
+        self.send_abilities(chosen_boxes)
+        self.ability_manager = AbstractAbilityManager(chosen_boxes, self.my_player.color)
 
+        self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_manager)
+        self.can_draw = True
+
+    def choose_abilities(self, abi, credits):
+        av = make_ability_validators(self.logic, self.my_player)
         boxes = {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload']) for ab in abi}
         for box in boxes.values():
             if box.visual.color[0] is None:
                 box.visual.color = self.my_player.color
         ui = ChooseReloadUI(boxes, credits)
         ui.choose_abilities()
-        chosen_boxes = {b: v for b, v in boxes.items() if v.count > 0}
-
-        self.send_abilities(chosen_boxes)
-
-        self.ability_manager = AbstractAbilityManager(chosen_boxes, self.my_player.color)
-
-        self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_manager)
-        self.can_draw = True
+        return {b: v for b, v in boxes.items() if v.count > 0}
 
     def valid_hover(self, position) -> Union[Tuple[IDItem, int], bool]:
         if node := self.find_node(position):
@@ -192,12 +198,17 @@ class Main:
         elif self.ps == PSE.VICTORY:
             if event.key == RESTART_CODE:
                 self.network.simple_send(RESTART_CODE)
-        elif self.ps == PSE.PLAY:
+        elif self.ps == PSE.PLAY.value:
+            print("playing")
             if event.key in self.ability_manager.abilities:
+                print("in abilities")
                 if self.ability_manager.select(event.key):
+                    print("selected")
                     self.network.simple_send(self.ability_manager.mode)
             elif event.key == FORFEIT_CODE:
                 self.network.simple_send(FORFEIT_CODE)
+        else:
+            print("not playing")
 
     def run(self):
         while True:
@@ -215,12 +226,37 @@ class Main:
                 elif event.type == py.MOUSEBUTTONDOWN:
                     self.mouse_button_down_event(event.button)
                 elif event.type == py.KEYDOWN:
+                    print("keydown")
                     self.keydown(event)
             if self.can_draw:
-                self.drawer.blit(self.ps)
+                self.drawer.blit(self.ps, self.timer)
                 py.display.flip()
+
+
+class TestMain(Main):
+
+    def settings(self):
+        return ["HOST", 1, 2], str(self.get_local_ip())
+
+    def choose_abilities(self, abi, credits):
+        av = make_ability_validators(self.logic, self.my_player)
+        counts = {BRIDGE_CODE: 3, D_BRIDGE_CODE: 3, FREEZE_CODE : 4}
+        return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
+
+    def get_local_ip(self):
+        import socket
+        try:
+            # Create a socket connection to determine the local IP address
+            # The address '8.8.8.8' and port 80 are used here as an example and do not need to be reachable
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                s.connect(("8.8.8.8", 80))
+                local_ip = s.getsockname()[0]
+            return local_ip
+        except Exception as e:
+            print(f"Error getting local IP address: {e}")
+            return None
 
 
 
 if __name__ == "__main__":
-    Main()
+   TestMain()
