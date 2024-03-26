@@ -1,4 +1,4 @@
-from typing import Any, Union, Tuple
+from typing import Any, Union, Tuple, get_type_hints, Optional
 import pygame as py
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
@@ -16,6 +16,10 @@ from ability_validators import make_ability_validators, unowned_node
 from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
+
+def is_prim(t):
+    primitive_types = {int, float, str, bool, bytes}
+    return t in primitive_types
 
 class Main:
 
@@ -46,11 +50,30 @@ class Main:
         self.parse(self.edges, update_data['board']['edges'])
 
     def parse(self, items: dict[IDItem, Any], updates):
-        for item in updates:
-            items[item].parse(updates[item])
-            # tech debt 
-            if isinstance(items[item], Node) and items[item].owner is not None:
-                items[item].owner = self.players[items[item].owner]
+        for u in updates:
+
+            obj = items[u]
+            oth = get_type_hints(type(obj))
+
+            for key, val in updates[u]:
+                if hasattr(obj, key):
+                    update_val = val
+
+                    if update_val is not None:
+
+                        desired_type = oth[key]
+                        if isinstance(desired_type, type(Optional)):
+                            desired_type = desired_type.__args__[0]
+
+                        if not is_prim(desired_type):
+                            update_val = self.types[type(val)][key]
+                            
+                    setattr(obj, key, update_val)
+
+            # items[item].parse(updates[item])
+            # # tech debt 
+            # if isinstance(items[item], Node) and items[item].owner is not None:
+            #     items[item].owner = self.players[items[item].owner]
 
     def send_abilities(self, boxes):
         self.chosen_abilities = {ab: boxes[ab].count for ab in boxes}
@@ -67,6 +90,8 @@ class Main:
         self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
         self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], self.make_ports(n[id]["port_count"]), state_dict[n[id]["state_visual_id"]], n[id]['value']) for id in n}
         self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
+
+        self.types = {OtherPlayer: self.players, Node: self.nodes, Edge: self.edges}
 
         self.logic = Logic(self.nodes, self.edges)
 
