@@ -1,7 +1,7 @@
 from typing import Any, Union, Tuple
 import pygame as py
 from highlight import Highlight
-from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK
+from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import Node, Edge, Port, OtherPlayer, MyPlayer, ReloadAbility, IDItem
 from port_position import opposite
 from chooseUI import ChooseReloadUI
@@ -48,6 +48,9 @@ class Main:
     def parse(self, items: dict[IDItem, Any], updates):
         for item in updates:
             items[item].parse(updates[item])
+            # tech debt 
+            if isinstance(items[item], Node) and items[item].owner is not None:
+                items[item].owner = self.players[items[item].owner]
 
     def send_abilities(self, boxes):
         self.chosen_abilities = {ab: boxes[ab].count for ab in boxes}
@@ -63,7 +66,7 @@ class Main:
         self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
         self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
         self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], self.make_ports(n[id]["port_count"]), state_dict[n[id]["state_visual_id"]], n[id]['value']) for id in n}
-        self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["state"] != 'one-way') for id in e}
+        self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
 
         self.logic = Logic(self.nodes, self.edges)
 
@@ -89,12 +92,12 @@ class Main:
             if self.ps == PSE.START_SELECTION.value:
                 if unowned_node([node]):
                     return node, SPAWN_CODE
-            elif self.ps == PSE.PLAY:
+            elif self.ps == PSE.PLAY.value:
                 if self.ability_manager.ability:
                     return self.ability_manager.validate(node)
                 
         elif edge := self.find_edge(position):
-            if self.ps == PSE.PLAY:
+            if self.ps == PSE.PLAY.value:
                 if self.ability_manager.ability:
                     if edge_highlight := self.ability_manager.validate(edge):
                         return edge_highlight
@@ -129,7 +132,7 @@ class Main:
     
     def mouse_button_down_event(self, button):
         if self.highlight:
-            if self.ps.value == PSE.START_SELECTION.value:
+            if self.ps == PSE.START_SELECTION.value:
                 self.network.send(self.highlight.send_format())
             else:
                 if (data := self.ability_manager.use_ability(self.highlight)) \
@@ -137,6 +140,19 @@ class Main:
                     self.network.send(self.highlight.send_format(items=data))
                 elif self.highlight.type == ClickType.EDGE:
                     self.network.send(self.highlight.send_format(code=button))
+
+    def keydown(self, event):
+        if event.key == OVERRIDE_RESTART_CODE:
+            self.network.simple_send(RESTART_CODE)
+        elif self.ps == PSE.VICTORY:
+            if event.key == RESTART_CODE:
+                self.network.simple_send(RESTART_CODE)
+        elif self.ps == PSE.PLAY:
+            if event.key in self.ability_manager.abilities:
+                if self.ability_manager.select(event.key):
+                    self.network.simple_send(self.ability_manager.mode)
+            elif event.key == FORFEIT_CODE:
+                self.network.simple_send(FORFEIT_CODE)
 
     def run(self):
         while True:
@@ -153,6 +169,8 @@ class Main:
                         self.highlight.wipe()
                 elif event.type == py.MOUSEBUTTONDOWN:
                     self.mouse_button_down_event(event.button)
+                elif event.type == py.KEYDOWN:
+                    self.keydown(event)
             if self.can_draw:
                 self.drawer.blit(self.ps)
                 py.display.flip()

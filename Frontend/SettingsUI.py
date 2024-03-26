@@ -242,7 +242,9 @@ def settings_ui():
         done_font = pygame.font.Font(None, done_font_size)
         done_text = done_font.render("Done", True, BLACK)
             
-        if (host_selected and host_settings_info[1] != 0 and host_settings_info[2] != 0) \
+        # if (host_selected and host_settings_info[1] != 0 and host_settings_info[2] != 0) \
+        #     or (join_selected and len(ip_address) > 0): 
+        if (host_selected and host_settings_info[2] != 0) \
             or (join_selected and len(ip_address) > 0): 
             
             pygame.draw.rect(screen, GREY, done_button)
@@ -266,6 +268,8 @@ def settings_ui():
             clock.tick(60)
 
             if host_selected:
+                if host_settings_info[1] == 0:
+                    host_settings_info[1] = 1
                 return host_settings_info, IP
             elif join_selected:
                 return join_settings_info, ip_address

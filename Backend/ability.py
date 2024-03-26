@@ -3,7 +3,8 @@ from constants import TIME_AMOUNT
 from abc import ABC, abstractmethod
 
 class AbstractAbility(ABC, Jsonable):
-    def __init__(self, validation_func, effect_func, in_game_cost, player, remaining=float("inf")):
+    def __init__(self, id, validation_func, effect_func, in_game_cost, player, remaining=float("inf")):
+        self.id = id
         self.validation_func = validation_func
         self.effect_func = effect_func
         self.in_game_cost = in_game_cost
@@ -32,8 +33,8 @@ class AbstractAbility(ABC, Jsonable):
 
 
 class ReloadAbility(AbstractAbility):
-    def __init__(self, validation_func, effect_func, in_game_cost, player, remaining):
-        super().__init__(validation_func, effect_func, in_game_cost, player, remaining)
+    def __init__(self, id, validation_func, effect_func, in_game_cost, player, remaining):
+        super().__init__(id, validation_func, effect_func, in_game_cost, player, remaining)
         self.load_amount = 0
 
     def counter(self):

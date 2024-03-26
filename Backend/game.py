@@ -33,7 +33,8 @@ class ServerGame:
 
         if player.ps.state == PSE.START_SELECTION:
             if key == SPAWN_CODE:
-                self.ability_effects[key](data, player)
+                data_items = [self.board.id_dict[d] for d in data]
+                self.ability_effects[key](data_items, player)
             else:
                 return False
         else:  

@@ -328,7 +328,9 @@ class Draw2:
 
     def blit_edges(self):
         for edge in self.edges:
-            if edge.dynamic == "one-way":
+            if isinstance(edge.to_node, int):
+                print("uh oh", str(edge.to_node)) 
+            elif not edge.dynamic:
                 self.draw_arrow(edge, edge.color, edge.from_node.pos, edge.to_node.pos)
             else:
                 self.draw_circle(edge, edge.color, edge.from_node.pos, edge.to_node.pos)
@@ -392,7 +394,8 @@ class Draw2:
             #         spot.size + 5,
             #         3,
             #     )
-            if spot.owner and spot.is_port:
+            # if spot.owner and spot.is_port:
+            if spot.owner:
                 port_width, port_height = (
                     spot.size * 1.5,
                     spot.size / 1.5,
@@ -402,18 +405,14 @@ class Draw2:
                     port_color = STRONG_ORANGE
                     percentage = spot.effects['burn'].counter / BURN_TICKS
                     port_width *= percentage
-                port_count = spot.port_count  # Number of ports
 
-                for i in range(port_count):
-                    # Angle for this port
-                    angle = spot.ports_angles[i]
-                    # Calculate the center of the port rectangle
+                for port in spot.ports:
                     port_center_x = spot.pos[0] + (
                         spot.size + port_height / 2
-                    ) * math.cos(angle)
+                    ) * math.cos(port.angle)
                     port_center_y = spot.pos[1] + (
                         spot.size + port_height / 2
-                    ) * math.sin(angle)
+                    ) * math.sin(port.angle)
 
                     # Create a new surface to draw the port rectangle (with per-pixel alpha)
                     port_surface = py.Surface((port_width, port_height), py.SRCALPHA)
@@ -423,7 +422,7 @@ class Draw2:
 
                     # Rotate the port surface to point outwards
                     rotated_port = py.transform.rotate(
-                        port_surface, math.degrees(-angle)
+                        port_surface, math.degrees(-port.angle)
                     )
 
                     # Get the new rect to blit the rotated port

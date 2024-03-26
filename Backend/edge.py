@@ -1,5 +1,5 @@
 from jsonable import Jsonable
-from Backend.constants import (
+from constants import (
     EDGE,
     MINIMUM_TRANSFER_VALUE,
     BEGIN_TRANSFER_VALUE,
@@ -17,11 +17,11 @@ class Edge(Jsonable):
         self.flowing = False
         self.popped = False
         self.update_nodes(initial)
-        self.state = "one-way"
+        self.dynamic = False
         self.type = EDGE
 
-        self.start_values = {'to_node', 'from_node', 'state'}
-        self.tick_values = {'on', 'flowing', 'state'}
+        self.start_values = {'to_node', 'from_node', 'dynamic'}
+        self.tick_values = {'on', 'flowing', 'dynamic'}
 
     def __str__(self):
         return str(self.id)

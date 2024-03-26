@@ -25,12 +25,11 @@ class Server:
         self.s.listen(10)
         print("Waiting for a connection, Server Started")
 
-    def send_ticks(self, batch):
+    def send_ticks(self, batch: Batch):
         time.sleep(1)
         while True:
 
-            if batch.tick_ready():
-                batch.tick()
+            batch.tick()
 
             for i, connection in enumerate(batch.connections):
                 # try:
@@ -43,7 +42,7 @@ class Server:
                 # except OSError as e:
                 #     print(f"Error on connection {i}: {e}")
                 #     del batch.connections[i]
-            time.sleep(1)
+            time.sleep(0.1)
 
     def threaded_client(self, conn):
 
@@ -61,15 +60,17 @@ class Server:
             if self.waiting_players:
                 conn.sendall("JOINED".encode())
                 self.waiting_players.add_player(conn)
-
-                if self.waiting_players.is_ready():
-                    print("Game is ready to start")
-                    self.waiting_players.build()
-                    self.start_game(self.waiting_players)
-                else:
-                    print("Game is not ready to start")
             else:
                 conn.sendall("FAIL".encode())
+                return
+
+        if self.waiting_players.is_ready():
+            print("Game is ready to start")
+            self.waiting_players.build()
+            self.start_game(self.waiting_players)
+        else:
+            print("Game is not ready to start")
+            
 
     def start_game(self, batch):
 

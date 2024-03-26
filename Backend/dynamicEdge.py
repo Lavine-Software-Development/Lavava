@@ -1,14 +1,14 @@
-from Backend.edge import Edge
-from Backend.constants import DYNAMIC_EDGE
+from edge import Edge
+from constants import DYNAMIC_EDGE
 
 
 class DynamicEdge(Edge):
     def __init__(self, node1, node2, id, initial=False):
         super().__init__(node1, node2, id, initial)
-        self.state = "two-way"
+        self.dynamic = True
         self.item_type = DYNAMIC_EDGE
 
-        self.tick_values = self.tick_values | {'to_node'}
+        # self.tick_values = self.tick_values | {"to_node"}
 
     def update_nodes(self, initial=False):
         self.to_node.new_edge(self, "incoming", initial)
@@ -25,7 +25,7 @@ class DynamicEdge(Edge):
         self.swap_direction()
 
     def swap_direction(self):
-        if self.state == "two-way":
+        if self.dynamic:
             temp = self.to_node
             self.to_node = self.from_node
             self.from_node = temp
@@ -64,7 +64,7 @@ class DynamicEdge(Edge):
                     self.natural_swap()
 
     def freeze(self):
-        self.state = "one-way"
+        self.dynamic = False
 
     def controlled_by(self, player):
         return super().controlled_by(player) or (

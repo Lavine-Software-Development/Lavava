@@ -1,4 +1,4 @@
-from Backend.playerStateEnums import PlayerStateEnum as PSE
+from playerStateEnums import PlayerStateEnum as PSE
 
 class PlayerState:
 

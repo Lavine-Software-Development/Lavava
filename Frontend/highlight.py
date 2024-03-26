@@ -15,6 +15,7 @@ class Highlight:
         self.item = None
         self.usage = None
 
+    @property
     def color(self):
         if self.usage:
             if self.usage in set(VISUALS) - {SPAWN_CODE}:
@@ -26,12 +27,15 @@ class Highlight:
         if self.item:
             return self.item.type
         return ClickType.BLANK
-    
+
     def send_format(self, code=None, items=None):
         code = code or self.usage
-        items = items or {self.item.id}
+        items = items or [self.item.id]
         return {"code": code, "items": items}
     
     def __call__(self, new_item: IDItem, new_usage: int):
         self.item = new_item
         self.usage = new_usage
+
+    def __bool__(self):
+        return bool(self.item)

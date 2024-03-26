@@ -75,11 +75,11 @@ def new_edge_validator(check_new_edge, player):
     return new_edge_ports
 
 
-def make_ability_validators(logic, player):
+def make_ability_validators(board, player):
     return {
         SPAWN_CODE: unowned_node,
-        BRIDGE_CODE: new_edge_validator(logic.check_new_edge, player),
-        D_BRIDGE_CODE: new_edge_validator(logic.check_new_edge, player),
+        BRIDGE_CODE: new_edge_validator(board.check_new_edge, player),
+        D_BRIDGE_CODE: new_edge_validator(board.check_new_edge, player),
         BURN_CODE: standard_port_node, 
         RAGE_CODE: no_click,
     } | validators_needing_player(player)

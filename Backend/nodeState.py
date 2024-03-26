@@ -1,4 +1,4 @@
-from Backend.constants import (
+from constants import (
     GROWTH_RATE,
     MINIMUM_TRANSFER_VALUE,
     CAPITAL_SHRINK_SPEED,

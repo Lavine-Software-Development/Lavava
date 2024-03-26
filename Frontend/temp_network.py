@@ -1,7 +1,7 @@
 import socket
 import threading
 import json
-from json_helpers import convert_keys_to_int
+from json_helpers import convert_keys_to_int, split_json_objects
 
 class SoloNetwork:
 
@@ -87,6 +87,9 @@ class Network():
         #except:
          #   print("Failed to receive board data.")
           #  return False
+            
+    def simple_send(self, code):
+        self.send({'code': code, 'body': {}})
 
     def send(self, data):
         try:
@@ -101,10 +104,9 @@ class Network():
                 # print(data)
                 
                 # Split the data string into individual JSON objects
-                json_objects = data.split('}}')
-                for obj_str in json_objects[:-1]:  # Exclude the last, likely incomplete, object
-                    obj_str += '}}'  # Add back the closing braces removed by split
-                    data_dict = convert_keys_to_int(json.loads(obj_str))
+                json_objects = split_json_objects(data)
+                for obj_str in json_objects:  # Exclude the last, likely incomplete, object
+                    data_dict = convert_keys_to_int(obj_str)
                     
                     self.update_callback(data_dict)
 

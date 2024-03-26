@@ -8,7 +8,7 @@ from constants import (
     BREAKDOWNS
 )
 from ability_validators import make_ability_validators
-from Backend.ability_effects import make_ability_effects
+from ability_effects import make_ability_effects
 from player_state import PlayerState
 
 class DefaultPlayer():
@@ -21,10 +21,10 @@ class DefaultPlayer():
         return {'abilities': {k: v.tick_json for k, v in self.abilities.items()}, 'ps': self.ps.value}
 
     def set_abilities(self, abilities, board):
-        validators = make_ability_validators(board)
+        validators = make_ability_validators(board, self)
         effects = make_ability_effects(board)
         for ab in abilities:
-            self.abilities[ab] = ReloadAbility(validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
+            self.abilities[ab] = ReloadAbility(ab, validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
         self.ps.next()
 
     def use_ability(self, key, data):
@@ -34,6 +34,7 @@ class DefaultPlayer():
         return False
 
     def default_values(self):
+        self.count = 0
         self.abilities = dict()
         self.effects = set()
         self.ps = PlayerState()

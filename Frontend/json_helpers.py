@@ -1,3 +1,5 @@
+import json
+
 def convert_keys_to_int(d):
     """
     Recursively converts string keys that can be converted into integers
@@ -9,3 +11,25 @@ def convert_keys_to_int(d):
         return [convert_keys_to_int(item) for item in d]
     else:
         return d
+    
+def split_json_objects(data):
+    objects = []
+    brace_count = 0
+    current_object = ""
+    
+    for char in data:
+        current_object += char
+        if char == '{':
+            brace_count += 1
+        elif char == '}':
+            brace_count -= 1
+        
+        if brace_count == 0 and current_object.strip():
+            try:
+                objects.append(json.loads(current_object))
+                current_object = ""  # Reset for the next object
+            except json.JSONDecodeError as e:
+                print(f"Error decoding JSON: {e}")
+                # Handle or log the error as needed
+                
+    return objects

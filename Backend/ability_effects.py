@@ -1,4 +1,4 @@
-from Backend.constants import (
+from constants import (
     BRIDGE_CODE,
     D_BRIDGE_CODE,
     SPAWN_CODE,

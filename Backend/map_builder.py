@@ -1,6 +1,6 @@
 from collections import defaultdict
 import numpy as np
-from Backend.constants import (
+from constants import (
     NODE_COUNT,
     EDGE_COUNT,
     ONE_WAY_COUNT,
@@ -14,6 +14,7 @@ from edge import Edge
 from dynamicEdge import DynamicEdge
 from map_builder_helpers import starter_port_nodes, starter_capitals
 from random import randint
+
 
 class MapBuilder:
     def __init__(self):
@@ -32,12 +33,8 @@ class MapBuilder:
         count = 0
         while count < NODE_COUNT:
             spot = [
-                randint(
-                    int(SCREEN_WIDTH / 10), int(9 * SCREEN_WIDTH / 10)
-                ),
-                randint(
-                    int(SCREEN_HEIGHT / 10), int(9 * SCREEN_HEIGHT / 10)
-                ),
+                randint(int(SCREEN_WIDTH / 10), int(9 * SCREEN_WIDTH / 10)),
+                randint(int(SCREEN_HEIGHT / 10), int(9 * SCREEN_HEIGHT / 10)),
             ]
 
             works = True
@@ -154,7 +151,7 @@ class MapBuilder:
     @property
     def starter_states(self):
         return starter_capitals
-    
+
     @property
     def node_function(self):
         return starter_port_nodes

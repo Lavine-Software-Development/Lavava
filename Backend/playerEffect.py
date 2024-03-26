@@ -1,5 +1,5 @@
-from Backend.constants import RAGE_TICKS
-from Backend.abstractEffect import AbstractPlayerEffect
+from constants import RAGE_TICKS
+from abstractEffect import AbstractPlayerEffect
 
 class PlayerEnraged(AbstractPlayerEffect):
 

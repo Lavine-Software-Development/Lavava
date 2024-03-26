@@ -36,7 +36,7 @@ def starter_mines(nodes):
                 island_mines += 1
         else:
             if (
-                sum(1 for edge in node.incoming if edge.state == "one-way")
+                sum(1 for edge in node.incoming if not edge.dynamic)
                 and network_mines < NETWORK_RESOURCE_COUNT
                 and not any(1 for neigh in node.neighbors if neigh.state_name == "mine")
             ):
@@ -55,7 +55,7 @@ def starter_capitals(nodes):
         if len(node.edges) != 0:
             if (
                 (node.item_type == NODE or not node.is_port)
-                and sum(1 for edge in node.incoming if edge.state == "one-way")
+                and sum(1 for edge in node.incoming if not edge.dynamic)
                 and capitals < CAPITAL_START_COUNT
                 and not any(
                     1 for neigh in node.neighbors if neigh.state_name == "capital"

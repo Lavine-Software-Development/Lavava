@@ -59,9 +59,9 @@ class Batch:
         elif key == ELIMINATE_VAL:
             self.game.eliminate(player)
         elif key in ALL_ABILITIES:
-            self.game.effect(key, player, data)
+            self.game.effect(key, player, data['items'])
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-            self.game.click(data[0], player, key)
+            self.game.click(data['items'][0], player, key)
         else:
             print("NOT ALLOWED")
         
