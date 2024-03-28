@@ -513,10 +513,7 @@ class Draw2:
         self.screen.fill(WHITE)
 
     def edge_build(self, end, type):
-        if type == 1:
-            start = self.abilities[BRIDGE_CODE].clicks[0].pos
-        else:
-            start = self.abilities[D_BRIDGE_CODE].clicks[0].pos
+        start = self.ability_manager.clicks[0].pos
         triangle_size = 5
         spacing = 9
         dx = end[0] - start[0]
@@ -536,7 +533,7 @@ class Draw2:
                 start[1] + i * spacing * dy + 5 * dy,
             )
 
-            if type == 1:
+            if type == BRIDGE_CODE:
                 point1 = pos
                 point2 = (
                     pos[0] - length_factor * triangle_size * dx + triangle_size * dy,
@@ -630,16 +627,8 @@ class Draw2:
         else:
             self.blit_numbers(time)
         self.draw_buttons()
-        # if (
-        #     BRIDGE_CODE in self.abilities
-        #     and len(self.abilities[BRIDGE_CODE].clicks) >= 1
-        # ):
-        #     self.edge_build(mouse_pos, 1)
-        # if (
-        #     D_BRIDGE_CODE in self.abilities
-        #     and len(self.abilities[D_BRIDGE_CODE].clicks) >= 1
-        # ):
-        #     self.edge_build(mouse_pos, 2)
+        if (self.ability_manager.mode in [BRIDGE_CODE, D_BRIDGE_CODE]) and self.ability_manager.clicks:
+            self.edge_build(py.mouse.get_pos(), self.ability_manager.mode)
         py.display.update()
 
     def relocate(self, width, height):

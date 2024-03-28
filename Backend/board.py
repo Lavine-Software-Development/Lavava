@@ -11,17 +11,19 @@ from helpers import do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from tracker import Tracker
+from priorityEnums import PriorityEnum
 
 
 class Board:
-    def __init__(self, gs):
+    def __init__(self, gs, priority):
         self.gs = gs
         self.nodes = []
         self.edges = []
         self.edge_dict = defaultdict(set)
-        self.extra_edges = 2
+        self.extra_edges = 0
         self.tracker = Tracker()
         self.player_capitals = defaultdict(set)
+        self.priority = priority
     
     def start_json(self):
         nodes_json = {k: v for node in self.nodes for k, v in node.start_json.items()}
@@ -75,7 +77,7 @@ class Board:
         self.id_dict = {node.id: node for node in self.nodes} | {
             edge.id: edge for edge in self.edges
         }
-        self.extra_edges = 2
+        self.extra_edges = 0
         self.tracker.reset()
         self.player_capitals.clear()
         self.track_starting_states()
@@ -135,12 +137,11 @@ class Board:
             return False
         return True
 
-    def new_edge_id(self, node_from):
+    def new_edge_id(self):
         return (
             NODE_COUNT
             + EDGE_COUNT
             + self.extra_edges
-            + self.id_dict[node_from].owner.id
         )
 
     def check_all_overlaps(self, edge):
@@ -170,18 +171,22 @@ class Board:
             self.nodeDict[edge2[1]],
         )
 
-    def buy_new_edge(self, id, node_from, node_to, edge_type):
+    def buy_new_edge(self, node_from, node_to, edge_type):
+        new_id = self.new_edge_id()
         if edge_type == DYNAMIC_EDGE:
-            newEdge = DynamicEdge(self.id_dict[node_to], self.id_dict[node_from], id)
+            newEdge = DynamicEdge(node_to, node_from, new_id)
         else:
-            newEdge = Edge(self.id_dict[node_to], self.id_dict[node_from], id)
+            newEdge = Edge(node_to, node_from, new_id)
 
         newEdge.check_status()
         newEdge.popped = True
         newEdge.switch(True)
         self.edges.append(newEdge)
         self.id_dict[newEdge.id] = newEdge
-        self.extra_edges += 5
+        self.extra_edges += 1
+
+        self.priority[PriorityEnum.NEW_EDGE.value].update(newEdge.start_json)
+        print("bought new edge here it is: ", self.priority)
 
     def remove_node(self, node):
         node.owner.count -= 1

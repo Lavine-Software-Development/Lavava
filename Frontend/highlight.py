@@ -30,7 +30,10 @@ class Highlight:
 
     def send_format(self, code=None, items=None):
         code = code or self.usage
-        items = items or [self.item.id]
+        if not items:
+            items = [self.item.id]
+        else:
+            print(items)
         return {"code": code, "items": items}
     
     def __call__(self, new_item: IDItem, new_usage: int):

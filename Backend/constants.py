@@ -18,8 +18,6 @@ class AbilityVisual:
     color: tuple
     count: int = 0
 
-CONTEXT = {}
-
 NODE_COUNT = 65
 EDGE_COUNT = 60
 MAX_EDGE_LENGTH = 7

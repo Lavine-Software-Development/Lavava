@@ -79,6 +79,10 @@ class Node(IDItem):
     @property
     def full(self):
         return self.value >= GROWTH_STOP
+    
+    @property
+    def port_count(self):
+        return len(self.ports)
 
 @dataclass
 class Edge(IDItem):

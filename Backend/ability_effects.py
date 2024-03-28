@@ -17,8 +17,9 @@ from playerEffect import PlayerEnraged
 
 def make_bridge(buy_new_edge, bridge_type):
     def bridge_effect(data, player):
-        id1, id2, id3 = data
-        buy_new_edge(id1, id2.id, id3.id, bridge_type)
+        id1, id2 = data
+        print("buying bridge")
+        buy_new_edge(id1, id2, bridge_type)
 
     return bridge_effect
 

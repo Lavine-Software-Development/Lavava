@@ -4,13 +4,15 @@ from board import Board
 from map_builder import MapBuilder
 from ability_effects import make_ability_effects
 from player import DefaultPlayer
+from collections import defaultdict
 
 class ServerGame:
     def __init__(self, player_count, gs):
 
         self.running = True
         self.gs = gs
-        self.board = Board(self.gs)
+        self.priority = defaultdict(dict)
+        self.board = Board(self.gs, self.priority)
         self.ability_effects = make_ability_effects(self.board)
         self.player_dict = {
             i: DefaultPlayer(i) for i in range(player_count)
@@ -24,6 +26,7 @@ class ServerGame:
     
     def tick_json(self, player):
         return {
+            "priority": self.get_priority(),
             "board": self.board.tick_json(),
             "player": self.player_dict[player].tick_json(),
             "timer": self.timer,
@@ -36,13 +39,17 @@ class ServerGame:
             if key == SPAWN_CODE:
                 data_items = [self.board.id_dict[d] for d in data]
                 self.ability_effects[key](data_items, player)
-                print("spawn effect")
                 player.ps.next()
             else:
                 return False
         else:  
             new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
-            return player.use_ability(key, new_data)
+            player.use_ability(key, new_data)
+
+    def get_priority(self):
+        priority = self.priority.copy()
+        self.priority.clear()
+        return priority 
         
     def click(self, key, player_id, item_id):
         player = self.player_dict[player_id]
@@ -104,11 +111,12 @@ class ServerGame:
         if not self.update_timer():
             self.board.update()
             self.player_update()
+
             # self.player_manager.check_over()
 
     def player_update(self):
         for player in self.player_dict.values():
-            if not player.ps.value < PSE.ELIMINATED.value:
+            if player.ps.value < PSE.ELIMINATED.value:
                 player.update()
                 # if player.count == 0:
                 #     self.eliminate(player.id)

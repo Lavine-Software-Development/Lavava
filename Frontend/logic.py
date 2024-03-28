@@ -10,7 +10,7 @@ class Logic:
     def check_new_edge(self, node_from, node_to):
         if node_to == node_from:
             return False
-        edge_set = {(edge.from_node.id, edge.to_node.id) for edge in self.edges}
+        edge_set = {(edge.from_node.id, edge.to_node.id) for edge in self.edges.values()}
         if (node_to, node_from) in edge_set or (node_from, node_to) in edge_set:
             return False
         if not self.check_all_overlaps((node_to, node_from)):
@@ -19,8 +19,8 @@ class Logic:
     
     def check_all_overlaps(self, edge):
         edgeDict = defaultdict(set)
-        self.nodeDict = {node.id: (node.pos) for node in self.nodes}
-        for e in self.edges:
+        self.nodeDict = {node.id: (node.pos) for node in self.nodes.values()}
+        for e in self.edges.values():
             edgeDict[e.to_node.id].add(e.from_node.id)
             edgeDict[e.from_node.id].add(e.to_node.id)
 

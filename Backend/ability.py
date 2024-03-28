@@ -24,8 +24,8 @@ class AbstractAbility(ABC, Jsonable):
         pass
 
     def use(self, data):
-        self.effect_func(data, self.player)
         self.remaining -= 1
+        self.effect_func(data, self.player)
 
     @property
     def percentage(self):

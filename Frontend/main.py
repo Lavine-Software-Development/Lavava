@@ -17,6 +17,7 @@ from ability_validators import make_ability_validators, unowned_node
 from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
+from priorityEnums import PriorityEnum
 
 class SafeNestedDict(dict):
     def __getitem__(self, key):
@@ -68,12 +69,23 @@ class Main:
         return [Port(angle) for angle in angles]
     
     def update(self, update_data):
+
+        if priority := update_data['priority']:
+            self.update_priority(priority)
+
         self.ps = update_data['player']['ps']
         self.timer = update_data['timer']
 
         self.parse(self.ability_manager.abilities, update_data['player']['abilities'])
         self.parse(self.nodes, update_data['board']['nodes'])
         self.parse(self.edges, update_data['board']['edges'])
+
+    def update_priority(self, priority):
+
+        if PriorityEnum.NEW_EDGE.value in priority:
+            e = priority[PriorityEnum.NEW_EDGE.value]
+            new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
+            self.edges.update(new_edges)
 
     def parse(self, items: dict[IDItem, Any], updates, most_complex_item=None):
         if most_complex_item is None:
@@ -199,11 +211,8 @@ class Main:
             if event.key == RESTART_CODE:
                 self.network.simple_send(RESTART_CODE)
         elif self.ps == PSE.PLAY.value:
-            print("playing")
             if event.key in self.ability_manager.abilities:
-                print("in abilities")
                 if self.ability_manager.select(event.key):
-                    print("selected")
                     self.network.simple_send(self.ability_manager.mode)
             elif event.key == FORFEIT_CODE:
                 self.network.simple_send(FORFEIT_CODE)

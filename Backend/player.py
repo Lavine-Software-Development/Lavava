@@ -1,3 +1,4 @@
+from typing import Optional
 from ability import ReloadAbility
 from constants import (
     GREY,
@@ -28,14 +29,11 @@ class DefaultPlayer():
         effects = make_ability_effects(board)
         for ab in abilities:
             self.abilities[ab] = ReloadAbility(ab, validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
-        print("set abilities player")
         self.ps.next()
 
-    def use_ability(self, key, data):
+    def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
             self.abilities[key].use(data)
-            return True
-        return False
 
     def default_values(self):
         self.count = 0
@@ -50,6 +48,8 @@ class DefaultPlayer():
 
     def update(self):
         self.effects = set(filter(lambda effect : (effect.count()), self.effects))
+        for ability in self.abilities.values():
+            ability.update()
 
     def pass_on_effects(self, node):
         for effect in self.effects:

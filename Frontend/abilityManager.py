@@ -9,7 +9,7 @@ class AbstractAbilityManager():
         self.abilities = abilities
         self.default_color = default_color
         self.mode = None
-        self.clicks = set()
+        self.clicks = []
         self.hovering = None
 
     def set_hover(self, item):
@@ -19,16 +19,16 @@ class AbstractAbilityManager():
         if not self.ability:
             return False
         if highlight.usage == self.mode:
-            self.clicks.add(highlight.item)
+            self.clicks.append(highlight.item)
             if self.complete_check():
-                clicks = {click.id for click in self.clicks}
+                clicks = [click.id for click in self.clicks]
                 self.wipe()
                 return clicks
             return False
         return False
     
     def wipe(self):
-        self.clicks = set()
+        self.clicks = []
 
     def switch_to(self, key):
         self.mode = key
@@ -39,7 +39,7 @@ class AbstractAbilityManager():
 
     def select(self, key):
         if self.ability:
-            self.abilities[self.mode].wipe()
+            self.wipe()
         if self.mode == key:
             self.mode = None
         elif self.abilities[key].selectable:
@@ -48,7 +48,7 @@ class AbstractAbilityManager():
     
     def validate(self, item: IDItem) -> Union[Tuple[IDItem, int], bool]:
         if self.mode and item.type == self.ability.click_type:
-            if self.ability.validation_func(self.clicks.union({item})):
+            if self.ability.verification_func(self.clicks + [item]):
                 return item, self.mode
         return False
     
