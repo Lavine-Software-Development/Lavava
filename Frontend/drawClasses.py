@@ -22,11 +22,6 @@ class CapitalState(State):
     capitalized: bool = False
 
 @dataclass
-class Port:
-    angle: float
-    burn_percent: float = 0.0
-
-@dataclass
 class OtherPlayer:
     name: str
     color: tuple
@@ -43,13 +38,22 @@ class IDItem(Parseable):
     id: int
     type: ClickType
 
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        if isinstance(other, IDItem):
+            return self.id == other.id
+        return False
+
 @dataclass
 class Node(IDItem):
     pos: tuple
-    ports: list[Port]
+    is_port: bool
+    ports: list
     state_visual: State
     value: int
-    effects: set = field(default_factory=set)
+    effect_visuals: set = field(default_factory=set)
     owner: Optional[OtherPlayer] = None
 
     @property

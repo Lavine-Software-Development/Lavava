@@ -2,7 +2,8 @@
 import random
 from math import pi
 
-def opposite():
-        first = random.uniform(0, pi)
-        second = first + pi
-        return [first, second]
+def port_angles(count):
+        ports = [random.uniform(0, pi)]
+        for i in range(1, count):
+            ports.append(ports[0] + pi * i / count)
+        return ports

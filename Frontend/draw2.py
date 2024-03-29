@@ -1,9 +1,11 @@
 from ast import main
 import math
 import pygame as py
+from priorityEnums import PriorityEnum
 from clickTypeEnum import ClickType
 from constants import (
     EDGE_HIGHLIGHT_SPACING,
+    ORANGE,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     ABILITY_SIZE,
@@ -34,7 +36,7 @@ from constants import (
 from playerStateEnums import PlayerStateEnum as PSE
 
 class Draw2:
-    def __init__(self, highlight):
+    def __init__(self, highlight, effect_visuals):
         self.font = py.font.Font(None, 60)
         self.small_font = py.font.Font(None, 45)
         self.smaller_font = py.font.Font(None, 35)
@@ -42,6 +44,7 @@ class Draw2:
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
         self.highlight = highlight
+        self.effect_visuals = effect_visuals
 
     def set_data(self, main_player ,players, nodes, edges, ability_manager):
         self.screen = py.display.set_mode(SIZE, py.RESIZABLE)
@@ -52,7 +55,6 @@ class Draw2:
         self.nodes = nodes
         self.ability_manager = ability_manager
         self.abilities = self.ability_manager.abilities
-
 
     def _generate_darker_color(self, color):
         return tuple(max(c - 50, 0) for c in color)
@@ -374,9 +376,9 @@ class Draw2:
                               spot.size, spot.size))
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
-            if 'poison' in spot.effects:
+            if 'poison' in spot.effect_visuals:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
-            if 'rage' in spot.effects:
+            if 'rage' in spot.effect_visuals:
                 py.draw.circle(self.screen, DARK_GREEN, spot.pos, spot.size - 2, 3)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
@@ -390,44 +392,38 @@ class Draw2:
             #         spot.size + 5,
             #         3,
             #     )
-            # if spot.owner and spot.is_port:
-            if spot.owner:
+            if spot.owner and spot.is_port:
                 port_width, port_height = (
-                    spot.size * 1.5,
                     spot.size / 1.5,
+                    spot.size * 1.5,
                 )  # Size of the ports
-                port_color = BROWN
-                if 'burn' in spot.effects:
-                    port_color = STRONG_ORANGE
-                    percentage = spot.effects['burn'].counter / BURN_TICKS
-                    port_width *= percentage
 
-                for port in spot.ports:
-                    port_center_x = spot.pos[0] + (
-                        spot.size + port_height / 2
-                    ) * math.cos(port.angle)
-                    port_center_y = spot.pos[1] + (
-                        spot.size + port_height / 2
-                    ) * math.sin(port.angle)
+                self.blit_ports(spot, BROWN, port_width, port_height)
 
-                    # Create a new surface to draw the port rectangle (with per-pixel alpha)
-                    port_surface = py.Surface((port_width, port_height), py.SRCALPHA)
-                    py.draw.rect(
-                        port_surface, port_color, (0, 0, port_width, port_height)
-                    )
+    def blit_ports(self, spot, port_color, port_width, port_height):
+        for angle in spot.ports:
+            port_center_x = spot.pos[0] + (
+                spot.size + port_height / 2
+            ) * math.cos(angle)
+            port_center_y = spot.pos[1] + (
+                spot.size + port_height / 2
+            ) * math.sin(angle)
 
-                    # Rotate the port surface to point outwards
-                    rotated_port = py.transform.rotate(
-                        port_surface, math.degrees(-port.angle)
-                    )
-
-                    # Get the new rect to blit the rotated port
-                    rotated_rect = rotated_port.get_rect(
-                        center=(port_center_x, port_center_y)
-                    )
-
-                    # Blit the rotated port surface onto the screen
-                    self.screen.blit(rotated_port, rotated_rect.topleft)
+            # Create a new surface to draw the port rectangle (with per-pixel alpha)
+            port_surface = py.Surface((port_width, port_height), py.SRCALPHA)
+            py.draw.rect(
+                port_surface, port_color, (0, 0, port_width, port_height)
+            )
+            # Rotate the port surface to point outwards
+            rotated_port = py.transform.rotate(
+                port_surface, math.degrees(angle)
+            )
+            # Get the new rect to blit the rotated port
+            rotated_rect = rotated_port.get_rect(
+                center=(port_center_x, port_center_y)
+            )
+            # Blit the rotated port surface onto the screen
+            self.screen.blit(rotated_port, rotated_rect.topleft)
 
     def blit_numbers(self, time):
         # py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))
@@ -555,6 +551,15 @@ class Draw2:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 
+    def draw_burning(self, burning):
+        for spot, count in burning.items():
+            percentage = count / BURN_TICKS
+            port_width, port_height = (
+                    spot.size / 1.5 * percentage,
+                    spot.size * 1.5 * percentage,
+                ) 
+            self.blit_ports(spot, ORANGE, port_width, port_height)
+
     def highlighting(self):
         if self.highlight.type == ClickType.NODE:
             color = self.highlight.color or self.main_player.color
@@ -621,6 +626,8 @@ class Draw2:
         self.blit_edges()
         if self.highlight:
             self.highlighting()
+        if burning := self.effect_visuals[PriorityEnum.BURNED_NODE.value]:
+            self.draw_burning(burning)
         self.blit_capital_stars()
         if ps == PSE.START_WAITING:
             self.blit_waiting()

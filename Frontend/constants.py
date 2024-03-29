@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from typing import Optional
 
@@ -25,6 +24,8 @@ TRIANGLE_SPACING = 9
 CIRCLE_RADIUS = 3
 CIRCLE_SPACING = 6
 EDGE_HIGHLIGHT_SPACING = 9
+
+PORT_COUNT = 3
 
 EDGE_CODE = 2
 STANDARD_LEFT_CLICK = 1
@@ -71,7 +72,6 @@ LIGHT_BLUE = (173, 216, 230)
 BROWN = (150, 75, 0)
 DARK_GRAY = (64, 64, 64)
 
-RAGE_TICKS = 200
 BURN_TICKS = 30
 
 GROWTH_STOP = 250

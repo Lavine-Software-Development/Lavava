@@ -1,10 +1,10 @@
-from typing import Any, Union, Tuple, get_type_hints, Optional
+from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BRIDGE_CODE, D_BRIDGE_CODE, FREEZE_CODE
+from constants import BURN_CODE, BURN_TICKS, CAPITAL_CODE, RAGE_CODE, PORT_COUNT
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
-from drawClasses import Node, Edge, Port, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State
-from port_position import opposite
+from drawClasses import Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State
+from port_position import port_angles
 from chooseUI import ChooseReloadUI
 from draw2 import Draw2
 from state_dictionary import state_dict
@@ -18,6 +18,7 @@ from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
 from priorityEnums import PriorityEnum
+from collections import defaultdict
 
 class SafeNestedDict(dict):
     def __getitem__(self, key):
@@ -51,8 +52,9 @@ class Main:
         self.ps = PSE.ABILITY_SELECTION
         self.timer = 60
         self.highlight = Highlight()
+        self.effect_visuals = defaultdict(dict)
 
-        self.drawer = Draw2(self.highlight)
+        self.drawer = Draw2(self.highlight, self.effect_visuals)
         self.can_draw = False
 
         data, server = self.settings()
@@ -61,12 +63,35 @@ class Main:
 
         self.run()
 
+    def setup(self, start_data):
+        pi = start_data["player_id"]
+        pc = start_data["player_count"]
+        n, e = start_data["board"]["nodes"], start_data["board"]["edges"]
+        abi, credits = start_data["abilities"]['values'], start_data["abilities"]['credits']
+
+        self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
+        self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
+        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], n[id]["is_port"], self.make_ports(n[id]["is_port"]), state_dict[n[id]["state_visual"]], n[id]['value']) for id in n}
+        self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
+
+        self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges, State: state_dict})
+
+        self.logic = Logic(self.nodes, self.edges)
+
+        chosen_boxes = self.choose_abilities(abi, credits)
+        self.send_abilities(chosen_boxes)
+        self.ability_manager = AbstractAbilityManager(chosen_boxes, self.my_player.color)
+
+        self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_manager)
+        self.can_draw = True
+
     def settings(self):
         return settings_ui()
-
-    def make_ports(self, count):
-        angles = opposite()[:count]
-        return [Port(angle) for angle in angles]
+    
+    def make_ports(self, is_port):
+        if is_port:
+            return port_angles(PORT_COUNT)
+        return []
     
     def update(self, update_data):
 
@@ -80,12 +105,28 @@ class Main:
         self.parse(self.nodes, update_data['board']['nodes'])
         self.parse(self.edges, update_data['board']['edges'])
 
+        self.effect_tick()
+
+    def effect_tick(self):
+        for key, effect in list(self.effect_visuals.items()):
+            for node, ticks in list(effect.items()):
+                if ticks == 0:
+                    self.effect_visuals[key].pop(node)
+                else:
+                    ticks -= 1
+            if not self.effect_visuals[key]:
+                self.effect_visuals.pop(key)
+
     def update_priority(self, priority):
 
         if PriorityEnum.NEW_EDGE.value in priority:
             e = priority[PriorityEnum.NEW_EDGE.value]
             new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
             self.edges.update(new_edges)
+
+        if PriorityEnum.BURNED_NODE.value in priority:
+            n = priority[PriorityEnum.BURNED_NODE.value]
+            self.effect_visuals[PriorityEnum.BURNED_NODE.value].update({self.nodes[id]: BURN_TICKS for id in n})
 
     def parse(self, items: dict[IDItem, Any], updates, most_complex_item=None):
         if most_complex_item is None:
@@ -116,29 +157,6 @@ class Main:
     def send_abilities(self, boxes):
         self.chosen_abilities = {ab: boxes[ab].count for ab in boxes}
         self.network.send({'code': ABILITIES_SELECTED} | {'body': self.chosen_abilities})
-
-    def setup(self, start_data):
-
-        pi = start_data["player_id"]
-        pc = start_data["player_count"]
-        n, e = start_data["board"]["nodes"], start_data["board"]["edges"]
-        abi, credits = start_data["abilities"]['values'], start_data["abilities"]['credits']
-
-        self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
-        self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
-        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], self.make_ports(n[id]["port_count"]), state_dict[n[id]["state_visual"]], n[id]['value']) for id in n}
-        self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
-
-        self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges, State: state_dict})
-
-        self.logic = Logic(self.nodes, self.edges)
-
-        chosen_boxes = self.choose_abilities(abi, credits)
-        self.send_abilities(chosen_boxes)
-        self.ability_manager = AbstractAbilityManager(chosen_boxes, self.my_player.color)
-
-        self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_manager)
-        self.can_draw = True
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.logic, self.my_player)
@@ -249,7 +267,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.logic, self.my_player)
-        counts = {BRIDGE_CODE: 3, D_BRIDGE_CODE: 3, FREEZE_CODE : 4}
+        counts = {RAGE_CODE: 3, CAPITAL_CODE: 2, BURN_CODE : 4}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):
