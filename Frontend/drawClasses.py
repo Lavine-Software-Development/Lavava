@@ -46,7 +46,7 @@ class IDItem(Parseable):
             return self.id == other.id
         return False
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Node(IDItem):
     pos: tuple
     is_port: bool

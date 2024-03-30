@@ -11,7 +11,7 @@ class ServerGame:
 
         self.running = True
         self.gs = gs
-        self.priority = defaultdict(dict)
+        self.priority = defaultdict(dict, set())
         self.board = Board(self.gs, self.priority)
         self.ability_effects = make_ability_effects(self.board)
         self.player_dict = {

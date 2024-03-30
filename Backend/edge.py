@@ -21,7 +21,7 @@ class Edge(Jsonable):
         self.type = EDGE
 
         self.start_values = {'to_node', 'from_node', 'dynamic'}
-        self.tick_values = {'on', 'flowing', 'dynamic'}
+        self.tick_values = {'on', 'flowing'}
 
     def __str__(self):
         return str(self.id)

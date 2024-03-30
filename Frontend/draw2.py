@@ -269,7 +269,7 @@ class Draw2:
             )
 
             if edge.flowing:
-                if 'rage' in edge.from_node.effects:
+                if 'rage' in edge.from_node.effect_visuals:
                     py.draw.polygon(self.screen, DARK_GREEN, [point1, point2, point3])
                 else:
                     py.draw.polygon(self.screen, color, [point1, point2, point3])
@@ -298,7 +298,7 @@ class Draw2:
                 start[1] + i * CIRCLE_SPACING * dy + 5 * dy,
             )
             if edge.flowing:
-                if 'rage' in edge.from_node.effects:
+                if 'rage' in edge.from_node.effect_visuals:
                     py.draw.circle(
                         self.screen, DARK_GREEN, (int(pos[0]), int(pos[1])), CIRCLE_RADIUS
                     )
@@ -329,7 +329,7 @@ class Draw2:
     def blit_edges(self):
         for edge in self.edges:
             if not edge.dynamic:
-                self.draw_arrow(edge, edge.color, edge.to_node.pos, edge.from_node.pos)
+                self.draw_arrow(edge, edge.color, edge.from_node.pos, edge.to_node.pos)
             else:
                 self.draw_circle(edge, edge.color, edge.from_node.pos, edge.to_node.pos)
 

@@ -1,3 +1,4 @@
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -72,6 +73,7 @@ LIGHT_BLUE = (173, 216, 230)
 BROWN = (150, 75, 0)
 DARK_GRAY = (64, 64, 64)
 
+RAGE_TICKS = 200
 BURN_TICKS = 30
 
 GROWTH_STOP = 250

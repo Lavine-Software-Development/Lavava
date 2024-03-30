@@ -14,11 +14,11 @@ from constants import (
     ZOMBIE_FULL_SIZE,
 )
 from playerEffect import PlayerEnraged
+from priorityEnums import PriorityEnum
 
 def make_bridge(buy_new_edge, bridge_type):
     def bridge_effect(data, player):
         id1, id2 = data
-        print("buying bridge")
         buy_new_edge(id1, id2, bridge_type)
 
     return bridge_effect
@@ -60,11 +60,12 @@ def poison_effect(data, player):
     node = data[0]
     node.set_state("poison")
 
-
-def burn_effect(data, player):
-    node = data[0]
-    node.set_state("burn")
-
+def make_burn(priority_update):
+    def burn_effect(data, player):
+        node = data[0]
+        node.lose_ports()
+        priority_update(PriorityEnum.BURNED_NODE, {node.id: None})
+    return burn_effect
 
 def capital_effect(data, player):
     node = data[0]
@@ -78,7 +79,7 @@ def make_ability_effects(board):
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),
-        BURN_CODE: burn_effect,
+        BURN_CODE: make_burn(board.priority_update),
         POISON_CODE: poison_effect,
         CAPITAL_CODE: capital_effect,
         ZOMBIE_CODE: zombie_effect,

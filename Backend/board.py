@@ -70,10 +70,6 @@ class Board:
         self.edge_dict = defaultdict(set)
         self.expand_nodes()
         # Gross. Mode Ports as a boolean could be used in multiple places
-        self.set_all_ports()
-        if self.nodes[0].item_type == PORT_NODE:
-            for node in self.nodes:
-                node.set_port_angles()
         self.id_dict = {node.id: node for node in self.nodes} | {
             edge.id: edge for edge in self.edges
         }
@@ -81,11 +77,6 @@ class Board:
         self.tracker.reset()
         self.player_capitals.clear()
         self.track_starting_states()
-
-    def set_all_ports(self):
-        if self.nodes[0].item_type == PORT_NODE:
-            for node in self.nodes:
-                node.set_port_angles()
 
     def eliminate(self, player):
         for edge in self.edges:
@@ -185,8 +176,10 @@ class Board:
         self.id_dict[newEdge.id] = newEdge
         self.extra_edges += 1
 
-        self.priority[PriorityEnum.NEW_EDGE.value].update(newEdge.start_json)
-        print("bought new edge here it is: ", self.priority)
+        self.priority_update(PriorityEnum.NEW_EDGE, newEdge.start_json)
+
+    def priority_update(self, priority_enum: PriorityEnum, value):
+        self.priority[priority_enum.value].update(value)
 
     def remove_node(self, node):
         node.owner.count -= 1
