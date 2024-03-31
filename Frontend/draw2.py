@@ -333,6 +333,17 @@ class Draw2:
 
     def blit_nodes(self):
         for spot in self.nodes:
+
+
+            if spot.owner and spot.is_port:
+                port_width, port_height = (
+                    spot.size / 1.3,
+                    spot.size * 1.8,
+                )  # Size of the ports
+
+                self.blit_ports(spot, BROWN, port_width, port_height)
+
+
             if spot.state_name == "mine":
                 state = spot.state_visual
                 if spot.owner is not None:
@@ -390,37 +401,22 @@ class Draw2:
             #         spot.size + 5,
             #         3,
             #     )
-            if spot.owner and spot.is_port:
-                port_width, port_height = (
-                    spot.size / 1.5,
-                    spot.size * 1.5,
-                )  # Size of the ports
-
-                self.blit_ports(spot, BROWN, port_width, port_height)
 
     def blit_ports(self, spot, port_color, port_width, port_height):
         for angle in spot.ports:
-            port_center_x = spot.pos[0] + (
-                spot.size + port_height / 2
-            ) * math.cos(angle)
-            port_center_y = spot.pos[1] + (
-                spot.size + port_height / 2
-            ) * math.sin(angle)
-
-            # Create a new surface to draw the port rectangle (with per-pixel alpha)
+            # Calculate the center of the port base on the node circumference
+            port_center_x = spot.pos[0] + spot.size * math.cos(angle)
+            port_center_y = spot.pos[1] + spot.size * math.sin(angle)
+            
+            # Create a new surface for the port (with per-pixel alpha)
             port_surface = py.Surface((port_width, port_height), py.SRCALPHA)
-            py.draw.rect(
-                port_surface, port_color, (0, 0, port_width, port_height)
-            )
-            # Rotate the port surface to point outwards
-            rotated_port = py.transform.rotate(
-                port_surface, math.degrees(angle)
-            )
-            # Get the new rect to blit the rotated port
-            rotated_rect = rotated_port.get_rect(
-                center=(port_center_x, port_center_y)
-            )
-            # Blit the rotated port surface onto the screen
+            port_surface.fill(port_color)
+            
+            # Rotate the port surface around its center
+            rotated_port = py.transform.rotate(port_surface, -math.degrees(angle))
+            rotated_rect = rotated_port.get_rect(center=(port_center_x, port_center_y))
+            
+            # Blit the rotated port surface onto the main screen
             self.screen.blit(rotated_port, rotated_rect.topleft)
 
     def blit_numbers(self, time):
