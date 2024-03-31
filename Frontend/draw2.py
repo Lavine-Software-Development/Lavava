@@ -334,15 +334,22 @@ class Draw2:
     def blit_nodes(self):
         for spot in self.nodes:
 
-
-            if spot.owner and spot.is_port:
-                port_width, port_height = (
-                    spot.size / 1.3,
-                    spot.size * 1.8,
-                )  # Size of the ports
-
-                self.blit_ports(spot, BROWN, port_width, port_height)
-
+            if spot.owner:
+                if spot.is_port:
+                    port_width, port_height = (
+                        spot.size,
+                        spot.size * 1.3,
+                    )  # Size of the ports
+                    self.blit_ports(spot, BROWN, port_width, port_height)
+                elif spot.ports:
+                    port_width, port_height = (
+                        spot.size * spot.port_percent,
+                        spot.size * spot.port_percent * 1.3,
+                    )
+                    spot.port_percent -= 0.005
+                    if spot.port_percent < 0:
+                        spot.ports = []
+                    self.blit_ports(spot, ORANGE, port_width, port_height)
 
             if spot.state_name == "mine":
                 state = spot.state_visual

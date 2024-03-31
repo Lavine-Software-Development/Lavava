@@ -70,7 +70,7 @@ class Main:
 
         self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
         self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
-        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], n[id]["is_port"], self.make_ports(n[id]["is_port"]), state_dict[n[id]["state_visual"]], n[id]['value']) for id in n}
+        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], n[id]["is_port"], *self.make_ports(n[id]["is_port"]), state_dict[n[id]["state_visual"]], n[id]['value']) for id in n}
         self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["from_node"]], self.nodes[e[id]["to_node"]], e[id]["dynamic"]) for id in e}
 
         self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges, State: state_dict})
@@ -89,8 +89,8 @@ class Main:
     
     def make_ports(self, is_port):
         if is_port:
-            return port_angles(PORT_COUNT)
-        return []
+            return 1, port_angles(PORT_COUNT)
+        return 0, []
     
     def update(self, update_data):
 

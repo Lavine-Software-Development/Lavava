@@ -50,6 +50,7 @@ class IDItem(Parseable):
 class Node(IDItem):
     pos: tuple
     is_port: bool
+    port_percent: float
     ports: list
     state_visual: State
     value: int
