@@ -1,13 +1,12 @@
 # from abc import ABC, abstractmethod
 
 from drawClasses import IDItem
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple
 
 
 class AbstractAbilityManager():
-    def __init__(self, abilities, default_color):
+    def __init__(self, abilities):
         self.abilities = abilities
-        self.default_color = default_color
         self.mode = None
         self.clicks = []
         self.hovering = None
@@ -61,12 +60,6 @@ class AbstractAbilityManager():
         if self.mode:
             return self.abilities[self.mode]
         return None
- 
-    @property
-    def box_col(self):
-        if not self.ability:
-            return self.default_color
-        return self.ability.visual.color
 
  
 # class MoneyAbilityManager(AbstractAbilityManager):

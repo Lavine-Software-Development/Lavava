@@ -5,17 +5,15 @@ from constants import (
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
     EDGE_COUNT,
-    PORT_NODE,
 )
 from helpers import do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from tracker import Tracker
-from priorityEnums import PriorityEnum
 
 
 class Board:
-    def __init__(self, gs, priority):
+    def __init__(self, gs):
         self.gs = gs
         self.nodes = []
         self.edges = []
@@ -23,7 +21,6 @@ class Board:
         self.extra_edges = 0
         self.tracker = Tracker()
         self.player_capitals = defaultdict(set)
-        self.priority = priority
     
     def start_json(self):
         nodes_json = {k: v for node in self.nodes for k, v in node.start_json.items()}
@@ -42,6 +39,7 @@ class Board:
         }
 
     def board_wide_effect(self, player, effect):
+        print("board wide effect")
         for node in self.nodes:
             if node.owner == player:
                 node.set_state(effect)
@@ -176,10 +174,7 @@ class Board:
         self.id_dict[newEdge.id] = newEdge
         self.extra_edges += 1
 
-        self.priority_update(PriorityEnum.NEW_EDGE, newEdge.start_json)
-
-    def priority_update(self, priority_enum: PriorityEnum, value):
-        self.priority[priority_enum.value].update(value)
+        newEdge.tick_extras.update(newEdge.start_values)
 
     def remove_node(self, node):
         node.owner.count -= 1

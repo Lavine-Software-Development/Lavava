@@ -106,6 +106,14 @@ class Edge(IDItem):
         if self.from_node.owner == player:
             return True
         return self.dynamic and self.to_node.owner == player and self.to_node.full
+    
+    def other(self, node):
+        if node == self.from_node:
+            return self.to_node
+        elif node == self.to_node:
+            return self.from_node
+        else:
+            raise ValueError('Node not in edge')
 
     
 @dataclass
@@ -123,8 +131,8 @@ class ReloadAbility:
     verification_func: Callable[..., bool]
     credits: int
     reload: int
-    count: int = 0
-    percent: float = 1.0
+    remaining: int = 0
+    percentage: float = 1.0
 
     @property
     def selection_display_num(self):
@@ -132,12 +140,12 @@ class ReloadAbility:
     
     @property
     def game_display_num(self):
-        return self.count
+        return self.remaining
     
     @property
     def centre_display_num(self):
-        return self.count
+        return self.remaining
     
     @property
     def selectable(self):
-        return self.count > 0 and self.percent == 1.0
+        return self.remaining > 0 and self.percentage == 1.0

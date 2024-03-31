@@ -2,7 +2,8 @@ from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_
 
 
 def no_click(data):
-    return False
+    print("rage validator")
+    return True
 
 def standard_port_node(data):
     node = data[0]
@@ -68,7 +69,7 @@ def new_edge_validator(check_new_edge, player):
             )
 
     def new_edge_ports(data):
-        if all([node.port_count > 0 for node in data]):
+        if all([node.is_port for node in data]):
             return new_edge_standard(data)
         return False
 

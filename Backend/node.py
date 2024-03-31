@@ -1,3 +1,4 @@
+from math import e
 from jsonable import Jsonable
 from constants import (
     NODE,
@@ -22,18 +23,19 @@ class Node(Jsonable):
         self.item_type = NODE
         self.incoming = set()
         self.outgoing = set()
-        self.id = id
         self.pos = pos
         self.type = NODE
         self.effects = {}
         self.expel_multiplier = 1
         self.intake_multiplier = 1
         self.grow_multiplier = 1
+
+        start_values = {'pos', 'state_visual', 'value'}
+        tick_values = {'value', 'owner', 'effect_visuals', 'state_visual'}
+        super().__init__(id, tick_values, start_values)
+
         self.set_default_state()
         self.updated = False
-
-        self.start_values = {'pos', 'state_visual', 'value'}
-        self.tick_values = {'value', 'owner', 'effect_visuals', 'state_visual'}
 
     def __str__(self):
         return str(self.id)
@@ -48,10 +50,17 @@ class Node(Jsonable):
         if status_name in STATE_NAMES:
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
-            self.state_visual = self.state.visual_id
         elif status_name in EFFECT_NAMES:
             self.effects[status_name] = self.new_effect(status_name)
         self.calculate_interactions()
+
+    @property
+    def state_visual(self):
+        return self.state.visual_id
+    
+    @property
+    def effect_visuals(self):
+        return list(self.effects)
 
     def new_state(self, state_name, data=None):
         self.updated = True
@@ -165,7 +174,6 @@ class Node(Jsonable):
             self.calculate_interactions()
 
         self.spread_effects()
-        self.effect_visuals = [key for key in self.effects]
     
     def effects_tick(self):
         effects_to_remove = [key for key, effect in self.effects.items() if not effect.count()]

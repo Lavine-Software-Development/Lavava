@@ -12,24 +12,26 @@ def unowned_node(data):
     node = data[0]
     return node.owner is None and node.state_name == "default"
 
-
-def validators_needing_player(player):
-
+def capital_validator(neighbors, player):
     def capital_logic(data):
         node = data[0]
         if (
             node.owner == player
             and node.state_name != "capital"
-            and node.full()
+            and node.full
         ):
             neighbor_capital = False
-            for neighbor in node.neighbors:
+            for neighbor in neighbors(node):
                 if neighbor.state_name == "capital":
                     neighbor_capital = True
                     break
             if not neighbor_capital:
                 return True
         return False
+    return capital_logic
+
+
+def player_validators(player):
     
     def standard_node_attack(data):
         node = data[0]
@@ -48,7 +50,6 @@ def validators_needing_player(player):
         return edge.dynamic and (edge.from_node.owner == player)
     
     return {
-        CAPITAL_CODE: capital_logic,
         POISON_CODE: standard_node_attack,
         NUKE_CODE: standard_node_attack,
         FREEZE_CODE: dynamic_edge_own_either,
@@ -82,5 +83,6 @@ def make_ability_validators(logic, player):
         D_BRIDGE_CODE: new_edge_validator(logic.check_new_edge, player),
         BURN_CODE: standard_port_node, 
         RAGE_CODE: no_click,
-    } | validators_needing_player(player)
+        CAPITAL_CODE: capital_validator(logic.neighbors, player),
+    } | player_validators(player)
 

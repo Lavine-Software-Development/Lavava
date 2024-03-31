@@ -13,6 +13,7 @@ class Batch:
         self.player_count = count
         self.mode = mode
         self.gs = GameState()
+        self.tick_dict = dict()
 
     def add_player(self, conn):
         self.connections.append(conn)
@@ -27,22 +28,30 @@ class Batch:
     def is_ready(self):
         return len(self.connections) == self.player_count
 
-    def repr(self, player) -> str:
-        game_dict = self.game.start_json()
-        game_dict["player_count"] = self.player_count
-        game_dict["player_id"] = player
-        game_dict["abilities"] = json_abilities.start_json()
-        return json.dumps(game_dict)
+    def start_repr_json(self, player) -> str:
+        start_dict = self.game.start_json()
+        start_dict["player_count"] = self.player_count
+        start_dict["player_id"] = player
+        start_dict["abilities"] = json_abilities.start_json()
+        return json.dumps(start_dict)
     
     def send_ready(self, player):
         return self.game.player_dict[player].ps.value >= PS.ABILITY_WAITING.value
+    
+    def tick_repr_json(self, player):
+        self.tick_dict["player"] = self.player_tick_repr(player)
+        return json.dumps(self.tick_dict)
 
-    def tick_json(self, player):
-        return json.dumps(self.game.tick_json(player))
+    def set_group_tick_repr(self):
+        self.tick_dict = self.game.group_tick_json()
+        
+    def player_tick_repr(self, player):
+        return self.game.player_dict[player].tick_json()
     
     def tick(self):
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
+        self.set_group_tick_repr()
     
     def process(self, player, data):
         data = convert_keys_to_int(data)

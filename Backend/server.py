@@ -35,7 +35,7 @@ class Server:
                 # try:
                 if batch.send_ready(i):
                     # print("Sending tick")
-                    batch_json = batch.tick_json(i)
+                    batch_json = batch.tick_repr_json(i)
                     batch_tick = batch_json.encode()
                     connection.sendall(batch_tick)
                     # print(i, 'sent tick')
@@ -81,8 +81,8 @@ class Server:
         for i, conn in enumerate(batch.connections):
             start_new_thread(self.threaded_client_in_game, (i, conn, batch))
 
-    def threaded_client_in_game(self, player, conn, batch):
-        conn.send(batch.repr(player).encode())
+    def threaded_client_in_game(self, player, conn, batch: Batch):
+        conn.send(batch.start_repr_json(player).encode())
         print("Sent start data to player")
         while True:
             try:

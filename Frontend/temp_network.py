@@ -1,3 +1,4 @@
+from asyncio import DatagramProtocol
 import socket
 import threading
 import json
@@ -85,9 +86,10 @@ class Network():
         threading.Thread(target=self.listen).start()
             
     def simple_send(self, code):
-        self.send({'code': code, 'body': {}})
+        self.send({'code': code, 'items': {}})
 
     def send(self, data):
+        print(data)
         try:
             self.client.send(json.dumps(data).encode())
         except socket.error as e:

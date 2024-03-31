@@ -34,6 +34,7 @@ class Tracker:
             self.mines.add(node.id)
         else:
             print("Should Not Occur. Should only ADD Capital or Mine in Tracker")
+            print(node.state_name)
 
     def update(self, node):
         if node.state_name == 'capital':

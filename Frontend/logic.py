@@ -7,6 +7,16 @@ class Logic:
         self.nodes = nodes
         self.edges = edges
 
+    def neighbors(self, node):
+        neighbors = []
+        for edge in self.edges.values():
+            try:
+                neighbor = edge.other(node)
+                neighbors.append(neighbor)
+            except ValueError:
+                continue
+        return neighbors
+
     def check_new_edge(self, node_from, node_to):
         if node_to == node_from:
             return False

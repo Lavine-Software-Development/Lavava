@@ -1,7 +1,5 @@
-from ast import main
 import math
 import pygame as py
-from priorityEnums import PriorityEnum
 from clickTypeEnum import ClickType
 from constants import (
     EDGE_HIGHLIGHT_SPACING,
@@ -159,13 +157,13 @@ class Draw2:
             btn_box = btn.visual
             self.draw_button(
                 btn_box.shape,
-                btn_box.color,
+                btn_box.color if btn_box.color[0] is not None else self.main_player.color,
                 btn_box.name,
                 btn.game_display_num,
                 btn_box.letter,
                 (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
                 self.ability_manager.mode == key,
-                btn.percent
+                btn.percentage
             )
             y_position += int(VERTICAL_ABILITY_GAP * self.height)  # Vertical gap between buttons
 
@@ -626,8 +624,8 @@ class Draw2:
         self.blit_edges()
         if self.highlight:
             self.highlighting()
-        if burning := self.effect_visuals[PriorityEnum.BURNED_NODE.value]:
-            self.draw_burning(burning)
+        # if burning := self.effect_visuals[PriorityEnum.BURNED_NODE.value]:
+        #     self.draw_burning(burning)
         self.blit_capital_stars()
         if ps == PSE.START_WAITING:
             self.blit_waiting()

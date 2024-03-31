@@ -1,6 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, BURN_TICKS, CAPITAL_CODE, RAGE_CODE, PORT_COUNT
+from constants import BURN_CODE, BURN_TICKS, CAPITAL_CODE, RAGE_CODE, PORT_COUNT, BRIDGE_CODE, NUKE_CODE, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State
@@ -17,7 +17,6 @@ from ability_validators import make_ability_validators, unowned_node
 from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
-from priorityEnums import PriorityEnum
 from collections import defaultdict
 
 class SafeNestedDict(dict):
@@ -30,8 +29,8 @@ class SafeNestedDict(dict):
             # If the key doesn't exist, return a function that just returns the key it was given
             return lambda k: k
 
-def get_adjusted_type_hints(obj, globalns=None, localns=None, include_extras=False):
-    hints = get_type_hints(obj, globalns, localns, include_extras)
+def get_adjusted_type_hints(obj):
+    hints = get_type_hints(obj)
     adjusted_hints = {}
 
     for name, type_hint in hints.items():
@@ -80,7 +79,7 @@ class Main:
 
         chosen_boxes = self.choose_abilities(abi, credits)
         self.send_abilities(chosen_boxes)
-        self.ability_manager = AbstractAbilityManager(chosen_boxes, self.my_player.color)
+        self.ability_manager = AbstractAbilityManager(chosen_boxes)
 
         self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_manager)
         self.can_draw = True
@@ -94,9 +93,6 @@ class Main:
         return []
     
     def update(self, update_data):
-
-        if priority := update_data['priority']:
-            self.update_priority(priority)
 
         self.ps = update_data['player']['ps']
         self.timer = update_data['timer']
@@ -117,18 +113,28 @@ class Main:
             if not self.effect_visuals[key]:
                 self.effect_visuals.pop(key)
 
-    def update_priority(self, priority):
+    # def update_priority(self, priority):
 
-        if PriorityEnum.NEW_EDGE.value in priority:
-            e = priority[PriorityEnum.NEW_EDGE.value]
-            new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["to_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
+    #     if PriorityEnum.NEW_EDGE.value in priority:
+    #         e = priority[PriorityEnum.NEW_EDGE.value]
+    #         new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["from_node"]], self.nodes[e[id]["from_node"]], e[id]["dynamic"]) for id in e}
+    #         self.edges.update(new_edges)
+
+    #     if PriorityEnum.BURNED_NODE.value in priority:
+    #         n = priority[PriorityEnum.BURNED_NODE.value]
+    #         self.effect_visuals[PriorityEnum.BURNED_NODE.value].update({self.nodes[id]: BURN_TICKS for id in n})
+
+    def parse(self, items: dict[int, Any], updates, most_complex_item=None):
+
+        deleted_items = set(items) - set(updates)
+        new_items = set(updates) - set(items)
+        for d in deleted_items:
+            items.pop(d)
+
+        if new_items:
+            new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[updates[id]["from_node"]], self.nodes[updates[id]["to_node"]], updates[id]["dynamic"]) for id in new_items}
             self.edges.update(new_edges)
 
-        if PriorityEnum.BURNED_NODE.value in priority:
-            n = priority[PriorityEnum.BURNED_NODE.value]
-            self.effect_visuals[PriorityEnum.BURNED_NODE.value].update({self.nodes[id]: BURN_TICKS for id in n})
-
-    def parse(self, items: dict[IDItem, Any], updates, most_complex_item=None):
         if most_complex_item is None:
             # select an arbitrary item to get the type hints
             most_complex_item = next(iter(items.values()))
@@ -140,6 +146,7 @@ class Main:
 
             for key, val in updates[u].items():
                 if hasattr(obj, key):
+
                     update_val = val
 
                     if update_val is not None:
@@ -149,13 +156,12 @@ class Main:
                             
                     setattr(obj, key, update_val)
 
-            # items[item].parse(updates[item])
-            # # tech debt 
-            # if isinstance(items[item], Node) and items[item].owner is not None:
-            #     items[item].owner = self.players[items[item].owner]
+                else:
+                    print(f"key {key} not in {type(obj)}")
+
 
     def send_abilities(self, boxes):
-        self.chosen_abilities = {ab: boxes[ab].count for ab in boxes}
+        self.chosen_abilities = {ab: boxes[ab].remaining for ab in boxes}
         self.network.send({'code': ABILITIES_SELECTED} | {'body': self.chosen_abilities})
 
     def choose_abilities(self, abi, credits):
@@ -166,7 +172,7 @@ class Main:
                 box.visual.color = self.my_player.color
         ui = ChooseReloadUI(boxes, credits)
         ui.choose_abilities()
-        return {b: v for b, v in boxes.items() if v.count > 0}
+        return {b: v for b, v in boxes.items() if v.remaining > 0}
 
     def valid_hover(self, position) -> Union[Tuple[IDItem, int], bool]:
         if node := self.find_node(position):
@@ -267,7 +273,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.logic, self.my_player)
-        counts = {RAGE_CODE: 3, CAPITAL_CODE: 2, BURN_CODE : 4}
+        counts = {CAPITAL_CODE: 1, RAGE_CODE: 2, ZOMBIE_CODE: 2, BURN_CODE: 2}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):
@@ -286,4 +292,4 @@ class TestMain(Main):
 
 
 if __name__ == "__main__":
-   TestMain()
+   Main()

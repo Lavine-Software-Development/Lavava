@@ -4,15 +4,13 @@ from board import Board
 from map_builder import MapBuilder
 from ability_effects import make_ability_effects
 from player import DefaultPlayer
-from collections import defaultdict
 
 class ServerGame:
     def __init__(self, player_count, gs):
 
         self.running = True
         self.gs = gs
-        self.priority = defaultdict(dict, set())
-        self.board = Board(self.gs, self.priority)
+        self.board = Board(self.gs)
         self.ability_effects = make_ability_effects(self.board)
         self.player_dict = {
             i: DefaultPlayer(i) for i in range(player_count)
@@ -24,11 +22,9 @@ class ServerGame:
             "board": self.board.start_json()
         }
     
-    def tick_json(self, player):
+    def group_tick_json(self):
         return {
-            "priority": self.get_priority(),
             "board": self.board.tick_json(),
-            "player": self.player_dict[player].tick_json(),
             "timer": self.timer,
         }
     
@@ -45,11 +41,6 @@ class ServerGame:
         else:  
             new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
             player.use_ability(key, new_data)
-
-    def get_priority(self):
-        priority = self.priority.copy()
-        self.priority.clear()
-        return priority 
         
     def click(self, key, player_id, item_id):
         player = self.player_dict[player_id]

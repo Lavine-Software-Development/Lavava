@@ -14,7 +14,6 @@ from constants import (
     ZOMBIE_FULL_SIZE,
 )
 from playerEffect import PlayerEnraged
-from priorityEnums import PriorityEnum
 
 def make_bridge(buy_new_edge, bridge_type):
     def bridge_effect(data, player):
@@ -34,6 +33,7 @@ def make_nuke(remove_node):
 
 def make_rage(rage):
     def rage_effect(data, player):
+        print("rage effect")
         rage(player, 'rage')
         player.effects.add(PlayerEnraged())
     return rage_effect
@@ -41,13 +41,12 @@ def make_rage(rage):
 
 def freeze_effect(data, player):
     edge = data[0]
-    edge.freeze()
-
+    edge.dynamic = False
+    edge.tick_extras.add("dynamic")
 
 def spawn_effect(data, player):
     node = data[0]
     node.capture(player)
-
 
 def zombie_effect(data, player):
     node = data[0]
@@ -55,22 +54,18 @@ def zombie_effect(data, player):
     node.set_state("zombie")
     node.value = ZOMBIE_FULL_SIZE
 
-
 def poison_effect(data, player):
     node = data[0]
     node.set_state("poison")
 
-def make_burn(priority_update):
-    def burn_effect(data, player):
-        node = data[0]
-        node.lose_ports()
-        priority_update(PriorityEnum.BURNED_NODE, {node.id: None})
-    return burn_effect
+def burn_effect(data, player):
+    node = data[0]
+    node.is_port = False
+    node.tick_extras.add("is_port")
 
 def capital_effect(data, player):
     node = data[0]
     node.set_state("capital")
-
 
 def make_ability_effects(board):
     return {
@@ -79,7 +74,7 @@ def make_ability_effects(board):
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),
-        BURN_CODE: make_burn(board.priority_update),
+        BURN_CODE: burn_effect,
         POISON_CODE: poison_effect,
         CAPITAL_CODE: capital_effect,
         ZOMBIE_CODE: zombie_effect,

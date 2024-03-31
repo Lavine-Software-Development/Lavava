@@ -4,13 +4,14 @@ from abc import ABC, abstractmethod
 
 class AbstractAbility(ABC, Jsonable):
     def __init__(self, id, validation_func, effect_func, in_game_cost, player, remaining=float("inf")):
-        self.id = id
         self.validation_func = validation_func
         self.effect_func = effect_func
         self.in_game_cost = in_game_cost
         self.player = player
         self.remaining = remaining
-        self.tick_values = {'remaining', 'percentage'}
+
+        tick_values = {'remaining', 'percentage'}
+        super().__init__(id, tick_values)
 
     @abstractmethod
     def counter(self):

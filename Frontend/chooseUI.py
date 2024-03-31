@@ -253,12 +253,12 @@ class ChooseReloadUI(ChooseUI):
         self.credits = credits
         super().__init__(boxes)
         for key, box in boxes.items():
-            if box.count > 0:
-                self.credits -= box.credits * box.count
+            if box.remaining > 0:
+                self.credits -= box.credits * box.remaining
                 self.selected_boxes.add(key)
 
     def draw_numbers(self, rect, box):
-        count_text = self.count_font.render(str(box.count), True, BLACK)
+        count_text = self.count_font.render(str(box.remaining), True, BLACK)
         count_text_rect = count_text.get_rect(center=(rect.centerx, rect.centery))
         self.screen.blit(count_text, count_text_rect)
         credit_text = self.number_font.render(str(box.credits), True, WHITE)
@@ -274,18 +274,18 @@ class ChooseReloadUI(ChooseUI):
                     self.selected_boxes.add(code)
                 else:
                     return
-            self.boxes[code].count += 1
+            self.boxes[code].remaining += 1
             self.credits -= self.boxes[code].credits
         elif click == 3 and code in self.selected_boxes:
-            self.boxes[code].count -= 1
+            self.boxes[code].remaining -= 1
             self.credits += self.boxes[code].credits
-            if self.boxes[code].count == 0:
+            if self.boxes[code].remaining == 0:
                 self.selected_boxes.remove(code)
 
     def reset_boxes(self):
         # Reset all counts to 0 and remove all from selected_boxes
         for key, box in self.boxes.items():
-            box.count = 0  # Reset count
+            box.remaining = 0  # Reset count
         self.credits = self.start_credits
         super().reset_boxes()
 

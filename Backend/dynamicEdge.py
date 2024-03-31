@@ -63,9 +63,6 @@ class DynamicEdge(Edge):
                 if from_value < to_value:
                     self.natural_swap()
 
-    def freeze(self):
-        self.dynamic = False
-
     def controlled_by(self, player):
         return super().controlled_by(player) or (
             self.to_node.owner == player and self.from_node.owner is None
