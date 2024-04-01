@@ -21,26 +21,23 @@ class AbstractAbilityManager():
             self.clicks.append(highlight.item)
             if self.complete_check():
                 clicks = [click.id for click in self.clicks]
-                self.wipe()
-                if not self.selected_ability.selectable:
-                    self.mode = None
+                self.reset()
                 return clicks
             return False
         return False
     
-    def check_auto_use_ability(self):
-        if self.ability and self.complete_check():
-            pass
-        return False
-            
+    def reset(self):
+        self.wipe()
+        self.mode = None
     
     def wipe(self):
         self.clicks = []
 
     def switch_to(self, key):
         self.mode = key
-        if self.selected_ability.usable:
-            return self.complete_check()
+        if self.complete_check():
+            self.reset()
+            return True
         return False
     
     def complete_check(self):
@@ -63,14 +60,9 @@ class AbstractAbilityManager():
 
     @property
     def ability(self):
-        if self.mode and self.abilities[self.mode].usable:
+        if self.mode:
             return self.abilities[self.mode]
         return None
-    
-    @property
-    def selected_ability(self):
-        return self.abilities[self.mode]
-
  
 # class MoneyAbilityManager(AbstractAbilityManager):
 

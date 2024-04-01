@@ -162,7 +162,7 @@ class Draw2:
                 btn_box.letter,
                 (self.width - int(HORIZONTAL_ABILITY_GAP * self.height), y_position),
                 self.ability_manager.mode == key,
-                btn.percentage
+                btn.percentage if btn.remaining else 0
             )
             y_position += int(VERTICAL_ABILITY_GAP * self.height)  # Vertical gap between buttons
 

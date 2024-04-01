@@ -101,8 +101,6 @@ class Main:
         self.parse(self.nodes, update_data['board']['nodes'])
         self.parse(self.edges, update_data['board']['edges'])
 
-        self.ability_manager.check_auto_use_ability()
-
     #     self.effect_tick()
 
     # def effect_tick(self):
@@ -239,7 +237,7 @@ class Main:
         elif self.ps == PSE.PLAY.value:
             if event.key in self.ability_manager.abilities:
                 if self.ability_manager.select(event.key):
-                    self.network.simple_send(self.ability_manager.mode)
+                    self.network.simple_send(event.key)
             elif event.key == FORFEIT_CODE:
                 self.network.simple_send(FORFEIT_CODE)
         else:

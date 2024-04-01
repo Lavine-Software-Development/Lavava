@@ -98,9 +98,10 @@ class Network():
     def listen(self):
         while True:
             try:
-                data = self.client.recv(10000).decode()  # Adjust buffer size if necessary
+                data = self.client.recv(15000).decode()  # Adjust buffer size if necessary
                 
                 # Split the data string into individual JSON objects
+                # print(data)
                 json_objects = split_json_objects(data)
                 for obj_str in json_objects:  # Exclude the last, likely incomplete, object
                     data_dict = convert_keys_to_int(obj_str)

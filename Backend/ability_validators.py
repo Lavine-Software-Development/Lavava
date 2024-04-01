@@ -2,7 +2,6 @@ from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_
 
 
 def no_click(data):
-    print("rage validator")
     return True
 
 def standard_port_node(data):

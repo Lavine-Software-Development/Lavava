@@ -33,7 +33,6 @@ def make_nuke(remove_node):
 
 def make_rage(rage):
     def rage_effect(data, player):
-        print("rage effect")
         rage(player, 'rage')
         player.effects.add(PlayerEnraged())
     return rage_effect

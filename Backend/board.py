@@ -39,7 +39,6 @@ class Board:
         }
 
     def board_wide_effect(self, player, effect):
-        print("board wide effect")
         for node in self.nodes:
             if node.owner == player:
                 node.set_state(effect)

@@ -1,4 +1,5 @@
 import json
+import sys
 
 def convert_keys_to_int(d):
     """
@@ -25,11 +26,12 @@ def split_json_objects(data):
             brace_count -= 1
         
         if brace_count == 0 and current_object.strip():
+            # print(current_object)
             try:
                 objects.append(json.loads(current_object))
                 current_object = ""  # Reset for the next object
             except json.JSONDecodeError as e:
-                print(f"Error decoding JSON: {e}")
+                print(f"Error decoding JSON: {current_object}")
                 # Handle or log the error as needed
                 
     return objects
