@@ -18,7 +18,6 @@ from constants import (
     PINK,
     GREY,
     BROWN,
-    STRONG_ORANGE,
     BRIDGE_CODE,
     D_BRIDGE_CODE,
     BURN_TICKS,

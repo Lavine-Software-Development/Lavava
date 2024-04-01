@@ -101,17 +101,19 @@ class Main:
         self.parse(self.nodes, update_data['board']['nodes'])
         self.parse(self.edges, update_data['board']['edges'])
 
-        self.effect_tick()
+        self.ability_manager.check_auto_use_ability()
 
-    def effect_tick(self):
-        for key, effect in list(self.effect_visuals.items()):
-            for node, ticks in list(effect.items()):
-                if ticks == 0:
-                    self.effect_visuals[key].pop(node)
-                else:
-                    ticks -= 1
-            if not self.effect_visuals[key]:
-                self.effect_visuals.pop(key)
+    #     self.effect_tick()
+
+    # def effect_tick(self):
+    #     for key, effect in list(self.effect_visuals.items()):
+    #         for node, ticks in list(effect.items()):
+    #             if ticks == 0:
+    #                 self.effect_visuals[key].pop(node)
+    #             else:
+    #                 ticks -= 1
+    #         if not self.effect_visuals[key]:
+    #             self.effect_visuals.pop(key)
 
     # def update_priority(self, priority):
 

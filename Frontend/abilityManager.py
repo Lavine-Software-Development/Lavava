@@ -22,16 +22,26 @@ class AbstractAbilityManager():
             if self.complete_check():
                 clicks = [click.id for click in self.clicks]
                 self.wipe()
+                if not self.selected_ability.selectable:
+                    self.mode = None
                 return clicks
             return False
         return False
+    
+    def check_auto_use_ability(self):
+        if self.ability and self.complete_check():
+            pass
+        return False
+            
     
     def wipe(self):
         self.clicks = []
 
     def switch_to(self, key):
         self.mode = key
-        return self.complete_check()
+        if self.selected_ability.usable:
+            return self.complete_check()
+        return False
     
     def complete_check(self):
         return self.ability.click_count == len(self.clicks)
@@ -50,16 +60,16 @@ class AbstractAbilityManager():
             if self.ability.verification_func(self.clicks + [item]):
                 return item, self.mode
         return False
-    
-    def update(self, abilities):
-        for ab_code in abilities:
-            self.abilities[ab_code].parse(abilities[ab_code])
 
     @property
     def ability(self):
-        if self.mode:
+        if self.mode and self.abilities[self.mode].usable:
             return self.abilities[self.mode]
         return None
+    
+    @property
+    def selected_ability(self):
+        return self.abilities[self.mode]
 
  
 # class MoneyAbilityManager(AbstractAbilityManager):

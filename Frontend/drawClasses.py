@@ -149,4 +149,8 @@ class ReloadAbility:
     
     @property
     def selectable(self):
-        return self.remaining > 0 and self.percentage == 1.0
+        return self.remaining > 0
+    
+    @property
+    def usable(self):
+        return self.percentage == 1.0

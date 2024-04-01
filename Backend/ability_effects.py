@@ -42,7 +42,6 @@ def make_rage(rage):
 def freeze_effect(data, player):
     edge = data[0]
     edge.dynamic = False
-    edge.tick_extras.add("dynamic")
 
 def spawn_effect(data, player):
     node = data[0]
@@ -61,7 +60,6 @@ def poison_effect(data, player):
 def burn_effect(data, player):
     node = data[0]
     node.is_port = False
-    node.tick_extras.add("is_port")
 
 def capital_effect(data, player):
     node = data[0]

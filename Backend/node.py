@@ -10,14 +10,15 @@ from constants import (
     AUTO_ATTACK,
     AUTO_EXPAND,
     BLACK,
-    BROWN,
 )
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
 from nodeEffect import Poisoned, NodeEnraged
 from effectEnums import EffectType
+from track_change_decorator import track_changes
 
 class Node(Jsonable):
     def __init__(self, id, pos):
+
         self.value = 0
         self.owner = None
         self.item_type = NODE
@@ -262,12 +263,9 @@ class Node(Jsonable):
         if self.owner:
             return self.owner.color
         return BLACK
-    
-    # @property
-    # def owner_id(self):
-    #     return self.owner.id if self.owner else None
-    
 
+    
+@track_changes('tick_extras', 'is_port')
 class PortNode(Node):
     def __init__(self, id, pos, is_port):
         super().__init__(id, pos)
@@ -275,14 +273,3 @@ class PortNode(Node):
         self.is_port = is_port
 
         self.start_values = self.start_values | {'is_port'}
-
-    def lose_ports(self):
-        self.is_port = False
-
-    @property
-    def color(self):
-        if self.owner:
-            return self.owner.color
-        elif self.is_port:
-            return BROWN
-        return BLACK

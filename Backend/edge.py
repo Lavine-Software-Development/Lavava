@@ -5,8 +5,10 @@ from constants import (
     BEGIN_TRANSFER_VALUE,
     AUTO_ATTACK,
 )
+from track_change_decorator import track_changes
 
 
+@track_changes('tick_extras', 'dynamic')
 class Edge(Jsonable):
     def __init__(self, to_node, from_node, id, initial=False):
         self.item_type = EDGE
@@ -16,7 +18,7 @@ class Edge(Jsonable):
         self.flowing = False
         self.popped = False
         self.update_nodes(initial)
-        self.dynamic = False
+        self.__dynamic = False
         self.type = EDGE
 
         start_values = {'to_node', 'from_node', 'dynamic'}
