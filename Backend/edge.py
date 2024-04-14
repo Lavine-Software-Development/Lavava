@@ -1,4 +1,4 @@
-from jsonable import Jsonable
+from jsonable import JsonableTracked
 from constants import (
     EDGE,
     MINIMUM_TRANSFER_VALUE,
@@ -8,8 +8,8 @@ from constants import (
 from track_change_decorator import track_changes
 
 
-@track_changes('tick_extras', 'dynamic')
-class Edge(Jsonable):
+@track_changes('dynamic', 'on', 'flowing')
+class Edge(JsonableTracked):
     def __init__(self, to_node, from_node, id, initial=False):
         self.item_type = EDGE
         self.to_node = to_node
@@ -18,12 +18,11 @@ class Edge(Jsonable):
         self.flowing = False
         self.popped = False
         self.update_nodes(initial)
-        self.__dynamic = False
+        self.dynamic = False
         self.type = EDGE
 
         start_values = {'to_node', 'from_node', 'dynamic'}
-        tick_values = {'on', 'flowing'}
-        super().__init__(id, tick_values, start_values)
+        super().__init__(id, start_values)
 
     def __str__(self):
         return str(self.id)

@@ -70,7 +70,7 @@ class Main:
 
         self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
         self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
-        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], n[id]["is_port"], *self.make_ports(n[id]["is_port"]), state_dict[n[id]["state_visual"]], n[id]['value']) for id in n}
+        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], n[id]["is_port"], *self.make_ports(n[id]["is_port"]), state_dict[n[id]["state"]], n[id]['value']) for id in n}
         self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["from_node"]], self.nodes[e[id]["to_node"]], e[id]["dynamic"]) for id in e}
 
         self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges, State: state_dict})
@@ -273,7 +273,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.logic, self.my_player)
-        counts = {CAPITAL_CODE: 1, RAGE_CODE: 2, ZOMBIE_CODE: 2, BURN_CODE: 2}
+        counts = {FREEZE_CODE: 2, RAGE_CODE: 2, ZOMBIE_CODE: 2, BURN_CODE: 2}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):

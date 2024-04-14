@@ -1,4 +1,5 @@
 from collections import defaultdict
+from jsonable import Jsonable
 from constants import (
     DYNAMIC_EDGE,
     SCREEN_WIDTH,
@@ -12,7 +13,7 @@ from dynamicEdge import DynamicEdge
 from tracker import Tracker
 
 
-class Board:
+class Board(Jsonable):
     def __init__(self, gs):
         self.gs = gs
         self.nodes = []
@@ -21,22 +22,10 @@ class Board:
         self.extra_edges = 0
         self.tracker = Tracker()
         self.player_capitals = defaultdict(set)
-    
-    def start_json(self):
-        nodes_json = {k: v for node in self.nodes for k, v in node.start_json.items()}
-        edges_json = {k: v for edge in self.edges for k, v in edge.start_json.items()}
-        return {
-            "nodes": nodes_json,
-            "edges": edges_json
-        }
-    
-    def tick_json(self):
-        nodes_json = {k: v for node in self.nodes for k, v in node.tick_json.items()}
-        edges_json = {k: v for edge in self.edges for k, v in edge.tick_json.items()}
-        return {
-            "nodes": nodes_json,
-            "edges": edges_json
-        }
+
+        recurse_values = {"nodes", "edges"}
+        super().__init__("board", recurse_values, recurse_values)
+
 
     def board_wide_effect(self, player, effect):
         for node in self.nodes:
@@ -173,7 +162,7 @@ class Board:
         self.id_dict[newEdge.id] = newEdge
         self.extra_edges += 1
 
-        newEdge.tick_extras.update(newEdge.start_values)
+        newEdge.tick_values.update(newEdge.start_values)
 
     def remove_node(self, node):
         node.owner.count -= 1

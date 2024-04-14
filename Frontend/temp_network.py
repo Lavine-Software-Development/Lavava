@@ -1,11 +1,10 @@
-from asyncio import DatagramProtocol
 import socket
 import threading
 import json
 from json_helpers import convert_keys_to_int, split_json_objects
 
-class SoloNetwork:
 
+class SoloNetwork:
     def __init__(self, setup, update, data):
         self.setup_callback = setup
         self.update_callback = update
@@ -37,11 +36,10 @@ class SoloNetwork:
     #     while self.running:
     #         self.action_callback(0, 0, 0)
     #         time.sleep(0.1)
-            
 
-class Network():
+
+class Network:
     def __init__(self, setup, update, data, server):
-
         self.setup_callback = setup
         self.update_callback = update
 
@@ -59,7 +57,9 @@ class Network():
 
     def setup_user(self, data):
         if data[0] == "HOST":
-            self.init_data = json.dumps({"type": "HOST", "players": data[1], "mode": data[2]})
+            self.init_data = json.dumps(
+                {"type": "HOST", "players": data[1], "mode": data[2]}
+            )
         else:
             self.init_data = json.dumps({"type": "JOIN", "players": 0, "mode": 0})
 
@@ -80,13 +80,14 @@ class Network():
             return False
 
     def receive_board_data(self):
-        data = self.client.recv(10000).decode()
+        data = self.client.recv(15000).decode()
+
         data_dict = convert_keys_to_int(json.loads(data))
         self.setup_callback(data_dict)
         threading.Thread(target=self.listen).start()
-            
+
     def simple_send(self, code):
-        self.send({'code': code, 'items': {}})
+        self.send({"code": code, "items": {}})
 
     def send(self, data):
         print(data)
@@ -98,21 +99,23 @@ class Network():
     def listen(self):
         while True:
             try:
-                data = self.client.recv(15000).decode()  # Adjust buffer size if necessary
-                
+                data = self.client.recv(
+                    15000
+                ).decode()  # Adjust buffer size if necessary
+
                 # Split the data string into individual JSON objects
                 # print(data)
                 json_objects = split_json_objects(data)
-                for obj_str in json_objects:  # Exclude the last, likely incomplete, object
+                for (
+                    obj_str
+                ) in json_objects:  # Exclude the last, likely incomplete, object
                     data_dict = convert_keys_to_int(obj_str)
-                    
+
                     self.update_callback(data_dict)
 
             except socket.error as e:
                 break
 
-
     def stop(self):
         self.running = False
         self.client.close()
-

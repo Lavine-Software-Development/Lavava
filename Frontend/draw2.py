@@ -266,7 +266,7 @@ class Draw2:
             )
 
             if edge.flowing:
-                if 'rage' in edge.from_node.effect_visuals:
+                if 'rage' in edge.from_node.effects:
                     py.draw.polygon(self.screen, DARK_GREEN, [point1, point2, point3])
                 else:
                     py.draw.polygon(self.screen, color, [point1, point2, point3])
@@ -295,7 +295,7 @@ class Draw2:
                 start[1] + i * CIRCLE_SPACING * dy + 5 * dy,
             )
             if edge.flowing:
-                if 'rage' in edge.from_node.effect_visuals:
+                if 'rage' in edge.from_node.effects:
                     py.draw.circle(
                         self.screen, DARK_GREEN, (int(pos[0]), int(pos[1])), CIRCLE_RADIUS
                     )
@@ -351,7 +351,7 @@ class Draw2:
                     self.blit_ports(spot, ORANGE, port_width, port_height)
 
             if spot.state_name == "mine":
-                state = spot.state_visual
+                state = spot.state
                 if spot.owner is not None:
                     angle1 = 2 * math.pi * ((state.bubble - spot.value) / state.bubble)
                     py.draw.arc(
@@ -383,7 +383,7 @@ class Draw2:
                 else:
                     py.draw.circle(self.screen, GREY, spot.pos, spot.size)
                 py.draw.circle(
-                    self.screen, spot.state_visual.ring_color, spot.pos, spot.size + 6, 6
+                    self.screen, spot.state.ring_color, spot.pos, spot.size + 6, 6
                 )
             elif spot.state_name == "zombie":
                 py.draw.rect(self.screen, spot.color,
@@ -391,9 +391,9 @@ class Draw2:
                               spot.size, spot.size))
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
-            if 'poison' in spot.effect_visuals:
+            if 'poison' in spot.effects:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
-            if 'rage' in spot.effect_visuals:
+            if 'rage' in spot.effects:
                 py.draw.circle(self.screen, DARK_GREEN, spot.pos, spot.size - 2, 3)
             if spot.full:
                 py.draw.circle(self.screen, BLACK, spot.pos, spot.size + 3, 3)
@@ -547,7 +547,7 @@ class Draw2:
 
     def blit_capital_stars(self):
         for spot in self.nodes:
-            if spot.state_name == "capital" and spot.state_visual.capitalized:
+            if spot.state_name == "capital" and spot.state.capitalized:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 

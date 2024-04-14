@@ -1,8 +1,10 @@
-from jsonable import Jsonable
+from jsonable import Jsonable, JsonableTracked
 from constants import TIME_AMOUNT
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from track_change_decorator import track_changes
 
-class AbstractAbility(ABC, Jsonable):
+@track_changes('remaining', 'percentage')
+class AbstractAbility(JsonableTracked):
     def __init__(self, id, validation_func, effect_func, in_game_cost, player, remaining=float("inf")):
         self.validation_func = validation_func
         self.effect_func = effect_func
@@ -10,15 +12,14 @@ class AbstractAbility(ABC, Jsonable):
         self.player = player
         self.remaining = remaining
 
-        tick_values = {'remaining', 'percentage'}
-        super().__init__(id, tick_values)
+        super().__init__(id)
 
     @abstractmethod
     def counter(self):
         pass
 
     def can_use(self, data):
-        return self.counter() >= self.in_game_cost and self.validation_func(data)
+        return self.counter >= self.in_game_cost and self.validation_func(data)
     
     @abstractmethod
     def update(self):
@@ -30,14 +31,16 @@ class AbstractAbility(ABC, Jsonable):
 
     @property
     def percentage(self):
-        return min(1, self.counter() / self.in_game_cost)
+        return min(1, self.counter / self.in_game_cost)
 
 
+@track_changes(('load_amount', 'percentage'))
 class ReloadAbility(AbstractAbility):
     def __init__(self, id, validation_func, effect_func, in_game_cost, player, remaining):
         super().__init__(id, validation_func, effect_func, in_game_cost, player, remaining)
         self.load_amount = 0
 
+    @property
     def counter(self):
         return self.load_amount
     
@@ -51,6 +54,7 @@ class ReloadAbility(AbstractAbility):
 
 class MoneyAbility(AbstractAbility):
 
+    @property
     def counter(self):
         return self.player.money
     

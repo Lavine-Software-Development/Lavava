@@ -1,14 +1,13 @@
 from edge import Edge
 from constants import DYNAMIC_EDGE
+from track_change_decorator import track_changes
 
-
+@track_changes('to_node', 'from_node')
 class DynamicEdge(Edge):
     def __init__(self, node1, node2, id, initial=False):
         super().__init__(node1, node2, id, initial)
         self.dynamic = True
         self.item_type = DYNAMIC_EDGE
-
-        self.tick_values = self.tick_values | {"to_node", "from_node"}
 
     def update_nodes(self, initial=False):
         self.to_node.new_edge(self, "incoming", initial)
