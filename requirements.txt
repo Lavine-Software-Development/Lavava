@@ -3,3 +3,4 @@ pygame==2.5.1
 requests==2.31.0
 pyperclip==1.8.2
 Pympler==1.0.1
+watchpoints==0.2.5

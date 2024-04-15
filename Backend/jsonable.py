@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import numbers
 import collections.abc
 
-from track_change_decorator import track_changes
+from watchpoints import watch
 
 class JsonableSkeleton(ABC):
 
@@ -75,10 +75,17 @@ class Jsonable(JsonableSkeleton):
         return isinstance(obj, (numbers.Number, str, bool, type(None), collections.abc.Sequence, collections.abc.Set))
     
 # tick values are tracked. Only send those which have changed since last tick, then erase
-@track_changes('tick_values')
 class JsonableTracked(Jsonable):
-    def __init__(self, id, start_values=set(), recurse_values=set()):
+    def __init__(self, id, tracked_values=set(), start_values=set(), recurse_values=set()):
         super().__init__(id, start_values, recurse_values)
+
+        for attr in tracked_values:
+            #watch(self, attr, callback=self.add_to_ticks)
+            watch(self, attr, on_access=False, track="variable")
+
+    #def add_to_ticks(self, frame, elem, prev_info):
+        #attr = elem.alias
+        #self.tick_values.add(attr)
 
     @property
     def tick_json(self):

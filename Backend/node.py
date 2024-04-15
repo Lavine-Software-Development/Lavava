@@ -12,11 +12,9 @@ from constants import (
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
 from nodeEffect import Poisoned, NodeEnraged
 from effectEnums import EffectType
-from track_change_decorator import track_changes
 
-@track_changes('owner', 'state', 'value', 'effects')
 class Node(JsonableTracked):
-    def __init__(self, id, pos):
+    def __init__(self, id, pos, given_track_values=set()):
 
         self.value = 0
         self.owner = None
@@ -31,7 +29,8 @@ class Node(JsonableTracked):
         self.grow_multiplier = 1
 
         start_values = {'pos', 'state', 'value', 'effects'}
-        super().__init__(id, start_values)
+        track_values = {'owner', 'state', 'value', 'effects'} | given_track_values
+        super().__init__(id, {'owner'}, start_values)
 
         self.set_default_state()
         self.updated = False
