@@ -4,7 +4,7 @@ from gameStateEnums import GameStateEnum as GS
 from playerStateEnums import PlayerStateEnum as PS
 from game import ServerGame
 import json_abilities
-from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, plain_json
+from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, json_cost, plain_json
 
 
 class Batch:
@@ -41,7 +41,7 @@ class Batch:
     
     def tick_repr_json(self, player):
         self.tick_dict["player"] = self.player_tick_repr(player)
-        tick_json = plain_json(self.tick_dict)
+        tick_json = json_cost(self.tick_dict)
         return tick_json
 
     def set_group_tick_repr(self):

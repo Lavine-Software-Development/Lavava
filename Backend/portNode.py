@@ -1,5 +1,6 @@
 from node import Node
 from constants import PORT_NODE
+from tracking_decorator.track_changes import track_changes
 
 @track_changes('is_port')
 class PortNode(Node):

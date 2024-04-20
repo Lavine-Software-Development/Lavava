@@ -1,4 +1,4 @@
-from jsonable import Jsonable, JsonableTracked
+from jsonable import JsonableTracked
 from constants import (
     NODE,
     SCREEN_WIDTH,
@@ -12,7 +12,7 @@ from constants import (
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
 from nodeEffect import Poisoned, NodeEnraged
 from effectEnums import EffectType
-from track_change_decorator import track_changes
+from tracking_decorator.track_changes import track_changes
 
 @track_changes('owner', 'state', 'value', 'effects')
 class Node(JsonableTracked):
@@ -31,8 +31,7 @@ class Node(JsonableTracked):
         self.grow_multiplier = 1
 
         start_values = {'pos', 'state', 'value', 'effects'}
-        recurse_values = {'owner'}
-        super().__init__(id, start_values, recurse_values)
+        super().__init__(id, start_values, set())
 
         self.set_default_state()
         self.updated = False

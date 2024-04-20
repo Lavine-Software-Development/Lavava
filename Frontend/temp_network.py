@@ -46,7 +46,7 @@ class Network:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.server = str(server)
-        self.port = 5555
+        self.port = 5553
         self.addr = (self.server, self.port)
 
         self.setup_user(data)

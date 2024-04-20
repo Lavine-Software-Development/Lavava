@@ -1,7 +1,7 @@
 from jsonable import JsonableTracked
 from constants import TIME_AMOUNT
 from abc import abstractmethod
-from track_change_decorator import track_changes
+from tracking_decorator.track_changes import track_changes
 
 @track_changes('remaining')
 class AbstractAbility(JsonableTracked):

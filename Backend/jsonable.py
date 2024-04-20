@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numbers
 import collections.abc
-from track_change_decorator import track_changes
+from tracking_decorator.track_changes import track_changes
 
 class JsonableSkeleton(ABC):
 
@@ -36,11 +36,15 @@ class JsonableBasic(JsonableSkeleton):
                 elif isinstance(v, dict):
                     final_attributes[k] = {}
                     for id, obj in v.items():
-                        final_attributes[k][id] = getattr(obj, recursive_method)
+                        inner_dict = getattr(obj, recursive_method)
+                        if inner_dict or recursive_method=='start_json':
+                            final_attributes[k][id] = inner_dict
                 elif isinstance(v, list):
                     final_attributes[k] = {}
                     for obj in v:
-                        final_attributes[k][obj.id] = getattr(obj, recursive_method)
+                        inner_dict = getattr(obj, recursive_method)
+                        if inner_dict or recursive_method=='start_json':
+                            final_attributes[k][obj.id] = inner_dict
                 else:
                     print("Error: Recurse value not a dict or Jsonable", f"Key: {k}")
         

@@ -5,7 +5,7 @@ from constants import (
     BEGIN_TRANSFER_VALUE,
     AUTO_ATTACK,
 )
-from track_change_decorator import track_changes
+from tracking_decorator.track_changes import track_changes
 
 @track_changes('dynamic', 'on', 'flowing')
 class Edge(JsonableTracked):

@@ -1,6 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, BURN_TICKS, CAPITAL_CODE, RAGE_CODE, PORT_COUNT, BRIDGE_CODE, NUKE_CODE, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE
+from constants import BURN_CODE, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State
@@ -18,6 +18,7 @@ from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
 from collections import defaultdict
+import sys
 
 class SafeNestedDict(dict):
     def __getitem__(self, key):
@@ -126,39 +127,58 @@ class Main:
 
     def parse(self, items: dict[int, Any], updates, most_complex_item=None):
 
-        deleted_items = set(items) - set(updates)
-        new_items = set(updates) - set(items)
-        for d in deleted_items:
-            items.pop(d)
+        print(len(items))
+        print(len(updates))
 
-        if new_items:
-            new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[updates[id]["from_node"]], self.nodes[updates[id]["to_node"]], updates[id]["dynamic"]) for id in new_items}
-            self.edges.update(new_edges)
+        try:
+            # deleted_items = set(items) - set(updates)
+            # new_items = set(updates) - set(items)
+            # for d in deleted_items:
+            #     items.pop(d)
 
-        if most_complex_item is None:
-            # select an arbitrary item to get the type hints
-            most_complex_item = next(iter(items.values()))
+            # if new_items:
+            #     new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[updates[id]["from_node"]], self.nodes[updates[id]["to_node"]], updates[id]["dynamic"]) for id in new_items}
+            #     self.edges.update(new_edges)
 
-        i_t = get_adjusted_type_hints(type(most_complex_item))
-        # update_types = {key: self.types[i_t[key]] for key in updates[0] if not is_prim(i_t[key])}
-        for u in updates:
-            obj = items[u]
+            # if most_complex_item is None:
+            #     # select an arbitrary item to get the type hints
+            #     most_complex_item = next(iter(items.values()))
 
-            for key, val in updates[u].items():
-                if hasattr(obj, key):
+            i_t = get_adjusted_type_hints(type(most_complex_item))
+            # update_types = {key: self.types[i_t[key]] for key in updates[0] if not is_prim(i_t[key])}
+            for u in updates:
+                obj = items[u]
 
-                    update_val = val
+                for key, val in updates[u].items():
+                    if hasattr(obj, key):
 
-                    if update_val is not None:
+                        update_val = val
 
-                        desired_type = i_t[key]
-                        update_val = self.types[desired_type](val)
-                            
-                    setattr(obj, key, update_val)
+                        if update_val is not None:
 
-                else:
-                    print(f"key {key} not in {type(obj)}")
+                            desired_type = i_t[key]
+                            update_val = self.types[desired_type](val)
+                                
+                        setattr(obj, key, update_val)
 
+                    else:
+                        print(f"key {key} not in {type(obj)}")
+
+        except Exception as e:
+            print(e)
+            print('items')
+            print(items)
+            print("UPDATES")
+            print(updates)
+            sys.exit()
+
+    def print_dict(self, items, indent):
+        for key, value in items.items():
+            if isinstance(value, dict):
+                print(f"{' ' * indent}{key}:")
+                self.print_dict(value, indent + 4)
+            else:
+                print(f"{' ' * indent}{key}: {value}")
 
     def send_abilities(self, boxes):
         self.chosen_abilities = {ab: boxes[ab].remaining for ab in boxes}

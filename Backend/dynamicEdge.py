@@ -1,6 +1,6 @@
 from edge import Edge
 from constants import DYNAMIC_EDGE
-from track_change_decorator import track_changes
+from tracking_decorator.track_changes import track_changes
 
 @track_changes('to_node', 'from_node')
 class DynamicEdge(Edge):
