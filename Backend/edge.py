@@ -5,8 +5,9 @@ from constants import (
     BEGIN_TRANSFER_VALUE,
     AUTO_ATTACK,
 )
+from track_change_decorator import track_changes
 
-
+@track_changes('dynamic', 'on', 'flowing')
 class Edge(JsonableTracked):
     def __init__(self, to_node, from_node, id, initial=False, given_track_values=set()):
         self.item_type = EDGE
@@ -20,9 +21,7 @@ class Edge(JsonableTracked):
         self.type = EDGE
 
         start_values = {'to_node', 'from_node', 'dynamic'}
-        track_values = {'dynamic', 'on', 'flowing'} | given_track_values
-
-        super().__init__(id, set(), start_values)
+        super().__init__(id, start_values, set())
 
     def __str__(self):
         return str(self.id)

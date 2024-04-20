@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 import numbers
 import collections.abc
-
-from watchpoints import watch
+from track_change_decorator import track_changes
 
 class JsonableSkeleton(ABC):
 
@@ -11,12 +10,10 @@ class JsonableSkeleton(ABC):
     def json_repr(self):
         pass
 
-# tick values predetermined. Recurse values are also sent every tick
-class Jsonable(JsonableSkeleton):
-    def __init__(self, id, start_values=set(), recurse_values=set(), tick_values=set()):
+class JsonableBasic(JsonableSkeleton):
+    def __init__(self, id, start_values=set(), recurse_values=set()):
         self.id = id
         self.start_values = start_values
-        self.tick_values = tick_values
         self.recurse_values = recurse_values
 
     def to_json(self, recursive_method, included=None):
@@ -68,27 +65,30 @@ class Jsonable(JsonableSkeleton):
         return self.to_json('start_json', self.start_values)
     
     @property
+    @abstractmethod
     def tick_json(self):
-        return self.to_json('tick_json', self.tick_values | self.recurse_values)
+        pass
 
     def is_basic_type(self, obj):
         return isinstance(obj, (numbers.Number, str, bool, type(None), collections.abc.Sequence, collections.abc.Set))
-    
-# tick values are tracked. Only send those which have changed since last tick, then erase
-class JsonableTracked(Jsonable):
-    def __init__(self, id, tracked_values=set(), start_values=set(), recurse_values=set()):
+
+class Jsonable(JsonableBasic):
+    def __init__(self, id, start_values=set(), recurse_values=set(), tick_values=set()):
         super().__init__(id, start_values, recurse_values)
-
-        for attr in tracked_values:
-            #watch(self, attr, callback=self.add_to_ticks)
-            watch(self, attr, on_access=False, track="variable")
-
-    #def add_to_ticks(self, frame, elem, prev_info):
-        #attr = elem.alias
-        #self.tick_values.add(attr)
+        self.tick_values = tick_values
 
     @property
     def tick_json(self):
-        tick_json = self.to_json('tick_json', self.tick_values)
-        self.tick_values.clear()
+        return self.to_json('tick_json', self.tick_values | self.recurse_values)
+    
+# tick values are tracked. Only send those which have changed since last tick, then erase
+@track_changes()
+class JsonableTracked(JsonableBasic):
+    def __init__(self, id, start_values=set(), recurse_values=set()):
+        super().__init__(id, start_values, recurse_values)
+
+    @property
+    def tick_json(self):
+        tick_json = self.to_json('tick_json', self.tracked_attributes)
+        self.clear()
         return tick_json

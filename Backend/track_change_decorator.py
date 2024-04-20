@@ -1,38 +1,48 @@
-def track_changes(*args):
+def track_changes(*attributes):
     def class_decorator(cls):
-        def make_attr_property(attr, attr_to_track):
-            private_attr_name = f"__{attr}"
+        original_init = cls.__init__
 
+        def make_getter(attribute_name):
+            storage_name = '_' + attribute_name
             def getter(self):
-                return getattr(self, private_attr_name)
+                return getattr(self, storage_name)
+            return getter
 
+        def make_setter(attribute_name, attribute_to_track):
+            storage_name = '_' + attribute_name
             def setter(self, value):
-                setattr(self, private_attr_name, value)
-                tracked_set = getattr(self, tracked_set_name)
-                tracked_set.add(attr_to_track)
-                print(f"just updated {attr_to_track}")
-                print(f"Tracked set: {tracked_set}")
-            
-            return property(getter, setter)
-        
-        parent_tracked_attrs = ()
-        if hasattr(cls, '_tracked_attrs'):
-            parent_tracked_attrs = cls._tracked_attrs
-        
-        if hasattr(cls, '_tracked_set_name'):
-            tracked_set_name = cls._tracked_set_name
-            cls._tracked_attrs = parent_tracked_attrs + args
-        else:
-            tracked_set_name, *tracked_attrs = args
-            cls._tracked_set_name = tracked_set_name
-            cls._tracked_attrs = parent_tracked_attrs + tuple(tracked_attrs)
+                self.tracked_attributes.add(attribute_to_track)
+                setattr(self, storage_name, value)
+            return setter
 
-        for attr in cls._tracked_attrs:
-            if isinstance(attr, tuple):
-                setattr(cls, attr[0], make_attr_property(*attr))
+        for attribute in attributes:
+            if isinstance(attribute, tuple):
+                attribute, attribute_to_track = attribute
+                getter_func = make_getter(attribute)
+                setter_func = make_setter(attribute, attribute_to_track)
             else:
-                setattr(cls, attr, make_attr_property(attr, attr))
+                getter_func = make_getter(attribute)
+                setter_func = make_setter(attribute, attribute)
+            setattr(cls, attribute, property(getter_func, setter_func))
+
+        # Modify the __init__ to initialize properties
+        def new_init(self, *args, **kwargs):
+            self.tracked_attributes = set()
+
+            for attribute_name in attributes:
+                if isinstance(attribute_name, tuple):
+                    attribute_name = attribute_name[0]
+                storage_name = '_' + attribute_name
+                setattr(self, storage_name, None)
+
+            original_init(self, *args, **kwargs)
+            self.clear()
+
+        def clear(self):
+            self.tracked_attributes.clear()
         
+        cls.__init__ = new_init
+        cls.clear = clear
         return cls
     
     return class_decorator
