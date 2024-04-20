@@ -127,9 +127,6 @@ class Main:
 
     def parse(self, items: dict[int, Any], updates, most_complex_item=None):
 
-        print(len(items))
-        print(len(updates))
-
         try:
             # deleted_items = set(items) - set(updates)
             # new_items = set(updates) - set(items)
@@ -140,9 +137,9 @@ class Main:
             #     new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[updates[id]["from_node"]], self.nodes[updates[id]["to_node"]], updates[id]["dynamic"]) for id in new_items}
             #     self.edges.update(new_edges)
 
-            # if most_complex_item is None:
-            #     # select an arbitrary item to get the type hints
-            #     most_complex_item = next(iter(items.values()))
+            if most_complex_item is None:
+                # select an arbitrary item to get the type hints
+                most_complex_item = next(iter(items.values()))
 
             i_t = get_adjusted_type_hints(type(most_complex_item))
             # update_types = {key: self.types[i_t[key]] for key in updates[0] if not is_prim(i_t[key])}
