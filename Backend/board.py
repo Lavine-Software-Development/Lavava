@@ -1,5 +1,5 @@
 from collections import defaultdict
-from jsonable import Jsonable
+from jsonable import JsonableTracked
 from constants import (
     DYNAMIC_EDGE,
     SCREEN_WIDTH,
@@ -11,9 +11,11 @@ from helpers import do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from tracker import Tracker
+from tracking_decorator.track_changes import track_changes
 
 
-class Board(Jsonable):
+@track_changes("nodes", "edges")
+class Board(JsonableTracked):
     def __init__(self, gs):
         self.gs = gs
         self.nodes = []

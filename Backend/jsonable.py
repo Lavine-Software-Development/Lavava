@@ -28,7 +28,7 @@ class JsonableBasic(JsonableSkeleton):
         for k, v in attributes.items():
 
             if k in self.recurse_values:
-                if isinstance(v, Jsonable):
+                if isinstance(v, JsonableBasic):
                     dog = getattr(v, recursive_method)
                     #print("here is the dog", dog)
                     final_attributes[k] = dog
@@ -45,8 +45,13 @@ class JsonableBasic(JsonableSkeleton):
                         inner_dict = getattr(obj, recursive_method)
                         if inner_dict or recursive_method=='start_json':
                             final_attributes[k][obj.id] = inner_dict
+                    for deleted in v.trash:
+                        print("deleted -------------------------------", deleted.id)
+                        final_attributes[k][deleted.id] = 'Deleted'
+                    v.clear_trash()
                 else:
                     print("Error: Recurse value not a dict or Jsonable", f"Key: {k}")
+                    print(type(v))
         
             else:
                 if isinstance(v, JsonableSkeleton):
@@ -55,6 +60,8 @@ class JsonableBasic(JsonableSkeleton):
                     final_attributes[k] = list(v)
                 elif self.is_basic_type(v):
                     final_attributes[k] = v
+                elif isinstance(v, numbers.Number):
+                    final_attributes[k] = round(v, ndigits=1)
                 else:
                     print("Error: base value not basic or a dict or JsonableSkeletable", f"Key: {k}")
 
@@ -74,7 +81,7 @@ class JsonableBasic(JsonableSkeleton):
         pass
 
     def is_basic_type(self, obj):
-        return isinstance(obj, (numbers.Number, str, bool, type(None), collections.abc.Sequence, collections.abc.Set))
+        return isinstance(obj, (str, bool, type(None), collections.abc.Sequence, collections.abc.Set))
 
 class Jsonable(JsonableBasic):
     def __init__(self, id, start_values=set(), recurse_values=set(), tick_values=set()):
@@ -93,6 +100,6 @@ class JsonableTracked(JsonableBasic):
 
     @property
     def tick_json(self):
-        tick_json = self.to_json('tick_json', self.tracked_attributes)
+        tick_json = self.to_json('tick_json', self.tracked_attributes | self.recurse_values)
         self.clear()
         return tick_json

@@ -16,6 +16,7 @@ def convert_keys_to_int(d):
     
 
 def all_levels_dict_and_json_cost(my_dict):
+    print("==============================")
     def print_dict(d, indent=0):
         for key, value in d.items():
             if isinstance(value, dict):
@@ -24,11 +25,16 @@ def all_levels_dict_and_json_cost(my_dict):
             else:
                 print(f"{' ' * indent}{key}: {value}")
 
+    my_json = json.dumps(my_dict)
+
     print_dict(my_dict)
+    print("-- -- --")
     print(f"shallow dictionary: {sys.getsizeof(my_dict)}")
     print(f"deep dictionary: {asizeof.asizeof(my_dict)}")
+    print(f"json: {asizeof.asizeof(my_json)}")
+    print("==============================")
 
-    return json.dumps(my_dict)
+    return my_json
 
 def json_cost(my_dict):
     json_dict = json.dumps(my_dict)

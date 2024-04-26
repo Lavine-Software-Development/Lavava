@@ -1,6 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE
+from constants import BURN_CODE, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State
@@ -129,13 +129,14 @@ class Main:
 
         try:
             # deleted_items = set(items) - set(updates)
-            # new_items = set(updates) - set(items)
+            
             # for d in deleted_items:
             #     items.pop(d)
 
-            # if new_items:
-            #     new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[updates[id]["from_node"]], self.nodes[updates[id]["to_node"]], updates[id]["dynamic"]) for id in new_items}
-            #     self.edges.update(new_edges)
+            new_items = set(updates) - set(items)
+            if new_items:
+                new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[updates[id]["from_node"]], self.nodes[updates[id]["to_node"]], updates[id]["dynamic"]) for id in new_items}
+                self.edges.update(new_edges)
 
             if most_complex_item is None:
                 # select an arbitrary item to get the type hints
@@ -145,6 +146,10 @@ class Main:
             # update_types = {key: self.types[i_t[key]] for key in updates[0] if not is_prim(i_t[key])}
             for u in updates:
                 obj = items[u]
+
+                if updates[u] == "Deleted":
+                    items.pop(u)
+                    continue
 
                 for key, val in updates[u].items():
                     if hasattr(obj, key):
@@ -290,7 +295,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.logic, self.my_player)
-        counts = {FREEZE_CODE: 2, RAGE_CODE: 2, ZOMBIE_CODE: 2, BURN_CODE: 2}
+        counts = {FREEZE_CODE: 2, NUKE_CODE: 2, BURN_CODE: 2}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):

@@ -41,7 +41,7 @@ class Batch:
     
     def tick_repr_json(self, player):
         self.tick_dict["player"] = self.player_tick_repr(player)
-        tick_json = json_cost(self.tick_dict)
+        tick_json = plain_json(self.tick_dict)
         return tick_json
 
     def set_group_tick_repr(self):
