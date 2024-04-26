@@ -1,6 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, BURN_TICKS, CAPITAL_CODE, RAGE_CODE, PORT_COUNT, BRIDGE_CODE, NUKE_CODE, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE
+from constants import BURN_CODE, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State
@@ -18,6 +18,7 @@ from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
 from collections import defaultdict
+import sys
 
 class SafeNestedDict(dict):
     def __getitem__(self, key):
@@ -70,7 +71,7 @@ class Main:
 
         self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
         self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}
-        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], n[id]["is_port"], *self.make_ports(n[id]["is_port"]), state_dict[n[id]["state_visual"]], n[id]['value']) for id in n}
+        self.nodes = {id: Node(id, ClickType.NODE, n[id]["pos"], n[id]["is_port"], *self.make_ports(n[id]["is_port"]), state_dict[n[id]["state"]], n[id]['value']) for id in n}
         self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["from_node"]], self.nodes[e[id]["to_node"]], e[id]["dynamic"]) for id in e}
 
         self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges, State: state_dict})
@@ -126,39 +127,60 @@ class Main:
 
     def parse(self, items: dict[int, Any], updates, most_complex_item=None):
 
-        deleted_items = set(items) - set(updates)
-        new_items = set(updates) - set(items)
-        for d in deleted_items:
-            items.pop(d)
+        try:
+            # deleted_items = set(items) - set(updates)
+            
+            # for d in deleted_items:
+            #     items.pop(d)
 
-        if new_items:
-            new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[updates[id]["from_node"]], self.nodes[updates[id]["to_node"]], updates[id]["dynamic"]) for id in new_items}
-            self.edges.update(new_edges)
+            new_items = set(updates) - set(items)
+            if new_items:
+                new_edges = {id: Edge(id, ClickType.EDGE, self.nodes[updates[id]["from_node"]], self.nodes[updates[id]["to_node"]], updates[id]["dynamic"]) for id in new_items}
+                self.edges.update(new_edges)
 
-        if most_complex_item is None:
-            # select an arbitrary item to get the type hints
-            most_complex_item = next(iter(items.values()))
+            if most_complex_item is None:
+                # select an arbitrary item to get the type hints
+                most_complex_item = next(iter(items.values()))
 
-        i_t = get_adjusted_type_hints(type(most_complex_item))
-        # update_types = {key: self.types[i_t[key]] for key in updates[0] if not is_prim(i_t[key])}
-        for u in updates:
-            obj = items[u]
+            i_t = get_adjusted_type_hints(type(most_complex_item))
+            # update_types = {key: self.types[i_t[key]] for key in updates[0] if not is_prim(i_t[key])}
+            for u in updates:
+                obj = items[u]
 
-            for key, val in updates[u].items():
-                if hasattr(obj, key):
+                if updates[u] == "Deleted":
+                    items.pop(u)
+                    continue
 
-                    update_val = val
+                for key, val in updates[u].items():
+                    if hasattr(obj, key):
 
-                    if update_val is not None:
+                        update_val = val
 
-                        desired_type = i_t[key]
-                        update_val = self.types[desired_type](val)
-                            
-                    setattr(obj, key, update_val)
+                        if update_val is not None:
 
-                else:
-                    print(f"key {key} not in {type(obj)}")
+                            desired_type = i_t[key]
+                            update_val = self.types[desired_type](val)
+                                
+                        setattr(obj, key, update_val)
 
+                    else:
+                        print(f"key {key} not in {type(obj)}")
+
+        except Exception as e:
+            print(e)
+            print('items')
+            print(items)
+            print("UPDATES")
+            print(updates)
+            sys.exit()
+
+    def print_dict(self, items, indent):
+        for key, value in items.items():
+            if isinstance(value, dict):
+                print(f"{' ' * indent}{key}:")
+                self.print_dict(value, indent + 4)
+            else:
+                print(f"{' ' * indent}{key}: {value}")
 
     def send_abilities(self, boxes):
         self.chosen_abilities = {ab: boxes[ab].remaining for ab in boxes}
@@ -273,7 +295,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.logic, self.my_player)
-        counts = {CAPITAL_CODE: 1, RAGE_CODE: 2, ZOMBIE_CODE: 2, BURN_CODE: 2}
+        counts = {FREEZE_CODE: 2, NUKE_CODE: 2, BURN_CODE: 2}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):

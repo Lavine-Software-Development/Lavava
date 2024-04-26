@@ -1,3 +1,4 @@
+from jsonable import JsonableSkeleton
 from constants import (
     GROWTH_RATE,
     MINIMUM_TRANSFER_VALUE,
@@ -9,11 +10,11 @@ from constants import (
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
 )
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import math
 
 
-class AbstractState(ABC):
+class AbstractState(JsonableSkeleton):
     def __init__(self, id, reset_on_capture, flow_ownership, update_on_new_owner):
         self.id = id
         self.reset_on_capture = reset_on_capture
@@ -48,6 +49,10 @@ class AbstractState(ABC):
         if value < 5:
             return 0
         return max(math.log10(value / 10) / 2 + value / 1000 + 0.15, 0)
+    
+    @property
+    def json_repr(self):
+        return self.visual_id
 
     @property
     def full_size(self):

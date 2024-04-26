@@ -1,4 +1,5 @@
 from typing import Optional
+
 from ability import ReloadAbility
 from constants import (
     GREY,
@@ -11,18 +12,16 @@ from constants import (
 from ability_validators import make_ability_validators
 from ability_effects import make_ability_effects
 from player_state import PlayerState
+from jsonable import Jsonable
 
-class DefaultPlayer():
+class DefaultPlayer(Jsonable):
     def __init__(self, id):
-        self.id = id
-        self.default_values()
-        self.ps = PlayerState()
 
-    def tick_json(self):
-        ability_dict = dict()
-        for ab in self.abilities.values():
-            ability_dict.update(ab.tick_json)
-        return {'abilities': ability_dict, 'ps': self.ps.value}
+        recurse_values = {'abilities'}
+        tick_values = {'ps'}
+        super().__init__(id, set(), recurse_values, tick_values)
+
+        self.default_values()
 
     def set_abilities(self, abilities, board):
         validators = make_ability_validators(board, self)

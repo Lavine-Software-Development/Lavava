@@ -1,3 +1,4 @@
+from jsonable import Jsonable
 from constants import SPAWN_CODE
 from playerStateEnums import PlayerStateEnum as PSE
 from board import Board
@@ -5,7 +6,7 @@ from map_builder import MapBuilder
 from ability_effects import make_ability_effects
 from player import DefaultPlayer
 
-class ServerGame:
+class ServerGame(Jsonable):
     def __init__(self, player_count, gs):
 
         self.running = True
@@ -15,19 +16,14 @@ class ServerGame:
         self.player_dict = {
             i: DefaultPlayer(i) for i in range(player_count)
         }
+
+        start_values = {'board'}
+        tick_values = {'timer'}
+        recurse_values = {'board'}
+        super().__init__('game', start_values, recurse_values, tick_values)
+
         self.restart()
 
-    def start_json(self):
-        return {
-            "board": self.board.start_json()
-        }
-    
-    def group_tick_json(self):
-        return {
-            "board": self.board.tick_json(),
-            "timer": self.timer,
-        }
-    
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
 

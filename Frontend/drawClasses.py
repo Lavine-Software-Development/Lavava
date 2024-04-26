@@ -52,9 +52,9 @@ class Node(IDItem):
     is_port: bool
     port_percent: float
     ports: list
-    state_visual: State
+    state: State
     value: int
-    effect_visuals: set = field(default_factory=set)
+    effects: set = field(default_factory=set)
     owner: Optional[OtherPlayer] = None
 
     @property
@@ -79,7 +79,7 @@ class Node(IDItem):
     
     @property
     def state_name(self):
-        return self.state_visual.name
+        return self.state.name
     
     @property
     def full(self):

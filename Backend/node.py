@@ -1,8 +1,6 @@
-from math import e
-from jsonable import Jsonable
+from jsonable import JsonableTracked
 from constants import (
     NODE,
-    PORT_NODE,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     STATE_NAMES,
@@ -14,9 +12,10 @@ from constants import (
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
 from nodeEffect import Poisoned, NodeEnraged
 from effectEnums import EffectType
-from track_change_decorator import track_changes
+from tracking_decorator.track_changes import track_changes
 
-class Node(Jsonable):
+@track_changes('owner', 'state', 'value', 'effects')
+class Node(JsonableTracked):
     def __init__(self, id, pos):
 
         self.value = 0
@@ -31,9 +30,8 @@ class Node(Jsonable):
         self.intake_multiplier = 1
         self.grow_multiplier = 1
 
-        start_values = {'pos', 'state_visual', 'value'}
-        tick_values = {'value', 'owner', 'effect_visuals', 'state_visual'}
-        super().__init__(id, tick_values, start_values)
+        start_values = {'pos', 'state', 'value', 'effects'}
+        super().__init__(id, start_values, set())
 
         self.set_default_state()
         self.updated = False
@@ -54,14 +52,6 @@ class Node(Jsonable):
         elif status_name in EFFECT_NAMES:
             self.effects[status_name] = self.new_effect(status_name)
         self.calculate_interactions()
-
-    @property
-    def state_visual(self):
-        return self.state.visual_id
-    
-    @property
-    def effect_visuals(self):
-        return list(self.effects)
 
     def new_state(self, state_name, data=None):
         self.updated = True
@@ -255,21 +245,9 @@ class Node(Jsonable):
         return [edge.opposite(self) for edge in self.edges]
 
     @property
-    def size(self):
-        return int(5 + self.state.size_factor(self.value) * 18)
-
-    @property
     def color(self):
         if self.owner:
             return self.owner.color
         return BLACK
 
     
-@track_changes('tick_extras', 'is_port')
-class PortNode(Node):
-    def __init__(self, id, pos, is_port):
-        super().__init__(id, pos)
-        self.item_type = PORT_NODE
-        self.is_port = is_port
-
-        self.start_values = self.start_values | {'is_port'}

@@ -1,6 +1,7 @@
+from jsonable import JsonableSkeleton
 from playerStateEnums import PlayerStateEnum as PSE
 
-class PlayerState:
+class PlayerState(JsonableSkeleton):
 
     def __init__(self):
         self._state = PSE.ABILITY_SELECTION
@@ -28,6 +29,10 @@ class PlayerState:
     @property
     def value(self):
         return self.state.value
+    
+    @property
+    def json_repr(self):
+        return self.value
 
     def eliminate(self):
         self.state = PSE.ELIMINATED

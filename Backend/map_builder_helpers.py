@@ -6,7 +6,8 @@ from constants import (
     PORT_LAYOUT,
     NODE
 )
-from node import Node, PortNode
+from node import Node
+from portNode import PortNode
 
 def starter_default_nodes(node_list):
     nodes = []
