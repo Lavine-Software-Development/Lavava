@@ -1,5 +1,4 @@
-from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE
-
+from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE, NUKE_RANGE
 
 def no_click(data):
     return True
@@ -12,6 +11,35 @@ def unowned_node(data):
     node = data[0]
     return node.owner is None and node.state_name == "default"
 
+    
+def attack_validators(capitals, player):
+
+    def capital_ranged_node_attack(data):
+        node = data[0]
+
+        def in_capital_range(capital):
+            x1, y1 = node.pos
+            x2, y2 = capital.pos
+            distance = (x1 - x2) ** 2 + (y1 - y2) ** 2
+            capital_nuke_range = (NUKE_RANGE * capital.value) ** 2
+            return distance <= capital_nuke_range
+        
+        return standard_node_attack(data) and any(in_capital_range(capital) for capital in capitals)
+        
+    def standard_node_attack(data):
+        node = data[0]
+
+        return (
+            node.owner != player and
+            node.owner is not None
+            and node.state_name not in ["capital", "mine"]
+        )
+    
+    return {
+        NUKE_CODE: capital_ranged_node_attack,
+        POISON_CODE: standard_node_attack,
+    }
+    
 
 def validators_needing_player(player):
 
@@ -30,14 +58,6 @@ def validators_needing_player(player):
             if not neighbor_capital:
                 return True
         return False
-    
-    def standard_node_attack(data):
-        node = data[0]
-        return (
-            node.owner != player
-            and node.owner is not None
-            and node.state_name not in ["capital", "mine"]
-        )
 
     def my_node(data):
         node = data[0]
@@ -49,8 +69,6 @@ def validators_needing_player(player):
     
     return {
         CAPITAL_CODE: capital_logic,
-        POISON_CODE: standard_node_attack,
-        NUKE_CODE: standard_node_attack,
         FREEZE_CODE: dynamic_edge_own_either,
         ZOMBIE_CODE: my_node
     }
@@ -80,7 +98,7 @@ def make_ability_validators(board, player):
         SPAWN_CODE: unowned_node,
         BRIDGE_CODE: new_edge_validator(board.check_new_edge, player),
         D_BRIDGE_CODE: new_edge_validator(board.check_new_edge, player),
-        BURN_CODE: standard_port_node, 
+        BURN_CODE: standard_port_node,
         RAGE_CODE: no_click,
-    } | validators_needing_player(player)
+    } | validators_needing_player(player) | attack_validators(board.player_capitals[player], player)
 
