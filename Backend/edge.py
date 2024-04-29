@@ -7,7 +7,7 @@ from constants import (
 )
 from tracking_decorator.track_changes import track_changes
 
-@track_changes('dynamic', 'on', 'flowing')
+@track_changes('dynamic', 'on', 'flowing_d')
 class Edge(JsonableTracked):
     def __init__(self, to_node, from_node, id, initial=False, given_track_values=set()):
         self.item_type = EDGE

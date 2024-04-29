@@ -14,7 +14,7 @@ from tracker import Tracker
 from tracking_decorator.track_changes import track_changes
 
 
-@track_changes("nodes", "edges")
+@track_changes("nodes_r", "edges_r")
 class Board(JsonableTracked):
     def __init__(self, gs):
         self.gs = gs
@@ -164,7 +164,7 @@ class Board(JsonableTracked):
         self.id_dict[newEdge.id] = newEdge
         self.extra_edges += 1
 
-        newEdge.tick_values.update(newEdge.start_values)
+        newEdge.tracked_attributes.update(newEdge.start_values)
 
     def remove_node(self, node):
         node.owner.count -= 1
