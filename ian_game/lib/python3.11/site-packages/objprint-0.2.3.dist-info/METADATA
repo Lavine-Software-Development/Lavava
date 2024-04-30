@@ -1,0 +1,676 @@
+Metadata-Version: 2.1
+Name: objprint
+Version: 0.2.3
+Summary: A library that can print Python objects in human readable format
+Author-email: Tian Gao <gaogaotiantian@hotmail.com>
+License: Apache License
+                                   Version 2.0, January 2004
+                                http://www.apache.org/licenses/
+        
+           TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+        
+           1. Definitions.
+        
+              "License" shall mean the terms and conditions for use, reproduction,
+              and distribution as defined by Sections 1 through 9 of this document.
+        
+              "Licensor" shall mean the copyright owner or entity authorized by
+              the copyright owner that is granting the License.
+        
+              "Legal Entity" shall mean the union of the acting entity and all
+              other entities that control, are controlled by, or are under common
+              control with that entity. For the purposes of this definition,
+              "control" means (i) the power, direct or indirect, to cause the
+              direction or management of such entity, whether by contract or
+              otherwise, or (ii) ownership of fifty percent (50%) or more of the
+              outstanding shares, or (iii) beneficial ownership of such entity.
+        
+              "You" (or "Your") shall mean an individual or Legal Entity
+              exercising permissions granted by this License.
+        
+              "Source" form shall mean the preferred form for making modifications,
+              including but not limited to software source code, documentation
+              source, and configuration files.
+        
+              "Object" form shall mean any form resulting from mechanical
+              transformation or translation of a Source form, including but
+              not limited to compiled object code, generated documentation,
+              and conversions to other media types.
+        
+              "Work" shall mean the work of authorship, whether in Source or
+              Object form, made available under the License, as indicated by a
+              copyright notice that is included in or attached to the work
+              (an example is provided in the Appendix below).
+        
+              "Derivative Works" shall mean any work, whether in Source or Object
+              form, that is based on (or derived from) the Work and for which the
+              editorial revisions, annotations, elaborations, or other modifications
+              represent, as a whole, an original work of authorship. For the purposes
+              of this License, Derivative Works shall not include works that remain
+              separable from, or merely link (or bind by name) to the interfaces of,
+              the Work and Derivative Works thereof.
+        
+              "Contribution" shall mean any work of authorship, including
+              the original version of the Work and any modifications or additions
+              to that Work or Derivative Works thereof, that is intentionally
+              submitted to Licensor for inclusion in the Work by the copyright owner
+              or by an individual or Legal Entity authorized to submit on behalf of
+              the copyright owner. For the purposes of this definition, "submitted"
+              means any form of electronic, verbal, or written communication sent
+              to the Licensor or its representatives, including but not limited to
+              communication on electronic mailing lists, source code control systems,
+              and issue tracking systems that are managed by, or on behalf of, the
+              Licensor for the purpose of discussing and improving the Work, but
+              excluding communication that is conspicuously marked or otherwise
+              designated in writing by the copyright owner as "Not a Contribution."
+        
+              "Contributor" shall mean Licensor and any individual or Legal Entity
+              on behalf of whom a Contribution has been received by Licensor and
+              subsequently incorporated within the Work.
+        
+           2. Grant of Copyright License. Subject to the terms and conditions of
+              this License, each Contributor hereby grants to You a perpetual,
+              worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+              copyright license to reproduce, prepare Derivative Works of,
+              publicly display, publicly perform, sublicense, and distribute the
+              Work and such Derivative Works in Source or Object form.
+        
+           3. Grant of Patent License. Subject to the terms and conditions of
+              this License, each Contributor hereby grants to You a perpetual,
+              worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+              (except as stated in this section) patent license to make, have made,
+              use, offer to sell, sell, import, and otherwise transfer the Work,
+              where such license applies only to those patent claims licensable
+              by such Contributor that are necessarily infringed by their
+              Contribution(s) alone or by combination of their Contribution(s)
+              with the Work to which such Contribution(s) was submitted. If You
+              institute patent litigation against any entity (including a
+              cross-claim or counterclaim in a lawsuit) alleging that the Work
+              or a Contribution incorporated within the Work constitutes direct
+              or contributory patent infringement, then any patent licenses
+              granted to You under this License for that Work shall terminate
+              as of the date such litigation is filed.
+        
+           4. Redistribution. You may reproduce and distribute copies of the
+              Work or Derivative Works thereof in any medium, with or without
+              modifications, and in Source or Object form, provided that You
+              meet the following conditions:
+        
+              (a) You must give any other recipients of the Work or
+                  Derivative Works a copy of this License; and
+        
+              (b) You must cause any modified files to carry prominent notices
+                  stating that You changed the files; and
+        
+              (c) You must retain, in the Source form of any Derivative Works
+                  that You distribute, all copyright, patent, trademark, and
+                  attribution notices from the Source form of the Work,
+                  excluding those notices that do not pertain to any part of
+                  the Derivative Works; and
+        
+              (d) If the Work includes a "NOTICE" text file as part of its
+                  distribution, then any Derivative Works that You distribute must
+                  include a readable copy of the attribution notices contained
+                  within such NOTICE file, excluding those notices that do not
+                  pertain to any part of the Derivative Works, in at least one
+                  of the following places: within a NOTICE text file distributed
+                  as part of the Derivative Works; within the Source form or
+                  documentation, if provided along with the Derivative Works; or,
+                  within a display generated by the Derivative Works, if and
+                  wherever such third-party notices normally appear. The contents
+                  of the NOTICE file are for informational purposes only and
+                  do not modify the License. You may add Your own attribution
+                  notices within Derivative Works that You distribute, alongside
+                  or as an addendum to the NOTICE text from the Work, provided
+                  that such additional attribution notices cannot be construed
+                  as modifying the License.
+        
+              You may add Your own copyright statement to Your modifications and
+              may provide additional or different license terms and conditions
+              for use, reproduction, or distribution of Your modifications, or
+              for any such Derivative Works as a whole, provided Your use,
+              reproduction, and distribution of the Work otherwise complies with
+              the conditions stated in this License.
+        
+           5. Submission of Contributions. Unless You explicitly state otherwise,
+              any Contribution intentionally submitted for inclusion in the Work
+              by You to the Licensor shall be under the terms and conditions of
+              this License, without any additional terms or conditions.
+              Notwithstanding the above, nothing herein shall supersede or modify
+              the terms of any separate license agreement you may have executed
+              with Licensor regarding such Contributions.
+        
+           6. Trademarks. This License does not grant permission to use the trade
+              names, trademarks, service marks, or product names of the Licensor,
+              except as required for reasonable and customary use in describing the
+              origin of the Work and reproducing the content of the NOTICE file.
+        
+           7. Disclaimer of Warranty. Unless required by applicable law or
+              agreed to in writing, Licensor provides the Work (and each
+              Contributor provides its Contributions) on an "AS IS" BASIS,
+              WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+              implied, including, without limitation, any warranties or conditions
+              of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+              PARTICULAR PURPOSE. You are solely responsible for determining the
+              appropriateness of using or redistributing the Work and assume any
+              risks associated with Your exercise of permissions under this License.
+        
+           8. Limitation of Liability. In no event and under no legal theory,
+              whether in tort (including negligence), contract, or otherwise,
+              unless required by applicable law (such as deliberate and grossly
+              negligent acts) or agreed to in writing, shall any Contributor be
+              liable to You for damages, including any direct, indirect, special,
+              incidental, or consequential damages of any character arising as a
+              result of this License or out of the use or inability to use the
+              Work (including but not limited to damages for loss of goodwill,
+              work stoppage, computer failure or malfunction, or any and all
+              other commercial damages or losses), even if such Contributor
+              has been advised of the possibility of such damages.
+        
+           9. Accepting Warranty or Additional Liability. While redistributing
+              the Work or Derivative Works thereof, You may choose to offer,
+              and charge a fee for, acceptance of support, warranty, indemnity,
+              or other liability obligations and/or rights consistent with this
+              License. However, in accepting such obligations, You may act only
+              on Your own behalf and on Your sole responsibility, not on behalf
+              of any other Contributor, and only if You agree to indemnify,
+              defend, and hold each Contributor harmless for any liability
+              incurred by, or claims asserted against, such Contributor by reason
+              of your accepting any such warranty or additional liability.
+        
+           END OF TERMS AND CONDITIONS
+        
+           APPENDIX: How to apply the Apache License to your work.
+        
+              To apply the Apache License to your work, attach the following
+              boilerplate notice, with the fields enclosed by brackets "[]"
+              replaced with your own identifying information. (Don't include
+              the brackets!)  The text should be enclosed in the appropriate
+              comment syntax for the file format. We also recommend that a
+              file or class name and description of purpose be included on the
+              same "printed page" as the copyright notice for easier
+              identification within third-party archives.
+        
+           Copyright [yyyy] [name of copyright owner]
+        
+           Licensed under the Apache License, Version 2.0 (the "License");
+           you may not use this file except in compliance with the License.
+           You may obtain a copy of the License at
+        
+               http://www.apache.org/licenses/LICENSE-2.0
+        
+           Unless required by applicable law or agreed to in writing, software
+           distributed under the License is distributed on an "AS IS" BASIS,
+           WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+           See the License for the specific language governing permissions and
+           limitations under the License.
+        
+Project-URL: Homepage, https://github.com/gaogaotiantian/objprint
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+License-File: NOTICE.txt
+
+# objprint
+
+[![build](https://github.com/gaogaotiantian/objprint/workflows/build/badge.svg)](https://github.com/gaogaotiantian/objprint/actions?query=workflow%3Abuild)  [![coverage](https://img.shields.io/codecov/c/github/gaogaotiantian/objprint)](https://codecov.io/gh/gaogaotiantian/objprint)  [![pypi](https://img.shields.io/pypi/v/objprint.svg)](https://pypi.org/project/objprint/)  [![support-version](https://img.shields.io/pypi/pyversions/objprint)](https://img.shields.io/pypi/pyversions/objprint)  [![license](https://img.shields.io/github/license/gaogaotiantian/objprint)](https://github.com/gaogaotiantian/objprint/blob/master/LICENSE)  [![commit](https://img.shields.io/github/last-commit/gaogaotiantian/objprint)](https://github.com/gaogaotiantian/objprint/commits/master)
+
+A library that can print Python objects in human readable format
+
+## Install
+```
+pip install objprint
+```
+
+## Usage
+
+### op
+
+Use ```op()``` (or ```objprint()```) to print objects.
+
+```python
+from objprint import op
+
+class Position:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+class Player:
+    def __init__(self):
+        self.name = "Alice"
+        self.age = 18
+        self.items = ["axe", "armor"]
+        self.coins = {"gold": 1, "silver": 33, "bronze": 57}
+        self.position = Position(3, 5)
+
+op(Player())
+```
+
+```
+<Player 0x7fe44e1e3070
+  .age = 18,
+  .coins = {'bronze': 57, 'gold': 1, 'silver': 33},
+  .items = ['axe', 'armor'],
+  .name = 'Alice',
+  .position = <Position
+    .x = 3,
+    .y = 5
+  >
+>
+```
+
+You can print multiple objects just like print, except ``op`` will print them in separate lines
+
+```python
+op([1, 2], {'a': 1})
+```
+
+```
+[1, 2]
+{'a': 1}
+```
+
+``op`` will return the same object it prints, so you can do something like this
+
+```python
+a = MyObject()
+# print the args inline with minumum change
+function_using_object(op(a))
+# the difference is more significant with complex expressions
+# original: function_using_object(a.f() + a.g())
+function_using_object(op(a.f() + a.g()))
+```
+
+It works on multiple objects as well, as it returns a tuple, you need to unpack it for functions
+
+```python
+a = MyObject()
+function_using_object(*op(a.f(), a.g()))
+```
+
+### add_objprint
+
+If you want to use ```print()``` to print your object, you can also use the class decorator
+```add_objprint``` to add ```__str__``` method for your class.
+
+```python
+from objprint import add_objprint
+
+class Position:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+@add_objprint
+class Player:
+    def __init__(self):
+        self.name = "Alice"
+        self.age = 18
+        self.items = ["axe", "armor"]
+        self.coins = {"gold": 1, "silver": 33, "bronze": 57}
+        self.position = Position(3, 5)
+
+# This will print the same thing as above
+print(Player())
+```
+
+### objstr
+
+If you want the ``str`` representation of the object, instead of printing it on the screen,
+you can use ``objstr`` function
+
+```python
+from objprint import objstr
+
+s = objstr(my_object)
+```
+
+### print more
+
+There are some optional information you can print with [config](###config).
+
+#### "Public" Methods
+
+There are no REAL public methods in python, here I simply meant you can print methods that do not start with ``__`` as there will be
+a lot of default magic methods and you don't want that.
+
+```python
+class Player:
+    def attack(self, opponent):
+        pass
+
+op(Player(), print_methods=True)
+```
+
+```
+<Player 0x7fe44e1e3070
+  def attack(opponent)
+>
+```
+
+As you can see, it will also print the method signature(without ``self`` argument).
+
+#### Line numbers
+
+You can print execution info, including the function it's in, the file and the line number of the printing line.
+This is helpful for you to locate where this object is printed.
+
+```python
+def f():
+    op(Player(), line_number=True)
+f()
+```
+
+```
+f (my_script.py:29)
+<Player 0x7f30e8cb1ac0
+  ...
+>
+```
+
+### Argument names
+
+You can print the expression of the argument with `arg_name`
+
+```python
+op(Player(), arg_name=True)
+```
+
+```
+Player():
+<Player 0x7f495850a8d0
+  ...
+>
+```
+
+### objjson
+
+``objprint`` supports print objects to json to make it easier to serialize an object.
+
+``objjson`` returns a jsonifiable object that can be dumped with ``json.dumps``
+
+```python
+from objprint import objjson
+
+json_obj = objjson(Player())
+
+print(json.dumps(json_obj, indent=2))
+```
+
+```
+{
+  ".type": "Player",
+  "name": "Alice",
+  "age": 18,
+  "items": [
+    "axe",
+    "armor"
+  ],
+  "coins": {
+    "gold": 1,
+    "silver": 33,
+    "bronze": 57
+  },
+  "position": {
+    ".type": "Position",
+    "x": 3,
+    "y": 5
+  }
+}
+```
+
+You can use ``op`` to print in json format directly with ``format="json"``. You can pass in argument for ```json.dumps```
+
+```python
+op(Player(), format="json", indent=2)
+```
+
+``add_objprint`` also works with ``format="json``"
+
+```python
+@add_objprint(format="json", indent=2)
+class Player:
+    pass
+```
+
+### Enable/Disable the print
+
+You can disable prints from all the ``op()`` calls globally with ``enable`` config.
+
+```python
+from objprint import op
+
+op.disable()
+op([1, 2, 3])  # This won't print anything
+op.enable()  # This could fix it!
+```
+
+Or you can use it for ``op()`` functions individually with some conditions
+
+```python
+op(obj, enable=check_do_print())
+```
+
+### attribute selection
+
+You can customize which attribute to print with name filters.
+
+``objprint`` will try to match the attribute name with ``attr_pattern`` regex. The default
+``attr_pattern`` is ``r"(!_).*"``, which means anything that does NOT start with an `_`.
+
+You can customize ``attr_pattern`` to select the attributes you want to print:
+
+```python
+# This will print all the attributes that do not start with __
+op(Player(), attr_pattern=r"(!__).*")
+```
+
+You can also use ``include`` and ``exclude`` to specify attributes to print with regular expression
+so ```objprint``` will only print out the attributes you are interested in.
+
+```python
+op(Player(), include=["name"])
+```
+```
+<Player
+  .name = 'Alice'
+>
+```
+
+```python
+op(Player(), exclude=[".*s"])
+```
+
+```
+<Player 0x7fe44e1e3070
+  .name = 'Alice',
+  .age = 18,
+  .position = <Position
+    .x = 3,
+    .y = 5
+  >
+>
+```
+
+If you specify both ``include`` and ``exclude``, it will do a inclusive check first, then filter out the attributes
+that match exclusive check.
+
+```attr_pattern```, ```include``` and ```exclude``` arguments work on ```objprint```, ```objstr``` and ```@add_objprint```.
+
+### Register Custom Type Formatter
+
+You can also customize how certain types of objects are displayed by registering a custom formatter function to transform an object of a specific type into a string. 
+
+For example, you can print all integers in hexadecimal format by registering the ```hex()``` function for the ```int``` data type, or registering a custom ```lambda``` function. 
+
+```python
+from objprint import op
+
+op.register_formatter(int, hex)
+op.register_formatter(float, lambda x: f"{round(x, 3)}")
+op(10)  # prints 0xa
+op(3.14159)  # prints 3.142
+```
+
+Alternatively, you can also register a custom formatter function using a decorator:
+
+```python
+@op.register_formatter(str)
+def custom_formatter(obj: str):
+    return f"custom_print: {obj}"
+
+op("hi")  # prints custom_print: hi
+```
+
+During registration, ```objprint``` will examine the specified object type, and raise a ```TypeError``` if an invalid object type is provided.
+
+When you finish using the custom formatters, you can unregister them with ```unregister_formatter()```.
+
+```python
+op.unregister_formatter(int, float, str)
+op(10)  # prints 10
+op(3.14159)  # prints 3.14159
+op("hi")  # prints hi
+```
+
+Or you can unregister everything by passing no argument to it.
+
+```python
+op.unregister_formatter()
+```
+
+The ```register_formatter()``` function also accepts an ```inherit``` argument (default ```True```) to dictate if the registered formatter should also apply to any derived classes of the object type.
+
+```python
+class BaseClass:
+    name = 'A'
+
+class DerivedClass(BaseClass):
+    name = 'B'
+```
+
+With ```inherit=True```, derived class will share the same formatter registered under base class. 
+
+```python
+def base_formatter(obj: BaseClass) -> str:
+    return f'Print {obj.name} with Base Class Formatter'
+
+op.register_formatter(BaseClass, base_formatter, inherit=True)
+
+op(DerivedClass())
+```
+
+```
+Print B with Base Class Formatter
+```
+
+With ```inherit=False```, derived class will use the default formatter provided by ```objprint```. 
+
+```python
+@op.register_formatter(BaseClass, inherit=False)
+def base_formatter(obj: BaseClass) -> str:
+    return f'Print {obj.name} with Base Class Formatter'
+
+op(DerivedClass())
+```
+
+```
+<DerivedClass 0x7fb42e8216a0
+  .name = 'B'
+>
+```
+
+If a derived class inherits from multiple base classes, each with a registered formatter, the chosen formatter adheres to the Method Resolution Order (MRO) of the derived class.
+
+To check all the registered functions and their inheritance status, you can use the ```get_formatter()``` method. It returns a dictionary-like object that you can print for easy inspection.
+
+```python
+fmts = op.get_formatter()
+print(fmts)
+```
+
+```
+{<class '__main__.BaseClass'>: FormatterInfo(formatter=<function base_formatter at 0x7feaf33d1f70>, inherit=False)}
+```
+
+Please note that registering a formatter function with ```op``` will affect the output of ```objprint``` and ```objstr``` methods in the same way.
+
+### config
+
+```objprint``` formats the output based on some configs
+
+* ``config_name(default_value)`` - this config's explanation
+* ``enable(True)`` - whether to print, it's like a switch
+* ``depth(100)`` - how deep ```objprint``` goes into nested data structures
+* ``indent(2)`` - the indentation
+* ``width(80)`` - the maximum width a data structure will be presented as a single line
+* ``elements(-1)`` - the maximum number of elements that will be displayed, ``-1`` means no restriction
+* ``color(True)`` - whether to use colored scheme
+* ``line_number(False)`` - whether to print the ``function (filename:line_number)`` before printing the object
+* ``arg_name(False)`` - whether to print the argument expression before the argument value
+* ``skip_recursion(True)`` - whether skip printing recursive data, which would cause infinite recursion without ``depth`` constraint
+* ``honor_existing(True)`` - whether to use the existing user defined ``__repr__`` or ``__str__`` method
+* ``attr_pattern(r"(!_).*")`` - the regex pattern for attribute selection
+* ``include([])`` - the list of attribute regex to do an inclusive filter
+* ``exclude([])`` - the list of attribute regex to do an exclusive filter
+
+You can set the configs globally using ``config`` function
+
+```python
+from objprint import config
+config(indent=4)
+```
+
+Or if you don't want to mess up your name space
+
+```python
+from objprint import op
+op.config(indent=4)
+```
+
+Or you can do a one time config by passing the arguments into ``objprint`` function
+
+```python
+from objprint import op
+
+op(var, indent=4)
+```
+
+### install
+
+Maybe you don't want to import ``op`` in every single file that you want to use. You can
+use ``install`` to make it globally accessible
+
+```python
+from objprint import op, install
+
+# Now you can use op() in any file
+install()
+
+# This is the same
+op.install()
+
+# You can specify a name for objprint()
+install("my_print")
+my_print(my_object)
+```
+
+## Bugs/Requests
+
+Please send bug reports and feature requests through [github issue tracker](https://github.com/gaogaotiantian/objprint/issues).
+
+## License
+
+Copyright 2020-2023 Tian Gao.
+
+Distributed under the terms of the  [Apache 2.0 license](https://github.com/gaogaotiantian/objprint/blob/master/LICENSE).

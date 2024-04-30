@@ -41,6 +41,7 @@ def get_local_ip():
 
 def settings_ui():
     IP = str(get_local_ip())
+    IP = str('3.145.28.243')
     host_settings_info = ["HOST", 0, 0]
     join_settings_info = ["JOIN"]
 
@@ -78,7 +79,7 @@ def settings_ui():
     ip_input_box_color = LIGHT_GREY
     ip_input_box = pygame.Rect(100, screen_height // 2, screen_width - 200, 40)
     typing_to_input_box = False
-    ip_address = ''
+    ip_address = '3.145.28.243'
 
     gameplay_selected = None
     

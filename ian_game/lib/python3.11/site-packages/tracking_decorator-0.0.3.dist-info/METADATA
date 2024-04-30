@@ -1,0 +1,26 @@
+Metadata-Version: 2.3
+Name: tracking_decorator
+Version: 0.0.3
+Summary: A small decorator for tracking changed attributes in a class
+Project-URL: Homepage, https://github.com/pypa/sampleproject
+Project-URL: Issues, https://github.com/pypa/sampleproject/issues
+Author-email: Ian Lavine <ian.lavine@mail.utoronto.ca>
+License-File: LICENSE
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+# Tracking Decorator Package
+
+This decorator tracks when the pointers to specified attributes of a class change.
+Whenever this occurs, the attribute is added to a set of tracked attributes.
+These attributes can be accessed with Clas.tracked_attributes, and cleared with Class.clear()
+
+The current primary usage is for delta compression in socket communications.
+Delta compression effectively means reducing the information to be sent, by only sending that which has changed since the last call.
+
+Is intuitive and short to write, and has extremely minimal impact on performace.
+
+Further functionality and customizability to come.
