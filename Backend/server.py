@@ -108,11 +108,13 @@ class Server:
 
     def run(self):
         while True:
+            print("hello")
             conn, addr = self.s.accept()
+            print("adad")
             print("Connected to:", addr)
 
             start_new_thread(self.threaded_client, (conn,))
 
 
-server = Server(5553)
-server.run()
+# server = Server(5553)
+# server.run()

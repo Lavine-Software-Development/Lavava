@@ -39,14 +39,15 @@ class SoloNetwork:
 
 
 class Network:
-    def __init__(self, setup, update, data, server):
+    def __init__(self, setup, update, data, port):
         self.setup_callback = setup
         self.update_callback = update
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # server = '3.16.188.113'
+        # server = '10.0.0.245'
+        server = '18.218.61.211'
         self.server = str(server)
-        self.port = 5553
+        self.port = port
         self.addr = (self.server, self.port)
 
         self.setup_user(data)

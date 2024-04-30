@@ -1,9 +1,9 @@
 import socket
 import pygame
 import pyperclip
-
+import requests
 from constants import GREY, BLACK, WHITE, LIGHT_GREY
-
+import json
 # CONSTANTS
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 800
@@ -14,6 +14,18 @@ LIGHT_BLUE = pygame.Color(82, 130, 209)
 DEFAULT = 1
 RELOAD = 2
 PORTS = 3
+
+def create_lobby():
+
+    # URL of the API endpoint (change the IP address and port as necessary)
+    
+    url = 'http://localhost:4000/start_game'
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response =requests.post(url,headers=headers)
+    return(json.loads(response.text)['port'])
 
 
 def is_point_in_circle(point, circle_center, circle_radius):
@@ -41,7 +53,7 @@ def get_local_ip():
 
 def settings_ui():
     IP = str(get_local_ip())
-    IP = str('3.145.28.243')
+    # IP = str('3.145.28.243')
     host_settings_info = ["HOST", 0, 0]
     join_settings_info = ["JOIN"]
 
@@ -79,7 +91,7 @@ def settings_ui():
     ip_input_box_color = LIGHT_GREY
     ip_input_box = pygame.Rect(100, screen_height // 2, screen_width - 200, 40)
     typing_to_input_box = False
-    ip_address = '3.145.28.243'
+    port = ''
 
     gameplay_selected = None
     
@@ -96,7 +108,7 @@ def settings_ui():
                         join_selected = False
                         gameplay_selected = None
                     host_selected = True
-                    ip_address = ''
+                    port = ''
                 elif join_button.collidepoint(event.pos):
                     if host_selected:
                         host_selected = False
@@ -127,12 +139,12 @@ def settings_ui():
             if event.type == pygame.KEYDOWN:
                 if join_selected:
                     if event.key == pygame.K_BACKSPACE:
-                        ip_address = ip_address[:-1]
+                        port = port[:-1]
                     else:
-                        ip_address += event.unicode
+                        port += event.unicode
                 if join_selected and event.key == pygame.K_v:  # Paste event
                     if pygame.key.get_mods() and pygame.KMOD_CTRL or pygame.key.get_mods() and pygame.KMOD_META:
-                        ip_address = pyperclip.paste()
+                        port = pyperclip.paste()
 
         # Draw elements on screen
         
@@ -220,11 +232,11 @@ def settings_ui():
         elif join_selected:
             pygame.draw.rect(screen, WHITE, choose_one_rect)
             ip_prompt_font = pygame.font.Font(None, 40)
-            ip_prompt_text = ip_prompt_font.render("Type or paste host IP to join game", True, BLACK)
+            ip_prompt_text = ip_prompt_font.render("Type or paste game code to join game", True, BLACK)
             screen.blit(ip_prompt_text, ip_prompt_text.get_rect(center=(screen_width // 2, screen_height // 2 - 100)))
             
             ip_font = pygame.font.Font(None, 32)
-            ip_text = ip_font.render(ip_address, True, BLACK)
+            ip_text = ip_font.render(port, True, BLACK)
             screen.blit(ip_text, (ip_input_box.x + 5, ip_input_box.y + 5))
             pygame.draw.rect(screen, ip_input_box_color, ip_input_box, 2)
 
@@ -246,7 +258,7 @@ def settings_ui():
         # if (host_selected and host_settings_info[1] != 0 and host_settings_info[2] != 0) \
         #     or (join_selected and len(ip_address) > 0): 
         if (host_selected and host_settings_info[2] != 0) \
-            or (join_selected and len(ip_address) > 0): 
+            or (join_selected and len(port) > 0): 
             
             pygame.draw.rect(screen, GREY, done_button)
             screen.blit(done_text, done_text.get_rect(center=done_button.center))
@@ -263,16 +275,22 @@ def settings_ui():
             screen.fill(WHITE)
             waiting_font = pygame.font.Font(None, 50)
             waiting_text = waiting_font.render("Waiting for players to join...", True, pygame.Color(127, 93, 153))
+          
             screen.blit(waiting_text, waiting_text.get_rect(center=(screen_width // 2, screen_height // 3)))
-            
+            if host_selected:
+                new_port = create_lobby()
+                game_str = "Game Code: "+str(new_port)
+                game_code = waiting_font.render(game_str, new_port, pygame.Color(127, 93, 153)) 
+                screen.blit(game_code, waiting_text.get_rect(center=(screen_width // 2, screen_height // 5)))
+ 
             pygame.display.flip()
             clock.tick(60)
 
             if host_selected:
                 if host_settings_info[1] == 0:
                     host_settings_info[1] = 1
-                return host_settings_info, IP
+                return host_settings_info, int(new_port)
             elif join_selected:
-                return join_settings_info, ip_address
+                return join_settings_info,int(port) 
             
         

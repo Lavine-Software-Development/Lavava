@@ -57,8 +57,8 @@ class Main:
         self.drawer = Draw2(self.highlight, self.effect_visuals)
         self.can_draw = False
 
-        data, server = self.settings()
-        self.network = Network(self.setup, self.update, data, server)
+        data, port = self.settings()
+        self.network = Network(self.setup, self.update, data, port)
         self.network.receive_board_data()
 
         self.run()
