@@ -82,7 +82,13 @@ class Server:
             start_new_thread(self.threaded_client_in_game, (i, conn, batch))
 
     def threaded_client_in_game(self, player, conn, batch: Batch):
-        conn.send(batch.start_repr_json(player).encode())
+        payload_size = len(batch.start_repr_json(player).encode())
+        sent, i = 0, 0
+        while (sent < payload_size):
+            print("Sending board data...")
+            print(f'Attempt {i}')
+            sent = conn.send(batch.start_repr_json(player).encode())
+            i += 1
         print("Sent start data to player")
         while True:
             try:

@@ -44,7 +44,7 @@ class Network:
         self.update_callback = update
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # server = '10.0.0.245'q
+        server = '10.0.0.245'
         server = '18.218.61.211'
         self.server = str(server)
         self.port = port
@@ -92,34 +92,38 @@ class Network:
         threading.Thread(target=self.listen).start()
 
     def receive_board_data(self):
-        try:
-            # Initialize an empty string to accumulate data
-            data = ''
-            while True:
-                print("reading")
-                # Receive data in chunks
+        data = ''
+        while True:
+            print("Reading data...")
+            try:
                 chunk = self.client.recv(4096)  # Buffer size of 4096 bytes
                 if not chunk:
-                    # If no more data, break out of the loop
-                    # this never happens though idrk why
+                    print("No more data received.")
                     break
-                # Decode each chunk and concatenate to the accumulated data
                 data += chunk.decode('utf-8')
-                # Check for the end of the message; this is very jank but works for now lol 
-                # TODO: fix
-                if '"122": {"credits"' in data:
-                    break
-            # print(data)  
-            data_dict = convert_keys_to_int(json.loads(data))
-            self.setup_callback(data_dict)
 
-        except json.JSONDecodeError as e:
-            print(f"JSON decode error: {e}")
-        except Exception as e:
-            print(f"An error occurred: {e}")
-        finally:
-            # Start a new thread to continue listening for new data
-            threading.Thread(target=self.listen).start()
+                # Attempt to decode the JSON at each step once a likely complete message has been received
+                # This check is pretty jank but will fix later after i experiment more with sending data over sockets
+                if '"122": {"credits"' in data:  # This checks for a specific end-of-message marker
+                    print("Potential complete message received.")
+                    data_dict = convert_keys_to_int(json.loads(data))
+                    self.setup_callback(data_dict)
+                    break
+
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e} - Continuing to read more data.")
+                data = ''
+                continue  
+            except UnicodeDecodeError as e:
+                print(f"Unicode decode error: {e} - Continuing to read more data.")
+                data = ''
+                continue  
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
+                break 
+
+        threading.Thread(target=self.listen).start()
+
     def simple_send(self, code):
         self.send({"code": code, "items": {}})
 
