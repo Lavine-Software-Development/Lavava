@@ -19,7 +19,7 @@ def create_lobby():
 
     # URL of the API endpoint (change the IP address and port as necessary)
     
-    url = 'http://localhost:4000/start_game'
+    url = 'http://18.218.61.211:5000/start_game'
     headers = {
         'Content-Type': 'application/json'
     }

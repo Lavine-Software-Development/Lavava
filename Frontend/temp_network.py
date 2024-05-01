@@ -44,7 +44,7 @@ class Network:
         self.update_callback = update
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # server = '10.0.0.245'
+        # server = '10.0.0.245'q
         server = '18.218.61.211'
         self.server = str(server)
         self.port = port
