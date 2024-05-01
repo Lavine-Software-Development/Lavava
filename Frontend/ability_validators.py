@@ -14,7 +14,8 @@ def unowned_node(data):
 
 def standard_node_attack(node, player):
     return (
-        node.owner != player
+        node.owner != player and
+        node.owner is not None
         and node.state_name not in ["capital", "mine"]
     )
 

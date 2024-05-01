@@ -19,10 +19,11 @@ def standard_node_attack(node, player):
     )
 
     
-def attack_validators(capitals, player):
+def attack_validators(capital_func, player):
 
     def capital_ranged_node_attack(data):
         node = data[0]
+        capitals = capital_func[player]
 
         def in_capital_range(capital):
             x1, y1 = node.pos
@@ -100,6 +101,6 @@ def make_ability_validators(board, player):
         D_BRIDGE_CODE: new_edge_validator(board.check_new_edge, player),
         BURN_CODE: standard_port_node,
         RAGE_CODE: no_click,
-        NUKE_CODE: attack_validators(board.player_capitals[player], player)
+        NUKE_CODE: attack_validators(board.player_capitals, player)
     } | validators_needing_player(player)
 
