@@ -1,5 +1,6 @@
 import math
 import pygame as py
+from constants import NUKE_RANGE
 from clickTypeEnum import ClickType
 from constants import (
     EDGE_HIGHLIGHT_SPACING,
@@ -20,6 +21,7 @@ from constants import (
     BROWN,
     BRIDGE_CODE,
     D_BRIDGE_CODE,
+    NUKE_CODE,
     BURN_TICKS,
     SIZE,
     VERTICAL_ABILITY_GAP,
@@ -619,6 +621,11 @@ class Draw2:
             # Blit the rotated surface onto the main screen
             self.screen.blit(rotated_surface, screen_pos)
 
+    def draw_perimeter(self):
+        caps = [node for node in self.nodes if node.state_name == "capital" and node.owner == self.main_player]
+        for cap in caps:
+            py.draw.circle(self.screen, PINK, cap.pos, cap.value * NUKE_RANGE, 4)
+
 
     def blit(self, ps, time):
         self.screen.fill(WHITE) 
@@ -636,6 +643,8 @@ class Draw2:
         self.draw_buttons()
         if (self.ability_manager.mode in [BRIDGE_CODE, D_BRIDGE_CODE]) and self.ability_manager.clicks:
             self.edge_build(py.mouse.get_pos(), self.ability_manager.mode)
+        elif (self.ability_manager.mode == NUKE_CODE):
+            self.draw_perimeter()
         py.display.update()
 
     def relocate(self, width, height):

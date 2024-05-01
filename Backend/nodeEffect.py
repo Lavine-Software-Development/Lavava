@@ -1,5 +1,4 @@
 from constants import (
-    BURN_TICKS,
     POISON_TICKS,
     RAGE_TICKS,
     RAGE_MULTIPLIER,

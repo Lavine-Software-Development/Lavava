@@ -1,4 +1,4 @@
-from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE
+from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE, NUKE_RANGE
 
 
 def no_click(data):
@@ -11,6 +11,32 @@ def standard_port_node(data):
 def unowned_node(data):
     node = data[0]
     return node.owner is None and node.state_name == "default"
+
+def standard_node_attack(node, player):
+    return (
+        node.owner != player and
+        node.owner is not None
+        and node.state_name not in ["capital", "mine"]
+    )
+
+def attack_validators(capital_func, player):
+
+    def capital_ranged_node_attack(data):
+        node = data[0]
+
+        capitals = capital_func(player)
+
+        def in_capital_range(capital):
+            x1, y1 = node.pos
+            x2, y2 = capital.pos
+            distance = (x1 - x2) ** 2 + (y1 - y2) ** 2
+            capital_nuke_range = (NUKE_RANGE * capital.value) ** 2
+            return distance <= capital_nuke_range
+
+        return standard_node_attack(node, player) and any(in_capital_range(capital) for capital in capitals)
+        # return standard_node_attack(node, player) and any(in_capital_range(capital) for capital in capitals)
+    
+    return capital_ranged_node_attack
 
 def capital_validator(neighbors, player):
     def capital_logic(data):
@@ -33,13 +59,9 @@ def capital_validator(neighbors, player):
 
 def player_validators(player):
     
-    def standard_node_attack(data):
-        node = data[0]
-        return (
-            node.owner != player
-            and node.owner is not None
-            and node.state_name not in ["capital", "mine"]
-        )
+    def attacking_edge(data):
+        edge = data[0]
+        return edge.from_node.owner == player and standard_node_attack(edge.to_node, player)
 
     def my_node(data):
         node = data[0]
@@ -50,8 +72,7 @@ def player_validators(player):
         return edge.dynamic and (edge.from_node.owner == player)
     
     return {
-        POISON_CODE: standard_node_attack,
-        NUKE_CODE: standard_node_attack,
+        POISON_CODE: attacking_edge,
         FREEZE_CODE: dynamic_edge_own_either,
         ZOMBIE_CODE: my_node
     }
@@ -84,5 +105,6 @@ def make_ability_validators(logic, player):
         BURN_CODE: standard_port_node, 
         RAGE_CODE: no_click,
         CAPITAL_CODE: capital_validator(logic.neighbors, player),
+        NUKE_CODE: attack_validators(logic.player_capitals, player)
     } | player_validators(player)
 
