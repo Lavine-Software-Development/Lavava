@@ -18,25 +18,21 @@ def standard_node_attack(node, player):
         and node.state_name not in ["capital", "mine"]
     )
 
-def attack_validators(capitals, player):
+def attack_validators(capital_func, player):
 
     def capital_ranged_node_attack(data):
         node = data[0]
+
+        capitals = capital_func(player)
 
         def in_capital_range(capital):
             x1, y1 = node.pos
             x2, y2 = capital.pos
             distance = (x1 - x2) ** 2 + (y1 - y2) ** 2
-            print("distance", distance)
             capital_nuke_range = (NUKE_RANGE * capital.value) ** 2
-            print("capital_nuke_range", capital_nuke_range)
             return distance <= capital_nuke_range
-        
 
-        print("has begun")
-        yeet = standard_node_attack(node, player)
-        print("yeet", yeet)
-        return yeet and any(in_capital_range(capital) for capital in capitals)
+        return standard_node_attack(node, player) and any(in_capital_range(capital) for capital in capitals)
         # return standard_node_attack(node, player) and any(in_capital_range(capital) for capital in capitals)
     
     return capital_ranged_node_attack
@@ -108,6 +104,6 @@ def make_ability_validators(logic, player):
         BURN_CODE: standard_port_node, 
         RAGE_CODE: no_click,
         CAPITAL_CODE: capital_validator(logic.neighbors, player),
-        NUKE_CODE: attack_validators(logic.player_capitals(player), player)
+        NUKE_CODE: attack_validators(logic.player_capitals, player)
     } | player_validators(player)
 
