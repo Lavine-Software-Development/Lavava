@@ -54,6 +54,9 @@ class Logic:
             self.nodeDict[edge2[1]],
         )
     
+    def player_capitals(self, player):
+        return [node for node in self.nodes.values() if node.owner == player and node.state_name == "capital"]
+    
 def on_segment(p, q, r):
     return (
         q[0] <= max(p[0], r[0])

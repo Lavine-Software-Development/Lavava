@@ -11,6 +11,13 @@ def unowned_node(data):
     node = data[0]
     return node.owner is None and node.state_name == "default"
 
+def standard_node_attack(node, player):
+    return (
+        node.owner != player and
+        node.owner is not None
+        and node.state_name not in ["capital", "mine"]
+    )
+
     
 def attack_validators(capitals, player):
 
@@ -24,21 +31,9 @@ def attack_validators(capitals, player):
             capital_nuke_range = (NUKE_RANGE * capital.value) ** 2
             return distance <= capital_nuke_range
         
-        return standard_node_attack(data) and any(in_capital_range(capital) for capital in capitals)
-        
-    def standard_node_attack(data):
-        node = data[0]
-
-        return (
-            node.owner != player and
-            node.owner is not None
-            and node.state_name not in ["capital", "mine"]
-        )
+        return standard_node_attack(node, player) and any(in_capital_range(capital) for capital in capitals)
     
-    return {
-        NUKE_CODE: capital_ranged_node_attack,
-        POISON_CODE: standard_node_attack,
-    }
+    return capital_ranged_node_attack
     
 
 def validators_needing_player(player):
@@ -67,10 +62,15 @@ def validators_needing_player(player):
         edge = data[0]
         return edge.dynamic and (edge.from_node.owner == player)
     
+    def attacking_edge(data):
+        edge = data[0]
+        return edge.from_node.owner == player and standard_node_attack(edge.to_node, player)
+    
     return {
         CAPITAL_CODE: capital_logic,
         FREEZE_CODE: dynamic_edge_own_either,
-        ZOMBIE_CODE: my_node
+        ZOMBIE_CODE: my_node,
+        POISON_CODE : attacking_edge
     }
 
 
@@ -100,5 +100,6 @@ def make_ability_validators(board, player):
         D_BRIDGE_CODE: new_edge_validator(board.check_new_edge, player),
         BURN_CODE: standard_port_node,
         RAGE_CODE: no_click,
-    } | validators_needing_player(player) | attack_validators(board.player_capitals[player], player)
+        NUKE_CODE: attack_validators(board.player_capitals[player], player)
+    } | validators_needing_player(player)
 

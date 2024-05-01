@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import numbers
 import collections.abc
 from tracking_decorator.track_changes import track_changes
+from tracking_decorator.trash_collections import TrashList
 
 class JsonableSkeleton(ABC):
 
@@ -39,7 +40,7 @@ class JsonableBasic(JsonableSkeleton):
                         inner_dict = getattr(obj, recursive_method)
                         if inner_dict or recursive_method=='start_json':
                             final_attributes[k][id] = inner_dict
-                elif isinstance(v, list):
+                elif isinstance(v, TrashList):
                     final_attributes[k] = {}
                     for obj in v:
                         inner_dict = getattr(obj, recursive_method)
