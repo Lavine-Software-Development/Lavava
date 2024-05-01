@@ -19,7 +19,7 @@ def create_lobby():
 
     # URL of the API endpoint (change the IP address and port as necessary)
     
-    url = 'http://18.218.61.211:5000/start_game'
+    url = 'http://18.218.61.211:4000/start_game'
     headers = {
         'Content-Type': 'application/json'
     }
@@ -53,7 +53,7 @@ def get_local_ip():
 
 def settings_ui():
     IP = str(get_local_ip())
-    # IP = str('3.145.28.243')
+    IP = str('18.218.61.211')
     host_settings_info = ["HOST", 0, 0]
     join_settings_info = ["JOIN"]
 
@@ -67,10 +67,10 @@ def settings_ui():
     host_button = pygame.Rect(0, 0, screen_width // 2, 100)
     join_button = pygame.Rect(screen_width // 2, 0, screen_width // 2, 100)   
     
-    host_ip_font = pygame.font.Font(None, 50)
-    host_ip_text = host_ip_font.render("Host IP:    " + IP, True, DARK_BLUE)
-    host_ip_rect = host_ip_text.get_rect(center=(screen_width // 2 - 75, 200)) 
-    copy_button = pygame.Rect(host_ip_rect.topright[0] + 50, host_ip_rect.top, 100, host_ip_rect.height)
+    # host_ip_font = pygame.font.Font(None, 50)
+    # host_ip_text = host_ip_font.render("Host IP:    " + IP, True, DARK_BLUE)
+    # host_ip_rect = host_ip_text.get_rect(center=(screen_width // 2 - 75, 200)) 
+    # copy_button = pygame.Rect(host_ip_rect.topright[0] + 50, host_ip_rect.top, 100, host_ip_rect.height)
 
     default_button = pygame.Rect(100, screen_height // 2 + 100, 150, 100)
     reload_button = pygame.Rect(screen_width // 2 - 75, screen_height // 2 + 100, 150, 100)
@@ -118,9 +118,9 @@ def settings_ui():
                 elif done_button.collidepoint(event.pos):
                     done_selected = True
                 elif host_selected:
-                    if copy_button.collidepoint(event.pos):
-                        pyperclip.copy(IP)
-                        copy_selected = True
+                    # if copy_button.collidepoint(event.pos):
+                    #     pyperclip.copy(IP)
+                    #     copy_selected = True
                         
                     if default_button.collidepoint(event.pos):
                         host_settings_info[2] = DEFAULT
@@ -165,15 +165,15 @@ def settings_ui():
             pygame.draw.rect(screen, WHITE, choose_one_rect)
             
             # Display host name 
-            screen.blit(host_ip_text, host_ip_rect)
-            if copy_selected:
-                copy_ip_text = HOST_MED_FONT.render("Copied", True, BLACK)
-                pygame.draw.rect(screen, LIGHT_BLUE, copy_button)
-                screen.blit(copy_ip_text, copy_ip_text.get_rect(center=copy_button.center))
-            else:
-                copy_ip_text = HOST_MED_FONT.render("Copy IP", True, BLACK)
-                pygame.draw.rect(screen, DARK_BLUE, copy_button)
-                screen.blit(copy_ip_text, copy_ip_text.get_rect(center=copy_button.center))
+            # screen.blit(host_ip_text, host_ip_rect)
+            # if copy_selected:
+            #     copy_ip_text = HOST_MED_FONT.render("Copied", True, BLACK)
+            #     pygame.draw.rect(screen, LIGHT_BLUE, copy_button)
+            #     screen.blit(copy_ip_text, copy_ip_text.get_rect(center=copy_button.center))
+            # else:
+            #     copy_ip_text = HOST_MED_FONT.render("Copy IP", True, BLACK)
+            #     pygame.draw.rect(screen, DARK_BLUE, copy_button)
+            #     screen.blit(copy_ip_text, copy_ip_text.get_rect(center=copy_button.center))
             
             NUM_PLAYERS_Y = 300
             num_players_label_pos = (200, NUM_PLAYERS_Y)
