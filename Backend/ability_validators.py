@@ -1,4 +1,4 @@
-from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE
+from constants import MINIMUM_TRANSFER_VALUE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE, CANNON_CODE, CANNON_SHOT_CODE
 
 
 def no_click(data):
@@ -14,6 +14,12 @@ def unowned_node(data):
 
 
 def validators_needing_player(player):
+
+    def cannon_shot_logic(data):
+        cannon, target = data[0], data[1]
+        can_shoot = cannon.state_name == "cannon" and cannon.owner == player
+        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full)
+        return can_shoot and can_accept
 
     def capital_logic(data):
         node = data[0]
@@ -52,7 +58,9 @@ def validators_needing_player(player):
         POISON_CODE: standard_node_attack,
         NUKE_CODE: standard_node_attack,
         FREEZE_CODE: dynamic_edge_own_either,
-        ZOMBIE_CODE: my_node
+        ZOMBIE_CODE: my_node,
+        CANNON_CODE: my_node,
+        CANNON_SHOT_CODE: cannon_shot_logic,
     }
 
 

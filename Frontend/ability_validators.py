@@ -1,4 +1,5 @@
-from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE
+from Backend.constants import CANNON_SHOT_CODE
+from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE, CANNON_CODE, MINIMUM_TRANSFER_VALUE
 
 
 def no_click(data):
@@ -49,11 +50,21 @@ def player_validators(player):
         edge = data[0]
         return edge.dynamic and (edge.from_node.owner == player)
     
+    def cannon_shot_validator(data):
+        if len(data) == 1:
+            first_node = data[0]
+            return first_node.owner == player and first_node.state_name == "cannon" and first_node.value > MINIMUM_TRANSFER_VALUE
+        else:
+            second_node = data[1]
+            return not (second_node.owner == player and second_node.full)
+    
     return {
         POISON_CODE: standard_node_attack,
         NUKE_CODE: standard_node_attack,
         FREEZE_CODE: dynamic_edge_own_either,
-        ZOMBIE_CODE: my_node
+        ZOMBIE_CODE: my_node,
+        CANNON_CODE: my_node,
+        CANNON_SHOT_CODE: cannon_shot_validator
     }
 
 

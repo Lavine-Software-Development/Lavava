@@ -67,6 +67,8 @@ class Node(JsonableTracked):
             if data:
                 return StartingCapitalState(self.id)
             return CapitalState(self.id)
+        elif state_name == "cannon":
+            return CannonState(self.id)
         else:
             return DefaultState(self.id)
 

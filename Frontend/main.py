@@ -1,5 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
+from Backend.constants import CANNON_SHOT_CODE
 from constants import BURN_CODE, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
@@ -204,6 +205,8 @@ class Main:
             elif self.ps == PSE.PLAY.value:
                 if self.ability_manager.ability:
                     return self.ability_manager.validate(node)
+                elif node.owner == self.my_player and node.state_name == "cannon":
+                    return node, CANNON_SHOT_CODE
                 
         elif edge := self.find_edge(position):
             if self.ps == PSE.PLAY.value:
@@ -239,7 +242,7 @@ class Main:
                 return edge
         return None
     
-    def mouse_button_down_event(self, button):
+    def  mouse_button_down_event(self, button):
         if self.highlight:
             if self.ps == PSE.START_SELECTION.value:
                 self.network.send(self.highlight.send_format())

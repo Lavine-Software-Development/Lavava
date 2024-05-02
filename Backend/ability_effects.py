@@ -1,6 +1,8 @@
 from constants import (
     BRIDGE_CODE,
     D_BRIDGE_CODE,
+    GROWTH_STOP,
+    MINIMUM_TRANSFER_VALUE,
     SPAWN_CODE,
     FREEZE_CODE,
     NUKE_CODE,
@@ -63,6 +65,19 @@ def burn_effect(data, player):
 def capital_effect(data, player):
     node = data[0]
     node.set_state("capital")
+
+def cannon_effect(data, player):
+    node = data[0]
+    node.set_state("cannon")
+
+def cannon_shot_effect(data, player):
+    cannon, target = data[0], data[1]
+    if target.owner == player:
+        transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
+    else:
+        transfer = cannon.value - MINIMUM_TRANSFER_VALUE
+    cannon.value -= transfer
+    target.delivery(transfer, player)
 
 def make_ability_effects(board):
     return {

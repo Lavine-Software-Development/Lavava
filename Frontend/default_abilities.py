@@ -1,6 +1,7 @@
 from drawClasses import AbilityVisual
 from constants import YELLOW, BLACK, PURPLE, LIGHT_BLUE, PINK, DARK_ORANGE, GREEN, RAGE_CODE, BURN_CODE, \
-    ZOMBIE_CODE, CAPITAL_CODE, FREEZE_CODE, POISON_CODE, NUKE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, SPAWN_CODE
+    ZOMBIE_CODE, CAPITAL_CODE, FREEZE_CODE, POISON_CODE, NUKE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, SPAWN_CODE, \
+          GREY, CANNON_CODE
 from clickTypeEnum import ClickType
 
 
@@ -14,6 +15,7 @@ CAPITAL_V = AbilityVisual("Capital", "star", PINK)
 ZOMBIE_V = AbilityVisual("Zombie", "square", BLACK)
 BURN_V = AbilityVisual("Burn", "square", DARK_ORANGE)
 RAGE_V = AbilityVisual("Rage", "cross", GREEN)
+CANNON_V = AbilityVisual("Cannon", "cannon", GREY)
 
 SPAWN_C = {1, ClickType.NODE}
 BRIDGE_C = {2, ClickType.NODE}
@@ -25,6 +27,7 @@ CAPITAL_C = {1, ClickType.NODE}
 ZOMBIE_C = {1, ClickType.NODE}
 BURN_C = {1, ClickType.NODE}
 RAGE_C = {0, ClickType.BLANK}
+CANNON_C = {2, ClickType.NODE}
 
 VISUALS = {
     SPAWN_CODE: SPAWN_V,
@@ -36,7 +39,8 @@ VISUALS = {
     CAPITAL_CODE: CAPITAL_V,
     ZOMBIE_CODE: ZOMBIE_V,
     BURN_CODE: BURN_V,
-    RAGE_CODE: RAGE_V
+    RAGE_CODE: RAGE_V,
+    CANNON_CODE: CANNON_V
 }
 
 CLICKS = {
@@ -49,5 +53,6 @@ CLICKS = {
     CAPITAL_CODE: CAPITAL_C,
     ZOMBIE_CODE: ZOMBIE_C,
     BURN_CODE: BURN_C,
-    RAGE_CODE: RAGE_C
+    RAGE_CODE: RAGE_C,
+    CANNON_CODE: CANNON_C
 }

@@ -15,14 +15,14 @@ import math
 
 
 class AbstractState(JsonableSkeleton):
-    def __init__(self, id, reset_on_capture, flow_ownership, update_on_new_owner):
+    def __init__(self, id, reset_on_capture, flow_ownership, update_on_new_owner, visual_id):
         self.id = id
         self.reset_on_capture = reset_on_capture
         self.flow_ownership = flow_ownership
         self.update_on_new_owner = update_on_new_owner
         self.acceptBridge = True
         self.swap_status = STANDARD_SWAP_STATUS
-        self.visual_id = 0
+        self.visual_id = visual_id
 
     def grow(self, multiplier):
         return GROWTH_RATE * multiplier
@@ -64,8 +64,7 @@ class AbstractState(JsonableSkeleton):
 
 class DefaultState(AbstractState):
     def __init__(self, id):
-        super().__init__(id, False, False, False)
-        self.visual_id = 0
+        super().__init__(id, False, False, False, 0)
 
     def intake(self, amount, multiplier, contested):
         change = amount * multiplier
@@ -83,25 +82,32 @@ class DefaultState(AbstractState):
 class ZombieState(DefaultState):
 
     def __init__(self, id):
-        AbstractState.__init__(self, id, True, False, False)
-        self.visual_id = 1
+        AbstractState.__init__(self, id, True, False, False, 1)
 
     def grow(self, multiplier):
         return 0
 
     def intake(self, amount, multiplier, contested):
         return super().intake(amount, multiplier, contested) / 2
+    
+
+class CannonState(DefaultState):
+    
+    def __init__(self, id):
+        AbstractState.__init__(self, id, False, False, False, 5)
+
+    def grow(self, multiplier):
+        return 0
 
 
 class CapitalState(DefaultState):
     def __init__(self, id, reset=True, update_on_new_owner=False):
-        AbstractState.__init__(self, id, reset, False, update_on_new_owner)
+        AbstractState.__init__(self, id, reset, False, update_on_new_owner, 2)
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
             (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED)
         )
-        self.visual_id = 2
 
     def grow(self, multiplier):
         if not self.capitalized:
@@ -141,8 +147,8 @@ class StartingCapitalState(CapitalState):
 
 class MineState(AbstractState):
     def __init__(self, id, absorbing_func, island):
-        super().__init__(id, True, True, False)
-        self.bonus, self.bubble, self.ring_color, self.visual_id = MINE_DICT[island]
+        self.bonus, self.bubble, self.ring_color, visual_id = MINE_DICT[island]
+        super().__init__(id, True, True, False, visual_id)
         self.absorbing_func = absorbing_func
         self.swap_status = BELOW_SWAP_STATUS
 
