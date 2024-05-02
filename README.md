@@ -1,48 +1,40 @@
 # Lavava
 Sup yall
 
-# Setup
-The game is for 2 to 4 players
-Go to the action tab and select the most recent workflow for the mode you want to play.
-Download the client and server version for your OS.
+# Main Idea
+This game is a real-time variation of the classic board game Risk, with some other twists. It's built around graph theory, and so rather than countries there are nodes, and instead of borders between countries (determining who can attack who), there are edges connecting nodes. The real time aspect is distinctly demonstrated in two ways. Firstly, rather than placing your troops at the beginning of each turn in select territories (as you would in Risk), each territory you own naturally grows at a constant rate, without any action. The game-term for this naturally growing resource is energy, shown visually through each nodes' size. Secondly, attacking, and additionally the reallocating of energy happens in real time all over the map: Each edge is directional, and can be turned on or off (this state being determined by the owner of the "from-node"). A turned on edge connecting two teammate nodes ("teammate nodes" as in that they are the same color (have the same owner)) will transfer energy from one node to the other in the direction it points. A turned on edge connecting two opposing nodes will remove energy at an equal rate from both nodes. If the attacked node (the node the edge points toward) loses all its energy before the atacking ndoe, then ownership of the attacked node transfers to the attacker (it takes on the attacking nodes color. This mechanic is identical to Risk). Nodes continue growing and energy continually transfers along edges throughout the game until only one player still having nodes of their color remains.
 
-Choose one player to run the server. This player needs to check the local ip address on their computer, and then start the server
-Each player should then run client. This MUST be after server.py is running. Enter the IP address of the computer running server 
-One player types HOST and chooses how many players should play, and they will be given a 3 digit code
-The other players type JOIN, and then type in the code.
+The main other twist is abilities! Each player is given 15 credits at the beginning of the game to select a set of abilities from the ability menu. Each ability has a cost (in credits) as well as a reload time to limit immediate repeated usage in-game. At the bottom is a description of each ability.
 
-# Play
-The goal is to be the only player with their colored nodes on the board
-Click a node to start growing from there. This will cost you 300 money each time (Wallet show in the top left)
-Note the edges pointing outwards from that node turn lightly of that color
-Once the node grows big enough it'll "pop" and new nodes will stem from its outward growing edges
+# Other tidbits of information 
+- The board is randomly generated, and has approximately 60 nodes and 80 edges.
+- Nodes can be full. At that point they no longer naturally gain energy. This means you shouldn't let nodes be full unless neccessary.
+- Many of the edges are in fact dynamic, meaning they can change the direction they point in. When between teammate nodes, the owner can swap their direction. When between opponent nodes they automatically point in favor of (away from) the larger node. However if both nodes are full, both players can turn it on and it will swap in their favor.
+- Players start by choosing one random start point. Everything else comes from natural energy growth and transferring, and abilities.
+- The map starts with 3 capital states, these can be captured and afford the owning player certain capabilties. Capitals are just one of multiple other 'states' nodes can be in (usually as a result of abilities, as explored further below)
+- The main win condition requires removing all other players from the map, but this can be tedious and so they can forfeit at any point once they're confident they've lost. However a secondary win condition exists in owning 3 full capitals.
+- Every other node is randomly determined to be a port-node. Port-nodes affect certain interactions with specific abilities.
 
-Click an edge pointing outwards from a node you own 
-The edge will turn on, and the node will shrink, as the node on the opposing side grows. (You're transferring energy)
-Two-way edges are denoted with circles connected to one green triangle
-Right click two-way edges to swap their direction. (This can only be done in certain circumstances you'll pick up on)
+# Ability Breakdown
+1 Credit
+- Spawn: Choose an an unowned node anywhere and claim it. Identical to choosing a node to start the game. Offensive
+- Freeze: Make a dynamic-edge directional. Effectively stops an opponent from attacking you through that edge, while still keeping it open for your use from the other side. Defensive
+- Burn: Make a port node into a standard node (remove its ports). Defensive
+- Zombie: Make a node you own into an unowned wall (Zombie State). It automatically is set to 200 energy, but all energy transferred into it is halved (affectively requires 400 energy to be recaptured by a player). Defensive
 
-Edge Building --- Costs 500 money
-Tap 'A' on the keyboard (do not hold)
-Click a node you want to start from (click the mouse, do not hold down) (must be a node you own)
-Click any other node (you do not need to own it)
-This will build an edge. Note edges cannot be built if they intersect other edges
+2 Credits
+- Bridge: The quintessential ability. Make a new edge between two *port-nodes* so long as it doesn't overlap any other edge. Offensive
+- D-Bridge: Just a dynamic edge. Has its pros and cons. Offensive
+- Rage: All nodes you own transfer energy at 2.5 times the rate. Meant for a rush-esque play. Offensive
+- Poison: Choose an edge directly extending from a node you own. A *poison* is then sent to the opposing node. That poison then recurisvely spreads along all edges that are on. A poisoned node shrinks (loses energy) at the rate a normal node grows. This happens for 20 seconds. Offensive/Defensive
+
+3 Credits
+- Nuke: Deletes a node, and all its connecting edges from the map. To use Nuke, the node selected must be within a certain perimeter outside a capital the said player controls. Defensive.
+- Capital. Turn any full node you own into a capital. It then immediately shrinks entirely, and then ceases to grow naturally, instead relying on transferred in energy. Capitals have a few usages. They cannot be poisoned or nuked, enable using Nukes (as explained above), be built to with a bridge, and most importantly act as a win condition. If a capital is ever captured, it returns to a normal node. Defensive.
+- Cannon. Placed on any node you own. That node can then shoot its energy anywhere onto the map. Can be used to capture unclaimed nodes, transfer energy to a teammate node in need, or to attack a node far away. If a cannon is ever captured, unlike capital, the capturing player now has access to the cannon. Offensive/Defensive.
+- ? Need one more 3 credit ability.
 
 # FAQ
-How does attacking work?
-Turn on an edge pointing into an opponents node. It'll make it shrink rather than grow.
-If it gets small enough the colors will swap. Node captured!
-
-The board is too small, or doesn't fit on my screen?
-Change 'HEIGHT' and 'WIDTH' in 'constants'py'
-This should be consistent for each player but may work even if not
-
-What are the numbers at the top in the middle?
-The total nodes each player has
-
-How do I start a new game?
-Every player but one should be killed (have no nodes) or forfeit (press 'X')
-The remaining player presses 'R' and voila (may be glitchy)
 
 Difference between lightly colored and darkly colored edges?
 Lightly colored just means it's on but can't flow for 1 of 2 reasons:
@@ -50,10 +42,7 @@ Lightly colored just means it's on but can't flow for 1 of 2 reasons:
 - The to_node is full (full nodes have a black outer ring. They cannot grow or intake energy)
 Clicking an edge turns it on or off. Flow can only happen when on
 
-Number below wallet?
-Rate of wealth increase. Logarithmically related to total nodes a player owns
-This will likely change as its too snowbally
+# Got ideas?
+Reach out pal I'd love to hear it. Still lots of ideas in progess.
 
-Got ideas?
-Reach out pal I'd love to hear it
 
