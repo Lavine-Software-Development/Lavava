@@ -70,15 +70,6 @@ def cannon_effect(data, player):
     node = data[0]
     node.set_state("cannon")
 
-def cannon_shot_effect(data, player):
-    cannon, target = data[0], data[1]
-    if target.owner == player:
-        transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
-    else:
-        transfer = cannon.value - MINIMUM_TRANSFER_VALUE
-    cannon.value -= transfer
-    target.delivery(transfer, player)
-
 def make_ability_effects(board):
     return {
         BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE),

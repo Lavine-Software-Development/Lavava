@@ -1,7 +1,12 @@
 from collections import defaultdict
+
+from event import Event
 from jsonable import JsonableTracked
 from constants import (
+    CANNON_SHOT_CODE,
     DYNAMIC_EDGE,
+    GROWTH_STOP,
+    MINIMUM_TRANSFER_VALUE,
     SCREEN_WIDTH,
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
@@ -20,6 +25,7 @@ class Board(JsonableTracked):
         self.gs = gs
         self.nodes = []
         self.edges = []
+        self.events = self.make_events_dict()
         self.edge_dict = defaultdict(set)
         self.extra_edges = 0
         self.tracker = Tracker()
@@ -180,3 +186,24 @@ class Board(JsonableTracked):
 
     def click(self, id, player, key):
         self.id_dict[id].click(player, key)
+
+    def cannon_shot_check(self, player, data):
+        cannon, target = data[0], data[1]
+        can_shoot = cannon.state_name == "cannon" and cannon.owner == player
+        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full)
+        return can_shoot and can_accept
+
+    def cannon_shot(self, player, data):
+        cannon, target = data[0], data[1]
+        if target.owner == player:
+            transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
+        else:
+            transfer = cannon.value - MINIMUM_TRANSFER_VALUE
+        cannon.value -= transfer
+        target.delivery(transfer, player)
+    
+
+    def make_events_dict(self):
+        return {
+            CANNON_SHOT_CODE: Event(CANNON_SHOT_CODE, self.cannon_shot_check, self.cannon_shot)
+        }

@@ -1,4 +1,4 @@
-from constants import ALL_ABILITIES, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
+from constants import ALL_ABILITIES, EVENTS, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
 from playerStateEnums import PlayerStateEnum as PS
@@ -75,6 +75,8 @@ class Batch:
             self.game.effect(key, player, data['items'])
         elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
             self.game.click(key, player, data['items'][0])
+        elif key in EVENTS:
+            self.game.event(key, player, data['items'])
         else:
             print("NOT ALLOWED")
         

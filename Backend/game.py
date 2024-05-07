@@ -38,6 +38,12 @@ class ServerGame(Jsonable):
             new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
             player.use_ability(key, new_data)
         
+    def event(self, key, player_id, data):
+        player = self.player_dict[player_id]
+        event = self.board.events[key]
+        if event.can_use(player, data):
+            event.use(player, data)
+
     def click(self, key, player_id, item_id):
         player = self.player_dict[player_id]
         self.board.id_dict[item_id].click(player, key)

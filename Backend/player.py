@@ -7,7 +7,7 @@ from constants import (
     START_MONEY,
     START_MONEY_RATE,
     CAPITAL_BONUS,
-    BREAKDOWNS
+    BREAKDOWNS,
 )
 from ability_validators import make_ability_validators
 from ability_effects import make_ability_effects
