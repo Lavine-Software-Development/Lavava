@@ -1,12 +1,10 @@
 class Event():
-    def __init__(self, id, validation_func, effect_func):
+    def __init__(self, validation_func, effect_func):
         self.validation_func = validation_func
         self.effect_func = effect_func
 
-        super().__init__(id)
-
-    def can_use(self, data):
-        return self.validation_func(data)
+    def can_use(self, player, data):
+        return self.validation_func(player, data)
     
-    def use(self, data):
-        self.effect_func(data)
+    def use(self, data, player):
+        self.effect_func(player, data)

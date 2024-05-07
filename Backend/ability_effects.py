@@ -1,8 +1,6 @@
 from constants import (
     BRIDGE_CODE,
     D_BRIDGE_CODE,
-    GROWTH_STOP,
-    MINIMUM_TRANSFER_VALUE,
     SPAWN_CODE,
     FREEZE_CODE,
     NUKE_CODE,

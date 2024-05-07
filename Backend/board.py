@@ -205,5 +205,5 @@ class Board(JsonableTracked):
 
     def make_events_dict(self):
         return {
-            CANNON_SHOT_CODE: Event(CANNON_SHOT_CODE, self.cannon_shot_check, self.cannon_shot)
+            CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot)
         }
