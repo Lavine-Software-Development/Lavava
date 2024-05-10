@@ -29,6 +29,7 @@ from constants import (
     TRIANGLE_SPACING,
     CIRCLE_RADIUS,
     CIRCLE_SPACING,
+    CANNON_SHOT_CODE
 )
 from playerStateEnums import PlayerStateEnum as PSE
 
@@ -391,6 +392,13 @@ class Draw2:
                               spot.size, spot.size))
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
+                if spot.state_name == "cannon":
+                    if spot.ability_manager.mode == CANNON_SHOT_CODE and self.ability_manager.clicks[0] == spot:
+                        pass
+                        # same as other rectangle but instead pointing in the direction of the py.mouse.get_pos()
+                    else:
+                        py.draw.rect(self.screen, GREY, (spot.pos[0] - spot.size // 2, spot.pos[1] - spot.size, spot.size, spot.size * 2))
+
             if 'poison' in spot.effects:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
             if 'rage' in spot.effects:

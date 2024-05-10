@@ -12,8 +12,9 @@ class AbstractAbilityManager():
         self.clicks = []
 
     def use_event(self, highlight):
-        if self.mode:
+        if self.mode and self.mode != highlight.usage:
             self.reset()
+        self.mode = highlight.usage
         self.clicks.append(highlight.item)
         if self.complete_check(highlight.usage):
             clicks = [click.id for click in self.clicks]
@@ -79,7 +80,7 @@ class AbstractAbilityManager():
 
     @property
     def ability(self):
-        if self.mode:
+        if self.mode in self.abilities:
             return self.abilities[self.mode]
         return None
  
