@@ -115,7 +115,19 @@ class Edge(IDItem):
             return self.from_node
         else:
             raise ValueError('Node not in edge')
+        
 
+@dataclass
+class EventVisual():
+    name: str
+    color: tuple
+
+@dataclass
+class Event:
+    visual: EventVisual
+    click_count: int
+    click_type: ClickType
+    verification_func: Callable[..., bool]
     
 @dataclass
 class AbilityVisual(Parseable):

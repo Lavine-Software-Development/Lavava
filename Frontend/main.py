@@ -1,20 +1,19 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from Backend.constants import CANNON_SHOT_CODE
-from constants import BURN_CODE, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE
+from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
-from drawClasses import Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State
+from drawClasses import EventVisual, Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State, Event
 from port_position import port_angles
 from chooseUI import ChooseReloadUI
 from draw2 import Draw2
 from state_dictionary import state_dict
 from SettingsUI import settings_ui
 from temp_network import Network
-from default_abilities import VISUALS, CLICKS
+from default_abilities import VISUALS, CLICKS, EVENTS
 from default_colors import PLAYER_COLORS
 from abilityManager import AbstractAbilityManager
-from ability_validators import make_ability_validators, unowned_node
+from ability_validators import make_ability_validators, unowned_node, make_event_validators
 from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
@@ -81,7 +80,9 @@ class Main:
 
         chosen_boxes = self.choose_abilities(abi, credits)
         self.send_abilities(chosen_boxes)
-        self.ability_manager = AbstractAbilityManager(chosen_boxes)
+        ev = make_event_validators(self.my_player)
+        events = {eb: Event(VISUALS[eb], *(EVENTS[eb]), ev[eb]) for eb in EVENT_CODES}
+        self.ability_manager = AbstractAbilityManager(chosen_boxes, events)
 
         self.drawer.set_data(self.my_player, self.players, self.nodes.values(), self.edges.values(), self.ability_manager)
         self.can_draw = True
@@ -203,10 +204,7 @@ class Main:
                 if unowned_node([node]):
                     return node, SPAWN_CODE
             elif self.ps == PSE.PLAY.value:
-                if self.ability_manager.ability:
-                    return self.ability_manager.validate(node)
-                elif node.owner == self.my_player and node.state_name == "cannon":
-                    return node, CANNON_SHOT_CODE
+                return self.ability_manager.validate(node)
                 
         elif edge := self.find_edge(position):
             if self.ps == PSE.PLAY.value:
@@ -250,6 +248,9 @@ class Main:
                 if (data := self.ability_manager.use_ability(self.highlight)) \
                         and button != STANDARD_RIGHT_CLICK:
                     self.network.send(self.highlight.send_format(items=data))
+                elif (event_data := self.ability_manager.use_event(self.highlight)) \
+                        and button != STANDARD_RIGHT_CLICK:
+                    self.network.send(self.highlight.send_format(items=event_data))
                 elif self.highlight.type == ClickType.EDGE:
                     self.network.send(self.highlight.send_format(code=button))
 
@@ -317,4 +318,4 @@ class TestMain(Main):
 
 
 if __name__ == "__main__":
-   Main()
+   TestMain()

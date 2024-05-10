@@ -5,14 +5,21 @@ from typing import Union, Tuple
 
 
 class AbstractAbilityManager():
-    def __init__(self, abilities):
+    def __init__(self, abilities, events):
         self.abilities = abilities
+        self.events = events
         self.mode = None
         self.clicks = []
-        self.hovering = None
 
-    def set_hover(self, item):
-        self.hovering = item
+    def use_event(self, highlight):
+        if self.mode:
+            self.reset()
+        self.clicks.append(highlight.item)
+        if self.complete_check(highlight.usage):
+            clicks = [click.id for click in self.clicks]
+            self.reset()
+            return clicks
+        return False
 
     def use_ability(self, highlight):
         if not self.ability:
@@ -40,8 +47,13 @@ class AbstractAbilityManager():
             return True
         return False
     
-    def complete_check(self):
-        return self.ability.click_count == len(self.clicks)
+    def complete_check(self, event=None):
+        if self.ability:
+            return self.ability.click_count == len(self.clicks)
+        elif event:
+            return self.events[event].click_count == len(self.clicks)
+        print("ERROR, No ability or event")
+        return False
 
     def select(self, key):
         if self.ability:
@@ -52,10 +64,17 @@ class AbstractAbilityManager():
             return self.switch_to(key)
         return False
     
-    def validate(self, item: IDItem) -> Union[Tuple[IDItem, int], bool]:
-        if self.mode and item.type == self.ability.click_type:
-            if self.ability.verification_func(self.clicks + [item]):
-                return item, self.mode
+    def validate(self, item: IDItem, event: int=0) -> Union[Tuple[IDItem, int], bool]:
+        if event:
+            if self.events[event].verification_func(self.clicks + [item]):
+                return item, event
+        elif self.ability and self.mode and item.type == self.ability.click_type and self.ability.verification_func(self.clicks + [item]):
+            return item, self.mode
+        else:
+            for code, ev in self.events.items():
+                if item.type == ev.click_type and ev.verification_func([item]):
+                    return item, code
+
         return False
 
     @property
