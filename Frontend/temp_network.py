@@ -3,51 +3,15 @@ import threading
 import json
 from json_helpers import convert_keys_to_int, split_json_objects
 
-
-class SoloNetwork:
-    def __init__(self, setup, update, data):
-        self.setup_callback = setup
-        self.update_callback = update
-
-        self.running = True
-        self.data = data
-
-        self.get_user_input_and_board()
-
-    def get_user_input_and_board(self):
-        while self.running:
-            self.get_user_input_for_game()
-            if self.receive_board():
-                threading.Thread(target=self.listen).start()
-                break
-
-    # def get_user_input_for_game(self):
-    #     self.game_type = int(self.data[0])
-
-    # def receive_board(self):
-    #     self.board_generator_value = int(random.randint(0, 10000))
-    #     return True
-
-    # def send(self, data):
-    #     self.action_callback(*data[:2], data[2:])
-
-    # def listen(self):
-    #     time.sleep(1)
-    #     while self.running:
-    #         self.action_callback(0, 0, 0)
-    #         time.sleep(0.1)
-
-
 class Network:
-    def __init__(self, setup, update, data, port):
+    def __init__(self, setup, update, data, server):
         self.setup_callback = setup
         self.update_callback = update
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server = '10.0.0.245'
-        server = '18.218.61.211'
+
         self.server = str(server)
-        self.port = port
+        self.port = 5553
         self.addr = (self.server, self.port)
 
         self.setup_user(data)
@@ -65,11 +29,8 @@ class Network:
             self.init_data = json.dumps({"type": "JOIN", "players": 0, "mode": 0})
 
     def establish_connection(self):
-        
         try:
-            print(self.init_data)
             self.client.connect(self.addr)
-            print("here")
             self.client.send(self.init_data.encode())
             data = self.client.recv(1024)
             response = data.decode()
@@ -79,49 +40,15 @@ class Network:
             else:
                 print("Connected to game", response)
                 return True
-        except Exception as e:
-            print(e)
+        except:
             print("Connection failed.")
             return False
 
-    def receive_board_data1(self):
+    def receive_board_data(self):
         data = self.client.recv(15000).decode()
-        print(data)
+
         data_dict = convert_keys_to_int(json.loads(data))
         self.setup_callback(data_dict)
-        threading.Thread(target=self.listen).start()
-
-    def receive_board_data(self):
-        data = ''
-        while True:
-            print("Reading data...")
-            try:
-                chunk = self.client.recv(4096)  # Buffer size of 4096 bytes
-                if not chunk:
-                    print("No more data received.")
-                    break
-                data += chunk.decode('utf-8')
-
-                # Attempt to decode the JSON at each step once a likely complete message has been received
-                # This check is pretty jank but will fix later after i experiment more with sending data over sockets
-                if '"122": {"credits"' in data:  # This checks for a specific end-of-message marker
-                    print("Potential complete message received.")
-                    data_dict = convert_keys_to_int(json.loads(data))
-                    self.setup_callback(data_dict)
-                    break
-
-            except json.JSONDecodeError as e:
-                print(f"JSON decode error: {e} - Continuing to read more data.")
-                data = ''
-                continue  
-            except UnicodeDecodeError as e:
-                print(f"Unicode decode error: {e} - Continuing to read more data.")
-                data = ''
-                continue  
-            except Exception as e:
-                print(f"An unexpected error occurred: {e}")
-                break 
-
         threading.Thread(target=self.listen).start()
 
     def simple_send(self, code):
