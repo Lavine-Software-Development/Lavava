@@ -1,5 +1,5 @@
 from game import Game
-from network import SoloNetwork
+from Frontend.deprecated.network import SoloNetwork
 from playerManager import SoloPlayerManager
 from Backend.randomGenerator import RandomGenerator
 import Server.mode as mode
