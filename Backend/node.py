@@ -9,7 +9,7 @@ from constants import (
     AUTO_EXPAND,
     BLACK,
 )
-from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState
+from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState
 from nodeEffect import Poisoned, NodeEnraged
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes

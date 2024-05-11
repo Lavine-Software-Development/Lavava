@@ -15,7 +15,7 @@ CAPITAL_V = AbilityVisual("Capital", "star", PINK)
 ZOMBIE_V = AbilityVisual("Zombie", "square", BLACK)
 BURN_V = AbilityVisual("Burn", "square", DARK_ORANGE)
 RAGE_V = AbilityVisual("Rage", "cross", GREEN)
-CANNON_V = AbilityVisual("Cannon", "cannon", GREY)
+CANNON_V = AbilityVisual("Cannon", "cannon", GREY, 'E')
 
 CANNON_SHOT_V = EventVisual("Cannon Shot", DARK_PINK)
 
@@ -46,7 +46,7 @@ VISUALS = {
     RAGE_CODE: RAGE_V,
     CANNON_CODE: CANNON_V,
 
-    CANNON_SHOT_CODE: DARK_PINK
+    CANNON_SHOT_CODE: CANNON_SHOT_V
 }
 
 CLICKS = {

@@ -1,10 +1,10 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE
+from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, CANNON_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import EventVisual, Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State, Event
-from port_position import port_angles
+from angled_position import angles
 from chooseUI import ChooseReloadUI
 from draw2 import Draw2
 from state_dictionary import state_dict
@@ -92,7 +92,7 @@ class Main:
     
     def make_ports(self, is_port):
         if is_port:
-            return 1, port_angles(PORT_COUNT)
+            return 1, angles(PORT_COUNT)
         return 0, []
     
     def update(self, update_data):
@@ -299,7 +299,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.logic, self.my_player)
-        counts = {FREEZE_CODE: 2, NUKE_CODE: 2, BURN_CODE: 2}
+        counts = {FREEZE_CODE: 2, CANNON_CODE: 2, BURN_CODE: 2}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):
