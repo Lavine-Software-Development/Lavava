@@ -248,11 +248,11 @@ class Main:
                 if (data := self.ability_manager.use_ability(self.highlight)) \
                         and button != STANDARD_RIGHT_CLICK:
                     self.network.send(self.highlight.send_format(items=data))
+                elif self.highlight.type == ClickType.EDGE:
+                    self.network.send(self.highlight.send_format(code=button))
                 elif (event_data := self.ability_manager.use_event(self.highlight)) \
                         and button != STANDARD_RIGHT_CLICK:
                     self.network.send(self.highlight.send_format(items=event_data))
-                elif self.highlight.type == ClickType.EDGE:
-                    self.network.send(self.highlight.send_format(code=button))
 
     def keydown(self, event):
         if event.key == OVERRIDE_RESTART_CODE:
