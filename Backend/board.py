@@ -190,7 +190,7 @@ class Board(JsonableTracked):
     def cannon_shot_check(self, player, data):
         cannon, target = self.id_dict[data[0]], self.id_dict[data[1]]
         can_shoot = cannon.state_name == "cannon" and cannon.owner == player
-        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full)
+        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full())
         return can_shoot and can_accept
 
     def cannon_shot(self, player, data):

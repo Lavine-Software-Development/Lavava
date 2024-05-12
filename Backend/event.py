@@ -6,5 +6,5 @@ class Event():
     def can_use(self, player, data):
         return self.validation_func(player, data)
     
-    def use(self, data, player):
+    def use(self, player, data):
         self.effect_func(player, data)
