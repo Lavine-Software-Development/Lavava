@@ -25,6 +25,8 @@ class GameState:
         elif self.state == GSE.START_SELECTION:
             self.state = GSE.PLAY
         elif self.state == GSE.PLAY:
+            self.state = GSE.END_GAME
+        elif self.state == GSE.END_GAME:
             self.state = GSE.GAME_OVER
 
     def restart(self):

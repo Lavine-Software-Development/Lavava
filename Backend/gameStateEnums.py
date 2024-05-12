@@ -7,4 +7,5 @@ class GameStateEnum(Enum):
     ABILITY_SELECTION = auto()
     START_SELECTION = auto()
     PLAY = auto()
+    END_GAME = auto()
     GAME_OVER = auto()

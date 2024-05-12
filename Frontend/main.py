@@ -98,7 +98,7 @@ class Main:
     def update(self, update_data):
 
         self.ps = update_data['player']['ps']
-        self.timer = update_data['timer']
+        self.timer = update_data['countdown_timer']
 
         self.parse(self.ability_manager.abilities, update_data['player']['abilities'])
         self.parse(self.nodes, update_data['board']['nodes'])
