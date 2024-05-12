@@ -73,8 +73,6 @@ class Batch:
             self.game.eliminate(player)
         elif key in ALL_ABILITIES:
             self.game.effect(key, player, data['items'])
-        elif key == STANDARD_LEFT_CLICK or key == STANDARD_RIGHT_CLICK:
-            self.game.click(key, player, data['items'][0])
         elif key in EVENTS:
             self.game.event(key, player, data['items'])
         else:

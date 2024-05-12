@@ -1,6 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, CANNON_CODE
+from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, CANNON_CODE, STANDARD_LEFT_CLICK
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import EventVisual, Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State, Event
@@ -208,11 +208,7 @@ class Main:
                 
         elif edge := self.find_edge(position):
             if self.ps == PSE.PLAY.value:
-                if self.ability_manager.ability:
-                    if edge_highlight := self.ability_manager.validate(edge):
-                        return edge_highlight
-                if edge.controlled_by(self.my_player):
-                    return edge, EDGE_CODE
+                return self.ability_manager.validate(edge)
                 
         return False
     
@@ -247,12 +243,12 @@ class Main:
             else:
                 if (data := self.ability_manager.use_ability(self.highlight)) \
                         and button != STANDARD_RIGHT_CLICK:
-                    self.network.send(self.highlight.send_format(items=data))
-                elif self.highlight.type == ClickType.EDGE:
-                    self.network.send(self.highlight.send_format(code=button))
-                elif (event_data := self.ability_manager.use_event(self.highlight)) \
-                        and button != STANDARD_RIGHT_CLICK:
-                    self.network.send(self.highlight.send_format(items=event_data))
+                    self.network.send(self.highlight.send_format(data))
+                elif (event_data := self.ability_manager.use_event(self.highlight)):
+                    if button == STANDARD_RIGHT_CLICK and self.highlight.usage == STANDARD_LEFT_CLICK:
+                        self.network.send(self.highlight.send_format(event_data, STANDARD_RIGHT_CLICK))
+                    else:
+                        self.network.send(self.highlight.send_format(event_data))
 
     def keydown(self, event):
         if event.key == OVERRIDE_RESTART_CODE:

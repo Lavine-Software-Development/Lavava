@@ -1,4 +1,4 @@
-from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE, CANNON_CODE, MINIMUM_TRANSFER_VALUE, CANNON_SHOT_CODE
+from constants import SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE, CANNON_CODE, MINIMUM_TRANSFER_VALUE, CANNON_SHOT_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK
 
 
 def no_click(data):
@@ -99,7 +99,13 @@ def make_event_validators(player):
             second_node = data[1]
             return not (second_node.owner == player and second_node.full)
         
+    def edge_validator(data):
+        edge = data[0]
+        return edge.controlled_by(player)
+        
     return {
-        CANNON_SHOT_CODE: cannon_shot_validator
+        CANNON_SHOT_CODE: cannon_shot_validator,
+        STANDARD_LEFT_CLICK: edge_validator,
+        STANDARD_RIGHT_CLICK: edge_validator,
     }
 

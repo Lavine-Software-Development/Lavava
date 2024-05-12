@@ -11,6 +11,8 @@ from constants import (
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
     EDGE_COUNT,
+    STANDARD_LEFT_CLICK,
+    STANDARD_RIGHT_CLICK,
 )
 from helpers import do_intersect
 from edge import Edge
@@ -201,9 +203,12 @@ class Board(JsonableTracked):
             transfer = cannon.value - MINIMUM_TRANSFER_VALUE
         cannon.value -= transfer
         target.delivery(transfer, player)
-    
 
     def make_events_dict(self):
         return {
-            CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot)
+            CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot),
+            STANDARD_LEFT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_left_click(player),
+                                        lambda player, data: self.id_dict[data[0]].switch()),
+            STANDARD_RIGHT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_right_click(player), 
+                                        lambda player, data: self.id_dict[data[0]].click_swap()),
         }

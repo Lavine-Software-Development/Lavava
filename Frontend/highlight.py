@@ -28,7 +28,7 @@ class Highlight:
             return self.item.type
         return ClickType.BLANK
 
-    def send_format(self, code=None, items=None):
+    def send_format(self, items=None, code=None):
         code = code or self.usage
         if not items:
             items = [self.item.id]

@@ -31,15 +31,8 @@ class DynamicEdge(Edge):
             self.to_node = self.from_node
             self.from_node = temp
 
-    def click(self, clicker, button):
-        super().click(clicker, button)
-        if button == 3 and self.to_node.owner == clicker:
-            # must own the node that will become from_node after swap (to_node becomes from_node)
-            # if you don't own both sides, you can only swap when full
-            if self.owned:
-                self.click_swap()
-            elif self.to_node.full():
-                self.click_swap()
+    def valid_right_click(self, clicker):
+        return self.to_node.owner == clicker and (self.owned or self.to_node.full())
 
     def check_status(self):
         if self.from_node.owner is None and self.to_node.owner is not None:
