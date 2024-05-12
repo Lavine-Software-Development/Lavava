@@ -30,9 +30,11 @@ class Edge(JsonableTracked):
         self.to_node.new_edge(self, "incoming", initial)
         self.from_node.new_edge(self, "outgoing", initial)
 
-    def click(self, clicker, button):
-        if button == 1 and self.controlled_by(clicker):
-            self.switch()
+    def valid_left_click(self, clicker):
+        return self.controlled_by(clicker)
+
+    def valid_right_click(self, clicker):
+        return False
 
     def switch(self, specified=None):
         if specified is None:

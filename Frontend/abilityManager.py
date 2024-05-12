@@ -1,5 +1,3 @@
-# from abc import ABC, abstractmethod
-
 from drawClasses import IDItem
 from typing import Union, Tuple
 
@@ -66,7 +64,7 @@ class AbstractAbilityManager():
         return False
     
     def validate(self, item: IDItem) -> Union[Tuple[IDItem, int], bool]:
-        if self.mode in self.events and self.events[self.mode].verification_func(self.clicks + [item]):
+        if self.event and item.type == self.event.click_type and self.event.verification_func(self.clicks + [item]):
             return item, self.mode
         elif self.ability and item.type == self.ability.click_type and self.ability.verification_func(self.clicks + [item]):
             return item, self.mode
@@ -74,13 +72,19 @@ class AbstractAbilityManager():
             for code, ev in self.events.items():
                 if item.type == ev.click_type and ev.verification_func([item]):
                     return item, code
-
+                
         return False
 
     @property
     def ability(self):
         if self.mode in self.abilities:
             return self.abilities[self.mode]
+        return None
+    
+    @property
+    def event(self):
+        if self.mode in self.events:
+            return self.events[self.mode]
         return None
  
 # class MoneyAbilityManager(AbstractAbilityManager):
