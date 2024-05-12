@@ -65,11 +65,10 @@ class AbstractAbilityManager():
             return self.switch_to(key)
         return False
     
-    def validate(self, item: IDItem, event: int=0) -> Union[Tuple[IDItem, int], bool]:
-        if event:
-            if self.events[event].verification_func(self.clicks + [item]):
-                return item, event
-        elif self.ability and self.mode and item.type == self.ability.click_type and self.ability.verification_func(self.clicks + [item]):
+    def validate(self, item: IDItem) -> Union[Tuple[IDItem, int], bool]:
+        if self.mode in self.events and self.events[self.mode].verification_func(self.clicks + [item]):
+            return item, self.mode
+        elif self.ability and item.type == self.ability.click_type and self.ability.verification_func(self.clicks + [item]):
             return item, self.mode
         else:
             for code, ev in self.events.items():

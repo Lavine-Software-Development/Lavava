@@ -393,11 +393,13 @@ class Draw2:
             else:
                 py.draw.circle(self.screen, spot.color, spot.pos, spot.size)
                 if spot.state_name == "cannon":
-                    if spot.ability_manager.mode == CANNON_SHOT_CODE and self.ability_manager.clicks[0] == spot:
-                        pass
-                        # same as other rectangle but instead pointing in the direction of the py.mouse.get_pos()
-                    else:
-                        py.draw.rect(self.screen, GREY, (spot.pos[0] - spot.size // 2, spot.pos[1] - spot.size, spot.size, spot.size * 2))
+                    if self.ability_manager.mode == CANNON_SHOT_CODE and self.ability_manager.clicks[0] == spot:
+                        mouse_pos = py.mouse.get_pos()
+                        # Calculate angle between the spot and the mouse cursor
+                        dx = mouse_pos[0] - spot.pos[0]
+                        dy = mouse_pos[1] - spot.pos[1]
+                        spot.state.angle = math.atan2(dy, dx)  # Angle in radians
+                    self.blit_angled_rectangle(spot, GREY, spot.size * 2, spot.size, spot.state.angle)
 
             if 'poison' in spot.effects:
                 py.draw.circle(self.screen, PURPLE, spot.pos, spot.size + 6, 6)
@@ -418,20 +420,22 @@ class Draw2:
 
     def blit_ports(self, spot, port_color, port_width, port_height):
         for angle in spot.ports:
-            # Calculate the center of the port base on the node circumference
-            port_center_x = spot.pos[0] + spot.size * math.cos(angle)
-            port_center_y = spot.pos[1] + spot.size * math.sin(angle)
-            
-            # Create a new surface for the port (with per-pixel alpha)
-            port_surface = py.Surface((port_width, port_height), py.SRCALPHA)
-            port_surface.fill(port_color)
-            
-            # Rotate the port surface around its center
-            rotated_port = py.transform.rotate(port_surface, -math.degrees(angle))
-            rotated_rect = rotated_port.get_rect(center=(port_center_x, port_center_y))
-            
-            # Blit the rotated port surface onto the main screen
-            self.screen.blit(rotated_port, rotated_rect.topleft)
+            self.blit_angled_rectangle(spot, port_color, port_width, port_height, angle)
+
+    def blit_angled_rectangle(self, spot, port_color, port_width, port_height, angle):
+        port_center_x = spot.pos[0] + spot.size * math.cos(angle)
+        port_center_y = spot.pos[1] + spot.size * math.sin(angle)
+        
+        # Create a new surface for the port (with per-pixel alpha)
+        port_surface = py.Surface((port_width, port_height), py.SRCALPHA)
+        port_surface.fill(port_color)
+        
+        # Rotate the port surface around its center
+        rotated_port = py.transform.rotate(port_surface, -math.degrees(angle))
+        rotated_rect = rotated_port.get_rect(center=(port_center_x, port_center_y))
+        
+        # Blit the rotated port surface onto the main screen
+        self.screen.blit(rotated_port, rotated_rect.topleft)
 
     def blit_numbers(self, time):
         # py.draw.rect(self.screen, WHITE, (0, 0, self.width, self.height / 13))

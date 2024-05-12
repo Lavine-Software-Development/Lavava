@@ -1,5 +1,6 @@
 from constants import (
     BRIDGE_CODE,
+    CANNON_CODE,
     D_BRIDGE_CODE,
     SPAWN_CODE,
     FREEZE_CODE,
@@ -80,6 +81,7 @@ def make_ability_effects(board):
         CAPITAL_CODE: capital_effect,
         ZOMBIE_CODE: zombie_effect,
         RAGE_CODE: make_rage(board.board_wide_effect),
+        CANNON_CODE: cannon_effect
     }
 
 

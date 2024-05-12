@@ -4,6 +4,7 @@ import math
 from parseable import Parseable
 from clickTypeEnum import ClickType
 from typing import Callable
+from angled_position import angles
 
 from constants import BROWN, BLACK, GREY, GROWTH_STOP
 
@@ -20,6 +21,10 @@ class MineState(State):
 @dataclass
 class CapitalState(State):
     capitalized: bool = False
+
+@dataclass
+class CannonState(State):
+    angle: int = angles(1)[0]
 
 @dataclass
 class OtherPlayer:

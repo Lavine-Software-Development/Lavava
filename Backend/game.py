@@ -43,6 +43,8 @@ class ServerGame(Jsonable):
         event = self.board.events[key]
         if event.can_use(player, data):
             event.use(player, data)
+        else:
+            print("failed to use event")
 
     def click(self, key, player_id, item_id):
         player = self.player_dict[player_id]
