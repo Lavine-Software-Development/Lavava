@@ -6,6 +6,7 @@ from board import Board
 from map_builder import MapBuilder
 from ability_effects import make_ability_effects
 from player import DefaultPlayer
+from node import Node
 
 class ServerGame(Jsonable):
     def __init__(self, player_count, gs):
@@ -24,6 +25,9 @@ class ServerGame(Jsonable):
         super().__init__('game', start_values, recurse_values, tick_values)
 
         self.restart()
+
+    def end_game(self):
+        Node.end_game = True
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
@@ -105,6 +109,7 @@ class ServerGame(Jsonable):
 
             if self.main_timer <= 0:
                 self.gs.next()
+                self.end_game()
 
         elif self.ending_timer > 0:
             self.ending_timer -= 0.1

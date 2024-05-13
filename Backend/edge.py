@@ -69,11 +69,8 @@ class Edge(JsonableTracked):
 
     def flow(self):
         amount_transferred = self.from_node.send_amount()
-        self.delivery(amount_transferred)
-        self.from_node.value -= amount_transferred
-
-    def delivery(self, amount):
-        self.to_node.delivery(amount, self.from_node.owner)
+        self.to_node.delivery(amount_transferred, self.from_node.owner)
+        self.from_node.lost_amount(amount_transferred)
 
     def check_status(self):
         pass

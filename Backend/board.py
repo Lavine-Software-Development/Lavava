@@ -19,6 +19,8 @@ from edge import Edge
 from dynamicEdge import DynamicEdge
 from tracker import Tracker
 from tracking_decorator.track_changes import track_changes
+from node import Node
+from end_game_methods import noGrowthFreeAttack
 
 
 @track_changes("nodes_r", "edges_r")
@@ -62,6 +64,7 @@ class Board(JsonableTracked):
 
     def reset(self, nodes, edges):
         self.nodes = nodes
+        Node.end_game_methods = noGrowthFreeAttack
         self.edges = edges
         self.edge_dict = defaultdict(set)
         self.expand_nodes()

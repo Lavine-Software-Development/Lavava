@@ -16,6 +16,10 @@ from tracking_decorator.track_changes import track_changes
 
 @track_changes('owner', 'state', 'value', 'effects')
 class Node(JsonableTracked):
+
+    end_game = False
+    end_game_methods = dict()
+
     def __init__(self, id, pos):
 
         self.value = 0
@@ -150,7 +154,9 @@ class Node(JsonableTracked):
 
     def grow(self):
         if self.can_grow():
-            self.value += self.state.grow(self.grow_multiplier)
+            growth = self.state.grow(self.grow_multiplier)
+            if self.end_game and 'growthMultiplier' in self.end_game_methods:
+                growth = self.end_game_methods['growthMultiplier'](growth)
         self.effects_update()
 
     def can_grow(self):
@@ -186,9 +192,12 @@ class Node(JsonableTracked):
                         neighbor.set_state(key)
 
     def delivery(self, amount, player):
-        self.value += self.state.intake(
-            amount, self.intake_multiplier, player != self.owner
-        )
+        intake = self.state.intake(
+            amount, self.intake_multiplier, player != self.owner)
+        if self.end_game and 'attackMultiplier' in self.end_game_methods:
+            intake *= self.end_game_methods['attackMultiplier'](player == self.owner)
+        self.value += intake
+
         if self.state.flow_ownership:
             self.owner = player
         if self.state.killed(self.value):
@@ -199,6 +208,11 @@ class Node(JsonableTracked):
 
     def send_amount(self):
         return self.state.expel(self.expel_multiplier, self.value)
+    
+    def lost_amount(self, amount, contested):
+        if self.end_game and 'attackCost' in self.end_game_methods:
+            amount *= self.end_game_methods['attackCost'](contested)
+        self.value -= amount
 
     def update_ownerships(self, player=None):
         if self.owner is not None and self.owner != player:
