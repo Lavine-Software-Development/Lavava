@@ -17,8 +17,8 @@ def freeAttack(contested):
 
 
 noGrowthFreeAttack = {
+    'growthMultiplier': stall,
     'attackCost': freeAttack,
-    'growthMultiplier': stall
 }
 
 

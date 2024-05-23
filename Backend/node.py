@@ -17,8 +17,11 @@ from tracking_decorator.track_changes import track_changes
 @track_changes('owner', 'state', 'value', 'effects')
 class Node(JsonableTracked):
 
-    end_game = False
-    end_game_methods = dict()
+    method_swaps = {
+        'attackMultiplier': ('delivery', 'end_game_delivery'),
+        'growthMultiplier': ('grow', 'end_game_grow'),
+        'attackCost': ('lost_amount', 'end_game_lost_amount')
+    }
 
     def __init__(self, id, pos):
 
@@ -154,10 +157,17 @@ class Node(JsonableTracked):
 
     def grow(self):
         if self.can_grow():
-            growth = self.state.grow(self.grow_multiplier)
-            if self.end_game and 'growthMultiplier' in self.end_game_methods:
-                growth = self.end_game_methods['growthMultiplier'](growth)
+            self.value += self.state.grow(self.grow_multiplier)
         self.effects_update()
+
+    @classmethod
+    def end_game_grow(cls, growth_multiplier_method):
+        def grow(self):
+            if self.can_grow():
+                growth_base = self.state.grow(self.grow_multiplier)
+                self.value += growth_multiplier_method(growth_base)
+            self.effects_update()
+        return grow
 
     def can_grow(self):
         ## Gross mention of poison
@@ -194,10 +204,40 @@ class Node(JsonableTracked):
     def delivery(self, amount, player):
         intake = self.state.intake(
             amount, self.intake_multiplier, player != self.owner)
-        if self.end_game and 'attackMultiplier' in self.end_game_methods:
-            intake *= self.end_game_methods['attackMultiplier'](player == self.owner)
-        self.value += intake
+        self.delivery_update(player, intake)
 
+    # def end_game_delivery(self, attack_multiplier_method):
+    #     def delivery(amount, player):
+    #         intake = self.state.intake(
+    #             amount, self.intake_multiplier, player != self.owner)
+    #         intake *= attack_multiplier_method(player == self.owner)
+    #         self.delivery_update(player, intake)
+    #     return delivery
+    
+    # @classmethod
+    # def switch_methods(cls, end_game_dict):
+    #     for str, injected_method in end_game_dict.items():
+    #         swapped = cls.method_swaps[str]
+    #         setattr(cls, swapped[0], getattr(cls, swapped[1])(injected_method))
+
+    @classmethod
+    def end_game_delivery(cls, attack_multiplier_method):
+        def delivery(self, amount, player):
+            intake = self.state.intake(
+                amount, self.intake_multiplier, player != self.owner)
+            intake *= attack_multiplier_method(player == self.owner)
+            self.delivery_update(player, intake)
+        return delivery
+
+    @classmethod
+    def end_game_method_switch(cls, end_game_dict):
+        for key, injected_method in end_game_dict.items():
+            method_name, generator_name = cls.method_swaps[key]
+            new_method = getattr(cls, generator_name)(injected_method)
+            setattr(cls, method_name, new_method.__get__(None, cls))
+
+    def delivery_update(self, player, intake):
+        self.value += intake
         if self.state.flow_ownership:
             self.owner = player
         if self.state.killed(self.value):
@@ -210,9 +250,13 @@ class Node(JsonableTracked):
         return self.state.expel(self.expel_multiplier, self.value)
     
     def lost_amount(self, amount, contested):
-        if self.end_game and 'attackCost' in self.end_game_methods:
-            amount *= self.end_game_methods['attackCost'](contested)
         self.value -= amount
+
+    @classmethod
+    def end_game_lost_amount(cls, attack_cost_method):
+        def lost_amount(self, amount, contested):
+            self.value -= amount * attack_cost_method(contested)
+        return lost_amount
 
     def update_ownerships(self, player=None):
         if self.owner is not None and self.owner != player:

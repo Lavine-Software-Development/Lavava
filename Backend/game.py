@@ -7,6 +7,7 @@ from map_builder import MapBuilder
 from ability_effects import make_ability_effects
 from player import DefaultPlayer
 from node import Node
+from end_game_methods import noGrowthFreeAttack
 
 class ServerGame(Jsonable):
     def __init__(self, player_count, gs):
@@ -27,7 +28,7 @@ class ServerGame(Jsonable):
         self.restart()
 
     def end_game(self):
-        Node.end_game = True
+        Node.end_game_method_switch(noGrowthFreeAttack)
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
