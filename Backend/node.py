@@ -13,15 +13,13 @@ from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState
 from nodeEffect import Poisoned, NodeEnraged
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
+from method_mulitplier import method_multipliers
+from end_game_methods import stall, freeAttack, shrink
+
 
 @track_changes('owner', 'state', 'value', 'effects')
+@method_multipliers({('value_grow', shrink), ('lost_amount', freeAttack)})
 class Node(JsonableTracked):
-
-    method_swaps = {
-        'attackMultiplier': ('delivery', 'end_game_delivery'),
-        'growthMultiplier': ('grow', 'end_game_grow'),
-        'attackCost': ('lost_amount', 'end_game_lost_amount')
-    }
 
     def __init__(self, id, pos):
 
@@ -157,22 +155,14 @@ class Node(JsonableTracked):
 
     def grow(self):
         if self.can_grow():
-            self.value += self.state.grow(self.grow_multiplier)
+            self.value += self.value_grow()
         self.effects_update()
 
-    @classmethod
-    def end_game_grow(cls, growth_multiplier_method):
-        def grow(self):
-            if self.can_grow():
-                growth_base = self.state.grow(self.grow_multiplier)
-                self.value += growth_multiplier_method(growth_base)
-            self.effects_update()
-        return grow
+    def value_grow(self):
+        return self.state.grow(self.grow_multiplier)
 
     def can_grow(self):
-        ## Gross mention of poison
-        ## I could cycle through all effects
-        if self.state.can_grow(self.value) or 'poison' in self.effects:
+        if self.state.can_grow(self.value, self.grow_multiplier):
             return True
 
     def effects_update(self):
@@ -202,42 +192,14 @@ class Node(JsonableTracked):
                         neighbor.set_state(key)
 
     def delivery(self, amount, player):
-        intake = self.state.intake(
-            amount, self.intake_multiplier, player != self.owner)
-        self.delivery_update(player, intake)
+        self.value += self.delivery_value_update(amount, player != self.owner)
+        self.delivery_status_update(player)
 
-    # def end_game_delivery(self, attack_multiplier_method):
-    #     def delivery(amount, player):
-    #         intake = self.state.intake(
-    #             amount, self.intake_multiplier, player != self.owner)
-    #         intake *= attack_multiplier_method(player == self.owner)
-    #         self.delivery_update(player, intake)
-    #     return delivery
-    
-    # @classmethod
-    # def switch_methods(cls, end_game_dict):
-    #     for str, injected_method in end_game_dict.items():
-    #         swapped = cls.method_swaps[str]
-    #         setattr(cls, swapped[0], getattr(cls, swapped[1])(injected_method))
-
-    @classmethod
-    def end_game_delivery(cls, attack_multiplier_method):
-        def delivery(self, amount, player):
-            intake = self.state.intake(
-                amount, self.intake_multiplier, player != self.owner)
-            intake *= attack_multiplier_method(player == self.owner)
-            self.delivery_update(player, intake)
-        return delivery
-
-    @classmethod
-    def end_game_method_switch(cls, end_game_dict):
-        for key, injected_method in end_game_dict.items():
-            method_name, generator_name = cls.method_swaps[key]
-            new_method = getattr(cls, generator_name)(injected_method)
-            setattr(cls, method_name, new_method.__get__(None, cls))
-
-    def delivery_update(self, player, intake):
-        self.value += intake
+    def delivery_value_update(self, amount, contested):
+        return self.state.intake(
+            amount, self.intake_multiplier, contested)
+        
+    def delivery_status_update(self, player):
         if self.state.flow_ownership:
             self.owner = player
         if self.state.killed(self.value):
@@ -250,13 +212,7 @@ class Node(JsonableTracked):
         return self.state.expel(self.expel_multiplier, self.value)
     
     def lost_amount(self, amount, contested):
-        self.value -= amount
-
-    @classmethod
-    def end_game_lost_amount(cls, attack_cost_method):
-        def lost_amount(self, amount, contested):
-            self.value -= amount * attack_cost_method(contested)
-        return lost_amount
+        return amount
 
     def update_ownerships(self, player=None):
         if self.owner is not None and self.owner != player:

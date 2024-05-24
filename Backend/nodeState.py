@@ -58,8 +58,8 @@ class AbstractState(JsonableSkeleton):
     def full_size(self):
         return GROWTH_STOP
     
-    def can_grow(self, value):
-        return value < self.full_size
+    def can_grow(self, size, change):
+        return 0 < size + change < self.full_size
 
 
 class DefaultState(AbstractState):
@@ -114,10 +114,10 @@ class CapitalState(DefaultState):
             return self.shrink()
         return 0
     
-    def can_grow(self, value):
+    def can_grow(self, size, change):
         if not self.capitalized:
             return True
-        return super().can_grow(value)
+        return super().can_grow(size, change)
 
     def shrink(self):
         if self.shrink_count == 0:
