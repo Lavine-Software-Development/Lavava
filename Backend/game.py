@@ -27,7 +27,7 @@ class ServerGame(Jsonable):
         self.restart()
 
     def end_game(self):
-        Node.end_game = True
+        Node.apply_modifications()
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]

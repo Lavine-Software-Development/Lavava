@@ -1,7 +1,9 @@
-def shrink(amount):
-    return abs(amount) * -1
+def shrink(self):
+    if self.grow_multiplier > 0:
+        return -1
+    return 1
 
-def stall(amount):
+def stall():
     return 0
 
 
@@ -14,11 +16,4 @@ def halfAttack(contested):
 
 def freeAttack(contested):
     return 0 if contested else 1
-
-
-noGrowthFreeAttack = {
-    'attackCost': freeAttack,
-    'growthMultiplier': stall
-}
-
 
