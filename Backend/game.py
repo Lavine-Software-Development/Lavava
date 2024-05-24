@@ -1,5 +1,5 @@
 from jsonable import Jsonable
-from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, SPAWN_CODE
+from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, SECTION_LENGTHS, SPAWN_CODE
 from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GSE
 from board import Board
@@ -25,6 +25,10 @@ class ServerGame(Jsonable):
         super().__init__('game', start_values, recurse_values, tick_values)
 
         self.restart()
+
+    @property
+    def countdown_timer(self):
+        return self.times[self.current_section]
 
     def end_game(self):
         Node.apply_modifications()
@@ -66,9 +70,8 @@ class ServerGame(Jsonable):
             player.default_values()
         self.remaining = {i for i in range(len(self.player_dict))}
 
-        self.countdown_timer = COUNTDOWN_LENGTH
-        self.main_timer = MAIN_GAME_LENGTH
-        self.ending_timer = END_GAME_LENGTH
+        self.times = SECTION_LENGTHS
+        self.current_section = 0
 
         map_builder = MapBuilder()
         map_builder.build()
@@ -94,27 +97,23 @@ class ServerGame(Jsonable):
         return all([p.ps.state == PSE.START_WAITING for p in self.player_dict.values()])
     
     def update_timer(self):
+
         if self.countdown_timer > 0:
-            self.countdown_timer -= 0.1
+            self.times[self.current_section] -= 0.1
+
+            if self.gs.value == GSE.START_SELECTION.value and self.countdown_timer > 3 and self.all_player_starts_selected:
+                self.times[self.current_section] = 3
 
             if self.countdown_timer <= 0:
-                self.gs.next()
-                self.all_player_next()
 
-            if self.countdown_timer > 3 and self.all_player_starts_selected:
-                self.countdown_timer = 3
-        
-        elif self.main_timer > 0:
-            self.main_timer -= 0.1
+                if self.gs.value < GSE.END_GAME.value:
+                    self.current_section += 1
 
-            if self.main_timer <= 0:
-                self.gs.next()
-                self.end_game()
-
-        elif self.ending_timer > 0:
-            self.ending_timer -= 0.1
-
-            if self.ending_timer <= 0:
+                    if self.gs.value == GSE.START_SELECTION.value:
+                        self.all_player_next()
+                    else:
+                        self.end_game()
+                
                 self.gs.next()
 
     def tick(self):
