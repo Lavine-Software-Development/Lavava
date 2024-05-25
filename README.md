@@ -6,6 +6,12 @@ This game is a real-time variation of the classic board game Risk, with some oth
 
 The main other twist is abilities! Each player is given 15 credits at the beginning of the game to select a set of abilities from the ability menu. Each ability has a cost (in credits) as well as a reload time to limit immediate repeated usage in-game. At the bottom is a description of each ability.
 
+# Phases and Ending
+The game is broken up into 3 main phases. First, start selection. Each player chooses one starting spot. Then there is the main part, as described in detail above. If no one wins in that time, the end-game phase begins. The end-game phase is still being experimented with but currently two things happen: 
+- Growth stops. Nodes naturally stay at their current energy.
+- Free attacking. Attacking an opponents node costs you no energy
+The goal of these changes is too stop progression, and allow the current winner to snowball. If still no player has won after the timer for end-game phase completes, then the winner is determined by which player owns the most nodes.
+
 # Other tidbits of information 
 - The board is randomly generated, and has approximately 60 nodes and 80 edges.
 - Nodes can be full. At that point they no longer naturally gain energy. This means you shouldn't let nodes be full unless neccessary.
