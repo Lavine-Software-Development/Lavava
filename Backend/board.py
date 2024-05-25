@@ -212,3 +212,15 @@ class Board(JsonableTracked):
             STANDARD_RIGHT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_right_click(player), 
                                         lambda player, data: self.id_dict[data[0]].click_swap()),
         }
+    
+    def player_node_count(self, player_count):
+        for node in self.nodes:
+            if node.owner:
+                player_count[node.owner.id] += 1
+        return player_count
+    
+    def player_energy_count(self, player_energy):
+        for node in self.nodes:
+            if node.owner:
+                player_energy[node.owner.id] += node.value
+        return player_energy

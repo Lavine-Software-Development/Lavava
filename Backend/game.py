@@ -113,6 +113,8 @@ class ServerGame(Jsonable):
                         self.all_player_next()
                     else:
                         self.end_game()
+                else:
+                    self.determine_ranks()
                 
                 self.gs.next()
 
@@ -129,4 +131,11 @@ class ServerGame(Jsonable):
                 player.update()
                 # if player.count == 0:
                 #     self.eliminate(player.id)
-    
+
+    def determine_ranks(self):
+        player_scores = self.board.player_node_count({i: 0 for i in range(len(self.player_dict))})
+        sorted_scores = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
+        self.player_dict[sorted_scores[0][0]].win()
+        for i in range(1, len(sorted_scores)):
+            self.player_dict[sorted_scores[i][0]].lose()
+        

@@ -9,4 +9,4 @@ class PlayerStateEnum(Enum):
     PLAY = auto()
     ELIMINATED = auto()
     VICTORY = auto()
-    GAME_OVER = auto()
+    LOSER = auto()

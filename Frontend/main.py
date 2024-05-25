@@ -1,6 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, CANNON_CODE, STANDARD_LEFT_CLICK
+from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, CANNON_CODE, STANDARD_LEFT_CLICK, RESTART_GAME_VAL
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import EventVisual, Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State, Event
@@ -49,7 +49,7 @@ class Main:
     def __init__(self):
         py.init() 
 
-        self.ps = PSE.ABILITY_SELECTION
+        self.ps = PSE.ABILITY_SELECTION.value
         self.timer = 60
         self.highlight = Highlight()
         self.effect_visuals = defaultdict(dict)
@@ -252,10 +252,10 @@ class Main:
 
     def keydown(self, event):
         if event.key == OVERRIDE_RESTART_CODE:
-            self.network.simple_send(RESTART_CODE)
-        elif self.ps == PSE.VICTORY:
+            self.network.simple_send(RESTART_GAME_VAL)
+        elif self.ps == PSE.VICTORY.value:
             if event.key == RESTART_CODE:
-                self.network.simple_send(RESTART_CODE)
+                self.network.simple_send(RESTART_GAME_VAL)
         elif self.ps == PSE.PLAY.value:
             if event.key in self.ability_manager.abilities:
                 if self.ability_manager.select(event.key):
@@ -281,7 +281,6 @@ class Main:
                 elif event.type == py.MOUSEBUTTONDOWN:
                     self.mouse_button_down_event(event.button)
                 elif event.type == py.KEYDOWN:
-                    print("keydown")
                     self.keydown(event)
             if self.can_draw:
                 self.drawer.blit(self.ps, self.timer)
@@ -314,4 +313,4 @@ class TestMain(Main):
 
 
 if __name__ == "__main__":
-   TestMain()
+   Main()

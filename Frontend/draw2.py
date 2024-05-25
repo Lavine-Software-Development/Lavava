@@ -563,6 +563,24 @@ class Draw2:
                 self.draw_star(spot.pos, spot.size * 2, PINK)
                 self.draw_star(spot.pos, spot.size * 2, BLACK, False)
 
+    def display_end(self, ps):
+        if ps == PSE.VICTORY.value:
+            self.screen.blit(
+                self.font.render("VICTORY", True, self.main_player.color), (self.width // 2 - 100, self.height // 2)
+            )
+            # a restart button in the bottom right corner. Should change color when hovered over
+            py.draw.rect(self.screen, self.main_player.color, (self.width - 150, self.height - 50, 140, 40))
+            self.screen.blit(
+                self.smaller_font.render("SPACE", True, WHITE), (self.width - 125, self.height - 50)
+            )
+            self.screen.blit(
+                self.smaller_font.render("to restart", True, WHITE), (self.width - 135, self.height - 33)
+            )
+        else:
+            self.screen.blit(
+                self.font.render("DEFEAT", True, self.main_player.color), (self.width // 2 - 100, self.height // 2)
+            )
+
     def draw_burning(self, burning):
         for spot, count in burning.items():
             percentage = count / BURN_TICKS
@@ -633,21 +651,24 @@ class Draw2:
 
 
     def blit(self, ps, time):
-        self.screen.fill(WHITE) 
-        self.blit_nodes()
-        self.blit_edges()
-        if self.highlight:
-            self.highlighting()
-        # if burning := self.effect_visuals[PriorityEnum.BURNED_NODE.value]:
-        #     self.draw_burning(burning)
-        self.blit_capital_stars()
-        if ps == PSE.START_WAITING:
-            self.blit_waiting()
+        if ps > PSE.PLAY.value:
+            self.display_end(ps)
         else:
-            self.blit_numbers(time)
-        self.draw_buttons()
-        if (self.ability_manager.mode in [BRIDGE_CODE, D_BRIDGE_CODE]) and self.ability_manager.clicks:
-            self.edge_build(py.mouse.get_pos(), self.ability_manager.mode)
+            self.screen.fill(WHITE) 
+            self.blit_nodes()
+            self.blit_edges()
+            if self.highlight:
+                self.highlighting()
+            # if burning := self.effect_visuals[PriorityEnum.BURNED_NODE.value]:
+            #     self.draw_burning(burning)
+            self.blit_capital_stars()
+            if ps == PSE.START_WAITING:
+                self.blit_waiting()
+            else:
+                self.blit_numbers(time)
+            self.draw_buttons()
+            if (self.ability_manager.mode in [BRIDGE_CODE, D_BRIDGE_CODE]) and self.ability_manager.clicks:
+                self.edge_build(py.mouse.get_pos(), self.ability_manager.mode)
         py.display.update()
 
     def relocate(self, width, height):

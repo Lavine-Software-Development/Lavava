@@ -40,5 +40,8 @@ class PlayerState(JsonableSkeleton):
     def victory(self):
         self.state = PSE.VICTORY
 
+    def defeat(self):
+        self.state = PSE.LOSER
+
     def restart(self):
         self.state = PSE.ABILITY_SELECTION

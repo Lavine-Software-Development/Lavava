@@ -57,6 +57,9 @@ class DefaultPlayer(Jsonable):
     def win(self):
         self.ps.victory()
 
+    def lose(self):
+        self.ps.defeat()
+
     def capital_handover(self, gain):
         pass
 
