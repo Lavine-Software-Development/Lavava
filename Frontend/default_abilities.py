@@ -50,7 +50,7 @@ CLICKS = {
     ZOMBIE_CODE: (1, ClickType.NODE),
     BURN_CODE: (1, ClickType.NODE),
     RAGE_CODE: (0, ClickType.BLANK),
-    CANNON_CODE: (2, ClickType.NODE),
+    CANNON_CODE: (1, ClickType.NODE),
 }
 
 EVENTS = {

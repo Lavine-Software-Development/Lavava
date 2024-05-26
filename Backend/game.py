@@ -70,7 +70,7 @@ class ServerGame(Jsonable):
             player.default_values()
         self.remaining = {i for i in range(len(self.player_dict))}
 
-        self.times = SECTION_LENGTHS
+        self.times = SECTION_LENGTHS.copy()
         self.current_section = 0
 
         map_builder = MapBuilder()

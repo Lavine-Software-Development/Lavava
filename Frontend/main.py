@@ -1,6 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, CANNON_CODE, STANDARD_LEFT_CLICK, RESTART_GAME_VAL
+from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, BRIDGE_CODE, CANNON_CODE, STANDARD_LEFT_CLICK, RESTART_GAME_VAL
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import EventVisual, Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State, Event
@@ -241,9 +241,10 @@ class Main:
             if self.ps == PSE.START_SELECTION.value:
                 self.network.send(self.highlight.send_format())
             else:
-                if (data := self.ability_manager.use_ability(self.highlight)) \
-                        and button != STANDARD_RIGHT_CLICK:
-                    self.network.send(self.highlight.send_format(data))
+                if self.ability_manager.ability:
+                    if (data := self.ability_manager.use_ability(self.highlight)) \
+                     and button != STANDARD_RIGHT_CLICK:
+                        self.network.send(self.highlight.send_format(data))
                 elif (event_data := self.ability_manager.use_event(self.highlight)):
                     if button == STANDARD_RIGHT_CLICK and self.highlight.usage == STANDARD_LEFT_CLICK:
                         self.network.send(self.highlight.send_format(event_data, STANDARD_RIGHT_CLICK))
@@ -294,7 +295,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.logic, self.my_player)
-        counts = {FREEZE_CODE: 2, CANNON_CODE: 2, BURN_CODE: 2}
+        counts = {BRIDGE_CODE: 2, CANNON_CODE: 2, BURN_CODE: 2}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):
@@ -313,4 +314,4 @@ class TestMain(Main):
 
 
 if __name__ == "__main__":
-   Main()
+   TestMain()
