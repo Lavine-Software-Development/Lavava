@@ -2,7 +2,7 @@ import { AbilityVisual, EventVisual } from "./immutable_visuals"; // Assuming th
 import { ClickType } from "./enums"; // Assuming this is defined
 import { ValidationFunction } from "./types"; // Assuming this is defined
 
-class Event {
+export class Event {
     visual: EventVisual;
     clickCount: number;
     clickType: ClickType;
@@ -16,7 +16,7 @@ class Event {
     }
 }
 
-class ReloadAbility {
+export class ReloadAbility {
     visual: AbilityVisual;
     clickCount: number;
     clickType: ClickType;

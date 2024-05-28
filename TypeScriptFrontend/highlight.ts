@@ -4,7 +4,7 @@ import { AbilityVisual } from "./immutable_visuals"; // Assume this is defined
 import { VISUALS } from "./default_abilities"; // Assume this is defined
 import { Colors, KeyCodes } from "./constants";
 
-class Highlight {
+export class Highlight {
     item: IDItem | null = null;
     usage: number | null = null;
 
