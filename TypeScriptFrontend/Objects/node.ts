@@ -1,8 +1,8 @@
-import { State } from "./States";
-import { Colors, GROWTH_STOP } from "./constants";
+import { State } from "../States";
+import { Colors, GROWTH_STOP } from "../constants";
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
-import { ClickType } from "./enums";
+import { ClickType } from "../enums";
 
 export class Node extends IDItem {
     pos: [number, number];

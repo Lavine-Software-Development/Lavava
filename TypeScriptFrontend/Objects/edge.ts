@@ -1,6 +1,6 @@
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
-import { ClickType } from "./enums";
+import { ClickType } from "../enums";
 import { Node } from "./node";
 
 export class Edge extends IDItem {

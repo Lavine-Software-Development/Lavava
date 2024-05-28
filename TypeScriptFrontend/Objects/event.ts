@@ -1,6 +1,6 @@
-import { EventVisual } from "./immutable_visuals"; // Assuming these are defined
-import { ClickType } from "./enums"; // Assuming this is defined
-import { ValidationFunction } from "./types"; // Assuming this is defined
+import { EventVisual } from "../immutable_visuals"; // Assuming these are defined
+import { ClickType } from "../enums"; // Assuming this is defined
+import { ValidationFunction } from "../types"; // Assuming this is defined
 
 
 export class Event {
