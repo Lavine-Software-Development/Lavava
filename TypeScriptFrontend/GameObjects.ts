@@ -1,33 +1,7 @@
 import { ClickType } from "./enums";
 import { State } from "./States";
 import { Colors, GROWTH_STOP } from "./constants";
-
-
-export class OtherPlayer {
-    name: string;
-    color: [number, number, number]; // Assuming RGB tuple
-    ready: boolean;
-    eliminated: boolean;
-    victor: boolean;
-
-    constructor(name: string, color: [number, number, number], ready: boolean = false, eliminated: boolean = false, victor: boolean = false) {
-        this.name = name;
-        this.color = color;
-        this.ready = ready;
-        this.eliminated = eliminated;
-        this.victor = victor;
-    }
-}
-
-class MyPlayer extends OtherPlayer {
-    score: number;
-
-    constructor(name: string, color: [number, number, number], score: number = 0.0, ready: boolean = false, eliminated: boolean = false, victor: boolean = false) {
-        super(name, color, ready, eliminated, victor);
-        this.score = score;
-    }
-}
-
+import { OtherPlayer } from "./PlayersObjects";
 
 export class IDItem{
     id: number;
@@ -52,7 +26,7 @@ export class Node extends IDItem {
     constructor(
         id: number, pos: [number, number], isPort: boolean,
         portPercent: number, ports: Array<any>, state: State, value: number,
-        effects = new Set<any>(), owner: OtherPlayer | null = null
+        effects = new Set<string>(), owner: OtherPlayer | null = null
     ) {
         super(id, ClickType.NODE);
         this.pos = pos;
