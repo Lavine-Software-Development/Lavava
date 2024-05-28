@@ -1,6 +1,7 @@
-import { ReloadAbility, Event } from "./ActionObjects";
-import { IDItem } from "./GameObjects";
+import { ReloadAbility } from "./ReloadAbility";
+import { IDItem } from "./idItem";
 import { Highlight } from "./highlight";
+import { Event } from "./event";
 
 class AbstractAbilityManager {
     private abilities: { [key: number]: ReloadAbility };

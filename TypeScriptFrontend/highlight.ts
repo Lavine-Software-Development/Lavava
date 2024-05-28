@@ -1,4 +1,4 @@
-import { IDItem } from "./GameObjects"; // Assume these are defined in the conversation// Assumed imports based on prior context
+import { IDItem } from "./idItem"; // Assume these are defined in the conversation// Assumed imports based on prior context
 import { ClickType } from "./enums"; // Assume this is defined
 import { AbilityVisual } from "./immutable_visuals"; // Assume this is defined
 import { VISUALS } from "./default_abilities"; // Assume this is defined

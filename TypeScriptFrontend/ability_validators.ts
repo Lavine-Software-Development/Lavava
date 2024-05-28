@@ -1,7 +1,9 @@
-import { IDItem, Node, Edge} from "./GameObjects";
-import { OtherPlayer } from "./PlayersObjects";
+import { IDItem } from "./idItem";
+import { OtherPlayer } from "./otherPlayer";
 import { KeyCodes } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
+import { Node } from "./node";
+import { Edge } from "./edge";
 
 function onSegment(p: Point, q: Point, r: Point): boolean {
     return (
