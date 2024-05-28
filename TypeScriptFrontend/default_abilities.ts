@@ -21,7 +21,7 @@ const STANDARD_LEFT_CLICK_V = createEventVisual("Switch", Colors.GREY);
 const STANDARD_RIGHT_CLICK_V = createEventVisual("Swap", Colors.GREY);
 
 // Maps for visuals
-const VISUALS = {
+export const VISUALS = {
     [KeyCodes.SPAWN_CODE]: SPAWN_V,
     [KeyCodes.BRIDGE_CODE]: BRIDGE_V,
     [KeyCodes.D_BRIDGE_CODE]: D_BRIDGE_V,
