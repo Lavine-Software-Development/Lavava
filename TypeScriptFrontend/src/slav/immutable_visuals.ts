@@ -1,9 +1,9 @@
-interface EventVisual {
+export interface EventVisual {
     name: string;
     color: readonly [number, number, number]; 
 }
 
-interface AbilityVisual {
+export interface AbilityVisual {
     name: string;
     shape: string;
     color: readonly [number, number, number]; 
