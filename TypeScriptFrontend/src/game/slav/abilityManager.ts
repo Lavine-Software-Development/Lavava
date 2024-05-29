@@ -3,7 +3,7 @@ import { IDItem } from "./Objects/idItem";
 import { Highlight } from "./highlight";
 import { Event } from "./Objects/event";
 
-class AbstractAbilityManager {
+export class AbstractAbilityManager {
     private abilities: { [key: number]: ReloadAbility };
     private events: { [key: number]: Event };
     private mode: number | null = null;

@@ -40,7 +40,7 @@ export class CannonState extends State {
     }
 }
 
-const stateDict: { [key: number]: State } = {
+export const stateDict: { [key: number]: State } = {
     0: new State('default'),
     1: new State('zombie'),
     2: new CapitalState('capital', true),
