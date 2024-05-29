@@ -11,9 +11,7 @@ class Server:
         self.server = "0.0.0.0"
         self.port = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.waiting_players = (
-            None  # Stores the waiting players with the game code as the key
-        )
+        self.waiting_players = None
         self.games = {}  # Stores the active games with the game code as the key
 
         try:
@@ -24,14 +22,9 @@ class Server:
 
         self.s.listen(10)
         print("Waiting for a connection, Server Started")
-    async def handler(websocket):
-        while True: 
-            message = await websocket.recv()
-            print(message)
     
-
     def send_ticks(self, batch: Batch):
-        time.sleep(1)
+        await asyncio.sleep(1)
         while True:
 
             batch.tick()
@@ -47,7 +40,7 @@ class Server:
                 # except OSError as e:
                 #     print(f"Error on connection {i}: {e}")
                 #     del batch.connections[i]
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
 
     def threaded_client(self, conn):
 

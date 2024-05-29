@@ -19,10 +19,8 @@ class Batch:
         self.connections.append(conn)
 
     def build(self):
-        print("build 1")
         self.gs.next()
         self.game = ServerGame(self.player_count, self.gs)
-        print("build 2")
         self.gs.next()
 
     def is_ready(self):
