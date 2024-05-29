@@ -5,7 +5,7 @@ import { IDItem } from "./idItem";
 import { ClickType } from "../enums";
 
 export class Node extends IDItem {
-    pos: [number, number];
+    pos: Phaser.Math.Vector2;
     isPort: boolean;
     portPercent: number;
     ports: Array<number>; 
@@ -20,7 +20,7 @@ export class Node extends IDItem {
         effects = new Set<string>(), owner: OtherPlayer | null = null
     ) {
         super(id, ClickType.NODE);
-        this.pos = pos;
+        this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
         this.isPort = isPort;
         this.portPercent = portPercent;
         this.ports = ports;
@@ -32,9 +32,14 @@ export class Node extends IDItem {
 
     get color(): readonly [number, number, number] {
         if (!this.owner) {
-            return this.ports.length > 0 ? Colors.BROWN : Colors.BLACK;
+            return this.isPort ? Colors.BROWN : Colors.BLACK;
         }
         return this.owner.color;
+    }
+
+    get phaserColor(): number {
+        const col = this.color;
+        return Phaser.Display.Color.GetColor(col[0], col[1], col[2]);
     }
 
     get size(): number {
@@ -56,5 +61,10 @@ export class Node extends IDItem {
 
     get portCount(): number {
         return this.ports.length;
+    }
+
+    draw(scene: Phaser.Scene): void {
+        let graphics = scene.add.graphics({ fillStyle: { color: this.phaserColor } });
+        graphics.fillCircle(this.pos.x, this.pos.y, this.value);
     }
 }

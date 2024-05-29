@@ -1,9 +1,9 @@
-import { IDItem } from "../slav/Objects/idItem";
-import { OtherPlayer } from "../slav/Objects/otherPlayer";
+import { IDItem } from "./Objects/idItem";
+import { OtherPlayer } from "./Objects/otherPlayer";
 import { KeyCodes } from "./constants";
-import { ValidationFunction as ValidatorFunc, Point } from "../slav/types";
-import { Node } from "../slav/Objects/node";
-import { Edge } from "../slav/Objects/edge";
+import { ValidationFunction as ValidatorFunc, Point } from "./types";
+import { Node } from "./Objects/node";
+import { Edge } from "./Objects/edge";
 
 function onSegment(p: Point, q: Point, r: Point): boolean {
     return (

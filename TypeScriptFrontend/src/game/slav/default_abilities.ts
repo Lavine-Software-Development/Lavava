@@ -3,7 +3,7 @@ import { Colors, KeyCodes} from './constants';
 import { ClickType } from './enums';
 
 // Create instances of AbilityVisual using the factory function
-const SPAWN_V = createAbilityVisual("Spawn", "circle", Colors.YELLOW);
+const SPAWN_V = createAbilityVisual("Spawn", "circle", Colors.GREEN);
 const BRIDGE_V = createAbilityVisual("Bridge", "triangle", Colors.YELLOW, 'A');
 const D_BRIDGE_V = createAbilityVisual("D-Bridge", "circle", Colors.YELLOW);
 const NUKE_V = createAbilityVisual("Nuke", "x", Colors.BLACK);
