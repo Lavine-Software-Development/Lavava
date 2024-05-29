@@ -66,9 +66,10 @@ export class MainScene extends Scene {
             if (this.ps === PSE.START_SELECTION) {
                 this.send(this.highlight.sendFormat());
             } else {
-                if (this.abilityManager.useAbility(this.highlight) && button !== KeyCodes.STANDARD_RIGHT_CLICK) {
-                
-                    this.send(this.highlight.sendFormat(this.abilityManager.completeAbility());
+                if (this.abilityManager.useAbility(this.highlight)) {
+                    const completion = this.abilityManager.completeAbility();
+                    if (completion !== false) {
+                        this.send(this.highlight.sendFormat(completion));
                 }
                 } else {
                     const event_data = this.abilityManager.useEvent(this.highlight);
