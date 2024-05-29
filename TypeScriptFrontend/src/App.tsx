@@ -10,16 +10,15 @@ function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const [spritePosition, setSpritePosition] = useState({ x: 0, y: 0 });
     useEffect(() => {
-        const ws = new WebSocket("ws://localhost:8765");
-
+        const ws = new WebSocket("ws://localhost:5553");
         ws.onopen = () => {
             console.log("Connected to server");
-            ws.send("Hello, server!");
+            ws.send('{"type": "HOST", "players":"1", "mode":"default"}');
         };
 
         ws.onmessage = (event) => {
             console.log("Received:", event.data);
-            ws.send("pong");
+            ws.send('{"type": "test", "players":"1", "mode":"default"}');
             // Handle incoming messages and update the state if necessary
             // const data = JSON.parse(event.data);
             // if (data.type === "spritePosition") {

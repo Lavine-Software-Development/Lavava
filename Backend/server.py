@@ -5,7 +5,6 @@ from batch import Batch
 import sys
 import time
 import json
-import asyncio
 class Server:
     def __init__(self, port):
         self.server = "0.0.0.0"
@@ -24,7 +23,7 @@ class Server:
         print("Waiting for a connection, Server Started")
     
     def send_ticks(self, batch: Batch):
-        await asyncio.sleep(1)
+        time.sleep(1)
         while True:
 
             batch.tick()
@@ -40,12 +39,14 @@ class Server:
                 # except OSError as e:
                 #     print(f"Error on connection {i}: {e}")
                 #     del batch.connections[i]
-            await asyncio.sleep(0.1)
+            time.sleep(0.1)
 
     def threaded_client(self, conn):
 
         data = conn.recv(1024).decode()
         json_data = json.loads(data)
+        print("json data")
+        print(json_data)
         is_host = json_data["type"]
         player_count = json_data["players"]
         mode = json_data["mode"]
