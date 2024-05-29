@@ -26,7 +26,7 @@ export class MainScene extends Scene {
         this.nodes.push(new Node(1, [100, 100], false, 0, [], stateDict[0], 10));
         this.nodes.push(new Node(1, [200, 200], true, 0, [], stateDict[0], 10));
         this.highlight = new Highlight(this);
-        this.ps = PSE.ABILITY_SELECTION;
+        this.ps = PSE.START_SELECTION;
 
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -60,9 +60,8 @@ export class MainScene extends Scene {
     }
 
     mouseButtonDownEvent(button: number): void {
-        if (this.highlight && this.highlight.valueOf()) {
+        if (this.highlight.highlighted) {
 
-            // Depending on game state or logic
             if (this.ps === PSE.START_SELECTION) {
                 this.send(this.highlight.sendFormat());
             } else {
@@ -73,10 +72,12 @@ export class MainScene extends Scene {
                 }
                 } else {
                     const event_data = this.abilityManager.useEvent(this.highlight);
-                    if (button === STANDARD_RIGHT_CLICK && this.highlight.usage === STANDARD_LEFT_CLICK) {
-                        this.network.send(this.highlight.sendFormat(event_data, STANDARD_RIGHT_CLICK));
-                    } else {
-                        this.network.send(this.highlight.sendFormat(event_data));
+                    if (event_data !== false) {
+                        if (button === KeyCodes.STANDARD_RIGHT_CLICK && this.highlight.usage === KeyCodes.STANDARD_LEFT_CLICK) {
+                            this.send(this.highlight.sendFormat(event_data, KeyCodes.STANDARD_RIGHT_CLICK));
+                        } else {
+                            this.send(this.highlight.sendFormat(event_data));
+                        }
                     }
                 }
             }
