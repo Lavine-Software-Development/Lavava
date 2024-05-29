@@ -5,7 +5,7 @@ from batch import Batch
 import sys
 import time
 import json
-
+import asyncio
 class Server:
     def __init__(self, port):
         self.server = "0.0.0.0"
@@ -24,6 +24,11 @@ class Server:
 
         self.s.listen(10)
         print("Waiting for a connection, Server Started")
+    async def handler(websocket):
+        while True: 
+            message = await websocket.recv()
+            print(message)
+    
 
     def send_ticks(self, batch: Batch):
         time.sleep(1)
