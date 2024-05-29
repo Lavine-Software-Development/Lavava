@@ -115,6 +115,7 @@ class Server:
         while True:
             conn, addr = self.s.accept()
             print("Connected to:", addr)
+            print(conn)
 
             start_new_thread(self.threaded_client, (conn,))
 
