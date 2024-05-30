@@ -1,7 +1,5 @@
 import websockets
 import asyncio
-from _thread import start_new_thread
-from threading import Thread
 from batch import Batch
 import sys
 import time
@@ -13,19 +11,32 @@ class WebSocketServer():
         self.port = port
         self.waiting_players = None
         self.games = {}  # Stores the active games with the game code as the key
+        self.locks = {}
 
-    async def handler(self, websocket):
+    async def handler1(self, websocket):
         async for message in websocket:
             print("message")
             print(message)
             data = json.loads(message)
             await self.process_message(websocket, data)
+    async def handler(self, websocket, path):
+        self.locks[websocket] = asyncio.Lock()
+        try:
+            async for message in websocket:
+                async with self.locks[websocket]:
+                    data = json.loads(message)
+                    await self.process_message(websocket, data)
+        finally:
+            del self.locks[websocket]
+
     async def process_message(self, websocket ,data):
         player_type = data["type"]
+        if player_type == "test":
+            await websocket.send("test received!")
+            return
         player_count = data["players"]
         mode = data["mode"]
-        if player_type == "test":
-            return
+       
         if player_type == "HOST":
             player_count = int(player_count)
             self.waiting_players = Batch(player_count, mode, websocket)
@@ -33,7 +44,7 @@ class WebSocketServer():
         elif player_type == "JOIN":
             if self.waiting_players:
                 await websocket.send("JOINED")
-                self.waiting_players.add(websocket)
+                self.waiting_players.add_player(websocket)
             else:
                 await websocket.send("FAILED")
                 return
@@ -48,17 +59,33 @@ class WebSocketServer():
         while True:
             await asyncio.sleep(1)
             batch.tick()
+            print("tick")
             for i, websocket in enumerate(batch.connections):
-                if batch.send_ready(i):
+                print(batch.send_ready(i))
+                # if batch.send_ready(i):
+                if True:
                     batch_json = batch.tick_repr_json(i)
                     await websocket.send(batch_json)
             await asyncio.sleep(0.1)
 
-    async def start_game(self, batch):
+    async def start_game1(self, batch):
         print("start game")
         asyncio.create_task(self.send_ticks(batch))
         for i, websocket in enumerate(batch.connections):
             asyncio.create_task(self.threaded_client_in_game(i, websocket, batch))
+    async def start_game(self, batch):
+        tasks = []
+        print("start game")
+        tasks.append(asyncio.create_task(self.send_ticks(batch)))
+        for i, websocket in enumerate(batch.connections):
+            tasks.append(asyncio.create_task(self.threaded_client_in_game(i, websocket, batch)))
+        
+        # Wait for all tasks to complete and handle exceptions
+        for task in tasks:
+            try:
+                await task
+            except Exception as e:
+                print(f"An exception occurred: {e}")
 
     async def threaded_client_in_game(self, player, websocket, batch: Batch):
         print("hereio")

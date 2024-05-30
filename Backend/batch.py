@@ -35,6 +35,7 @@ class Batch:
         return start_json
     
     def send_ready(self, player):
+        print(self.game.player_dict[player].ps.value, PS.ABILITY_WAITING.value)
         return self.game.player_dict[player].ps.value >= PS.ABILITY_WAITING.value
     
     def tick_repr_json(self, player):
