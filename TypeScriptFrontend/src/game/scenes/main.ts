@@ -8,7 +8,7 @@ import { Event } from '../slav/Objects/event';
 import { AbstractAbilityManager } from '../slav/abilityManager';
 import { OtherPlayer } from '../slav/Objects/otherPlayer';
 import { MyPlayer } from '../slav/Objects/myPlayer';
-import { unownedNode } from '../slav/ability_validators';
+import { makeEventValidators, unownedNode } from '../slav/ability_validators';
 import { IDItem } from '../slav/Objects/idItem';
 import { EVENTS, VISUALS } from '../slav/default_abilities';
 
@@ -25,16 +25,23 @@ export class MainScene extends Scene {
     private mainPlayer: MyPlayer;
     private otherPlayers: OtherPlayer[] = [];
 
-    constructor(abilities: { [key: number]: ReloadAbility }, events: { [key: number]: Event }) {
+    constructor(abilities: { [key: number]: ReloadAbility }) {
         super({ key: 'MainScene' });
+        this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
+        this.otherPlayers.push(this.mainPlayer);
+        this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
+        const ev = makeEventValidators(this.mainPlayer);
+        const events: { [key: number]: Event } = {};
+        Object.values(EventCodes).forEach((eb: number) => {
+            events[eb] = new Event(VISUALS[eb], EVENTS[eb][0], EVENTS[eb][1], ev[eb]);
+        });
+
         this.abilityManager = new AbstractAbilityManager(abilities, events);
     }
  
     create(): void {
 
-        this.mainPlayer = new MyPlayer("Player 1", Colors.RED);
-        this.otherPlayers.push(this.mainPlayer);
-        this.otherPlayers.push(new OtherPlayer("Player 2", Colors.BLUE));
+
 
         // Example of creating nodes
         this.nodes.push(new Node(1, [100, 100], false, 0, [], stateDict[0], 10, this.mainPlayer));

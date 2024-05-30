@@ -34,7 +34,7 @@ export class AbstractAbilityManager {
     }
 
     useAbility(highlight: Highlight): boolean {
-        if (this.ability && highlight.usage === this.mode && highlight.type === this.ability.clickType) {
+        if (this.ability && highlight.usage === this.mode && highlight.type === this.ability.clickType && highlight.item) {
             this.clicks.push(highlight.item);
             return true;
         }

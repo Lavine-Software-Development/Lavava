@@ -1,4 +1,4 @@
-import { createAbilityVisual, createEventVisual } from './immutable_visuals';
+import { AbilityVisual, createAbilityVisual, createEventVisual, EventVisual } from './immutable_visuals';
 import { Colors, KeyCodes, EventCodes} from './constants';
 import { ClickType } from './enums';
 
@@ -20,8 +20,12 @@ const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.DARK_PINK);
 const STANDARD_LEFT_CLICK_V = createEventVisual("Switch", Colors.GREY);
 const STANDARD_RIGHT_CLICK_V = createEventVisual("Swap", Colors.GREY);
 
+interface EventVisualParameters {
+    [index: string]: EventVisual | AbilityVisual;
+}
+
 // Maps for visuals
-export const VISUALS = {
+export const VISUALS: EventVisualParameters = {
     [KeyCodes.SPAWN_CODE]: SPAWN_V,
     [KeyCodes.BRIDGE_CODE]: BRIDGE_V,
     [KeyCodes.D_BRIDGE_CODE]: D_BRIDGE_V,
@@ -54,7 +58,11 @@ const CLICKS = {
     [KeyCodes.CANNON_CODE]: [2, ClickType.NODE],
 };
 
-export const EVENTS = {
+interface EventParameters {
+    [index: string]: [number, ClickType];  // Adjust the types according to what Event constructor expects
+}
+
+export const EVENTS: EventParameters = {
     [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE],
     [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE],
     [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE]

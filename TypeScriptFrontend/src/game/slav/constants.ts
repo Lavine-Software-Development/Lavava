@@ -62,3 +62,4 @@ export const MineVisuals = {
 }
 
 export const GROWTH_STOP = 250;
+export const MINIMUM_TRANSFER_VALUE = 8;
