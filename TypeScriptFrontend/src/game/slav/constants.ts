@@ -42,6 +42,9 @@ export const KeyCodes = {
     CAPITAL_CODE: 99,
     CANNON_CODE: 101,
 
+};
+
+export const EventCodes = {
     CANNON_SHOT_CODE: 4,
     STANDARD_LEFT_CLICK: 1,
     STANDARD_RIGHT_CLICK: 3

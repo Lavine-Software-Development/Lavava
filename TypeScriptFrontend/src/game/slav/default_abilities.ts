@@ -1,5 +1,5 @@
 import { createAbilityVisual, createEventVisual } from './immutable_visuals';
-import { Colors, KeyCodes} from './constants';
+import { Colors, KeyCodes, EventCodes} from './constants';
 import { ClickType } from './enums';
 
 // Create instances of AbilityVisual using the factory function
@@ -34,9 +34,9 @@ export const VISUALS = {
     [KeyCodes.RAGE_CODE]: RAGE_V,
     [KeyCodes.CANNON_CODE]: CANNON_V,
 
-    [KeyCodes.CANNON_SHOT_CODE]: CANNON_SHOT_V,
-    [KeyCodes.STANDARD_LEFT_CLICK]: STANDARD_LEFT_CLICK_V,
-    [KeyCodes.STANDARD_RIGHT_CLICK]: STANDARD_RIGHT_CLICK_V
+    [EventCodes.CANNON_SHOT_CODE]: CANNON_SHOT_V,
+    [EventCodes.STANDARD_LEFT_CLICK]: STANDARD_LEFT_CLICK_V,
+    [EventCodes.STANDARD_RIGHT_CLICK]: STANDARD_RIGHT_CLICK_V
 };
 
 // Map for click behaviors
@@ -54,8 +54,8 @@ const CLICKS = {
     [KeyCodes.CANNON_CODE]: [2, ClickType.NODE],
 };
 
-const EVENTS = {
-    [KeyCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE],
-    [KeyCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE],
-    [KeyCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE]
+export const EVENTS = {
+    [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE],
+    [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE],
+    [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE]
 };

@@ -76,9 +76,9 @@ function capitalValidator(edges: Edge[], player: OtherPlayer): ValidatorFunc {
     };
 }
 
-function unownedNode(data: IDItem[]): boolean {
+export function unownedNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
-    return node.owner === undefined && node.stateName === "default";
+    return node.owner === null && node.stateName === "default";
 }
 
 function playerValidators(player: OtherPlayer): {
@@ -188,5 +188,33 @@ function makeAbilityValidators(
     // Merge the validators from `player_validators` into `abilityValidators`
     const playerValidatorsMap = playerValidators(player);
     return { ...abilityValidators, ...playerValidatorsMap };
+}
+
+export function makeEventValidators(player: OtherPlayer): { [key: string]: (data: IDItem[]) => boolean } {
+    
+    function cannonShotValidator(data: IDItem[]): boolean {
+        if (data.length === 1) {
+            const firstNode = data[0] as Node;
+            return firstNode.owner === player && firstNode.stateName === "cannon" && firstNode.value > MINIMUM_TRANSFER_VALUE;
+        } else if (data.length > 1) {
+            const secondNode = data[1] as Node;
+            return !(secondNode.owner === player && secondNode.full);
+        }
+        return false;
+    }
+    
+    function edgeValidator(data:  IDItem[]): boolean {
+        if (data instanceof Array && data.length > 0 && data[0] instanceof Edge) {
+            const edge = data[0] as Edge;
+            return edge.controlledBy(player);
+        }
+        return false;
+    }
+    
+    return {
+        CANNON_SHOT_CODE: cannonShotValidator,
+        STANDARD_LEFT_CLICK: edgeValidator,
+        STANDARD_RIGHT_CLICK: edgeValidator,
+    };
 }
 

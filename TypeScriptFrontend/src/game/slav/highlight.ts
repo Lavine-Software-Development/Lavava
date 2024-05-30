@@ -3,15 +3,17 @@ import { Node } from "./Objects/node"; // Assume this is defined
 import { ClickType } from "./enums"; // Assume this is defined
 import { AbilityVisual } from "./immutable_visuals"; // Assume this is defined
 import { VISUALS } from "./default_abilities"; // Assume this is defined
-import { Colors, KeyCodes } from "./constants";
+import { KeyCodes } from "./constants";
 
 export class Highlight {
     private graphics: Phaser.GameObjects.Graphics;
     item: IDItem | null = null;
     usage: number | null = null;
+    playerColor: readonly [number, number, number];
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, playerColor: readonly [number, number, number]) {
         this.graphics = scene.add.graphics();
+        this.playerColor = playerColor;
     }
 
 
@@ -35,7 +37,7 @@ export class Highlight {
             const visual = VISUALS[this.usage] as AbilityVisual; // Assuming AbilityVisual has a color property
             return visual.color;
         }
-        return Colors.GREY;
+        return this.playerColor;
     }
 
     get type(): ClickType {
@@ -48,7 +50,7 @@ export class Highlight {
     sendFormat(items?: number[], code?: number): object {
         const coda = code ?? this.usage;
         items = items || (this.item ? [this.item.id] : []);
-        return { code, items };
+        return { coda, items };
     }
 
     draw(): void {
