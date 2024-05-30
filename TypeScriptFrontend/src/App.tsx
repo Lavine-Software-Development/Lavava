@@ -2,6 +2,9 @@ import { useRef, useState } from "react";
 import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
 import { MainMenu } from "./game/scenes/MainMenu";
 import { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import WebSocketTest from "./websocketClient"; // Import your WebSocketTest component if not already done
+
 function App() {
     // The sprite can only be moved in the MainMenu Scene
     const [canMoveSprite, setCanMoveSprite] = useState(true);
@@ -9,36 +12,31 @@ function App() {
     //  References to the PhaserGame component (game and scene are exposed)
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const [spritePosition, setSpritePosition] = useState({ x: 0, y: 0 });
-    useEffect(() => {
-        const ws = new WebSocket("ws://localhost:5553");
-        ws.onopen = () => {
-            console.log("Connected to server");
-            ws.send('{"type": "HOST", "players":"1", "mode":"default"}');
-        };
+    // useEffect(() => {
+    //     const ws = new WebSocket("ws://localhost:5553");
+    //     ws.onopen = () => {
+    //         console.log("Connected to server");
+    //         ws.send('{"type": "HOST", "players":"1", "mode":"default"}');
+    //     };
 
-        ws.onmessage = (event) => {
-            console.log("Received:", event.data);
-            ws.send('{"type": "test", "players":"1", "mode":"default"}');
-            // Handle incoming messages and update the state if necessary
-            // const data = JSON.parse(event.data);
-            // if (data.type === "spritePosition") {
-            //     setSpritePosition({ x: data.x, y: data.y });
-            // }
-        };
+    //     ws.onmessage = (event) => {
+    //         console.log("Received:", event.data);
+    //         ws.send('{"type": "test", "players":"1", "mode":"default"}');
+    //     };
 
-        ws.onerror = (error) => {
-            console.log("WebSocket error:", error);
-        };
+    //     ws.onerror = (error) => {
+    //         console.log("WebSocket error:", error);
+    //     };
 
-        ws.onclose = () => {
-            console.log("Disconnected from server");
-        };
+    //     ws.onclose = () => {
+    //         console.log("Disconnected from server");
+    //     };
 
-        // Cleanup on unmount
-        return () => {
-            ws.close();
-        };
-    }, []);
+    //     // Cleanup on unmount
+    //     return () => {
+    //         ws.close();
+    //     };
+    // }, []);
     const changeScene = () => {
         if (phaserRef.current) {
             const scene = phaserRef.current.scene as MainMenu;
@@ -92,31 +90,70 @@ function App() {
     const currentScene = (scene: Phaser.Scene) => {
         setCanMoveSprite(scene.scene.key !== "MainMenu");
     };
-
     return (
-        <div id="app">
-            <PhaserGame ref={phaserRef} currentActiveScene={currentScene} />
-            <div>
-                <div>
-                    <button
-                        disabled={canMoveSprite}
-                        className="button"
-                        onClick={moveSprite}
+        <Router>
+            <div
+                id="app"
+                style={{ fontFamily: "Arial, sans-serif", lineHeight: "1.6" }}
+            >
+                <nav
+                    style={{
+                        backgroundColor: "#f0f0f0",
+                        padding: "10px 0",
+                        borderBottom: "2px solid #ccc",
+                        marginBottom: "20px",
+                    }}
+                >
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "20px",
+                        }}
                     >
-                        Toggle Movement
-                    </button>
-                </div>
-                <div className="spritePosition">
-                    Sprite Position:
-                    <pre>{`{\n  x: ${spritePosition.x}\n  y: ${spritePosition.y}\n}`}</pre>
-                </div>
-                <div>
-                    <button className="button" onClick={addSprite}>
-                        Add New Sprite
-                    </button>
-                </div>
+                        <Link
+                            to="/"
+                            style={{
+                                padding: "10px 20px",
+                                textDecoration: "none",
+                                color: "#333",
+                                fontWeight: "bold",
+                            }}
+                        >
+                            Home
+                        </Link>
+                        <Link
+                            to="/websocket-test"
+                            style={{
+                                padding: "10px 20px",
+                                textDecoration: "none",
+                                color: "#333",
+                                fontWeight: "bold",
+                            }}
+                        >
+                            WebSocket Test
+                        </Link>
+                    </div>
+                </nav>
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
+                            <div>
+                                <PhaserGame
+                                    ref={phaserRef}
+                                    currentActiveScene={currentScene}
+                                />
+                                <div>
+                                    {/* Existing buttons and other UI components */}
+                                </div>
+                            </div>
+                        }
+                    />
+                    <Route path="/websocket-test" element={<WebSocketTest />} />
+                </Routes>
             </div>
-        </div>
+        </Router>
     );
 }
 
