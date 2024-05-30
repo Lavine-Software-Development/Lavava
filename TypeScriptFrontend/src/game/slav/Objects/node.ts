@@ -17,7 +17,7 @@ export class Node extends IDItem {
     constructor(
         id: number, pos: [number, number], isPort: boolean,
         portPercent: number, ports: Array<any>, state: State, value: number,
-        effects = new Set<string>(), owner: OtherPlayer | null = null
+        owner: OtherPlayer | null = null, effects = new Set<string>() 
     ) {
         super(id, ClickType.NODE);
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
@@ -65,6 +65,6 @@ export class Node extends IDItem {
 
     draw(scene: Phaser.Scene): void {
         let graphics = scene.add.graphics({ fillStyle: { color: this.phaserColor } });
-        graphics.fillCircle(this.pos.x, this.pos.y, this.value);
+        graphics.fillCircle(this.pos.x, this.pos.y, this.size);
     }
 }

@@ -42,10 +42,19 @@ export const KeyCodes = {
     CAPITAL_CODE: 99,
     CANNON_CODE: 101,
 
+};
+
+export const EventCodes = {
     CANNON_SHOT_CODE: 4,
     STANDARD_LEFT_CLICK: 1,
     STANDARD_RIGHT_CLICK: 3
 };
+
+export const stateCodes = {
+    OVERRIDE_RESTART_CODE: 121,
+    RESTART_CODE: 32,
+    FORFEIT_CODE: 120
+}
 
 export const MineVisuals = {
     RESOURCE_BUBBLE: 400,
