@@ -47,6 +47,12 @@ export const KeyCodes = {
     STANDARD_RIGHT_CLICK: 3
 };
 
+export const stateCodes = {
+    OVERRIDE_RESTART_CODE: 121,
+    RESTART_CODE: 32,
+    FORFEIT_CODE: 120
+}
+
 export const MineVisuals = {
     RESOURCE_BUBBLE: 400,
     ISLAND_RESOURCE_BUBBLE: 400

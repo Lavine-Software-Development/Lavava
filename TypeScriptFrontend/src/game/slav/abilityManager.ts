@@ -15,6 +15,10 @@ export class AbstractAbilityManager {
         this.events = events;
     }
 
+    inAbilities(key: number): boolean {
+        return key in this.abilities;
+    }
+
     useEvent(highlight: Highlight): number[] | false {
         if (this.mode && this.mode !== highlight.usage) {
             this.backupReset();

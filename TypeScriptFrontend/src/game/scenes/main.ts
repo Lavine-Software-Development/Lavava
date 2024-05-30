@@ -1,7 +1,7 @@
 import { Node } from '../slav/Objects/node';
 import { Highlight } from '../slav/highlight';
 import { stateDict } from '../slav/States';
-import { KeyCodes } from '../slav/constants';
+import { KeyCodes, stateCodes } from '../slav/constants';
 import { PlayerStateEnum as PSE } from '../slav/enums';
 import { ReloadAbility } from '../slav/Objects/ReloadAbility';
 import { Event } from '../slav/Objects/event';
@@ -36,6 +36,28 @@ export class MainScene extends Scene {
                 this.mouseButtonDownEvent(KeyCodes.STANDARD_RIGHT_CLICK); 
             }
         });
+
+        this.input.keyboard!.on('keydown', (event: KeyboardEvent) => {
+            this.keydown(event.key.charCodeAt(0));
+        });
+    }
+
+    keydown(key: number): void {
+        if (key === stateCodes.OVERRIDE_RESTART_CODE) {
+            this.simple_send(stateCodes.RESTART_CODE);
+        } else if (this.ps === PSE.VICTORY && key === stateCodes.RESTART_CODE) {
+            this.simple_send(stateCodes.RESTART_CODE);
+        } else if (this.ps === PSE.PLAY) {
+            if (this.abilityManager.inAbilities(key)) {
+                if (this.abilityManager.select(key)) {
+                    this.simple_send(key);
+                }
+            } else if (key === stateCodes.FORFEIT_CODE) {
+                this.simple_send(stateCodes.FORFEIT_CODE);
+            }
+        } else {
+            console.log("Not playing");
+        }
     }
 
     update(): void {
@@ -86,5 +108,9 @@ export class MainScene extends Scene {
 
     send(str: any): void {
        
+    }
+
+    simple_send(str: any): void {
+
     }
 }
