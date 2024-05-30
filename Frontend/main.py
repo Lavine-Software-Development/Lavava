@@ -1,6 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
-from constants import BURN_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, BRIDGE_CODE, CANNON_CODE, STANDARD_LEFT_CLICK, RESTART_GAME_VAL
+from constants import BURN_CODE, CAPITAL_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, BRIDGE_CODE, CANNON_CODE, STANDARD_LEFT_CLICK, RESTART_GAME_VAL
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import EventVisual, Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State, Event
@@ -14,11 +14,11 @@ from default_abilities import VISUALS, CLICKS, EVENTS
 from default_colors import PLAYER_COLORS
 from abilityManager import AbstractAbilityManager
 from ability_validators import make_ability_validators, unowned_node, make_event_validators
-from logic import Logic, distance_point_to_segment
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
 from collections import defaultdict
 import sys
+import math
 
 class SafeNestedDict(dict):
     def __getitem__(self, key):
@@ -75,8 +75,6 @@ class Main:
         self.edges = {id: Edge(id, ClickType.EDGE, self.nodes[e[id]["from_node"]], self.nodes[e[id]["to_node"]], e[id]["dynamic"]) for id in e}
 
         self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges, State: state_dict})
-
-        self.logic = Logic(self.nodes, self.edges)
 
         chosen_boxes = self.choose_abilities(abi, credits)
         self.send_abilities(chosen_boxes)
@@ -189,7 +187,7 @@ class Main:
         self.network.send({'code': ABILITIES_SELECTED} | {'body': self.chosen_abilities})
 
     def choose_abilities(self, abi, credits):
-        av = make_ability_validators(self.logic, self.my_player)
+        av = make_ability_validators(self.my_player, self.nodes, self.edges)
         boxes = {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload']) for ab in abi}
         for box in boxes.values():
             if box.visual.color[0] is None:
@@ -221,6 +219,23 @@ class Main:
         return None
 
     def find_edge(self, position):
+
+        def distance_point_to_segment(px, py, x1, y1, x2, y2):
+            segment_length_sq = (x2 - x1) ** 2 + (y2 - y1) ** 2
+
+            if segment_length_sq < 1e-6:
+                return math.sqrt((px - x1) ** 2 + (py - y1) ** 2)
+
+            t = max(
+                0, min(1, ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / segment_length_sq)
+            )
+
+            closest_x = x1 + t * (x2 - x1)
+            closest_y = y1 + t * (y2 - y1)
+
+            distance = math.sqrt((px - closest_x) ** 2 + (py - closest_y) ** 2)
+            return distance
+
         for edge in self.edges.values():
             if (
                 distance_point_to_segment(
@@ -241,9 +256,8 @@ class Main:
             if self.ps == PSE.START_SELECTION.value:
                 self.network.send(self.highlight.send_format())
             else:
-                if self.ability_manager.ability:
-                    if (data := self.ability_manager.use_ability(self.highlight)) \
-                     and button != STANDARD_RIGHT_CLICK:
+                if self.ability_manager.use_ability(self.highlight):
+                    if data := self.ability_manager.complete_ability():
                         self.network.send(self.highlight.send_format(data))
                 elif (event_data := self.ability_manager.use_event(self.highlight)):
                     if button == STANDARD_RIGHT_CLICK and self.highlight.usage == STANDARD_LEFT_CLICK:
@@ -294,8 +308,8 @@ class TestMain(Main):
         return ["HOST", 1, 2], str(self.get_local_ip())
 
     def choose_abilities(self, abi, credits):
-        av = make_ability_validators(self.logic, self.my_player)
-        counts = {BRIDGE_CODE: 2, CANNON_CODE: 2, BURN_CODE: 2}
+        av = make_ability_validators(self.my_player, self.nodes, self.edges)
+        counts = {BRIDGE_CODE: 2, CANNON_CODE: 2, CAPITAL_CODE: 2}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):

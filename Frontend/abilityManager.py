@@ -7,30 +7,43 @@ class AbstractAbilityManager():
         self.abilities = abilities
         self.events = events
         self.mode = None
+        self.backup_mode = None
         self.clicks = []
 
     def use_event(self, highlight):
         if self.mode and self.mode != highlight.usage:
-            self.reset()
+            self.backup_reset()
         self.mode = highlight.usage
         self.clicks.append(highlight.item)
         if self.complete_check(highlight.usage):
             clicks = [click.id for click in self.clicks]
-            self.reset()
+            self.backup_reset()
             return clicks
         return False
 
     def use_ability(self, highlight):
-        if not self.ability:
-            return False
-        if highlight.usage == self.mode:
-            self.clicks.append(highlight.item)
-            if self.complete_check():
-                clicks = [click.id for click in self.clicks]
-                self.reset()
-                return clicks
-            return False
+        if self.ability:
+            if highlight.usage == self.mode and highlight.item.type == self.ability.click_type:
+                self.clicks.append(highlight.item)
+                return True
         return False
+    
+    def complete_ability(self):
+        if self.complete_check():
+            clicks = [click.id for click in self.clicks]
+            self.reset()
+            return clicks
+        return False
+    
+    def backup_reset(self):
+        if self.backup_mode:
+            self.mode = self.backup_mode
+            self.backup_mode = None
+            self.wipe()
+        else:
+            if self.ability:
+                self.backup_mode = self.mode
+            self.reset()
     
     def reset(self):
         self.wipe()
@@ -55,7 +68,7 @@ class AbstractAbilityManager():
         return False
 
     def select(self, key):
-        if self.ability:
+        if self.mode:
             self.wipe()
         if self.mode == key:
             self.mode = None

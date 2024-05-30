@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Optional
 import math
-from parseable import Parseable
 from clickTypeEnum import ClickType
 from typing import Callable
 from angled_position import angles
@@ -39,7 +38,7 @@ class MyPlayer(OtherPlayer):
     score: float = 0.0
 
 @dataclass
-class IDItem(Parseable):
+class IDItem():
     id: int
     type: ClickType
 
@@ -135,7 +134,7 @@ class Event:
     verification_func: Callable[..., bool]
     
 @dataclass
-class AbilityVisual(Parseable):
+class AbilityVisual:
     name: str
     shape: str
     color: tuple
@@ -151,17 +150,9 @@ class ReloadAbility:
     reload: int
     remaining: int = 0
     percentage: float = 1.0
-
-    @property
-    def selection_display_num(self):
-        return self.credits
     
     @property
     def game_display_num(self):
-        return self.remaining
-    
-    @property
-    def centre_display_num(self):
         return self.remaining
     
     @property
