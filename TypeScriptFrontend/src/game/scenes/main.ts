@@ -11,6 +11,7 @@ import { MyPlayer } from '../slav/Objects/myPlayer';
 import { makeEventValidators, unownedNode } from '../slav/ability_validators';
 import { IDItem } from '../slav/Objects/idItem';
 import { EVENTS, VISUALS } from '../slav/default_abilities';
+import { Network } from "../slav/iansNetwork";
 
 import { Scene } from 'phaser';
 import { Edge } from '../slav/Objects/edge';
@@ -24,6 +25,7 @@ export class MainScene extends Scene {
     private abilityManager: AbstractAbilityManager;
     private mainPlayer: MyPlayer;
     private otherPlayers: OtherPlayer[] = [];
+    private network: Network;
 
     constructor(abilities: { [key: number]: ReloadAbility }) {
         super({ key: 'MainScene' });
@@ -37,18 +39,17 @@ export class MainScene extends Scene {
         });
 
         this.abilityManager = new AbstractAbilityManager(abilities, events);
+        this.network = new Network();
     }
  
     create(): void {
-
-
 
         // Example of creating nodes
         this.nodes.push(new Node(1, [100, 100], false, 0, [], stateDict[0], 10, this.mainPlayer));
         this.nodes.push(new Node(2, [200, 200], true, 1, [], stateDict[0], 10, this.otherPlayers[1]));
         this.nodes.push(new Node(3, [300, 150], true, 1, [], stateDict[0], 10));
-        this.edges.push(new Edge(this, 4, this.nodes[0], this.nodes[1], true, false, false));
-        this.edges.push(new Edge(this, 5, this.nodes[1], this.nodes[2], false, false, false));
+        this.edges.push(new Edge(this, 4, this.nodes[0], this.nodes[1], true, true, false));
+        this.edges.push(new Edge(this, 5, this.nodes[1], this.nodes[2], false, true, true));
 
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
@@ -135,20 +136,20 @@ export class MainScene extends Scene {
         if (this.highlight.highlighted) {
 
             if (this.ps === PSE.START_SELECTION) {
-                this.send(this.highlight.sendFormat());
+                this.send();
             } else {
                 if (this.abilityManager.useAbility(this.highlight)) {
                     const completion = this.abilityManager.completeAbility();
                     if (completion !== false) {
-                        this.send(this.highlight.sendFormat(completion));
+                        this.send(completion);
                 }
                 } else {
                     const event_data = this.abilityManager.useEvent(this.highlight);
                     if (event_data !== false) {
                         if (button === EventCodes.STANDARD_RIGHT_CLICK && this.highlight.usage === EventCodes.STANDARD_LEFT_CLICK) {
-                            this.send(this.highlight.sendFormat(event_data, EventCodes.STANDARD_RIGHT_CLICK));
+                            this.send(event_data, EventCodes.STANDARD_RIGHT_CLICK);
                         } else {
-                            this.send(this.highlight.sendFormat(event_data));
+                            this.send(event_data);
                         }
                     }
                 }
@@ -156,11 +157,11 @@ export class MainScene extends Scene {
         }
     }
 
-    send(str: any): void {
-       
+    send(items?: number[], code?: number): void {
+       this.network.pointless(this.highlight.sendFormat(items, code));
     }
 
-    simple_send(str: any): void {
-
+    simple_send(code: number): void {
+        this.network.pointless({"code": code, "items": {}});
     }
 }

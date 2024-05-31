@@ -49,9 +49,9 @@ export class Highlight {
     }
 
     sendFormat(items?: number[], code?: number): object {
-        const coda = code ?? this.usage;
+        const code_usage = code ?? this.usage;
         items = items || (this.item ? [this.item.id] : []);
-        return { coda, items };
+        return { "code": code_usage, "items": items };
     }
 
     draw(): void {
