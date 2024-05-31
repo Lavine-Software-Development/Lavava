@@ -12,6 +12,7 @@ import { makeEventValidators, unownedNode } from '../slav/ability_validators';
 import { IDItem } from '../slav/Objects/idItem';
 import { EVENTS, VISUALS } from '../slav/default_abilities';
 import { Network } from "../slav/iansNetwork";
+import { random_equal_distributed_angles } from '../slav/utilities';
 
 import { Scene } from 'phaser';
 import { Edge } from '../slav/Objects/edge';
@@ -46,8 +47,8 @@ export class MainScene extends Scene {
 
         // Example of creating nodes
         this.nodes.push(new Node(1, [100, 100], false, 0, [], stateDict[0], 10, this.mainPlayer));
-        this.nodes.push(new Node(2, [200, 200], true, 1, [], stateDict[0], 10, this.otherPlayers[1]));
-        this.nodes.push(new Node(3, [300, 150], true, 1, [], stateDict[0], 10));
+        this.nodes.push(new Node(2, [200, 200], true, 1, random_equal_distributed_angles(3), stateDict[0], 10, this.otherPlayers[1]));
+        this.nodes.push(new Node(3, [300, 150], true, 1, random_equal_distributed_angles(3), stateDict[0], 10));
         this.edges.push(new Edge(this, 4, this.nodes[0], this.nodes[1], true, true, false));
         this.edges.push(new Edge(this, 5, this.nodes[1], this.nodes[2], false, true, true));
 
@@ -91,7 +92,6 @@ export class MainScene extends Scene {
         this.highlight.draw();
         this.nodes.forEach(node => node.draw(this));
         this.edges.forEach(edge => edge.draw());
-        
     }
 
     checkHighlight(): void {

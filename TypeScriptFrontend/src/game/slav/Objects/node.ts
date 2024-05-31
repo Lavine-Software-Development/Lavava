@@ -64,7 +64,59 @@ export class Node extends IDItem {
     }
 
     draw(scene: Phaser.Scene): void {
-        let graphics = scene.add.graphics({ fillStyle: { color: this.phaserColor } });
+        let graphics = scene.add.graphics(); 
+        if (this.owner) {
+            if (this.isPort) {
+                this.drawPorts(graphics, Colors.BROWN);
+            } else if (this.ports.length > 0) {
+                this.drawPorts(graphics, Colors.ORANGE);
+            }
+        }
+        graphics.fillStyle(this.phaserColor, 1);
         graphics.fillCircle(this.pos.x, this.pos.y, this.size);
     }
+
+    drawPorts(graphics: Phaser.GameObjects.Graphics, color: readonly [number, number, number]): void {
+        const portWidth = this.size;
+        const portHeight = this.size * 1.3;
+        this.ports.forEach(angle => {
+            this.drawRotatedRectangle(graphics, angle, portWidth, portHeight, color);
+        });
+    }
+
+    drawRotatedRectangle(graphics: Phaser.GameObjects.Graphics, angle: number, portWidth: number, portHeight: number, col: readonly [number, number, number]): void {
+        const rad = Phaser.Math.DegToRad(angle);
+        const halfWidth = portWidth / 2;
+        const halfHeight = portHeight / 2;
+        const distanceFromCenter = this.size * 1.2;  // Define how far each port should be from the center of the node
+
+        const portCenter = new Phaser.Math.Vector2(
+            this.pos.x + Math.cos(rad) * distanceFromCenter,
+            this.pos.y + Math.sin(rad) * distanceFromCenter
+        );
+    
+        // Calculate the corners of the rotated rectangle
+        const corners = [
+            new Phaser.Math.Vector2(-halfWidth, -halfHeight),
+            new Phaser.Math.Vector2(halfWidth, -halfHeight),
+            new Phaser.Math.Vector2(halfWidth, halfHeight),
+            new Phaser.Math.Vector2(-halfWidth, halfHeight),
+        ].map(corner => {
+            // Rotate and then translate each corner
+            return corner.rotate(rad).add(portCenter);
+        });
+    
+        // Change graphics fill style here if needed
+        graphics.fillStyle(Phaser.Display.Color.GetColor(col[0], col[1], col[2]), 1); // Set the color to Orange
+    
+        // Draw the polygon
+        graphics.beginPath();
+        graphics.moveTo(corners[0].x, corners[0].y);
+        corners.forEach((corner, index) => {
+            if (index > 0) graphics.lineTo(corner.x, corner.y);
+        });
+        graphics.closePath();
+        graphics.fillPath();
+    }
+    
 }
