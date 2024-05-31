@@ -139,7 +139,10 @@ function newEdgeValidator(
                 doIntersect(
                     [nodes[nodeFromId].pos.x, nodes[nodeFromId].pos.y],
                     [nodes[nodeToId].pos.x, nodes[nodeToId].pos.y],
-                    [nodes[edge.fromNode.id].pos.x, nodes[edge.fromNode.id].pos.y],
+                    [
+                        nodes[edge.fromNode.id].pos.x,
+                        nodes[edge.fromNode.id].pos.y,
+                    ],
                     [nodes[edge.toNode.id].pos.x, nodes[edge.toNode.id].pos.y]
                 )
             ) {
@@ -171,18 +174,18 @@ function newEdgeValidator(
     };
 }
 
-function makeAbilityValidators(
+export function makeAbilityValidators(
     player: OtherPlayer,
     nodes: Node[],
     edges: Edge[]
 ): { [key: string]: ValidatorFunc } {
     const abilityValidators: { [key: string]: ValidatorFunc } = {
-        SPAWN_CODE: unownedNode,
-        BRIDGE_CODE: newEdgeValidator(nodes, edges, player),
-        D_BRIDGE_CODE: newEdgeValidator(nodes, edges, player),
-        BURN_CODE: standardPortNode,
-        RAGE_CODE: noClick,
-        CAPITAL_CODE: capitalValidator(edges, player),
+        [KeyCodes.SPAWN_CODE]: unownedNode,
+        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(nodes, edges, player),
+        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(nodes, edges, player),
+        [KeyCodes.BURN_CODE]: standardPortNode,
+        [KeyCodes.RAGE_CODE]: noClick,
+        [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
@@ -190,27 +193,36 @@ function makeAbilityValidators(
     return { ...abilityValidators, ...playerValidatorsMap };
 }
 
-export function makeEventValidators(player: OtherPlayer): { [key: number]: (data: IDItem[]) => boolean } {
-    
+export function makeEventValidators(player: OtherPlayer): {
+    [key: number]: (data: IDItem[]) => boolean;
+} {
     function cannonShotValidator(data: IDItem[]): boolean {
         if (data.length === 1) {
             const firstNode = data[0] as Node;
-            return firstNode.owner === player && firstNode.stateName === "cannon" && firstNode.value > MINIMUM_TRANSFER_VALUE;
+            return (
+                firstNode.owner === player &&
+                firstNode.stateName === "cannon" &&
+                firstNode.value > MINIMUM_TRANSFER_VALUE
+            );
         } else if (data.length > 1) {
             const secondNode = data[1] as Node;
             return !(secondNode.owner === player && secondNode.full);
         }
         return false;
     }
-    
-    function edgeValidator(data:  IDItem[]): boolean {
-        if (data instanceof Array && data.length > 0 && data[0] instanceof Edge) {
+
+    function edgeValidator(data: IDItem[]): boolean {
+        if (
+            data instanceof Array &&
+            data.length > 0 &&
+            data[0] instanceof Edge
+        ) {
             const edge = data[0] as Edge;
             return edge.controlledBy(player);
         }
         return false;
     }
-    
+
     return {
         [EventCodes.CANNON_SHOT_CODE]: cannonShotValidator,
         [EventCodes.STANDARD_LEFT_CLICK]: edgeValidator,

@@ -7,6 +7,8 @@ import {
     stateCodes,
     EventCodes,
     GROWTH_STOP,
+    AbilityCredits,
+    AbilityReloadTimes,
 } from "../slav/constants";
 import { PlayerStateEnum as PSE } from "../slav/enums";
 import { ReloadAbility } from "../slav/Objects/ReloadAbility";
@@ -14,11 +16,16 @@ import { Event } from "../slav/Objects/event";
 import { AbstractAbilityManager } from "../slav/abilityManager";
 import { OtherPlayer } from "../slav/Objects/otherPlayer";
 import { MyPlayer } from "../slav/Objects/myPlayer";
-import { makeEventValidators, unownedNode } from "../slav/ability_validators";
+import {
+    makeEventValidators,
+    unownedNode,
+    makeAbilityValidators,
+} from "../slav/ability_validators";
 import { IDItem } from "../slav/Objects/idItem";
-import { EVENTS, VISUALS } from "../slav/default_abilities";
+import { CLICKS, EVENTS, VISUALS } from "../slav/default_abilities";
 import { Network } from "../slav/iansNetwork";
 import { random_equal_distributed_angles } from "../slav/utilities";
+import { AbilityVisual } from "../slav/immutable_visuals";
 
 import { Scene } from "phaser";
 import { Edge } from "../slav/Objects/edge";
@@ -33,23 +40,11 @@ export class MainScene extends Scene {
     private otherPlayers: OtherPlayer[] = [];
     private network: Network;
 
-    constructor(abilities: { [key: number]: ReloadAbility }) {
+    constructor() {
         super({ key: "MainScene" });
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
-        const ev = makeEventValidators(this.mainPlayer);
-        const events: { [key: number]: Event } = {};
-        Object.values(EventCodes).forEach((eb: number) => {
-            events[eb] = new Event(
-                VISUALS[eb],
-                EVENTS[eb][0],
-                EVENTS[eb][1],
-                ev[eb]
-            );
-        });
-
-        this.abilityManager = new AbstractAbilityManager(abilities, events);
         this.network = new Network();
     }
 
@@ -58,12 +53,12 @@ export class MainScene extends Scene {
         this.nodes.push(
             new Node(
                 this,
-                1,
-                [100, 100],
-                false,
                 0,
-                [],
-                stateDict[1],
+                [100, 100],
+                true,
+                1,
+                random_equal_distributed_angles(4),
+                stateDict[0],
                 10,
                 this.mainPlayer
             )
@@ -71,12 +66,12 @@ export class MainScene extends Scene {
         this.nodes.push(
             new Node(
                 this,
-                2,
+                1,
                 [200, 200],
                 true,
                 1,
                 random_equal_distributed_angles(3),
-                stateDict[5],
+                stateDict[0],
                 GROWTH_STOP,
                 this.otherPlayers[1]
             )
@@ -84,7 +79,7 @@ export class MainScene extends Scene {
         this.nodes.push(
             new Node(
                 this,
-                3,
+                2,
                 [300, 150],
                 true,
                 1,
@@ -102,6 +97,40 @@ export class MainScene extends Scene {
 
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
+
+        const ev = makeEventValidators(this.mainPlayer);
+        const ab = makeAbilityValidators(
+            this.mainPlayer,
+            this.nodes,
+            this.edges
+        );
+        const events: { [key: number]: Event } = {};
+        const abilities: { [key: number]: ReloadAbility } = {};
+        Object.values(EventCodes).forEach((eb: number) => {
+            events[eb] = new Event(
+                VISUALS[eb],
+                EVENTS[eb][0],
+                EVENTS[eb][1],
+                ev[eb]
+            );
+        });
+        Object.values(KeyCodes).forEach((abk: number) => {
+            abilities[abk] = new ReloadAbility(
+                VISUALS[abk] as AbilityVisual,
+                CLICKS[abk][0],
+                CLICKS[abk][1],
+                ab[abk],
+                AbilityCredits[abk],
+                AbilityReloadTimes[abk],
+                1,
+                1
+            );
+        });
+        this.abilityManager = new AbstractAbilityManager(
+            this,
+            abilities,
+            events
+        );
 
         this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
             if (pointer.leftButtonDown()) {
@@ -137,6 +166,7 @@ export class MainScene extends Scene {
     update(): void {
         this.checkHighlight();
         this.highlight.draw();
+        this.abilityManager.draw(this);
         this.nodes.forEach((node) => node.draw(this));
         this.edges.forEach((edge) => edge.draw());
     }
