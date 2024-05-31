@@ -4,22 +4,30 @@ import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
 import { ClickType } from "../enums";
 import { phaserColor } from "../utilities";
-import { CapitalState } from "../States";
+import { CapitalState, CannonState } from "../States";
 
 export class Node extends IDItem {
     pos: Phaser.Math.Vector2;
     isPort: boolean;
     portPercent: number;
-    ports: Array<number>; 
+    ports: Array<number>;
     state: State;
     value: number;
-    effects: Set<string>; 
+    effects: Set<string>;
     owner: OtherPlayer | null;
+    private cannonGraphics: Phaser.GameObjects.Graphics;
 
     constructor(
-        id: number, pos: [number, number], isPort: boolean,
-        portPercent: number, ports: Array<any>, state: State, value: number,
-        owner: OtherPlayer | null = null, effects = new Set<string>() 
+        scene: Phaser.Scene,
+        id: number,
+        pos: [number, number],
+        isPort: boolean,
+        portPercent: number,
+        ports: Array<any>,
+        state: State,
+        value: number,
+        owner: OtherPlayer | null = null,
+        effects = new Set<string>()
     ) {
         super(id, ClickType.NODE);
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
@@ -30,6 +38,7 @@ export class Node extends IDItem {
         this.value = value;
         this.effects = effects;
         this.owner = owner;
+        this.cannonGraphics = scene.add.graphics();
     }
 
     get color(): readonly [number, number, number] {
@@ -49,7 +58,10 @@ export class Node extends IDItem {
 
     get sizeFactor(): number {
         if (this.value < 5) return 0;
-        return Math.max(Math.log10(this.value / 10) / 2 + this.value / 1000 + 0.15, 0);
+        return Math.max(
+            Math.log10(this.value / 10) / 2 + this.value / 1000 + 0.15,
+            0
+        );
     }
 
     get stateName(): string {
@@ -65,15 +77,15 @@ export class Node extends IDItem {
     }
 
     draw(scene: Phaser.Scene): void {
-        let graphics = scene.add.graphics(); 
-
+        let graphics = scene.add.graphics();
+        graphics.clear();
         if (this.stateName === "zombie") {
             // Handle drawing for zombie state
             graphics.fillStyle(this.phaserColor, 1); // Set the fill color for the rectangle
             graphics.fillRect(
-                this.pos.x - this.size / 2, 
+                this.pos.x - this.size / 2,
                 this.pos.y - this.size / 2,
-                this.size, 
+                this.size,
                 this.size
             );
             return; // Return early to prevent drawing the normal node graphics
@@ -89,11 +101,11 @@ export class Node extends IDItem {
         graphics.fillStyle(this.phaserColor, 1);
         graphics.fillCircle(this.pos.x, this.pos.y, this.size);
 
-        if (this.effects.has('poison')) {
+        if (this.effects.has("poison")) {
             graphics.lineStyle(6, phaserColor(Colors.PURPLE), 1);
             graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 6);
         }
-        if (this.effects.has('rage')) {
+        if (this.effects.has("rage")) {
             graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
             graphics.strokeCircle(this.pos.x, this.pos.y, this.size - 2);
         }
@@ -106,45 +118,82 @@ export class Node extends IDItem {
             }
         }
 
-        if (this.stateName === "capital" && (this.state as CapitalState).capitalized) {
+        if (
+            this.stateName === "capital" &&
+            (this.state as CapitalState).capitalized
+        ) {
             this.drawStar(graphics, phaserColor(Colors.BLACK), false);
             this.drawStar(graphics, phaserColor(Colors.PINK), true);
+        } else if (this.state instanceof CannonState) {
+            if (this.state.selected) {
+                this.cannonGraphics.clear();
+                let mousePos = scene.input.activePointer.position;
+                // Calculate angle between the spot and the mouse cursor
+                let dx = mousePos.x - this.pos.x;
+                let dy = mousePos.y - this.pos.y;
+                this.state.angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
+            }
+            this.drawRotatedRectangle(
+                this.cannonGraphics,
+                this.state.angle,
+                this.size * 2,
+                this.size,
+                Colors.GREY
+            );
         }
     }
 
-    drawPorts(graphics: Phaser.GameObjects.Graphics, color: readonly [number, number, number]): void {
+    drawPorts(
+        graphics: Phaser.GameObjects.Graphics,
+        color: readonly [number, number, number]
+    ): void {
         const portWidth = this.size;
         const portHeight = this.size * 1.3;
-        this.ports.forEach(angle => {
-            this.drawRotatedRectangle(graphics, angle, portWidth, portHeight, color);
+        this.ports.forEach((angle) => {
+            this.drawRotatedRectangle(
+                graphics,
+                angle,
+                portWidth,
+                portHeight,
+                color
+            );
         });
     }
 
-    drawRotatedRectangle(graphics: Phaser.GameObjects.Graphics, angle: number, portWidth: number, portHeight: number, col: readonly [number, number, number]): void {
+    drawRotatedRectangle(
+        graphics: Phaser.GameObjects.Graphics,
+        angle: number,
+        portWidth: number,
+        portHeight: number,
+        col: readonly [number, number, number]
+    ): void {
         const rad = Phaser.Math.DegToRad(angle);
         const halfWidth = portWidth / 2;
         const halfHeight = portHeight / 2;
-        const distanceFromCenter = this.size * 1.2;  // Define how far each port should be from the center of the node
+        const distanceFromCenter = this.size * 1.2; // Define how far each port should be from the center of the node
 
         const portCenter = new Phaser.Math.Vector2(
             this.pos.x + Math.cos(rad) * distanceFromCenter,
             this.pos.y + Math.sin(rad) * distanceFromCenter
         );
-    
+
         // Calculate the corners of the rotated rectangle
         const corners = [
             new Phaser.Math.Vector2(-halfWidth, -halfHeight),
             new Phaser.Math.Vector2(halfWidth, -halfHeight),
             new Phaser.Math.Vector2(halfWidth, halfHeight),
             new Phaser.Math.Vector2(-halfWidth, halfHeight),
-        ].map(corner => {
+        ].map((corner) => {
             // Rotate and then translate each corner
             return corner.rotate(rad).add(portCenter);
         });
-    
+
         // Change graphics fill style here if needed
-        graphics.fillStyle(Phaser.Display.Color.GetColor(col[0], col[1], col[2]), 1); // Set the color to Orange
-    
+        graphics.fillStyle(
+            Phaser.Display.Color.GetColor(col[0], col[1], col[2]),
+            1
+        ); // Set the color to Orange
+
         // Draw the polygon
         graphics.beginPath();
         graphics.moveTo(corners[0].x, corners[0].y);
@@ -155,27 +204,35 @@ export class Node extends IDItem {
         graphics.fillPath();
     }
 
-    drawStar(graphics: Phaser.GameObjects.Graphics, color: number, filled: boolean = true): void {
+    drawStar(
+        graphics: Phaser.GameObjects.Graphics,
+        color: number,
+        filled: boolean = true
+    ): void {
         const innerRadius = this.size / 3;
         const outerRadius = this.size / 1.5;
         const starPoints = [];
-    
+
         for (let i = 0; i < 5; i++) {
             // Outer points
-            let angle = Phaser.Math.DegToRad(i * 72 + 55);  // Start at top point
-            starPoints.push(new Phaser.Math.Vector2(
-                this.pos.x + outerRadius * Math.cos(angle),
-                this.pos.y + outerRadius * Math.sin(angle)
-            ));
-    
+            let angle = Phaser.Math.DegToRad(i * 72 + 55); // Start at top point
+            starPoints.push(
+                new Phaser.Math.Vector2(
+                    this.pos.x + outerRadius * Math.cos(angle),
+                    this.pos.y + outerRadius * Math.sin(angle)
+                )
+            );
+
             // Inner points
-            angle += Phaser.Math.DegToRad(36);  // Halfway between outer points
-            starPoints.push(new Phaser.Math.Vector2(
-                this.pos.x + innerRadius * Math.cos(angle),
-                this.pos.y + innerRadius * Math.sin(angle)
-            ));
+            angle += Phaser.Math.DegToRad(36); // Halfway between outer points
+            starPoints.push(
+                new Phaser.Math.Vector2(
+                    this.pos.x + innerRadius * Math.cos(angle),
+                    this.pos.y + innerRadius * Math.sin(angle)
+                )
+            );
         }
-    
+
         // Draw the star
         graphics.beginPath();
         graphics.fillStyle(color, 1);
@@ -184,13 +241,13 @@ export class Node extends IDItem {
             if (index > 0) graphics.lineTo(point.x, point.y);
         });
         graphics.closePath();
-    
+
         if (filled) {
             graphics.fillPath();
         } else {
+            graphics.lineStyle(1, color);
             graphics.strokePath();
         }
     }
-    
-    
 }
+
