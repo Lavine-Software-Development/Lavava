@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap">
+</head>
+<body>
+    <div class="container" id="login">
+        <h1 class="form-title">
+            Welcome back
+            <span class="form-subtitle">Login to your account</span>
+        </h1>
+        <form method="post" action="home.html">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" placeholder="Username/Email" required>
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" placeholder="Password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            <a href="reset_password.html" class="forgot-password">Forgot password?</a>
+            <input type="submit" class="btn" value="Sign In" name="Sign In">
+            <input type="submit" class="btn" value="Play as Guest" name="Play as Guest"
+                   onclick="location.href='home.html';">
+        </form>
+        <p>Don't have an account? <a href="register.html"> Register here!</a></p>
+    </div>
+</body>
+</html>

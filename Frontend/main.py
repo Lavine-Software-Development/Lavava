@@ -328,4 +328,4 @@ class TestMain(Main):
 
 
 if __name__ == "__main__":
-   TestMain()
+   Main()

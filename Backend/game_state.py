@@ -1,7 +1,6 @@
 from gameStateEnums import GameStateEnum as GSE
 
 class GameState:
-
     def __init__(self):
         self._state = GSE.LOBBY
 

@@ -5,15 +5,12 @@ from batch import Batch
 import sys
 import time
 import json
-
 class Server:
     def __init__(self, port):
         self.server = "0.0.0.0"
         self.port = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.waiting_players = (
-            None  # Stores the waiting players with the game code as the key
-        )
+        self.waiting_players = None
         self.games = {}  # Stores the active games with the game code as the key
 
         try:
@@ -24,7 +21,7 @@ class Server:
 
         self.s.listen(10)
         print("Waiting for a connection, Server Started")
-
+    
     def send_ticks(self, batch: Batch):
         time.sleep(1)
         while True:
@@ -48,6 +45,8 @@ class Server:
 
         data = conn.recv(1024).decode()
         json_data = json.loads(data)
+        print("json data")
+        print(json_data)
         is_host = json_data["type"]
         player_count = json_data["players"]
         mode = json_data["mode"]
@@ -110,6 +109,7 @@ class Server:
         while True:
             conn, addr = self.s.accept()
             print("Connected to:", addr)
+            print(conn)
 
             start_new_thread(self.threaded_client, (conn,))
 
