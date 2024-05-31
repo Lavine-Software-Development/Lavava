@@ -1,5 +1,5 @@
-import { Colors, MineVisuals } from './constants';
-import { random_equal_distributed_angles } from './utilities';  // Ensure you import the angles function
+import { Colors, MineVisuals } from "./constants";
+import { random_equal_distributed_angles } from "./utilities"; // Ensure you import the angles function
 
 export class State {
     name: string;
@@ -14,7 +14,12 @@ export class MineState extends State {
     ringColor: readonly [number, number, number];
     unfilledColor: readonly [number, number, number];
 
-    constructor(name: string, bubble: number, ringColor: readonly [number, number, number], unfilledColor: readonly [number, number, number] = Colors.GREY) {
+    constructor(
+        name: string,
+        bubble: number,
+        ringColor: readonly [number, number, number],
+        unfilledColor: readonly [number, number, number] = Colors.GREY
+    ) {
         super(name);
         this.bubble = bubble;
         this.ringColor = ringColor;
@@ -33,18 +38,24 @@ export class CapitalState extends State {
 
 export class CannonState extends State {
     angle: number;
+    selected: boolean;
 
-    constructor(name: string, angle: number = random_equal_distributed_angles(1)[0]) {
+    constructor(
+        name: string,
+        angle: number = random_equal_distributed_angles(1)[0]
+    ) {
         super(name);
         this.angle = angle;
+        this.selected = true;
     }
 }
 
 export const stateDict: { [key: number]: State } = {
-    0: new State('default'),
-    1: new State('zombie'),
-    2: new CapitalState('capital', true),
-    3: new MineState('mine', MineVisuals.RESOURCE_BUBBLE, Colors.DARK_YELLOW),
-    4: new MineState('mine', MineVisuals.ISLAND_RESOURCE_BUBBLE, Colors.YELLOW),
-    5: new CannonState('cannon')
+    0: new State("default"),
+    1: new State("zombie"),
+    2: new CapitalState("capital", true),
+    3: new MineState("mine", MineVisuals.RESOURCE_BUBBLE, Colors.DARK_YELLOW),
+    4: new MineState("mine", MineVisuals.ISLAND_RESOURCE_BUBBLE, Colors.YELLOW),
+    5: new CannonState("cannon"),
 };
+

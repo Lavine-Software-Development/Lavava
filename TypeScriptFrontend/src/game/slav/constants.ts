@@ -19,14 +19,16 @@ export const Colors = {
     DARK_PINK: [255, 0, 127] as const,
     LIGHT_BLUE: [173, 216, 230] as const,
     BROWN: [150, 75, 0] as const,
-    DARK_GRAY: [64, 64, 64] as const
+    DARK_GRAY: [64, 64, 64] as const,
 };
 
-export const PlayerColors: { [key: number]: Readonly<[number, number, number]> } = {
+export const PlayerColors: {
+    [key: number]: Readonly<[number, number, number]>;
+} = {
     0: Colors.RED,
     1: Colors.BLUE,
     2: Colors.ORANGE,
-    3: Colors.GREEN
+    3: Colors.GREEN,
 };
 
 export const KeyCodes = {
@@ -41,24 +43,53 @@ export const KeyCodes = {
     POISON_CODE: 112,
     CAPITAL_CODE: 99,
     CANNON_CODE: 101,
-
 };
 
 export const EventCodes = {
     CANNON_SHOT_CODE: 4,
     STANDARD_LEFT_CLICK: 1,
-    STANDARD_RIGHT_CLICK: 3
+    STANDARD_RIGHT_CLICK: 3,
 };
 
 export const stateCodes = {
     OVERRIDE_RESTART_CODE: 121,
     RESTART_CODE: 32,
-    FORFEIT_CODE: 120
-}
+    FORFEIT_CODE: 120,
+};
 
 export const MineVisuals = {
     RESOURCE_BUBBLE: 400,
-    ISLAND_RESOURCE_BUBBLE: 400
-}
+    ISLAND_RESOURCE_BUBBLE: 400,
+};
+
+export const AbilityCredits = {
+    [KeyCodes.SPAWN_CODE]: 1,
+    [KeyCodes.FREEZE_CODE]: 1,
+    [KeyCodes.BURN_CODE]: 1,
+    [KeyCodes.ZOMBIE_CODE]: 1,
+    [KeyCodes.BRIDGE_CODE]: 2,
+    [KeyCodes.D_BRIDGE_CODE]: 2,
+    [KeyCodes.RAGE_CODE]: 2,
+    [KeyCodes.POISON_CODE]: 2,
+    [KeyCodes.NUKE_CODE]: 3,
+    [KeyCodes.CAPITAL_CODE]: 3,
+    [KeyCodes.CANNON_CODE]: 3,
+};
+
+export const AbilityReloadTimes = {
+    [KeyCodes.SPAWN_CODE]: 30,
+    [KeyCodes.FREEZE_CODE]: 8,
+    [KeyCodes.BURN_CODE]: 5,
+    [KeyCodes.ZOMBIE_CODE]: 2,
+    [KeyCodes.BRIDGE_CODE]: 2,
+    [KeyCodes.D_BRIDGE_CODE]: 8,
+    [KeyCodes.RAGE_CODE]: 20, // Adjust this based on RAGE_TICKS being defined
+    [KeyCodes.NUKE_CODE]: 20,
+    [KeyCodes.POISON_CODE]: 5,
+    [KeyCodes.CAPITAL_CODE]: 20,
+    [KeyCodes.CANNON_CODE]: 3,
+};
 
 export const GROWTH_STOP = 250;
+export const MINIMUM_TRANSFER_VALUE = 8;
+
