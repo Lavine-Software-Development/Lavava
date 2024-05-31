@@ -5,3 +5,7 @@ export function random_equal_distributed_angles(count: number): number[] {
     }
     return ports;
 }
+
+export function phaserColor(color: readonly [number, number, number]): number {
+    return Phaser.Display.Color.GetColor(color[0], color[1], color[2]);
+}
