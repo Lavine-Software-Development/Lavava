@@ -15,6 +15,8 @@ export class Node extends IDItem {
     value: number;
     effects: Set<string>;
     owner: OtherPlayer | null;
+    private scene: Phaser.Scene;
+    private graphics: Phaser.GameObjects.Graphics;
     private cannonGraphics: Phaser.GameObjects.Graphics;
 
     constructor(
@@ -38,6 +40,8 @@ export class Node extends IDItem {
         this.value = value;
         this.effects = effects;
         this.owner = owner;
+        this.scene = scene;
+        this.graphics = scene.add.graphics()
         this.cannonGraphics = scene.add.graphics();
     }
 
@@ -76,13 +80,12 @@ export class Node extends IDItem {
         return this.ports.length;
     }
 
-    draw(scene: Phaser.Scene): void {
-        let graphics = scene.add.graphics();
-        graphics.clear();
+    draw(): void {
+        this.graphics.clear();
         if (this.stateName === "zombie") {
             // Handle drawing for zombie state
-            graphics.fillStyle(this.phaserColor, 1); // Set the fill color for the rectangle
-            graphics.fillRect(
+            this.graphics.fillStyle(this.phaserColor, 1); // Set the fill color for the rectangle
+            this.graphics.fillRect(
                 this.pos.x - this.size / 2,
                 this.pos.y - this.size / 2,
                 this.size,
@@ -91,30 +94,31 @@ export class Node extends IDItem {
             return; // Return early to prevent drawing the normal node graphics
         }
 
+        if (this.effects.has("poison")) {
+            this.graphics.lineStyle(6, phaserColor(Colors.PURPLE), 1);
+            this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 4);
+        }
+
         if (this.owner) {
             if (this.isPort) {
-                this.drawPorts(graphics, Colors.BROWN);
+                this.drawPorts(Colors.BROWN);
             } else if (this.ports.length > 0) {
-                this.drawPorts(graphics, Colors.ORANGE);
+                this.drawPorts(Colors.ORANGE);
             }
         }
-        graphics.fillStyle(this.phaserColor, 1);
-        graphics.fillCircle(this.pos.x, this.pos.y, this.size);
+        this.graphics.fillStyle(this.phaserColor, 1);
+        this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
 
-        if (this.effects.has("poison")) {
-            graphics.lineStyle(6, phaserColor(Colors.PURPLE), 1);
-            graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 6);
-        }
         if (this.effects.has("rage")) {
-            graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
-            graphics.strokeCircle(this.pos.x, this.pos.y, this.size - 2);
+            this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
+            this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size - 2);
         }
         if (this.full) {
-            graphics.lineStyle(2, phaserColor(Colors.BLACK), 1);
-            graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 1);
+            this.graphics.lineStyle(2, phaserColor(Colors.BLACK), 1);
+            this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 1);
             if (this.stateName === "capital") {
-                graphics.lineStyle(2, phaserColor(Colors.PINK), 1);
-                graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 3);
+                this.graphics.lineStyle(2, phaserColor(Colors.PINK), 1);
+                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 3);
             }
         }
 
@@ -122,36 +126,34 @@ export class Node extends IDItem {
             this.stateName === "capital" &&
             (this.state as CapitalState).capitalized
         ) {
-            this.drawStar(graphics, phaserColor(Colors.BLACK), false);
-            this.drawStar(graphics, phaserColor(Colors.PINK), true);
+            this.drawStar(this.graphics, phaserColor(Colors.BLACK), false);
+            this.drawStar(this.graphics, phaserColor(Colors.PINK), true);
         } else if (this.state instanceof CannonState) {
             if (this.state.selected) {
                 this.cannonGraphics.clear();
-                let mousePos = scene.input.activePointer.position;
+                let mousePos = this.scene.input.activePointer.position;
                 // Calculate angle between the spot and the mouse cursor
                 let dx = mousePos.x - this.pos.x;
                 let dy = mousePos.y - this.pos.y;
                 this.state.angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
             }
             this.drawRotatedRectangle(
-                this.cannonGraphics,
                 this.state.angle,
                 this.size * 2,
                 this.size,
-                Colors.GREY
+                Colors.GREY,
+                this.cannonGraphics,
             );
         }
     }
 
     drawPorts(
-        graphics: Phaser.GameObjects.Graphics,
         color: readonly [number, number, number]
     ): void {
         const portWidth = this.size;
         const portHeight = this.size * 1.3;
         this.ports.forEach((angle) => {
             this.drawRotatedRectangle(
-                graphics,
                 angle,
                 portWidth,
                 portHeight,
@@ -161,11 +163,11 @@ export class Node extends IDItem {
     }
 
     drawRotatedRectangle(
-        graphics: Phaser.GameObjects.Graphics,
         angle: number,
         portWidth: number,
         portHeight: number,
-        col: readonly [number, number, number]
+        col: readonly [number, number, number],
+        graphics: Phaser.GameObjects.Graphics = this.graphics
     ): void {
         const rad = Phaser.Math.DegToRad(angle);
         const halfWidth = portWidth / 2;

@@ -60,7 +60,7 @@ export class Highlight {
                 const node = this.item as Node;
                 const [r, g, b] = this.color;
                 this.graphics.lineStyle(2, Phaser.Display.Color.GetColor(r, g, b), 1); // Set line color and alpha
-                this.graphics.strokeCircle(node.pos.x, node.pos.y, node.value + 3); // Assuming `x`, `y` coordinates and radius
+                this.graphics.strokeCircle(node.pos.x, node.pos.y, node.size + 3); // Assuming `x`, `y` coordinates and radius
                 this.graphics.closePath();
             } else if (this.type === ClickType.EDGE) {
                 const edge = this.item as Edge;

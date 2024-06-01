@@ -51,7 +51,6 @@ export class Edge extends IDItem {
 
     
     draw(): void {
-
         const startX = this.fromNode.pos.x;
         const startY = this.fromNode.pos.y;
         const endX = this.toNode.pos.x;
@@ -60,29 +59,37 @@ export class Edge extends IDItem {
         const dx = endX - startX;
         const dy = endY - startY;
         const magnitude = Math.sqrt(dx * dx + dy * dy);
-
+    
         const normX = dx / magnitude;
         const normY = dy / magnitude;
-
+    
+        // Calculate adjusted starting coordinates
+        const adjustedStartX = startX + normX * this.fromNode.size;
+        const adjustedStartY = startY + normY * this.fromNode.size;
+    
+        // Adjust the magnitude for both node sizes
+        const adjustedMagnitude = magnitude - (this.toNode.size + this.fromNode.size);
+    
         const color = this.phaserColor;
-
+    
         if (!this.dynamic) {
-            // Draw Arrow
-            this.drawArrow(startX, startY, normX, normY, magnitude, color);
+            // Draw Arrow from adjusted start point to the adjusted length
+            this.drawArrow(adjustedStartX, adjustedStartY, normX, normY, adjustedMagnitude, color);
         } else {
-            // Draw Circles
-            this.drawCircle(startX, startY, normX, normY, magnitude, color);
+            // Draw Circles from adjusted start point to the adjusted length
+            this.drawCircle(adjustedStartX, adjustedStartY, normX, normY, adjustedMagnitude, color);
         }
     }
+    
 
     drawArrow(startX: number, startY: number, normX: number, normY: number, magnitude: number, color: number): void {
         const triangleSize = 11;
-        const minSpacing = 11;
+        const minSpacing = 13;
 
-        const numTriangles = Math.floor((magnitude - 2 * triangleSize) / minSpacing);
-        const spacing = (magnitude - 2 * triangleSize) / numTriangles;
+        const numTriangles = Math.floor(magnitude / minSpacing);
+        const spacing = magnitude / numTriangles;
 
-        for (let i = 1; i <= numTriangles; i++) {
+        for (let i = 0; i < numTriangles; i++) {
             let x = startX + i * spacing * normX + triangleSize * normX;
             let y = startY + i * spacing * normY + triangleSize * normY;
             let angle = Math.atan2(normY, normX);

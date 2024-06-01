@@ -85,6 +85,7 @@ export class AbstractAbilityManager {
 
     wipe(): void {
         this.clicks = [];
+        this.BridgeGraphics.clear();
     }
 
     switchTo(key: number): boolean {
@@ -170,7 +171,6 @@ export class AbstractAbilityManager {
                 // If the text object doesn't exist, create it
                 this.abilityText = scene.add.text(x, y, name, {
                     fontSize: "24px",
-                    fill: "#ffffff",
                     align: "right",
                 });
 

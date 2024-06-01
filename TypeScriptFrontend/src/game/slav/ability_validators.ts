@@ -5,34 +5,8 @@ import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./Objects/node";
 import { Edge } from "./Objects/edge";
 
-function onSegment(p: Point, q: Point, r: Point): boolean {
-    return (
-        q[0] <= Math.max(p[0], r[0]) &&
-        q[0] >= Math.min(p[0], r[0]) &&
-        q[1] <= Math.max(p[1], r[1]) &&
-        q[1] >= Math.min(p[1], r[1])
-    );
-}
-
-function orientation(p: Point, q: Point, r: Point): number {
-    const val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
-    if (val === 0) return 0; // Collinear
-    return val > 0 ? 1 : 2; // Clock or counterclockwise
-}
-
-function doIntersect(p1: Point, q1: Point, p2: Point, q2: Point): boolean {
-    const o1 = orientation(p1, q1, p2);
-    const o2 = orientation(p1, q1, q2);
-    const o3 = orientation(p2, q2, p1);
-    const o4 = orientation(p2, q2, q1);
-
-    return (
-        (o1 !== o2 && o3 !== o4) ||
-        (o1 === 0 && onSegment(p1, p2, q1)) ||
-        (o2 === 0 && onSegment(p1, q2, q1)) ||
-        (o3 === 0 && onSegment(p2, p1, q2)) ||
-        (o4 === 0 && onSegment(p2, q1, q2))
-    );
+function hasAnySame(num1: number, num2: number, num3: number, num4: number): boolean {
+    return num1 === num3 || num1 === num4 || num2 === num4 || num2 === num3
 }
 
 function noClick(data: IDItem[]): boolean {
@@ -123,29 +97,12 @@ function newEdgeValidator(
     player: OtherPlayer
 ): ValidatorFunc {
     const checkNewEdge = (nodeFromId: number, nodeToId: number): boolean => {
-        const edgeSet = new Set(
-            edges.map((edge) => `${edge.fromNode.id}-${edge.toNode.id}`)
-        );
-        if (
-            edgeSet.has(`${nodeToId}-${nodeFromId}`) ||
-            edgeSet.has(`${nodeFromId}-${nodeToId}`)
-        ) {
-            return false;
-        }
 
+        const newLine = new Phaser.Geom.Line(nodes[nodeFromId].pos.x, nodes[nodeFromId].pos.y, nodes[nodeToId].pos.x, nodes[nodeToId].pos.y);
         // Check for overlaps with all other edges
         for (let edge of edges) {
-            if (
-                doIntersect(
-                    [nodes[nodeFromId].pos.x, nodes[nodeFromId].pos.y],
-                    [nodes[nodeToId].pos.x, nodes[nodeToId].pos.y],
-                    [
-                        nodes[edge.fromNode.id].pos.x,
-                        nodes[edge.fromNode.id].pos.y,
-                    ],
-                    [nodes[edge.toNode.id].pos.x, nodes[edge.toNode.id].pos.y]
-                )
-            ) {
+            if (hasAnySame(nodeFromId, nodeToId, edge.fromNode.id, edge.toNode.id) || 
+                Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
                 return false;
             }
         }

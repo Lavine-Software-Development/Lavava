@@ -57,45 +57,48 @@ export class MainScene extends Scene {
                 [100, 100],
                 true,
                 1,
-                random_equal_distributed_angles(4),
+                random_equal_distributed_angles(3),
                 stateDict[0],
-                10,
-                this.mainPlayer
+                150,
+                this.mainPlayer,
             )
         );
         this.nodes.push(
             new Node(
                 this,
                 1,
-                [200, 200],
+                [300, 300],
                 true,
                 1,
                 random_equal_distributed_angles(3),
                 stateDict[0],
                 GROWTH_STOP,
-                this.otherPlayers[1]
+                this.mainPlayer,
             )
         );
         this.nodes.push(
             new Node(
                 this,
                 2,
-                [300, 150],
+                [500, 150],
                 true,
                 1,
                 random_equal_distributed_angles(3),
                 stateDict[0],
-                10
+                150
             )
         );
+        this.highlight = new Highlight(this, this.mainPlayer.color);
         this.edges.push(
             new Edge(this, 4, this.nodes[0], this.nodes[1], true, true, false)
         );
         this.edges.push(
-            new Edge(this, 5, this.nodes[1], this.nodes[2], false, true, true)
+            new Edge(this, 5, this.nodes[2], this.nodes[1], false, false, false)
+        );
+        this.edges.push(
+            new Edge(this, 4, this.nodes[2], this.nodes[0], false, false, false)
         );
 
-        this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
 
         const ev = makeEventValidators(this.mainPlayer);
@@ -165,9 +168,9 @@ export class MainScene extends Scene {
 
     update(): void {
         this.checkHighlight();
-        this.highlight.draw();
         this.abilityManager.draw(this);
-        this.nodes.forEach((node) => node.draw(this));
+        this.nodes.forEach((node) => node.draw());
+        this.highlight.draw();
         this.edges.forEach((edge) => edge.draw());
     }
 
@@ -186,7 +189,7 @@ export class MainScene extends Scene {
 
     validHover(position: Phaser.Math.Vector2): [IDItem, number] | false {
         for (const node of this.nodes) {
-            if (node.pos.distance(position) < 10) {
+            if (node.pos.distance(position) < node.size) {
                 // Assuming a proximity check
                 if (this.ps === PSE.START_SELECTION) {
                     if (unownedNode([node])) {
