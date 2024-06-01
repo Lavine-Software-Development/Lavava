@@ -30,9 +30,6 @@ class ServerGame(Jsonable):
     def countdown_timer(self):
         return self.times[self.current_section]
 
-    def end_game(self):
-        Node.apply_modifications()
-
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
 
@@ -112,7 +109,7 @@ class ServerGame(Jsonable):
                     if self.gs.value == GSE.START_SELECTION.value:
                         self.all_player_next()
                     else:
-                        self.end_game()
+                        self.board.end_game()
                 else:
                     self.determine_ranks()
                 
