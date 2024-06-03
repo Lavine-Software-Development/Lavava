@@ -28,7 +28,7 @@ export class Edge extends IDItem {
         this.dynamic = dynamic;
         this.on = on;
         this.flowing = flowing;
-        if (this.graphics) {
+        if (scene) {
             this.graphics = scene.add.graphics();
         }
         this.line = new Phaser.Geom.Line(
