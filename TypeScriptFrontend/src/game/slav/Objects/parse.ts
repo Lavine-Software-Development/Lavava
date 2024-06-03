@@ -141,18 +141,48 @@ export class Main {
             return value;
         }
     }
-    parse(items: { [key: string]: any }, updates) {
+    parse(items, updates) {
+        if (!items || typeof items !== "object" || Array.isArray(items)) {
+            throw new Error("Invalid 'items' parameter; expected an object.");
+        }
+        if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+            throw new Error("Invalid 'updates' parameter; expected an object.");
+        }
+
         for (const u in updates) {
+            if (!items.hasOwnProperty(u)) {
+                console.error(`No item found for key ${u}`);
+                continue;
+            }
+
             let obj = items[u];
+            if (typeof obj !== "object" || obj === null) {
+                console.error(`Invalid item at key ${u}; expected an object.`);
+                continue;
+            }
+
             for (const [key, val] of Object.entries(updates[u])) {
+                if (typeof obj[key] === "undefined") {
+                    console.error(`Key ${key} not found in item ${u}.`);
+                    continue;
+                }
+
                 console.log("before: " + obj[key]);
-                let updateVal = this.getObject(obj, key, val);
+                let updateVal;
+                try {
+                    updateVal = this.getObject(obj, key, val);
+                } catch (error) {
+                    console.error(
+                        `Error updating key ${key} in item ${u}: ${error.message}`
+                    );
+                    continue;
+                }
+
                 obj[key] = updateVal;
                 console.log("updated key: ", key, " with value: ", val);
                 console.log("after: " + obj[key]);
             }
         }
-        return typeof items;
     }
 }
 
