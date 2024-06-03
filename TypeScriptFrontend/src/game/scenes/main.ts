@@ -39,6 +39,7 @@ export class MainScene extends Scene {
     private mainPlayer: MyPlayer;
     private otherPlayers: OtherPlayer[] = [];
     private network: Network;
+    private burning: Node[] = [];
 
     constructor() {
         super({ key: "MainScene" });
@@ -46,6 +47,7 @@ export class MainScene extends Scene {
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
         this.network = new Network();
+        this.burning = [];
     }
 
     create(): void {
@@ -176,6 +178,14 @@ export class MainScene extends Scene {
         this.nodes.forEach((node) => node.draw());
         this.highlight.draw();
         this.edges.forEach((edge) => edge.draw());
+    }
+
+    tick(): void {
+        this.burning = this.burning.filter(node => !node.burn());
+    }
+
+    addToBurn(node: Node): void {
+        this.burning.push(node);
     }
 
     checkHighlight(): void {

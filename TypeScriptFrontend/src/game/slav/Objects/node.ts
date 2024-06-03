@@ -82,6 +82,15 @@ export class Node extends IDItem {
         return this.ports.length;
     }
 
+    burn(): boolean {
+        this.portPercent -= 0.01;
+        if (this.portPercent <= 0) {
+            this.ports = [];
+            return true;
+        }
+        return false;
+    }
+
     draw(): void {
         this.graphics.clear();
         if (this.stateName === "zombie") {
