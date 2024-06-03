@@ -50,12 +50,12 @@ export class CannonState extends State {
     }
 }
 
-export const stateDict: { [key: number]: State } = {
-    0: new State("default"),
-    1: new State("zombie"),
-    2: new CapitalState("capital", true),
-    3: new MineState("mine", MineVisuals.RESOURCE_BUBBLE, Colors.DARK_YELLOW),
-    4: new MineState("mine", MineVisuals.ISLAND_RESOURCE_BUBBLE, Colors.YELLOW),
-    5: new CannonState("cannon"),
+export const stateDict: { [key: number]: () => State } = {
+    0: () => new State("default"),
+    1: () => new State("zombie"),
+    2: () => new CapitalState("capital", true),
+    3: () => new MineState("mine", MineVisuals.RESOURCE_BUBBLE, Colors.DARK_YELLOW),
+    4: () => new MineState("mine", MineVisuals.ISLAND_RESOURCE_BUBBLE, Colors.YELLOW),
+    5: () => new CannonState("cannon"),
 };
 
