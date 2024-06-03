@@ -9,43 +9,52 @@ import { stateDict } from "./States";
 import { random_equal_distributed_angles } from "../utilities";
 // import * as Phaser from "phaser";
 import { Scene } from "phaser";
-
+import nodeData from "./nodeData.json";
 // const Phaserr = require("phaser");
 
-type NodeData = {
-    effects: any[]; // Replace `any` with a more specific type if possible
+// Define the Node interface
+interface NodeData {
+    effects: any[]; // Define the type for effects if known, 'any' is a placeholder
     is_port: boolean;
-    pos: [number, number];
+    pos: number[];
     state: number;
     value: number;
-};
+}
 
-type EdgeData = {
+// Define the Edge interface
+interface EdgeData {
     dynamic: boolean;
     from_node: number;
     to_node: number;
-};
+}
 
-type AbilityValue = {
+// Define the Abilities interface for individual ability
+interface Ability {
     credits: number;
     reload: number;
-};
+}
 
-type AbilitiesData = {
-    values: { [key: string]: AbilityValue };
+// Define the Abilities storage structure
+interface Abilities {
+    values: { [key: string]: Ability };
     credits: number;
-};
+}
 
-type BoardData = {
-    board: {
-        nodes: { [id: string]: NodeData };
-        edges: { [id: string]: EdgeData };
-    };
+// Define the Board interface
+interface Board {
+    edges: { [key: string]: EdgeData };
+    nodes: { [key: string]: NodeData };
+}
+
+// Define the main Game interface
+export interface BoardJSON {
+    board: Board;
     player_count: number;
     player_id: number;
-    abilities: AbilitiesData;
-};
+    abilities: Abilities;
+}
 
+// Example JSON object based on these interfaces
 export class Main {
     // ps: string;
     // timer: number;
@@ -63,8 +72,11 @@ export class Main {
         // Placeholder: replace with actual settings retrieval logic
         return [{}, 8080];
     }
-
-    setup(startData: BoardData): void {
+    test(node: NodeData) {
+        return node;
+    }
+    setup(startData: BoardJSON): void {
+        this.test(nodeData["0"] as NodeData);
         if (
             startData &&
             startData.board &&
@@ -101,7 +113,7 @@ export class Main {
                     id,
                     new Node(
                         Number(id),
-                        n[id]["pos"],
+                        n[id]["pos"] as [number, number],
                         n[id]["is_port"],
                         0.0, // Placeholder: replace with actual value of portPercent
                         n[id]["is_port"]

@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import WebSocketTest from "./websocketClient"; // Import your WebSocketTest component if not already done
 import { Main } from "./game/slav/Objects/parse";
 import board_data from "./game/slav/Objects/board_data.json";
+import { BoardJSON } from "./game/slav/Objects/parse";
 function App() {
 
     const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -16,7 +17,7 @@ function App() {
         const main = new Main();
         console.log("test");
         console.log(typeof board_data);
-        main.setup(board_data);
+        main.setup(board_data as BoardJSON);
         const updates = { "97": { on: true } };
         console.log(main.parse(main.edges, updates));
     };
