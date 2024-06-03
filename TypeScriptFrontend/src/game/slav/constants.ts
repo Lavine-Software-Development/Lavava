@@ -92,4 +92,4 @@ export const AbilityReloadTimes = {
 
 export const GROWTH_STOP = 250;
 export const MINIMUM_TRANSFER_VALUE = 8;
-
+export const PORT_COUNT = 3;

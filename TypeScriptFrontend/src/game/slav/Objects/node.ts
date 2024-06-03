@@ -1,10 +1,10 @@
-import { State } from "../States";
+import { State } from "./States";
 import { Colors, GROWTH_STOP } from "../constants";
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
 import { ClickType } from "../enums";
 import { phaserColor } from "../utilities";
-import { CapitalState, CannonState } from "../States";
+import { CapitalState, CannonState } from "./States";
 
 export class Node extends IDItem {
     pos: Phaser.Math.Vector2;
@@ -20,7 +20,6 @@ export class Node extends IDItem {
     private cannonGraphics: Phaser.GameObjects.Graphics;
 
     constructor(
-        scene: Phaser.Scene,
         id: number,
         pos: [number, number],
         isPort: boolean,
@@ -29,7 +28,8 @@ export class Node extends IDItem {
         state: State,
         value: number,
         owner: OtherPlayer | null = null,
-        effects = new Set<string>()
+        effects = new Set<string>(),
+        scene?: Phaser.Scene
     ) {
         super(id, ClickType.NODE);
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
@@ -41,8 +41,10 @@ export class Node extends IDItem {
         this.effects = effects;
         this.owner = owner;
         this.scene = scene;
-        this.graphics = scene.add.graphics()
-        this.cannonGraphics = scene.add.graphics();
+        if (this.scene) {
+            this.graphics = scene.add.graphics();
+            this.cannonGraphics = scene.add.graphics();
+        }
     }
 
     get color(): readonly [number, number, number] {
@@ -118,7 +120,11 @@ export class Node extends IDItem {
             this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 1);
             if (this.stateName === "capital") {
                 this.graphics.lineStyle(2, phaserColor(Colors.PINK), 1);
-                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 3);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size + 3
+                );
             }
         }
 
@@ -142,23 +148,16 @@ export class Node extends IDItem {
                 this.size * 2,
                 this.size,
                 Colors.GREY,
-                this.cannonGraphics,
+                this.cannonGraphics
             );
         }
     }
 
-    drawPorts(
-        color: readonly [number, number, number]
-    ): void {
+    drawPorts(color: readonly [number, number, number]): void {
         const portWidth = this.size;
         const portHeight = this.size * 1.3;
         this.ports.forEach((angle) => {
-            this.drawRotatedRectangle(
-                angle,
-                portWidth,
-                portHeight,
-                color
-            );
+            this.drawRotatedRectangle(angle, portWidth, portHeight, color);
         });
     }
 

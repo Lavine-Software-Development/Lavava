@@ -1,11 +1,13 @@
-
 import { useRef, useState } from "react";
+import React from "react";
+
 import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
 import { MainMenu } from "./game/scenes/MainMenu";
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import WebSocketTest from "./websocketClient"; // Import your WebSocketTest component if not already done
-
+import { Main } from "./game/slav/Objects/parse";
+import board_data from "./game/slav/Objects/board_data.json";
 function App() {
     // The sprite can only be moved in the MainMenu Scene
     const [canMoveSprite, setCanMoveSprite] = useState(true);
@@ -47,7 +49,14 @@ function App() {
             }
         }
     };
-
+    const testMain = () => {
+        const main = new Main();
+        console.log("test");
+        console.log(typeof board_data);
+        main.setup(board_data);
+        const updates = { "97": { on: true } };
+        console.log(main.parse(main.edges, updates));
+    };
     const moveSprite = () => {
         if (phaserRef.current) {
             const scene = phaserRef.current.scene as MainMenu;
@@ -112,6 +121,7 @@ function App() {
                             gap: "20px",
                         }}
                     >
+                        <button onClick={testMain}>Change Scene</button>
                         <Link
                             to="/"
                             style={{
@@ -159,5 +169,4 @@ function App() {
 }
 
 export default App;
-
 

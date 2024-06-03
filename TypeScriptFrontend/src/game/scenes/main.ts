@@ -1,6 +1,6 @@
 import { Node } from "../slav/Objects/node";
 import { Highlight } from "../slav/highlight";
-import { stateDict } from "../slav/States";
+import { stateDict } from "../slav/Objects/States";
 import {
     Colors,
     KeyCodes,
@@ -27,7 +27,7 @@ import { Network } from "../slav/iansNetwork";
 import { random_equal_distributed_angles } from "../slav/utilities";
 import { AbilityVisual } from "../slav/immutable_visuals";
 
-import { Scene } from "phaser";
+import { NONE, Scene } from "phaser";
 import { Edge } from "../slav/Objects/edge";
 
 export class MainScene extends Scene {
@@ -52,7 +52,6 @@ export class MainScene extends Scene {
         // Example of creating nodes
         this.nodes.push(
             new Node(
-                this,
                 0,
                 [100, 100],
                 true,
@@ -61,11 +60,12 @@ export class MainScene extends Scene {
                 stateDict[0],
                 150,
                 this.mainPlayer,
+                new Set<string>(),
+                this
             )
         );
         this.nodes.push(
             new Node(
-                this,
                 1,
                 [300, 300],
                 true,
@@ -74,29 +74,33 @@ export class MainScene extends Scene {
                 stateDict[0],
                 GROWTH_STOP,
                 this.mainPlayer,
+                new Set<string>(),
+                this
             )
         );
         this.nodes.push(
             new Node(
-                this,
                 2,
                 [500, 150],
                 true,
                 1,
                 random_equal_distributed_angles(3),
                 stateDict[0],
-                150
+                150,
+                this.mainPlayer,
+                new Set<string>(),
+                this
             )
         );
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.edges.push(
-            new Edge(this, 4, this.nodes[0], this.nodes[1], true, true, false)
+            new Edge(4, this.nodes[0], this.nodes[1], true, true, false, this)
         );
         this.edges.push(
-            new Edge(this, 5, this.nodes[2], this.nodes[1], false, false, false)
+            new Edge(5, this.nodes[2], this.nodes[1], false, false, false, this)
         );
         this.edges.push(
-            new Edge(this, 4, this.nodes[2], this.nodes[0], false, false, false)
+            new Edge(4, this.nodes[2], this.nodes[0], false, false, false, this)
         );
 
         this.ps = PSE.PLAY;
