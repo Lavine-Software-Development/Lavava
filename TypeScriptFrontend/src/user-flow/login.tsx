@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../../styles/style.css"; // Adjust the path as necessary
 
@@ -11,6 +11,13 @@ const Login: React.FC<LoginProps> = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('userToken');
+        if (token) {
+            navigate('/home');  // Redirect to home if token exists
+        }
+    }, [navigate]);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();

@@ -53,6 +53,16 @@ def register():
     else:
         return jsonify({"success": False, "message": "Registration failed, username must be 'default'"}), 400
     
+@app.route('/user_abilities', methods=['GET'])
+@token_required
+def get_home(current_user):
+    if current_user == "default":
+        return jsonify({
+            "abilities": user_decks(current_user)[0],
+        })
+    else:
+        return jsonify({"error": "User not found"}), 404
+
 @app.route('/profile', methods=['GET'])
 @token_required
 def get_profile(current_user):
@@ -61,12 +71,39 @@ def get_profile(current_user):
             "userName": "Default-User",
             "displayName": "John Doe",
             "email": "john.doe@example.com",
-            "abilities": ["Bridge", "Freeze", "Poison", "Rage"],
+            "abilities": user_decks(current_user),
             "elo": 1138,
             "past_games": ["1st", "4th", "2nd"]
         })
     else:
         return jsonify({"error": "User not found"}), 404
+    
+
+def user_decks(current_user):
+    if current_user == "default":
+        return [
+            [{"name": "Bridge", "count": 3}, {"name": "Freeze", "count": 2}, {"name": "Poison", "count": 4}, {"name": "Rage", "count": 1}],
+            [{"name": "Bridge", "count": 2}, {"name": "D-Bridge", "count": 1}, {"name": "Capital", "count": 3}, {"name": "Nuke", "count": 2}]
+        ]
+    else:
+        return [[]]
+    
+@app.route('/abilities', methods=['GET'])
+def get_abilities():
+    abilities = [
+        {"name": "Freeze", "cost": 1},
+        {"name": "Spawn", "cost": 1},
+        {"name": "Zombie", "cost": 1},
+        {"name": "Burn", "cost": 1},
+        {"name": "Poison", "cost": 2},
+        {"name": "Rage", "cost": 2},
+        {"name": "D-Bridge", "cost": 2},
+        {"name": "Bridge", "cost": 2},
+        {"name": "Capital", "cost": 3},
+        {"name": "Nuke", "cost": 3},
+        {"name": "Cannon", "cost": 3},
+    ]
+    return jsonify({"abilities": abilities})
 
 
 if __name__ == '__main__':

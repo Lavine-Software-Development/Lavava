@@ -14,7 +14,8 @@ const Home: React.FC = () => {
         <div className="container" id="home">
             <h1 className="form-title">Home</h1>
             <i className="fas fa-user"><a href="profile">Profile</a></i>
-            <input type="submit" className="btn" value="Play" onClick={() => navigate('/')} />
+            <input type="submit" className="btn" value="Play" onClick={() => navigate('/play')} />
+            <input type="submit" className="btn" value="Build" onClick={() => navigate('/builder')} />
                 <nav
                     style={{
                         backgroundColor: "#f0f0f0",

@@ -178,3 +178,40 @@ input::placeholder {
 .info-card {
     width: 300px;
 }
+
+.ability-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.ability-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.ability-button.selected {
+    background-color: #e0e0e0;
+}
+
+.ability-name {
+    font-weight: bold;
+}
+
+.ability-cost {
+    margin-top: 5px;
+    font-size: 0.8em;
+}
+
+.ability-count {
+    margin-top: 10px;
+    font-size: 1.5em;
+    font-weight: bold;
+}
