@@ -170,8 +170,9 @@ export class AbstractAbilityManager {
             if (!this.abilityText) {
                 // If the text object doesn't exist, create it
                 this.abilityText = scene.add.text(x, y, name, {
-                    fontSize: "24px",
+                    fontSize: "36px",
                     align: "right",
+                    color: "#000000",
                 });
 
                 // Set origin to (1, 1) to align text to the bottom right
