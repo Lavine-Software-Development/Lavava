@@ -66,6 +66,64 @@ const DeckBuilder: React.FC = () => {
         fetchAbilities();
     }, []);
 
+    const handleStartOver = () => {
+        setSelectedCounts(abilities.reduce((counts: { [key: string]: number }, ability: Ability) => {
+            counts[ability.name] = 0;
+            return counts;
+        }, {}));
+        sessionStorage.setItem('selectedAbilities', JSON.stringify(abilities.map(ability => ({ name: ability.name, count: 0 }))));
+    };
+
+    const handleSaveDeck = async () => {
+        const token = localStorage.getItem('userToken');
+        if (token) {
+            const selectedAbilities = Object.entries(selectedCounts)
+                .filter(([, count]) => count > 0)
+                .map(([name, count]) => ({ name, count }));
+
+            try {
+                // Make a dummy backend call to save the user's deck
+                await fetch('http://localhost:5001/save_deck', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ abilities: selectedAbilities }),
+                });
+            } catch (error) {
+                console.error('Error saving deck:', error);
+            }
+        }
+    };
+
+    const handleResetDeck = async () => {
+        const token = localStorage.getItem('userToken');
+        if (token) {
+            try {
+                const response = await fetch('http://localhost:5001/user_abilities', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    const userAbilities = data.abilities;
+                    const initialCounts = userAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
+                        counts[ability.name] = ability.count;
+                        return counts;
+                    }, {});
+                    setSelectedCounts(initialCounts);
+                    sessionStorage.setItem('selectedAbilities', JSON.stringify(userAbilities));
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error resetting deck:', error);
+            }
+        }
+    };
+
     const handleButtonClick = (abilityName: string, increment: boolean) => {
         setSelectedCounts(prevCounts => {
             const newCounts = {
@@ -102,6 +160,15 @@ const DeckBuilder: React.FC = () => {
                         <div className="ability-count">{selectedCounts[ability.name] || 0}</div>
                     </button>
                 ))}
+            </div>
+            <div className="button-container">
+                <button onClick={handleStartOver}>Start Over</button>
+                {localStorage.getItem('userToken') && (
+                    <>
+                        <button onClick={handleSaveDeck}>Save Deck</button>
+                        <button onClick={handleResetDeck}>Reset Deck</button>
+                    </>
+                )}
             </div>
         </div>
     );

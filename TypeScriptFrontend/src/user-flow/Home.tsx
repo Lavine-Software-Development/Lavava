@@ -7,6 +7,7 @@ const Home: React.FC = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('userToken');  // Clear the token from localStorage
+        sessionStorage.clear();
         navigate('/login');  // Redirect the user to the login page
     };
 

@@ -34,6 +34,7 @@ const Login: React.FC<LoginProps> = () => {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem('userToken', data.token);
+                sessionStorage.clear();
                 navigate('/home');
             } else {
                 setError(data.message);
