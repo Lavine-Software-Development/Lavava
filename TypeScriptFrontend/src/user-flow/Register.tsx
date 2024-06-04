@@ -1,15 +1,36 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../../styles/style.css'; // Adjust path as needed
 
 const Register: React.FC = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
+    const navigate = useNavigate();
 
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        // Implement your registration logic here
-        console.log(username, email, password);
+        setMessage(''); // Clear previous message
+
+        try {
+            const response = await fetch('http://localhost:5001/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, email, password })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setMessage(data.message);
+                navigate('/home');  // Navigate to home if registration is successful
+            } else {
+                setMessage(data.message);
+            }
+        } catch (error) {
+            setMessage("Failed to connect to the server.");
+        }
     };
 
     return (
@@ -31,9 +52,10 @@ const Register: React.FC = () => {
                     <input type="password" name="password" id="password" placeholder="Password" required
                         value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
+                {message && <p className="error-message">{message}</p>}
                 <input type="submit" className="btn" value="Register" />
             </form>
-            <p>Already have an account? <a href="login">Login here!</a></p>
+            <p>Already have an account? <a href="/login">Login here!</a></p>
         </div>
     );
 };

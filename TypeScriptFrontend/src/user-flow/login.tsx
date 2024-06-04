@@ -9,12 +9,31 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("Login Attempt:", username, password);
-        // Implement your login logic here
+        setError(""); // Clear previous errors
+
+        try {
+            const response = await fetch('http://localhost:5001/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.setItem('userToken', data.token);
+                navigate('/home');
+            } else {
+                setError(data.message);
+            }
+        } catch (err) {
+            setError("Failed to connect to the server.");
+        }
     };
 
     return (
@@ -50,6 +69,7 @@ const Login: React.FC<LoginProps> = () => {
                     />
                     <i className="fas fa-lock"></i>
                 </div>
+                {error && <div className="error-message">{error}</div>}
                 <a href="forgot-password" className="forgot-password">Forgot password?</a>
                 <input type="submit" className="btn" value="Sign In" name="Sign In" />
                 <input

@@ -22,9 +22,23 @@ const Profile: React.FC = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await fetch(`http://localhost:5001/profile/Default-User`);
-            const data: ProfileData = await response.json();
-            setProfileData(data);
+            const token = localStorage.getItem('userToken');
+            try {
+            const response = await fetch(`http://localhost:5001/profile`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setProfileData(data);
+            } else {
+                throw new Error(data.message);
+            }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         };
         fetchData();
     }, []);
