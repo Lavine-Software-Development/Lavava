@@ -12,7 +12,7 @@ import board_data from "./game/slav/Objects/board_data.json";
 import Register from "./user-flow/Register";
 import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
-import Profile from "./user-flow/profile";
+import Profile from "./user-flow/Profile";
 function App() {
 
     const phaserRef = useRef<IRefPhaserGame | null>(null);
