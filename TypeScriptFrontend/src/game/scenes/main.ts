@@ -43,6 +43,7 @@ export class MainScene extends Scene {
     private otherPlayers: OtherPlayer[] = [];
     private network: Network;
     private burning: Node[] = [];
+    private abilityCounts: { [key: string]: number };
 
     constructor() {
         super({ key: "MainScene" });
@@ -51,6 +52,19 @@ export class MainScene extends Scene {
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
         this.network = new Network("ws://localhost:5553");
         this.burning = [];
+        const storedAbilities = sessionStorage.getItem('selectedAbilities');
+        const abilitiesFromStorage = storedAbilities ? JSON.parse(storedAbilities) : [];
+
+        // Create a map from ability code to count using the NameToCode mapping
+        this.abilityCounts = abilitiesFromStorage.reduce((acc: { [x: string]: any; }, ability: { name: string ; count: number; }) => {
+            const code = NameToCode[ability.name];
+            if (code) {
+                acc[code] = ability.count;
+            }
+            return acc;
+        }, {});
+
+        // this.network.setupUser({"abilities: ": this.abilityCounts}) host/join mode etc
     }
 
     create(): void {
@@ -87,19 +101,7 @@ export class MainScene extends Scene {
             );
         });
 
-        const storedAbilities = sessionStorage.getItem('selectedAbilities');
-        const abilitiesFromStorage = storedAbilities ? JSON.parse(storedAbilities) : [];
-
-        // Create a map from ability code to count using the NameToCode mapping
-        const abilityCounts = abilitiesFromStorage.reduce((acc: { [x: string]: any; }, ability: { name: string ; count: number; }) => {
-            const code = NameToCode[ability.name];
-            if (code) {
-                acc[code] = ability.count;
-            }
-            return acc;
-        }, {});
-
-        Object.entries(abilityCounts).forEach(([abk, count]) => {
+        Object.entries(this.abilityCounts).forEach(([abk, count]) => {
             // abk here is the ability code (converted from the name via NameToCode)
             const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
         
@@ -114,9 +116,6 @@ export class MainScene extends Scene {
                 1
             );
         });
-
-        console.log(abilityCounts);
-        console.log("herree");
         
         this.abilityManager = new AbstractAbilityManager(
             this,
