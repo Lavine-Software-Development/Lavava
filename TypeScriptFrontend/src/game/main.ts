@@ -15,11 +15,11 @@ const config: Phaser.Types.Core.GameConfig = {
     parent: "game-container",
     backgroundColor: "#ffffff",
     scene: [MainScene],
-    input : {
+    input: {
         keyboard: true,
         mouse: true,
         touch: true,
-        gamepad: false
+        gamepad: false,
     },
 };
 

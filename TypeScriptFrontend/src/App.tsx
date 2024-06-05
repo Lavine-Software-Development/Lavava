@@ -9,6 +9,7 @@ import WebSocketTest from "./websocketClient"; // Import your WebSocketTest comp
 import Login from './user-flow/login';
 import { Main } from "./game/slav/Objects/parse";
 import board_data from "./game/slav/Objects/board_data.json";
+import { BoardJSON } from "./game/slav/Objects/parse";
 import Register from "./user-flow/Register";
 import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
@@ -22,7 +23,7 @@ function App() {
         const main = new Main();
         console.log("test");
         console.log(typeof board_data);
-        main.setup(board_data);
+        main.setup(board_data as BoardJSON);
         const updates = { "97": { on: true } };
         console.log(main.parse(main.edges, updates));
     };

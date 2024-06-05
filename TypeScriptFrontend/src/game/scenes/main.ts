@@ -23,13 +23,15 @@ import {
 } from "../slav/ability_validators";
 import { IDItem } from "../slav/Objects/idItem";
 import { CLICKS, EVENTS, VISUALS } from "../slav/default_abilities";
-import { Network } from "../slav/iansNetwork";
+import { Network } from "../slav/Network";
 import { random_equal_distributed_angles } from "../slav/utilities";
 import { AbilityVisual } from "../slav/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
 import { Edge } from "../slav/Objects/edge";
-
+import { Main } from "../slav/Objects/parse";
+import board_data from "../slav/Objects/board_data.json";
+import { BoardJSON } from "../slav/Objects/parse";
 export class MainScene extends Scene {
     private nodes: Node[] = [];
     private edges: Edge[] = [];
@@ -39,72 +41,34 @@ export class MainScene extends Scene {
     private mainPlayer: MyPlayer;
     private otherPlayers: OtherPlayer[] = [];
     private network: Network;
+    private burning: Node[] = [];
 
     constructor() {
         super({ key: "MainScene" });
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
-        this.network = new Network();
+        this.network = new Network("ws://localhost:5553");
+        this.burning = [];
     }
 
     create(): void {
-        // Example of creating nodes
-        this.nodes.push(
-            new Node(
-                0,
-                [100, 100],
-                true,
-                1,
-                random_equal_distributed_angles(3),
-                stateDict[0](),
-                150,
-                this.mainPlayer,
-                new Set<string>(),
-                this
-            )
-        );
-        this.nodes.push(
-            new Node(
-                1,
-                [300, 300],
-                true,
-                1,
-                random_equal_distributed_angles(3),
-                stateDict[0](),
-                GROWTH_STOP,
-                this.mainPlayer,
-                new Set<string>(),
-                this
-            )
-        );
-        this.nodes.push(
-            new Node(
-                2,
-                [500, 150],
-                true,
-                1,
-                random_equal_distributed_angles(3),
-                stateDict[0](),
-                150,
-                this.mainPlayer,
-                new Set<string>(),
-                this
-            )
-        );
+        const main = new Main();
+        main.setup(board_data as BoardJSON);
+        for (let i in main.nodes) {
+            console.log(main.nodes[i].pos);
+            let node = main.nodes[i];
+            node.scene = this;
+            this.nodes.push(node);
+        }
+        for (let i in main.edges) {
+            let edge = main.edges[i];
+            edge.scene = this;
+            this.edges.push(edge);
+        }
+        this.network.connectWebSocket();
         this.highlight = new Highlight(this, this.mainPlayer.color);
-        this.edges.push(
-            new Edge(4, this.nodes[0], this.nodes[1], true, true, false, this)
-        );
-        this.edges.push(
-            new Edge(5, this.nodes[2], this.nodes[1], false, false, false, this)
-        );
-        this.edges.push(
-            new Edge(4, this.nodes[2], this.nodes[0], false, false, false, this)
-        );
-
         this.ps = PSE.PLAY;
-
         const ev = makeEventValidators(this.mainPlayer);
         const ab = makeAbilityValidators(
             this.mainPlayer,
@@ -171,11 +135,20 @@ export class MainScene extends Scene {
     }
 
     update(): void {
+        //refresh board state
         this.checkHighlight();
         this.abilityManager.draw(this);
         this.nodes.forEach((node) => node.draw());
         this.highlight.draw();
         this.edges.forEach((edge) => edge.draw());
+    }
+
+    tick(): void {
+        this.burning = this.burning.filter((node) => !node.burn());
+    }
+
+    addToBurn(node: Node): void {
+        this.burning.push(node);
     }
 
     checkHighlight(): void {
@@ -185,6 +158,7 @@ export class MainScene extends Scene {
         );
 
         if (hoverResult !== false) {
+            console.log("Hovering over: ", hoverResult[0].id, hoverResult[1]);
             this.highlight.set(hoverResult[0], hoverResult[1]);
         } else {
             this.highlight.wipe();
@@ -254,11 +228,70 @@ export class MainScene extends Scene {
     }
 
     send(items?: number[], code?: number): void {
-        this.network.pointless(this.highlight.sendFormat(items, code));
+        this.network.sendMessage(
+            JSON.stringify(this.highlight.sendFormat(items, code))
+        );
     }
 
     simple_send(code: number): void {
-        this.network.pointless({ code: code, items: {} });
+        this.network.sendMessage(JSON.stringify({ code: code, items: {} }));
+    }
+    update_board(new_data) {
+        //call parse on new data
+    }
+    parse(items, updates) {
+        if (!items || typeof items !== "object" || Array.isArray(items)) {
+            throw new Error("Invalid 'items' parameter; expected an object.");
+        }
+        if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+            throw new Error("Invalid 'updates' parameter; expected an object.");
+        }
+
+        for (const u in updates) {
+            if (!items.hasOwnProperty(u)) {
+                console.error(`No item found for key ${u}`);
+                continue;
+            }
+
+            let obj = items[u];
+            if (typeof obj !== "object" || obj === null) {
+                console.error(`Invalid item at key ${u}; expected an object.`);
+                continue;
+            }
+
+            for (const [key, val] of Object.entries(updates[u])) {
+                if (typeof obj[key] === "undefined") {
+                    console.error(`Key ${key} not found in item ${u}.`);
+                    continue;
+                }
+
+                console.log("before: " + obj[key]);
+                let updateVal;
+                try {
+                    updateVal = this.getObject(obj, key, val);
+                } catch (error) {
+                    console.error(
+                        `Error updating key ${key} in item ${u}: ${error.message}`
+                    );
+                    continue;
+                }
+
+                obj[key] = updateVal;
+                console.log("updated key: ", key, " with value: ", val);
+                console.log("after: " + obj[key]);
+            }
+        }
+    }
+    getObject(object, attribute, value) {
+        if (object[attribute] instanceof Node) {
+            return this.nodes[value];
+        } else if (object[attribute] instanceof Edge) {
+            return this.edges[value];
+        }
+        //TODO: check for State and OtherPlayer types after adding those
+        else {
+            return value;
+        }
     }
 }
 
