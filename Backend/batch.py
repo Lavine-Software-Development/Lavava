@@ -8,20 +8,23 @@ from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, jso
 
 
 class Batch:
-    def __init__(self, count, mode, conn):
-        self.connections = [conn]
+    def __init__(self, count, mode, conn, ability_data):
+        self.connections = []
         self.player_count = count
         self.mode = mode
         self.gs = GameState()
+        self.game = ServerGame(self.player_count, self.gs)
+        self.add_player(conn, ability_data)
         self.tick_dict = dict()
 
-    def add_player(self, conn):
-        self.connections.append(conn)
-
-    def build(self):
-        self.gs.next()
-        self.game = ServerGame(self.player_count, self.gs)
-        self.gs.next()
+    def add_player(self, conn, ability_data):
+        print("adding player")
+        player = len(self.connections)
+        if self.ability_process(player, ability_data):
+            self.connections.append(conn)
+            return False
+        else:
+            return "CHEATING: INVALID ABILITY SELECTION"
 
     def is_ready(self):
         return len(self.connections) == self.player_count
@@ -35,7 +38,6 @@ class Batch:
         return start_json
     
     def send_ready(self, player):
-        print(self.game.player_dict[player].ps.value, PS.ABILITY_WAITING.value)
         return self.game.player_dict[player].ps.value >= PS.ABILITY_WAITING.value
     
     def tick_repr_json(self, player):
@@ -53,20 +55,21 @@ class Batch:
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
         self.set_group_tick_repr()
-    
+
+    def ability_process(self, player, data):
+        data = convert_keys_to_int(data)
+        if json_abilities.validate_ability_selection(data):
+            self.game.set_abilities(player, data)
+            return True
+        else:
+            self.game.set_abilities(player, {})
+            return 
+
     def process(self, player, data):
         data = convert_keys_to_int(data)
         key = data['code']
-
-        if key == ABILITIES_SELECTED:
-            if json_abilities.validate_ability_selection(data['body']):
-                self.game.set_abilities(player, data['body'])
-                return False
-            else:
-                self.game.set_abilities(player, {})
-                return "CHEATING: INVALID ABILITY SELECTION"
             
-        elif key == RESTART_GAME_VAL:
+        if key == RESTART_GAME_VAL:
             self.game.restart()
         elif key == ELIMINATE_VAL:
             self.game.eliminate(player)

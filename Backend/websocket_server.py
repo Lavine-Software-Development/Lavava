@@ -36,21 +36,22 @@ class WebSocketServer():
             return
         player_count = data["players"]
         mode = data["mode"]
+        abilities = data["abilities"]
        
         if player_type == "HOST":
             player_count = int(player_count)
-            self.waiting_players = Batch(player_count, mode, websocket)
+            self.waiting_players = Batch(player_count, mode, websocket, abilities)
             await websocket.send("Players may join")
         elif player_type == "JOIN":
             if self.waiting_players:
                 await websocket.send("JOINED")
-                self.waiting_players.add_player(websocket)
+                if message := self.waiting_players.add_player(websocket, abilities):
+                    await self.problem(websocket, message)
             else:
                 await websocket.send("FAILED")
                 return
         if self.waiting_players.is_ready():
             print("Game is ready to start")
-            self.waiting_players.build()
             await self.start_game(self.waiting_players)
         else:
             print("Game is not ready to start")
@@ -100,8 +101,7 @@ class WebSocketServer():
                 else:
                     data = json.loads(data)
                     print("Received: ", data)
-                    if message := batch.process(player, data):
-                        await self.problem(websocket, message)
+                    batch.process(player, data)  
             except websockets.ConnectionClosed as e:
                 print(e)
                 break

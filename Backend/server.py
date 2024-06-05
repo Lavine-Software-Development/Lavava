@@ -50,22 +50,23 @@ class Server:
         is_host = json_data["type"]
         player_count = json_data["players"]
         mode = json_data["mode"]
+        abilities = json_data["abilities"]
 
         if is_host == "HOST":
             player_count = int(player_count)
-            self.waiting_players = Batch(player_count, mode, conn)
+            self.waiting_players = Batch(player_count, mode, conn, abilities)
             conn.sendall("Players may JOIN".encode())
         elif is_host == "JOIN":
             if self.waiting_players:
                 conn.sendall("JOINED".encode())
-                self.waiting_players.add_player(conn)
+                if message := self.waiting_players.add_player(conn, abilities):
+                    self.problem(conn, message)
             else:
                 conn.sendall("FAIL".encode())
                 return
 
         if self.waiting_players.is_ready():
             print("Game is ready to start")
-            self.waiting_players.build()
             self.start_game(self.waiting_players)
         else:
             print("Game is not ready to start")
@@ -94,8 +95,7 @@ class Server:
                     print("Received: ", data)
                     # for connection in batch.connections:
                     #     connection.sendall(data)
-                    if message := batch.process(player, data):
-                        self.problem(conn, message)
+                    batch.process(player, data)
             except socket.error as e:
                 print(e)
 

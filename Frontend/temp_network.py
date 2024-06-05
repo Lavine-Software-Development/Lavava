@@ -4,7 +4,7 @@ import json
 from json_helpers import convert_keys_to_int, split_json_objects
 
 class Network:
-    def __init__(self, setup, update, data, server):
+    def __init__(self, setup, update, data, abilities, server):
         self.setup_callback = setup
         self.update_callback = update
 
@@ -14,19 +14,19 @@ class Network:
         self.port = 5553
         self.addr = (self.server, self.port)
 
-        self.setup_user(data)
+        self.setup_user(data, abilities)
 
         while True:
             if self.establish_connection():
                 break
 
-    def setup_user(self, data):
+    def setup_user(self, data, abilities):
         if data[0] == "HOST":
             self.init_data = json.dumps(
-                {"type": "HOST", "players": data[1], "mode": data[2]}
+                {"type": "HOST", "players": data[1], "mode": data[2], "abilities": abilities}
             )
         else:
-            self.init_data = json.dumps({"type": "JOIN", "players": 0, "mode": 0})
+            self.init_data = json.dumps({"type": "JOIN", "players": 0, "mode": 0, "abilities": abilities})
 
     def establish_connection(self):
         try:
