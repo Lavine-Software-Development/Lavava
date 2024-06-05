@@ -77,7 +77,6 @@ class ServerGame(Jsonable):
     def set_abilities(self, player, abilities):
         self.player_dict[player].set_abilities(abilities, self.board)
         if self.all_player_abilities_set:
-            print("set abilities game")
             self.gs.next()
             self.all_player_next()
 

@@ -16,10 +16,6 @@ class GameState:
             
     def next(self):
         if self.state == GSE.LOBBY:
-            self.state = GSE.BUILDING_GAME
-        elif self.state == GSE.BUILDING_GAME:
-            self.state = GSE.ABILITY_SELECTION
-        elif self.state == GSE.ABILITY_SELECTION:
             self.state = GSE.START_SELECTION
         elif self.state == GSE.START_SELECTION:
             self.state = GSE.PLAY
@@ -27,9 +23,6 @@ class GameState:
             self.state = GSE.END_GAME
         elif self.state == GSE.END_GAME:
             self.state = GSE.GAME_OVER
-
-    def restart(self):
-        self.state = GSE.BUILDING_GAME
 
     @property
     def value(self):

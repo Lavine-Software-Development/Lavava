@@ -58,7 +58,8 @@ class Main:
         self.can_draw = False
 
         data, port = self.settings()
-        self.network = Network(self.setup, self.update, data, port)
+        abilities = {BRIDGE_CODE: 2, CANNON_CODE: 2, CAPITAL_CODE: 2}
+        self.network = Network(self.setup, self.update, data, abilities, port)
         self.network.receive_board_data()
 
         self.run()
@@ -77,7 +78,6 @@ class Main:
         self.types = SafeNestedDict({OtherPlayer: self.players, Node: self.nodes, Edge: self.edges, State: state_dict})
 
         chosen_boxes = self.choose_abilities(abi, credits)
-        self.send_abilities(chosen_boxes)
         ev = make_event_validators(self.my_player)
         events = {eb: Event(VISUALS[eb], *(EVENTS[eb]), ev[eb]) for eb in EVENT_CODES}
         self.ability_manager = AbstractAbilityManager(chosen_boxes, events)
@@ -170,8 +170,9 @@ class Main:
         for box in boxes.values():
             if box.visual.color[0] is None:
                 box.visual.color = self.my_player.color
-        ui = ChooseReloadUI(boxes, credits)
-        ui.choose_abilities()
+        boxes[BRIDGE_CODE].remaining = 2
+        boxes[CANNON_CODE].remaining = 2
+        boxes[CAPITAL_CODE].remaining = 2
         return {b: v for b, v in boxes.items() if v.remaining > 0}
 
     def valid_hover(self, position) -> Union[Tuple[IDItem, int], bool]:
