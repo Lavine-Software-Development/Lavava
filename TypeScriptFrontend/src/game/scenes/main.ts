@@ -48,7 +48,7 @@ export class MainScene extends Scene {
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
-        this.network = new Network();
+        this.network = new Network("ws://localhost:5553");
         this.burning = [];
     }
 
@@ -66,6 +66,7 @@ export class MainScene extends Scene {
             edge.scene = this;
             this.edges.push(edge);
         }
+        this.network.connectWebSocket();
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
         const ev = makeEventValidators(this.mainPlayer);
@@ -227,11 +228,70 @@ export class MainScene extends Scene {
     }
 
     send(items?: number[], code?: number): void {
-        this.network.pointless(this.highlight.sendFormat(items, code));
+        this.network.sendMessage(
+            JSON.stringify(this.highlight.sendFormat(items, code))
+        );
     }
 
     simple_send(code: number): void {
-        this.network.pointless({ code: code, items: {} });
+        this.network.sendMessage(JSON.stringify({ code: code, items: {} }));
+    }
+    update_board(new_data) {
+        //call parse on new data
+    }
+    parse(items, updates) {
+        if (!items || typeof items !== "object" || Array.isArray(items)) {
+            throw new Error("Invalid 'items' parameter; expected an object.");
+        }
+        if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+            throw new Error("Invalid 'updates' parameter; expected an object.");
+        }
+
+        for (const u in updates) {
+            if (!items.hasOwnProperty(u)) {
+                console.error(`No item found for key ${u}`);
+                continue;
+            }
+
+            let obj = items[u];
+            if (typeof obj !== "object" || obj === null) {
+                console.error(`Invalid item at key ${u}; expected an object.`);
+                continue;
+            }
+
+            for (const [key, val] of Object.entries(updates[u])) {
+                if (typeof obj[key] === "undefined") {
+                    console.error(`Key ${key} not found in item ${u}.`);
+                    continue;
+                }
+
+                console.log("before: " + obj[key]);
+                let updateVal;
+                try {
+                    updateVal = this.getObject(obj, key, val);
+                } catch (error) {
+                    console.error(
+                        `Error updating key ${key} in item ${u}: ${error.message}`
+                    );
+                    continue;
+                }
+
+                obj[key] = updateVal;
+                console.log("updated key: ", key, " with value: ", val);
+                console.log("after: " + obj[key]);
+            }
+        }
+    }
+    getObject(object, attribute, value) {
+        if (object[attribute] instanceof Node) {
+            return this.nodes[value];
+        } else if (object[attribute] instanceof Edge) {
+            return this.edges[value];
+        }
+        //TODO: check for State and OtherPlayer types after adding those
+        else {
+            return value;
+        }
     }
 }
 
