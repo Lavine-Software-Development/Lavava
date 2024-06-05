@@ -108,6 +108,3 @@ export const AbilityReloadTimes = {
 export const GROWTH_STOP = 250;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
-export const ABILITY_SIZE = 0.19
-export const ABILITY_FONT = 0.05
-export const FONT_GAP = 0.035
