@@ -139,7 +139,7 @@ def get_home(current_user):
     
     if current_user == "default":
         return jsonify({
-            "abilities": user_decks(current_user)[0],
+            "abilities": user_decks(current_user),
         })
     else:
         return jsonify({"error": "User not found"}), 404
@@ -162,12 +162,9 @@ def get_profile(current_user):
 
 def user_decks(current_user):
     if current_user == "default":
-        return [
-            [{"name": "Bridge", "count": 3}, {"name": "Freeze", "count": 2}, {"name": "Poison", "count": 4}, {"name": "Rage", "count": 1}],
-            [{"name": "Bridge", "count": 2}, {"name": "D-Bridge", "count": 1}, {"name": "Capital", "count": 3}, {"name": "Nuke", "count": 2}]
-        ]
+        return [{"name": "Bridge", "count": 3}, {"name": "Freeze", "count": 2}, {"name": "Poison", "count": 1}, {"name": "Rage", "count": 1}]
     else:
-        return [[]]
+        return []
     
 @app.route('/abilities', methods=['GET'])
 def get_abilities():
@@ -184,7 +181,7 @@ def get_abilities():
         {"name": "Nuke", "cost": 3},
         {"name": "Cannon", "cost": 3},
     ]
-    return jsonify({"abilities": abilities})
+    return jsonify({"abilities": abilities, "salary": 15})
 
 
 if __name__ == '__main__':
