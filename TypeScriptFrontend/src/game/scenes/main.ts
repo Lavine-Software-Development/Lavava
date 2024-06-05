@@ -23,7 +23,7 @@ import {
 } from "../slav/ability_validators";
 import { IDItem } from "../slav/Objects/idItem";
 import { CLICKS, EVENTS, VISUALS } from "../slav/default_abilities";
-import { Network } from "../slav/iansNetwork";
+import { Network } from "../slav/Network";
 import { random_equal_distributed_angles } from "../slav/utilities";
 import { AbilityVisual } from "../slav/immutable_visuals";
 
