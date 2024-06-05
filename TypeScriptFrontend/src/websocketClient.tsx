@@ -29,6 +29,7 @@ const WebSocketTest: React.FC = () => {
         };
         socket.onmessage = (event) => {
             setMessages((prevMessages) => [...prevMessages, event.data]);
+            //call update callback here
         };
         socket.onclose = () => {
             console.log("WebSocket Disconnected");

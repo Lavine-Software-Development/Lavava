@@ -20,7 +20,7 @@ export class Edge extends IDItem {
         dynamic: boolean,
         on = false,
         flowing = false,
-        scene?: Phaser.Scene
+        _scene?: Phaser.Scene
     ) {
         super(id, ClickType.EDGE); // Example ID logic
         this.fromNode = fromNode;
@@ -28,8 +28,8 @@ export class Edge extends IDItem {
         this.dynamic = dynamic;
         this.on = on;
         this.flowing = flowing;
-        if (scene) {
-            this.graphics = scene.add.graphics();
+        if (_scene) {
+            this.graphics = _scene.add.graphics();
         }
         this.line = new Phaser.Geom.Line(
             fromNode.pos.x,
@@ -66,7 +66,9 @@ export class Edge extends IDItem {
         const col = this.color;
         return Phaser.Display.Color.GetColor(col[0], col[1], col[2]);
     }
-
+    set scene(scene: Phaser.Scene) {
+        this.graphics = scene.add.graphics();
+    }
     draw(): void {
         const startX = this.fromNode.pos.x;
         const startY = this.fromNode.pos.y;

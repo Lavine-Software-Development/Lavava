@@ -20,12 +20,18 @@ interface NodeData {
     state: number;
     value: number;
 }
-
+interface Indexnode {
+    [key: string]: NodeData;
+}
 // Define the Edge interface
 interface EdgeData {
     dynamic: boolean;
     from_node: number;
     to_node: number;
+}
+
+interface Indexedge {
+    [key: string]: EdgeData;
 }
 
 // Define the Abilities interface for individual ability
@@ -86,7 +92,6 @@ export class Main {
             startData.player_id &&
             startData.abilities
         ) {
-            console.log("hereadsad");
             const pi = Number(startData.player_id.toString());
             const pc = startData.player_count;
             const n = startData.board.nodes;
@@ -137,7 +142,7 @@ export class Main {
                     ),
                 ])
             );
-            console.log("num edges: ", Object.keys(this.nodes).length);
+            // console.log("num edges: ", Object.keys(this.nodes).length);
         } else {
             console.log("not here");
         }

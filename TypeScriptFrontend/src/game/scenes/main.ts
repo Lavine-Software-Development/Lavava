@@ -29,7 +29,9 @@ import { AbilityVisual } from "../slav/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
 import { Edge } from "../slav/Objects/edge";
-
+import { Main } from "../slav/Objects/parse";
+import board_data from "../slav/Objects/board_data.json";
+import { BoardJSON } from "../slav/Objects/parse";
 export class MainScene extends Scene {
     private nodes: Node[] = [];
     private edges: Edge[] = [];
@@ -51,62 +53,21 @@ export class MainScene extends Scene {
     }
 
     create(): void {
-        // Example of creating nodes
-        this.nodes.push(
-            new Node(
-                0,
-                [100, 100],
-                true,
-                1,
-                random_equal_distributed_angles(3),
-                stateDict[0](),
-                150,
-                this.mainPlayer,
-                new Set<string>(),
-                this
-            )
-        );
-        this.nodes.push(
-            new Node(
-                1,
-                [300, 300],
-                true,
-                1,
-                random_equal_distributed_angles(3),
-                stateDict[0](),
-                GROWTH_STOP,
-                this.mainPlayer,
-                new Set<string>(),
-                this
-            )
-        );
-        this.nodes.push(
-            new Node(
-                2,
-                [500, 150],
-                true,
-                1,
-                random_equal_distributed_angles(3),
-                stateDict[0](),
-                150,
-                this.mainPlayer,
-                new Set<string>(),
-                this
-            )
-        );
+        const main = new Main();
+        main.setup(board_data as BoardJSON);
+        for (let i in main.nodes) {
+            console.log(main.nodes[i].pos);
+            let node = main.nodes[i];
+            node.scene = this;
+            this.nodes.push(node);
+        }
+        for (let i in main.edges) {
+            let edge = main.edges[i];
+            edge.scene = this;
+            this.edges.push(edge);
+        }
         this.highlight = new Highlight(this, this.mainPlayer.color);
-        this.edges.push(
-            new Edge(4, this.nodes[0], this.nodes[1], true, true, false, this)
-        );
-        this.edges.push(
-            new Edge(5, this.nodes[2], this.nodes[1], false, false, false, this)
-        );
-        this.edges.push(
-            new Edge(4, this.nodes[2], this.nodes[0], false, false, false, this)
-        );
-
         this.ps = PSE.PLAY;
-
         const ev = makeEventValidators(this.mainPlayer);
         const ab = makeAbilityValidators(
             this.mainPlayer,
@@ -173,6 +134,7 @@ export class MainScene extends Scene {
     }
 
     update(): void {
+        //refresh board state
         this.checkHighlight();
         this.abilityManager.draw(this);
         this.nodes.forEach((node) => node.draw());
@@ -181,7 +143,7 @@ export class MainScene extends Scene {
     }
 
     tick(): void {
-        this.burning = this.burning.filter(node => !node.burn());
+        this.burning = this.burning.filter((node) => !node.burn());
     }
 
     addToBurn(node: Node): void {
@@ -195,6 +157,7 @@ export class MainScene extends Scene {
         );
 
         if (hoverResult !== false) {
+            console.log("Hovering over: ", hoverResult[0].id, hoverResult[1]);
             this.highlight.set(hoverResult[0], hoverResult[1]);
         } else {
             this.highlight.wipe();
