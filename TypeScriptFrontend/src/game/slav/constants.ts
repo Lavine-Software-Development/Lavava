@@ -62,6 +62,21 @@ export const MineVisuals = {
     ISLAND_RESOURCE_BUBBLE: 400,
 };
 
+export const NameToCode = {
+    "Spawn": KeyCodes.SPAWN_CODE,
+    "Freeze": KeyCodes.FREEZE_CODE,
+    "Bridge" : KeyCodes.BRIDGE_CODE,
+    "D-Bridge": KeyCodes.D_BRIDGE_CODE,
+    "Zombie": KeyCodes.ZOMBIE_CODE,
+    "Rage": KeyCodes.RAGE_CODE,
+    "Burn": KeyCodes.BURN_CODE,
+    "Nuke": KeyCodes.NUKE_CODE,
+    "Poison": KeyCodes.POISON_CODE,
+    "Capital": KeyCodes.CAPITAL_CODE,
+    "Cannon": KeyCodes.CANNON_CODE,
+};
+
+
 export const AbilityCredits = {
     [KeyCodes.SPAWN_CODE]: 1,
     [KeyCodes.FREEZE_CODE]: 1,
@@ -93,3 +108,6 @@ export const AbilityReloadTimes = {
 export const GROWTH_STOP = 250;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
+export const ABILITY_SIZE = 0.19
+export const ABILITY_FONT = 0.05
+export const FONT_GAP = 0.035

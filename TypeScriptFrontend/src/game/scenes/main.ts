@@ -4,6 +4,7 @@ import { stateDict } from "../slav/Objects/States";
 import {
     Colors,
     KeyCodes,
+    NameToCode,
     stateCodes,
     EventCodes,
     GROWTH_STOP,
@@ -85,18 +86,38 @@ export class MainScene extends Scene {
                 ev[eb]
             );
         });
-        Object.values(KeyCodes).forEach((abk: number) => {
-            abilities[abk] = new ReloadAbility(
-                VISUALS[abk] as AbilityVisual,
-                CLICKS[abk][0],
-                CLICKS[abk][1],
-                ab[abk],
-                AbilityCredits[abk],
-                AbilityReloadTimes[abk],
-                1,
+
+        const storedAbilities = sessionStorage.getItem('selectedAbilities');
+        const abilitiesFromStorage = storedAbilities ? JSON.parse(storedAbilities) : [];
+
+        // Create a map from ability code to count using the NameToCode mapping
+        const abilityCounts = abilitiesFromStorage.reduce((acc: { [x: string]: any; }, ability: { name: string ; count: number; }) => {
+            const code = NameToCode[ability.name];
+            if (code) {
+                acc[code] = ability.count;
+            }
+            return acc;
+        }, {});
+
+        Object.entries(abilityCounts).forEach(([abk, count]) => {
+            // abk here is the ability code (converted from the name via NameToCode)
+            const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
+        
+            abilities[abilityCode] = new ReloadAbility(
+                VISUALS[abilityCode] as AbilityVisual,
+                CLICKS[abilityCode][0],
+                CLICKS[abilityCode][1],
+                ab[abilityCode],
+                AbilityCredits[abilityCode],
+                AbilityReloadTimes[abilityCode],
+                count,  // Use the count from abilityCounts
                 1
             );
         });
+
+        console.log(abilityCounts);
+        console.log("herree");
+        
         this.abilityManager = new AbstractAbilityManager(
             this,
             abilities,

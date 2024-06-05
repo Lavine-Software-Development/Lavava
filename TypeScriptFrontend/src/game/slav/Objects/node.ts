@@ -81,7 +81,6 @@ export class Node extends IDItem {
         return this.ports.length;
     }
     set scene(scene: Phaser.Scene) {
-        console.log("setting scene");
         this._scene = scene;
         this.graphics = this._scene.add.graphics();
         this.cannonGraphics = this._scene.add.graphics();
