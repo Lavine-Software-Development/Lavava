@@ -42,21 +42,26 @@ export class MainScene extends Scene {
     private otherPlayers: OtherPlayer[] = [];
     private network: Network;
     private burning: Node[] = [];
-
+    private timer: number;
     constructor() {
         super({ key: "MainScene" });
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
-        this.network = new Network("ws://localhost:5553");
+        this.network = new Network(
+            "ws://localhost:5553",
+            this.update_board.bind(this)
+        );
         this.burning = [];
+        this.network.connectWebSocket();
     }
 
     create(): void {
+        console.log("running create");
         const main = new Main();
         main.setup(board_data as BoardJSON);
         for (let i in main.nodes) {
-            console.log(main.nodes[i].pos);
+            // console.log(main.nodes[i].pos);
             let node = main.nodes[i];
             node.scene = this;
             this.nodes.push(node);
@@ -66,7 +71,6 @@ export class MainScene extends Scene {
             edge.scene = this;
             this.edges.push(edge);
         }
-        this.network.connectWebSocket();
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
         const ev = makeEventValidators(this.mainPlayer);
@@ -114,6 +118,7 @@ export class MainScene extends Scene {
         this.input.keyboard!.on("keydown", (event: KeyboardEvent) => {
             this.keydown(event.key.charCodeAt(0));
         });
+        this.simple_send(100);
     }
 
     keydown(key: number): void {
@@ -228,18 +233,27 @@ export class MainScene extends Scene {
     }
 
     send(items?: number[], code?: number): void {
-        this.network.sendMessage(
-            JSON.stringify(this.highlight.sendFormat(items, code))
-        );
+        console.log("trying to send message");
+        console.log(this.highlight.sendFormat(items, code));
+        // this.network.sendMessage(
+        //     JSON.stringify(this.highlight.sendFormat(items, code))
+        // );
     }
 
     simple_send(code: number): void {
-        this.network.sendMessage(JSON.stringify({ code: code, items: {} }));
+        console.log("trying to send simple message", code);
+        this.network.sendMessage(JSON.stringify({ type: "test", items: {} }));
     }
     update_board(new_data) {
+        this.ps = new_data["player"]["ps"];
+        this.timer = new_data["countdown_timer"];
+
+        this.parse(this.nodes, new_data["nodes"]);
+        this.parse(this.edges, new_data["edges"]);
+
         //call parse on new data
     }
-    parse(items, updates) {
+    parse(this, items, updates) {
         if (!items || typeof items !== "object" || Array.isArray(items)) {
             throw new Error("Invalid 'items' parameter; expected an object.");
         }

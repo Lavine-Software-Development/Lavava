@@ -1,24 +1,22 @@
 export class Network {
     private socket: WebSocket | null = null;
     serverURL: string;
-    //add update callback function
-    constructor(serverURL: string) {
+    updateCallback: () => void;
+    messageQueue: string[] = [];
+
+    constructor(serverURL: string, updateCallback: () => void) {
         this.serverURL = serverURL;
+        this.updateCallback = updateCallback;
     }
 
-    // A method that doesn't perform any meaningful operation
-    pointless(value: any): void {
-        console.log("This is a pointless function", value);
-    }
-
-    // Method to connect to the WebSocket server
     connectWebSocket(): void {
         console.log("Trying to connect to WebSocket...");
         this.socket = new WebSocket(this.serverURL);
 
         this.socket.onopen = () => {
             console.log("WebSocket Connected");
-            this.sendMessage("Hello from the client!"); //send player join/host data
+            this.messageQueue.forEach((msg) => this.sendMessage(msg)); // Send all queued messages
+            this.messageQueue = []; // Clear the queue
         };
 
         this.socket.onmessage = (event) => {
@@ -34,16 +32,19 @@ export class Network {
         };
     }
 
-    // Method to send a message through the WebSocket
     sendMessage(message: string): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             console.log("Sending message: ", message);
             this.socket.send(message);
+        } else if (
+            this.socket &&
+            this.socket.readyState === WebSocket.CONNECTING
+        ) {
+            console.log("Queuing message due to WebSocket connecting");
+            this.messageQueue.push(message);
         } else {
-            console.error("WebSocket is not connected.");
+            console.error("WebSocket is not connected or has failed.");
         }
     }
-
-    setupUser(initData) {}
 }
 

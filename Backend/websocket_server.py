@@ -25,11 +25,17 @@ class WebSocketServer():
             async for message in websocket:
                 async with self.locks[websocket]:
                     data = json.loads(message)
+                    print("Received: ", data)
                     await self.process_message(websocket, data)
         finally:
             del self.locks[websocket]
 
     async def process_message(self, websocket ,data):
+        # print("Received: ", data)
+        # if "type" not in data:
+        #     # await websocket.send("FAILED")
+        #     return
+        print("here")
         player_type = data["type"]
         if player_type == "test":
             await websocket.send("test received!")
