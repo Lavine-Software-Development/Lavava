@@ -15,7 +15,7 @@ export class Node extends IDItem {
     value: number;
     effects: Set<string>;
     owner: OtherPlayer | null;
-    private scene: Phaser.Scene;
+    private _scene: Phaser.Scene;
     private graphics: Phaser.GameObjects.Graphics;
     private cannonGraphics: Phaser.GameObjects.Graphics;
 
@@ -29,7 +29,7 @@ export class Node extends IDItem {
         value: number,
         owner: OtherPlayer | null = null,
         effects = new Set<string>(),
-        scene?: Phaser.Scene
+        _scene?: Phaser.Scene
     ) {
         super(id, ClickType.NODE);
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
@@ -40,10 +40,10 @@ export class Node extends IDItem {
         this.value = value;
         this.effects = effects;
         this.owner = owner;
-        this.scene = scene;
-        if (this.scene) {
-            this.graphics = scene.add.graphics();
-            this.cannonGraphics = scene.add.graphics();
+        this._scene = _scene;
+        if (this._scene) {
+            this.graphics = _scene.add.graphics();
+            this.cannonGraphics = _scene.add.graphics();
         }
     }
 
@@ -61,7 +61,6 @@ export class Node extends IDItem {
     get size(): number {
         return 5 + this.sizeFactor * 18;
     }
-
     get sizeFactor(): number {
         if (this.value < 5) return 0;
         return Math.max(
@@ -81,7 +80,11 @@ export class Node extends IDItem {
     get portCount(): number {
         return this.ports.length;
     }
-
+    set scene(scene: Phaser.Scene) {
+        this._scene = scene;
+        this.graphics = this._scene.add.graphics();
+        this.cannonGraphics = this._scene.add.graphics();
+    }
     burn(): boolean {
         this.portPercent -= 0.01;
         if (this.portPercent <= 0) {
@@ -117,7 +120,15 @@ export class Node extends IDItem {
                 this.drawPorts(Colors.ORANGE);
             }
         }
+
         this.graphics.fillStyle(this.phaserColor, 1);
+        // console.log(
+        //     "Trying to draw a circle at: ",
+        //     this.pos.x,
+        //     this.pos.y,
+        //     this.size,
+        //     this.pos
+        // );
         this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
 
         if (this.effects.has("rage")) {

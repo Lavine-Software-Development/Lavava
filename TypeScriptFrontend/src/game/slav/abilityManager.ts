@@ -170,8 +170,9 @@ export class AbstractAbilityManager {
             if (!this.abilityText) {
                 // If the text object doesn't exist, create it
                 this.abilityText = scene.add.text(x, y, name, {
-                    fontSize: "24px",
+                    fontSize: "36px",
                     align: "right",
+                    color: "#000000",
                 });
 
                 // Set origin to (1, 1) to align text to the bottom right
@@ -203,6 +204,17 @@ export class AbstractAbilityManager {
                 const color = phaserColor(Colors.YELLOW);
                 this.drawArrow(startX, startY, normX, normY, magnitude, color);
             }
+        }
+
+        let y_position = 20;
+        const squareSize = 150;  // Size of each square
+        const spacing = 15;  // Spacing between squares
+        const x_position = scene.scale.width - squareSize - 10;  // Position on the right side of the screen
+    
+        for (let key in this.abilities) {
+            const isSelected = this.mode === parseInt(key);
+            this.abilities[key].draw(scene, x_position, y_position, isSelected);
+            y_position += squareSize + spacing;  // Move down for the next square
         }
     }
 

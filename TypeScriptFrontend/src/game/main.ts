@@ -10,16 +10,16 @@ import { Preloader } from "./scenes/Preloader";
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
-    width: 1024,
+    width: 1424,
     height: 768,
     parent: "game-container",
     backgroundColor: "#ffffff",
     scene: [MainScene],
-    input : {
+    input: {
         keyboard: true,
         mouse: true,
         touch: true,
-        gamepad: false
+        gamepad: false,
     },
 };
 
