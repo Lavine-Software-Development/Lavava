@@ -4,11 +4,17 @@ import React from "react";
 import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
 import { MainMenu } from "./game/scenes/MainMenu";
 import { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
 import WebSocketTest from "./websocketClient"; // Import your WebSocketTest component if not already done
+import Login from './user-flow/login';
 import { Main } from "./game/slav/Objects/parse";
 import board_data from "./game/slav/Objects/board_data.json";
 import { BoardJSON } from "./game/slav/Objects/parse";
+import Register from "./user-flow/Register";
+import ForgotPassword from "./user-flow/reset_password";
+import Home from "./user-flow/Home";
+import Profile from "./user-flow/Profile";
+import DeckBuilder from "./user-flow/deck_builder";
 function App() {
 
     const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -31,48 +37,9 @@ function App() {
                 id="app"
                 style={{ fontFamily: "Arial, sans-serif", lineHeight: "1.6" }}
             >
-                <nav
-                    style={{
-                        backgroundColor: "#f0f0f0",
-                        padding: "10px 0",
-                        borderBottom: "2px solid #ccc",
-                        marginBottom: "20px",
-                    }}
-                >
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            gap: "20px",
-                        }}
-                    >
-                        <Link
-                            to="/"
-                            style={{
-                                padding: "10px 20px",
-                                textDecoration: "none",
-                                color: "#333",
-                                fontWeight: "bold",
-                            }}
-                        >
-                            Home
-                        </Link>
-                        <Link
-                            to="/websocket-test"
-                            style={{
-                                padding: "10px 20px",
-                                textDecoration: "none",
-                                color: "#333",
-                                fontWeight: "bold",
-                            }}
-                        >
-                            WebSocket Test
-                        </Link>
-                    </div>
-                </nav>
                 <Routes>
                     <Route
-                        path="/"
+                        path="/play"
                         element={
                             <div>
                                 <PhaserGame
@@ -83,6 +50,13 @@ function App() {
                         }
                     />
                     <Route path="/websocket-test" element={<WebSocketTest />} />
+                    <Route path="/" element={<Navigate replace to="/login" />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/builder" element={<DeckBuilder />} />
+                    <Route path="/profile" element={<Profile />} />
                 </Routes>
             </div>
         </Router>
