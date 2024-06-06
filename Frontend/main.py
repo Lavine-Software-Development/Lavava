@@ -287,7 +287,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.my_player, self.nodes, self.edges)
-        counts = {BRIDGE_CODE: 2, CANNON_CODE: 2, CAPITAL_CODE: 2}
+        counts = {BRIDGE_CODE: 2, CANNON_CODE: 1, BURN_CODE: 2, NUKE_CODE: 1}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):
@@ -306,4 +306,4 @@ class TestMain(Main):
 
 
 if __name__ == "__main__":
-   Main()
+   TestMain()

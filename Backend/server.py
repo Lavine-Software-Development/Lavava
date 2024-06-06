@@ -33,13 +33,16 @@ class Server:
                 if batch.send_ready(i):
                     # print("Sending tick")
                     batch_json = batch.tick_repr_json(i)
-                    batch_tick = batch_json.encode()
-                    connection.sendall(batch_tick)
+                    self.send(connection, batch_json)
                     # print(i, 'sent tick')
                 # except OSError as e:
                 #     print(f"Error on connection {i}: {e}")
                 #     del batch.connections[i]
             time.sleep(0.1)
+
+    def send(self, connection, batch_json):
+        batch_tick = batch_json.encode()
+        connection.sendall(batch_tick)
 
     def threaded_client(self, conn):
 
@@ -114,5 +117,14 @@ class Server:
             start_new_thread(self.threaded_client, (conn,))
 
 
-server = Server(5553)
+class PrintServer(Server):
+    def send(self, connection, batch_json):
+        with open("output.txt", "a") as f:
+            f.write(batch_json)
+        batch_tick = batch_json.encode()
+        connection.sendall(batch_tick)
+
+
+
+server = PrintServer(5553)
 server.run()
