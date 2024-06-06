@@ -25,7 +25,7 @@ import {
 import { IDItem } from "../slav/Objects/idItem";
 import { CLICKS, EVENTS, VISUALS } from "../slav/default_abilities";
 import { Network } from "../slav/network";
-import { random_equal_distributed_angles } from "../slav/utilities";
+import { phaserColor, random_equal_distributed_angles } from "../slav/utilities";
 import { AbilityVisual } from "../slav/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
@@ -44,6 +44,7 @@ export class MainScene extends Scene {
     private network: Network;
     private burning: Node[] = [];
     private abilityCounts: { [key: string]: number };
+    private graphics: Phaser.GameObjects.Graphics;
 
     constructor() {
         super({ key: "MainScene" });
@@ -68,6 +69,7 @@ export class MainScene extends Scene {
     }
 
     create(): void {
+        this.graphics = this.add.graphics();
         const main = new Main();
         main.setup(board_data as BoardJSON);
         for (let i in main.nodes) {
@@ -161,6 +163,14 @@ export class MainScene extends Scene {
         this.nodes.forEach((node) => node.draw());
         this.highlight.draw();
         this.edges.forEach((edge) => edge.draw());
+        if (this.abilityManager.ability?.visual.name == "Nuke") {
+            const capitals = this.nodes.filter((node) => node.stateName === "capital" && node.owner === this.mainPlayer);
+            // for each node in capitals, draw a pink hollow circle on the node of the size of its this.value
+            capitals.forEach((node) => {
+                this.graphics.lineStyle(6, phaserColor(Colors.PINK), 1);
+                this.graphics.strokeCircle(node.pos.x, node.pos.y, node.size + 4);
+            });
+        }
     }
 
     tick(): void {
