@@ -1,7 +1,7 @@
 export class Network {
     private socket: WebSocket | null = null;
     serverURL: string;
-    updateCallback: () => void;
+    updateCallback: (board_data) => void;
     messageQueue: string[] = [];
 
     constructor(serverURL: string, updateCallback: () => void) {
@@ -20,7 +20,8 @@ export class Network {
         };
 
         this.socket.onmessage = (event) => {
-            console.log("Received message: ", event.data);
+            // console.log("Received message: ", event.data);
+            this.updateCallback(event.data);
         };
 
         this.socket.onclose = () => {

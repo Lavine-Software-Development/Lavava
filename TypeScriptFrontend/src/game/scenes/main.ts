@@ -118,7 +118,7 @@ export class MainScene extends Scene {
         this.input.keyboard!.on("keydown", (event: KeyboardEvent) => {
             this.keydown(event.key.charCodeAt(0));
         });
-        this.simple_send(100);
+        this.simple_send(0);
     }
 
     keydown(key: number): void {
@@ -242,32 +242,44 @@ export class MainScene extends Scene {
 
     simple_send(code: number): void {
         console.log("trying to send simple message", code);
-        this.network.sendMessage(JSON.stringify({ type: "test", items: {} }));
+        this.network.sendMessage(
+            JSON.stringify({ type: "HOST", players: "1", mode: "default" })
+        );
     }
     update_board(new_data) {
-        this.ps = new_data["player"]["ps"];
-        this.timer = new_data["countdown_timer"];
+        if (new_data != "Players may join") {
+            new_data = JSON.parse(new_data);
+            if (!("abilities" in new_data)) {
+                // console.log("new_data: ", new_data);
+                // console.log("new_data: ", typeof new_data, new_data["player"]);
+                console.log(new_data["countdown_timer"]);
+                this.ps = new_data["player"]["ps"];
+                this.timer = new_data["countdown_timer"];
 
-        this.parse(this.nodes, new_data["nodes"]);
-        this.parse(this.edges, new_data["edges"]);
+                this.parse(this.nodes, new_data["board"]["nodes"]);
+                this.parse(this.edges, new_data["board"]["edges"]);
+            }
+        }
 
         //call parse on new data
     }
     parse(this, items, updates) {
-        if (!items || typeof items !== "object" || Array.isArray(items)) {
-            throw new Error("Invalid 'items' parameter; expected an object.");
-        }
-        if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
-            throw new Error("Invalid 'updates' parameter; expected an object.");
-        }
-
+        // if (!items || typeof items !== "object" || Array.isArray(items)) {
+        //     throw new Error("Invalid 'items' parameter; expected an object.");
+        // }
+        // if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+        //     throw new Error("Invalid 'updates' parameter; expected an object.");
+        // }
+        console.log(updates);
         for (const u in updates) {
+            console.log("here");
             if (!items.hasOwnProperty(u)) {
                 console.error(`No item found for key ${u}`);
                 continue;
             }
 
             let obj = items[u];
+            console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
             if (typeof obj !== "object" || obj === null) {
                 console.error(`Invalid item at key ${u}; expected an object.`);
                 continue;

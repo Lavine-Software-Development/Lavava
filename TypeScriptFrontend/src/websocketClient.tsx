@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import { Network } from "./game/slav/network";
 const WebSocketTest: React.FC = () => {
     const [ws, setWs] = useState<WebSocket | null>(null);
     const [messages, setMessages] = useState<string[]>([]);
