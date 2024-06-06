@@ -125,6 +125,7 @@ class PrintServer(Server):
     def send(self, connection, batch_json):
         with open("output.txt", "a") as f:
             f.write(batch_json)
+            f.write("\n")
         batch_tick = batch_json.encode()
         connection.sendall(batch_tick)
 
@@ -132,6 +133,7 @@ class PrintServer(Server):
         to_encode = batch.start_repr_json(player)
         with open("output.txt", "a") as f:
             f.write(to_encode)
+            f.write("\n")
         conn.send(to_encode.encode())
 
 
