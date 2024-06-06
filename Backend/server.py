@@ -83,8 +83,12 @@ class Server:
         for i, conn in enumerate(batch.connections):
             start_new_thread(self.threaded_client_in_game, (i, conn, batch))
 
-    def threaded_client_in_game(self, player, conn, batch: Batch):
+    def send_batch(self, player, conn, batch: Batch):
         conn.send(batch.start_repr_json(player).encode())
+
+    def threaded_client_in_game(self, player, conn, batch: Batch):
+        self.send_batch(player, conn, batch)
+        
         print("Sent start data to player")
         while True:
             try:
@@ -123,6 +127,12 @@ class PrintServer(Server):
             f.write(batch_json)
         batch_tick = batch_json.encode()
         connection.sendall(batch_tick)
+
+    def send_batch(self, player, conn, batch: Batch):
+        to_encode = batch.start_repr_json(player)
+        with open("output.txt", "a") as f:
+            f.write(to_encode)
+        conn.send(to_encode.encode())
 
 
 
