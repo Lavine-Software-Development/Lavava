@@ -5,8 +5,13 @@ import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./Objects/node";
 import { Edge } from "./Objects/edge";
 
-function hasAnySame(num1: number, num2: number, num3: number, num4: number): boolean {
-    return num1 === num3 || num1 === num4 || num2 === num4 || num2 === num3
+function hasAnySame(
+    num1: number,
+    num2: number,
+    num3: number,
+    num4: number
+): boolean {
+    return num1 === num3 || num1 === num4 || num2 === num4 || num2 === num3;
 }
 
 function noClick(data: IDItem[]): boolean {
@@ -97,12 +102,23 @@ function newEdgeValidator(
     player: OtherPlayer
 ): ValidatorFunc {
     const checkNewEdge = (nodeFromId: number, nodeToId: number): boolean => {
-
-        const newLine = new Phaser.Geom.Line(nodes[nodeFromId].pos.x, nodes[nodeFromId].pos.y, nodes[nodeToId].pos.x, nodes[nodeToId].pos.y);
+        const newLine = new Phaser.Geom.Line(
+            nodes[nodeFromId].pos.x,
+            nodes[nodeFromId].pos.y,
+            nodes[nodeToId].pos.x,
+            nodes[nodeToId].pos.y
+        );
         // Check for overlaps with all other edges
         for (let edge of edges) {
-            if (hasAnySame(nodeFromId, nodeToId, edge.fromNode.id, edge.toNode.id) || 
-                Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
+            if (
+                hasAnySame(
+                    nodeFromId,
+                    nodeToId,
+                    edge.fromNode.id,
+                    edge.toNode.id
+                ) ||
+                Phaser.Geom.Intersects.LineToLine(newLine, edge.line)
+            ) {
                 return false;
             }
         }

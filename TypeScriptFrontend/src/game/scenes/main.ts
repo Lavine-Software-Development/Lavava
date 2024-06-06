@@ -33,8 +33,8 @@ import { Main } from "../slav/Objects/parse";
 import board_data from "../slav/Objects/board_data.json";
 import { BoardJSON } from "../slav/Objects/parse";
 export class MainScene extends Scene {
-    private nodes: Node[] = [];
-    private edges: Edge[] = [];
+    private nodes: { [key: string]: Node } = {};
+    private edges: { [key: string]: Edge } = {};
     private highlight: Highlight;
     private ps: PSE;
     private abilityManager: AbstractAbilityManager;
@@ -57,27 +57,27 @@ export class MainScene extends Scene {
     }
 
     create(): void {
-        console.log("running create");
         const main = new Main();
         main.setup(board_data as BoardJSON);
         for (let i in main.nodes) {
             // console.log(main.nodes[i].pos);
             let node = main.nodes[i];
             node.scene = this;
-            this.nodes.push(node);
+            node.owner = this.mainPlayer;
+            this.nodes[i] = node;
         }
         for (let i in main.edges) {
             let edge = main.edges[i];
             edge.scene = this;
-            this.edges.push(edge);
+            this.edges[i] = edge;
         }
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
         const ev = makeEventValidators(this.mainPlayer);
         const ab = makeAbilityValidators(
             this.mainPlayer,
-            this.nodes,
-            this.edges
+            Object.values(this.nodes),
+            Object.values(this.edges)
         );
         const events: { [key: number]: Event } = {};
         const abilities: { [key: number]: ReloadAbility } = {};
@@ -119,6 +119,8 @@ export class MainScene extends Scene {
             this.keydown(event.key.charCodeAt(0));
         });
         this.simple_send(0);
+        Object.values(this.nodes).forEach((node) => node.draw());
+        Object.values(this.edges).forEach((edge) => edge.draw());
     }
 
     keydown(key: number): void {
@@ -143,9 +145,9 @@ export class MainScene extends Scene {
         //refresh board state
         this.checkHighlight();
         this.abilityManager.draw(this);
-        this.nodes.forEach((node) => node.draw());
+        // Object.values(this.nodes).forEach((node) => node.draw());
         this.highlight.draw();
-        this.edges.forEach((edge) => edge.draw());
+        // Object.values(this.edges).forEach((edge) => edge.draw());
     }
 
     tick(): void {
@@ -171,7 +173,7 @@ export class MainScene extends Scene {
     }
 
     validHover(position: Phaser.Math.Vector2): [IDItem, number] | false {
-        for (const node of this.nodes) {
+        for (const node of Object.values(this.nodes)) {
             if (node.pos.distance(position) < node.size) {
                 // Assuming a proximity check
                 if (this.ps === PSE.START_SELECTION) {
@@ -187,7 +189,7 @@ export class MainScene extends Scene {
             }
         }
 
-        for (const edge of this.edges) {
+        for (const edge of Object.values(this.edges)) {
             if (edge.isNear(position)) {
                 // You need to define how to check proximity to an edge
                 if (this.ps === PSE.PLAY) {
@@ -252,7 +254,7 @@ export class MainScene extends Scene {
             if (!("abilities" in new_data)) {
                 // console.log("new_data: ", new_data);
                 // console.log("new_data: ", typeof new_data, new_data["player"]);
-                console.log(new_data["countdown_timer"]);
+                // console.log(new_data["countdown_timer"]);
                 this.ps = new_data["player"]["ps"];
                 this.timer = new_data["countdown_timer"];
 
@@ -260,6 +262,8 @@ export class MainScene extends Scene {
                 this.parse(this.edges, new_data["board"]["edges"]);
             }
         }
+        // Object.values(this.nodes).forEach((node) => node.draw());
+        // Object.values(this.edges).forEach((edge) => edge.draw());
 
         //call parse on new data
     }
@@ -270,16 +274,16 @@ export class MainScene extends Scene {
         // if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
         //     throw new Error("Invalid 'updates' parameter; expected an object.");
         // }
-        console.log(updates);
+        // console.log(updates);
         for (const u in updates) {
-            console.log("here");
+            // console.log("here");
             if (!items.hasOwnProperty(u)) {
                 console.error(`No item found for key ${u}`);
                 continue;
             }
 
             let obj = items[u];
-            console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
+            // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
             if (typeof obj !== "object" || obj === null) {
                 console.error(`Invalid item at key ${u}; expected an object.`);
                 continue;
@@ -291,7 +295,7 @@ export class MainScene extends Scene {
                     continue;
                 }
 
-                console.log("before: " + obj[key]);
+                // console.log("before: " + obj[key]);
                 let updateVal;
                 try {
                     updateVal = this.getObject(obj, key, val);
@@ -303,8 +307,8 @@ export class MainScene extends Scene {
                 }
 
                 obj[key] = updateVal;
-                console.log("updated key: ", key, " with value: ", val);
-                console.log("after: " + obj[key]);
+                // console.log("updated key: ", key, " with value: ", val);
+                // console.log("after: " + obj[key]);
             }
         }
     }

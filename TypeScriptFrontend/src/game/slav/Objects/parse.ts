@@ -83,15 +83,17 @@ export class Main {
     }
     setup(startData: BoardJSON): void {
         this.test(nodeData["0"] as NodeData);
+        console.log(startData);
         if (
             startData &&
             startData.board &&
             startData.board.nodes &&
             startData.board.edges &&
             startData.player_count &&
-            startData.player_id &&
+            // startData.player_id &&
             startData.abilities
         ) {
+            console.log("trying to parse");
             const pi = Number(startData.player_id.toString());
             const pc = startData.player_count;
             const n = startData.board.nodes;
