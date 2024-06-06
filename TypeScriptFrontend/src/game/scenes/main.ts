@@ -64,7 +64,7 @@ export class MainScene extends Scene {
             return acc;
         }, {});
 
-        // this.network.setupUser({"abilities: ": this.abilityCounts}) host/join mode etc
+        this.network.setupUser()
     }
 
     create(): void {

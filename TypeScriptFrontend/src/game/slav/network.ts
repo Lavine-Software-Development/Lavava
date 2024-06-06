@@ -1,3 +1,5 @@
+import { NameToCode } from "./constants";
+
 export class Network {
     private socket: WebSocket | null = null;
     serverURL: string;
@@ -44,6 +46,22 @@ export class Network {
         }
     }
 
-    setupUser(initData) {}
+    setupUser() {
+        const storedAbilities = sessionStorage.getItem('selectedAbilities');
+        const abilitiesFromStorage = storedAbilities ? JSON.parse(storedAbilities) : [];
+        abilitiesFromStorage.reduce((acc: { [x: string]: any; }, ability: { name: string ; count: number; }) => {
+            const code = NameToCode[ability.name];
+            if (code) {
+                acc[code] = ability.count;
+            }
+            return acc;
+        }, {});
+
+        const code = sessionStorage.getItem('key_code');
+        const type = sessionStorage.getItem('type');
+        const playerCount = Number(sessionStorage.getItem('player_count')) || 0;
+
+        const send_dict = {"type": type, "players": playerCount, "code": code, "abilities": abilitiesFromStorage};
+    }
 }
 

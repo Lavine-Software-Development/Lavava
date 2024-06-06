@@ -56,7 +56,7 @@ const DeckBuilder: React.FC = () => {
             counts[ability.name] = 0;
             return counts;
         }, {}));
-        sessionStorage.setItem('selectedAbilities', JSON.stringify(abilities.map(ability => ({ name: ability.name, count: 0 }))));
+        sessionStorage.setItem('selectedAbilities', JSON.stringify({ abilities: [] }));
         setSalary(abilities.reduce((total, ability) => total + (ability.cost * 0), salary)); // Reset salary to full amount
     };
 
@@ -177,8 +177,8 @@ const DeckBuilder: React.FC = () => {
                 <button onClick={handleStartFresh}>Start Fresh</button>
                 {localStorage.getItem('userToken') && (
                     <>
-                        <button onClick={handleSaveDeck}>Save Deck</button>
-                        <button onClick={handleResetDeck}>Reset Deck</button>
+                        <button onClick={handleSaveDeck}>Save</button>
+                        <button onClick={handleResetDeck}>My Deck</button>
                     </>
                 )}
             </div>
