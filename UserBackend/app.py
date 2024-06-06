@@ -27,10 +27,11 @@ class User(db.Model):
 
 # Deck table
 class Deck(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    items = db.Column(db.JSON, nullable=False)  # Example: {"Bridge": 3, "Freeze": 2}
-    db.CheckConstraint('json_array_length(items) <= 4', name='max_4_items')
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    ability = db.Column(db.String(50), primary_key=True, autoincrement=False)
+    count = db.Column(db.Integer, nullable=False)
+    # db.CheckConstraint('json_array_length(items) <= 4', name='max_4_items')
 
 # Game table
 class Game(db.Model):
@@ -41,6 +42,7 @@ class Game(db.Model):
 
 with app.app_context():
 # def create_tables():
+    # Deck.__table__.drop(db.engine)
     db.create_all()
 
 def token_required(f):
@@ -82,6 +84,7 @@ def login():
 
     if user and check_password_hash(user.password, password):
         token = jwt.encode({
+            'user_id': user.id,
             'user': username,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
         }, app.config['SECRET_KEY'], algorithm="HS256")
@@ -132,7 +135,7 @@ def get_home(current_user):
     if user and user.deck_id:
         deck = Deck.query.filter_by(id=user.deck_id).first()
         return jsonify({
-            "abilities": user_decks(current_user)[0]
+            "abilities": user_decks(current_user)
         })
     else:
         return jsonify({"error": "User not found or no deck assigned"}), 404
@@ -165,6 +168,53 @@ def user_decks(current_user):
         return [{"name": "Bridge", "count": 3}, {"name": "Freeze", "count": 2}, {"name": "Poison", "count": 1}, {"name": "Rage", "count": 1}]
     else:
         return []
+    
+@app.route('/save_deck', methods=['POST'])
+@token_required
+def save_deck(current_user):
+    data = request.json
+    abilities = data.get('abilities')
+
+    if not abilities:
+        return jsonify({"success": False, "message": "Missing abilities"}), 400
+
+    user = User.query.filter_by(username=current_user).first()
+    if not user:
+        return jsonify({"success": False, "message": "User not found"}), 404
+    
+    # Ensure items count is valid
+    # assert len(abilities) < 4 and all(item['count'] > 0 for item in abilities)
+
+    if user.deck_id is None:
+        # Find the maximum deck_id and increment it
+        max_deck_id = db.session.query(db.func.max(Deck.id)).scalar()
+        new_deck_id = (max_deck_id or 0) + 1
+        user.deck_id = new_deck_id
+        db.session.commit()
+
+    # Delete old deck entries for the user
+    Deck.query.filter_by(id=user.deck_id).delete()
+    db.session.commit()
+
+    # Save new deck entries
+    # deck_id=user.deck_id, 
+    for item in abilities:
+        new_deck_entry = Deck(id=user.deck_id, ability=item['name'], count=item['count'])
+        db.session.add(new_deck_entry)
+    
+    db.session.commit()
+
+    # # Convert abilities list to a dictionary
+    # items = {item['name']: item['count'] for item in abilities}
+    # new_deck = Deck(items=items, count=count)
+    # db.session.add(new_deck)
+    # db.session.commit()
+
+    # Update user's deck_id
+    # user.deck_id = new_deck.id
+    # db.session.commit()
+
+    return jsonify({"success": True, "message": "Deck saved successfully"}), 200
     
 @app.route('/abilities', methods=['GET'])
 def get_abilities():

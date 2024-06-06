@@ -69,7 +69,7 @@ const DeckBuilder: React.FC = () => {
 
             try {
                 // Make a dummy backend call to save the user's deck
-                await fetch('http://localhost:5001/save_deck', {
+                const response = await fetch('http://localhost:5001/save_deck', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -77,6 +77,7 @@ const DeckBuilder: React.FC = () => {
                     },
                     body: JSON.stringify({ abilities: selectedAbilities }),
                 });
+                await response.json();
             } catch (error) {
                 console.error('Error saving deck:', error);
             }
