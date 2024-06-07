@@ -12,6 +12,7 @@ export class Edge extends IDItem {
     flowing: boolean;
     line: Phaser.Geom.Line;
     graphics: Phaser.GameObjects.Graphics;
+    my_scene: Phaser.Scene;
 
     constructor(
         id: number,
@@ -29,6 +30,7 @@ export class Edge extends IDItem {
         this.on = on;
         this.flowing = flowing;
         if (_scene) {
+            this.my_scene = _scene;
             this.graphics = _scene.add.graphics();
         }
         this.line = new Phaser.Geom.Line(
@@ -67,6 +69,7 @@ export class Edge extends IDItem {
         return Phaser.Display.Color.GetColor(col[0], col[1], col[2]);
     }
     set scene(scene: Phaser.Scene) {
+        this.my_scene = scene;
         this.graphics = scene.add.graphics();
     }
     draw(): void {
@@ -125,50 +128,20 @@ export class Edge extends IDItem {
     ): void {
         const triangleSize = 11;
         const minSpacing = 13;
-
+    
         const numTriangles = Math.floor(magnitude / minSpacing);
         const spacing = magnitude / numTriangles;
-
+        let angle = Math.atan2(normY, normX) -Math.PI / 2;
+    
         for (let i = 0; i < numTriangles; i++) {
             let x = startX + i * spacing * normX + triangleSize * normX;
             let y = startY + i * spacing * normY + triangleSize * normY;
-            let angle = Math.atan2(normY, normX);
-
-            this.graphics.beginPath();
-            this.graphics.moveTo(x, y);
-            this.graphics.lineTo(
-                x - Math.cos(angle - Math.PI / 6) * triangleSize,
-                y - Math.sin(angle - Math.PI / 6) * triangleSize
-            );
-            this.graphics.lineTo(
-                x - Math.cos(angle + Math.PI / 6) * triangleSize,
-                y - Math.sin(angle + Math.PI / 6) * triangleSize
-            );
-            this.graphics.closePath();
-
-            if (this.flowing) {
-                this.graphics.fillStyle(color);
-                this.graphics.fillPath();
-            } else {
-                let point1 = { x, y };
-                let point2 = {
-                    x: x - Math.cos(angle - Math.PI / 6) * triangleSize,
-                    y: y - Math.sin(angle - Math.PI / 6) * triangleSize,
-                };
-                let point3 = {
-                    x: x - Math.cos(angle + Math.PI / 6) * triangleSize,
-                    y: y - Math.sin(angle + Math.PI / 6) * triangleSize,
-                };
-                this.graphics.lineStyle(1, color); // Set stroke style
-                this.graphics.beginPath();
-                this.graphics.moveTo(point1.x, point1.y);
-                this.graphics.lineTo(point2.x, point2.y);
-                this.graphics.lineTo(point3.x, point3.y);
-                this.graphics.closePath();
-                this.graphics.strokePath();
-            }
+    
+            let triangleSprite = this.my_scene.add.sprite(x, y, this.flowing ? 'filledTriangle' : 'outlinedTriangle');
+            triangleSprite.setRotation(angle); // Set rotation
         }
     }
+    
 
     drawCircle(
         startX: number,

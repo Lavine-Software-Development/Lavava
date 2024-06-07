@@ -2,46 +2,36 @@ import { Scene } from 'phaser';
 
 export class Preloader extends Scene
 {
-    constructor ()
-    {
+    constructor() {
         super('Preloader');
     }
 
-    init ()
-    {
-        //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(512, 384, 'background');
+    preload() {
 
-        //  A simple progress bar. This is the outline of the bar.
-        this.add.rectangle(512, 384, 468, 32).setStrokeStyle(1, 0xffffff);
-
-        //  This is the progress bar itself. It will increase in size from the left based on the % of progress.
-        const bar = this.add.rectangle(512-230, 384, 4, 28, 0xffffff);
-
-        //  Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
-        this.load.on('progress', (progress: number) => {
-
-            //  Update the progress bar (our bar is 464px wide, so 100% = 464px)
-            bar.width = 4 + (460 * progress);
-
-        });
+        // Prepare graphics assets
+        this.createTriangleTextures();
     }
 
-    preload ()
-    {
-        //  Load the assets for the game - Replace with your own assets
-        this.load.setPath('assets');
+    createTriangleTextures() {
+        const centre = 30;
+        const siz = 0.8;
 
-        this.load.image('logo', 'logo.png');
-        this.load.image('star', 'star.png');
+        // Create a black filled triangle, make it larger for visibility
+        let filledTriangle = this.add.graphics({ fillStyle: { color: 0x000000 } });
+        filledTriangle.fillTriangle(8, 0, 1, 12, 15, 12)
+        filledTriangle.generateTexture('filledTriangle', 50, 50); // Bigger texture size
+        filledTriangle.destroy();
+    
+        // Create a black outlined triangle, make it larger for visibility
+        let outlinedTriangle = this.add.graphics({ lineStyle: { width: 0.5, color: 0x000000 } });
+        outlinedTriangle.strokeTriangle(centre + 0, centre - 8 * siz, centre - 7 * siz, centre + 4 * siz, centre + 7 * siz, centre + 4 * siz); // Larger triangle
+        outlinedTriangle.generateTexture('outlinedTriangle', 60, 60); // Bigger texture size
+        outlinedTriangle.destroy();
     }
 
-    create ()
-    {
-        //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
-        //  For example, you can define global animations here, so we can use them in other scenes.
-
-        //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-        this.scene.start('MainMenu');
+    create() {
+        // Transition to next scene
+        this.createTriangleTextures();
+        this.scene.start('MainScene');
     }
 }
