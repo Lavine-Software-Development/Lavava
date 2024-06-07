@@ -9,7 +9,7 @@ from chooseUI import ChooseReloadUI
 from draw2 import Draw2
 from state_dictionary import state_dict
 from SettingsUI import settings_ui
-from temp_network import Network
+from temp_network import PrintNetwork
 from default_abilities import VISUALS, CLICKS, EVENTS
 from default_colors import PLAYER_COLORS
 from abilityManager import AbstractAbilityManager
@@ -58,7 +58,7 @@ class Main:
         self.can_draw = False
 
         data, port = self.settings()
-        self.network = Network(self.setup, self.update, data, port)
+        self.network = PrintNetwork(self.setup, self.update, data, port)
         self.network.receive_board_data()
 
         self.run()

@@ -138,5 +138,5 @@ class PrintServer(Server):
 
 
 
-server = PrintServer(5553)
+server = Server(5553)
 server.run()
