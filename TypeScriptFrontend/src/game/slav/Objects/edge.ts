@@ -13,6 +13,7 @@ export class Edge extends IDItem {
     line: Phaser.Geom.Line;
     graphics: Phaser.GameObjects.Graphics;
     my_scene: Phaser.Scene;
+    sprites: Phaser.GameObjects.Sprite[]; 
 
     constructor(
         id: number,
@@ -39,6 +40,7 @@ export class Edge extends IDItem {
             toNode.pos.x,
             toNode.pos.y
         );
+        this.sprites = [];
     }
 
     get color(): readonly [number, number, number] {
@@ -72,6 +74,15 @@ export class Edge extends IDItem {
         this.my_scene = scene;
         this.graphics = scene.add.graphics();
     }
+
+    clearSprites(): void {
+        // Clear existing sprites from the scene
+        this.sprites.forEach(sprite => {
+            sprite.destroy();
+        });
+        this.sprites = [];  // Reset the sprite storage
+    }
+    
     draw(): void {
         const startX = this.fromNode.pos.x;
         const startY = this.fromNode.pos.y;
@@ -106,6 +117,7 @@ export class Edge extends IDItem {
                 color
             );
         } else {
+            this.clearSprites();  
             // Draw Circles from adjusted start point to the adjusted length
             this.drawCircle(
                 adjustedStartX,
@@ -131,15 +143,37 @@ export class Edge extends IDItem {
     
         const numTriangles = Math.floor(magnitude / minSpacing);
         const spacing = magnitude / numTriangles;
-        let angle = Math.atan2(normY, normX) -Math.PI / 2;
+        let angle = Math.atan2(normY, normX) - Math.PI / 2;
     
+        if (this.sprites.length !== numTriangles) {
+            // Adjust the number of sprites if the count has changed
+            if (this.sprites.length < numTriangles) {
+                // Add more sprites
+                for (let i = this.sprites.length; i < numTriangles; i++) {
+                    let triangleSprite = this.my_scene.add.sprite(0, 0, this.flowing ? 'filledTriangle' : 'outlinedTriangle');
+                    triangleSprite.setRotation(angle);
+                    triangleSprite.setTint(color);
+                    this.sprites.push(triangleSprite);
+                }
+            } else {
+                // Remove excess sprites
+                while (this.sprites.length > numTriangles) {
+                    let sprite = this.sprites.pop();
+                    sprite.destroy();
+                }
+            }
+        }
+    
+        // Update positions of existing sprites
         for (let i = 0; i < numTriangles; i++) {
             let x = startX + i * spacing * normX + triangleSize * normX;
             let y = startY + i * spacing * normY + triangleSize * normY;
     
-            let triangleSprite = this.my_scene.add.sprite(x, y, this.flowing ? 'filledTriangle' : 'outlinedTriangle');
-            triangleSprite.setRotation(angle); // Set rotation
-            triangleSprite.setTint(color); // Set color
+            let triangleSprite = this.sprites[i];
+            triangleSprite.x = x;
+            triangleSprite.y = y;
+            // Adjust properties only if needed
+            triangleSprite.setTint(color);
         }
     }
     
@@ -166,6 +200,7 @@ export class Edge extends IDItem {
 
             let circlSprite = this.my_scene.add.sprite(x, y, this.flowing ? 'filledCircle' : 'outlinedCircle')
             circlSprite.setTint(color); // Set color
+            this.sprites.push(circlSprite);
         }
 
         let x = startX + (numCircles - 0.5) * spacing * normX;
@@ -175,6 +210,7 @@ export class Edge extends IDItem {
         let triangleSprite = this.my_scene.add.sprite(x, y, 'filledTriangle');
         triangleSprite.setRotation(angle + Math.PI / 2); // Set rotation
         triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51)); // Set color
+        this.sprites.push(triangleSprite);
     }
 
     isNear(position: Phaser.Math.Vector2): boolean {

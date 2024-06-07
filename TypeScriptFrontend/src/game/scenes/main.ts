@@ -75,6 +75,7 @@ export class MainScene extends Scene {
         for (let i in main.nodes) {
             console.log(main.nodes[i].pos);
             let node = main.nodes[i];
+            node.owner = this.mainPlayer;
             node.scene = this;
             this.nodes.push(node);
         }
@@ -188,7 +189,6 @@ export class MainScene extends Scene {
         );
 
         if (hoverResult !== false) {
-            console.log("Hovering over: ", hoverResult[0].id, hoverResult[1]);
             this.highlight.set(hoverResult[0], hoverResult[1]);
         } else {
             this.highlight.wipe();
