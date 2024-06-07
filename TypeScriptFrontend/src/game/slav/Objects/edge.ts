@@ -139,6 +139,7 @@ export class Edge extends IDItem {
     
             let triangleSprite = this.my_scene.add.sprite(x, y, this.flowing ? 'filledTriangle' : 'outlinedTriangle');
             triangleSprite.setRotation(angle); // Set rotation
+            triangleSprite.setTint(color); // Set color
         }
     }
     
