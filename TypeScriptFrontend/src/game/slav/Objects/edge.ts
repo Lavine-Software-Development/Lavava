@@ -154,7 +154,6 @@ export class Edge extends IDItem {
     ): void {
         const circleRadius = 3;
         const minSpacing = 8;
-        const triangleSize = 13;
 
         const numCircles = Math.floor(
             (magnitude - 2 * circleRadius) / minSpacing
@@ -165,31 +164,17 @@ export class Edge extends IDItem {
             let x = startX + i * spacing * normX + circleRadius * normX;
             let y = startY + i * spacing * normY + circleRadius * normY;
 
-            this.graphics.beginPath();
-            this.graphics.arc(x, y, circleRadius, 0, 2 * Math.PI);
-
-            if (this.flowing) {
-                this.graphics.fillStyle(color);
-                this.graphics.fillPath();
-            } else {
-                this.graphics.lineStyle(1, color); // Set stroke style
-                this.graphics.strokeCircle(x, y, circleRadius);
-            }
+            let circlSprite = this.my_scene.add.sprite(x, y, this.flowing ? 'filledCircle' : 'outlinedCircle')
+            circlSprite.setTint(color); // Set color
         }
 
-        let x = startX + numCircles * spacing * normX;
-        let y = startY + numCircles * spacing * normY;
+        let x = startX + (numCircles - 0.5) * spacing * normX;
+        let y = startY + (numCircles - 0.5) * spacing * normY;
         let angle = Math.atan2(normY, normX);
 
-        this.graphics.fillStyle(Phaser.Display.Color.GetColor(153, 255, 51)); // Light green
-        this.graphics.fillTriangle(
-            x,
-            y,
-            x - Math.cos(angle - Math.PI / 6) * triangleSize,
-            y - Math.sin(angle - Math.PI / 6) * triangleSize,
-            x - Math.cos(angle + Math.PI / 6) * triangleSize,
-            y - Math.sin(angle + Math.PI / 6) * triangleSize
-        );
+        let triangleSprite = this.my_scene.add.sprite(x, y, 'filledTriangle');
+        triangleSprite.setRotation(angle + Math.PI / 2); // Set rotation
+        triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51)); // Set color
     }
 
     isNear(position: Phaser.Math.Vector2): boolean {
