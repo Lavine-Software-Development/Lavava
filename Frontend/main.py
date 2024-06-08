@@ -9,7 +9,7 @@ from chooseUI import ChooseReloadUI
 from draw2 import Draw2
 from state_dictionary import state_dict
 from SettingsUI import settings_ui
-from temp_network import Network
+from temp_network import PrintNetwork
 from default_abilities import VISUALS, CLICKS, EVENTS
 from default_colors import PLAYER_COLORS
 from abilityManager import AbstractAbilityManager
@@ -58,7 +58,7 @@ class Main:
         self.can_draw = False
 
         data, port = self.settings()
-        self.network = Network(self.setup, self.update, data, port)
+        self.network = PrintNetwork(self.setup, self.update, data, port)
         self.network.receive_board_data()
 
         self.run()
@@ -286,7 +286,7 @@ class TestMain(Main):
 
     def choose_abilities(self, abi, credits):
         av = make_ability_validators(self.my_player, self.nodes, self.edges)
-        counts = {BRIDGE_CODE: 2, CANNON_CODE: 2, CAPITAL_CODE: 2}
+        counts = {BRIDGE_CODE: 2, CANNON_CODE: 1, BURN_CODE: 2, NUKE_CODE: 1}
         return {ab: ReloadAbility(VISUALS[ab], *(CLICKS[ab]), av[ab], abi[ab]['credits'], abi[ab]['reload'], counts[ab]) for ab in counts}
 
     def get_local_ip(self):
@@ -305,4 +305,4 @@ class TestMain(Main):
 
 
 if __name__ == "__main__":
-   Main()
+   TestMain()
