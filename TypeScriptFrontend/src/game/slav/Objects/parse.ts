@@ -161,12 +161,12 @@ export class Main {
         }
     }
     parse(items, updates) {
-        if (!items || typeof items !== "object" || Array.isArray(items)) {
-            throw new Error("Invalid 'items' parameter; expected an object.");
-        }
-        if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
-            throw new Error("Invalid 'updates' parameter; expected an object.");
-        }
+        // if (!items || typeof items !== "object" || Array.isArray(items)) {
+        //     throw new Error("Invalid 'items' parameter; expected an object.");
+        // }
+        // if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+        //     throw new Error("Invalid 'updates' parameter; expected an object.");
+        // }
 
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {

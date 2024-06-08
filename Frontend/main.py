@@ -94,7 +94,6 @@ class Main:
         return 0, []
     
     def update(self, update_data):
-
         self.ps = update_data['player']['ps']
         self.timer = update_data['countdown_timer']
 
