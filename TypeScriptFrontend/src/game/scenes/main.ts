@@ -134,7 +134,7 @@ export class MainScene extends Scene {
                 AbilityCredits[abilityCode],
                 AbilityReloadTimes[abilityCode],
                 count,  // Use the count from abilityCounts
-                0.6
+                1
             );
         });
         

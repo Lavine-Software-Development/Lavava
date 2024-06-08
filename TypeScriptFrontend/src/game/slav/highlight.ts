@@ -55,6 +55,7 @@ export class Highlight {
     }
 
     draw(): void {
+        this.graphics.clear();
         if (this.item) {
             if (this.type === ClickType.NODE) {
                 const node = this.item as Node;

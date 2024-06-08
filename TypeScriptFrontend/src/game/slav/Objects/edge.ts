@@ -13,7 +13,8 @@ export class Edge extends IDItem {
     line: Phaser.Geom.Line;
     graphics: Phaser.GameObjects.Graphics;
     my_scene: Phaser.Scene;
-    sprites: Phaser.GameObjects.Sprite[]; 
+    sprites: Phaser.GameObjects.Sprite[];
+    spacing: number;
 
     constructor(
         id: number,
@@ -41,6 +42,7 @@ export class Edge extends IDItem {
             toNode.pos.y
         );
         this.sprites = [];
+        this.spacing = 0;
     }
 
     get color(): readonly [number, number, number] {
@@ -117,7 +119,6 @@ export class Edge extends IDItem {
                 color
             );
         } else {
-            this.clearSprites();  
             // Draw Circles from adjusted start point to the adjusted length
             this.drawCircle(
                 adjustedStartX,
@@ -166,17 +167,20 @@ export class Edge extends IDItem {
     
         // Update positions of existing sprites
         for (let i = 0; i < numTriangles; i++) {
-            let x = startX + i * spacing * normX + triangleSize * normX;
-            let y = startY + i * spacing * normY + triangleSize * normY;
-    
             let triangleSprite = this.sprites[i];
-            triangleSprite.x = x;
-            triangleSprite.y = y;
+            if (spacing != this.spacing) {
+                let x = startX + i * spacing * normX + triangleSize * normX;
+                let y = startY + i * spacing * normY + triangleSize * normY;
+        
+                triangleSprite.x = x;
+                triangleSprite.y = y;
+            }
             // Adjust properties only if needed
             triangleSprite.setTint(color);
         }
+
+        this.spacing = spacing;
     }
-    
 
     drawCircle(
         startX: number,
@@ -188,30 +192,69 @@ export class Edge extends IDItem {
     ): void {
         const circleRadius = 3;
         const minSpacing = 8;
-
-        const numCircles = Math.floor(
-            (magnitude - 2 * circleRadius) / minSpacing
-        );
+    
+        const numCircles = Math.floor((magnitude - 2 * circleRadius) / minSpacing);
         const spacing = (magnitude - 2 * circleRadius) / numCircles;
+    
+        // Initialize the triangle sprite if not already present or if there are no sprites at all
+        if (this.sprites.length === 0 || this.sprites[this.sprites.length - 1].texture.key !== 'filledTriangle') {
+            // First, clear any inappropriate sprites
+            this.sprites.forEach(sprite => sprite.destroy());
+            this.sprites = [];
+    
+            // Then, populate the array correctly
+            for (let i = 0; i < numCircles; i++) {
+                let circleSprite = this.my_scene.add.sprite(0, 0, this.flowing ? 'filledCircle' : 'outlinedCircle');
+                circleSprite.setTint(color);
+                this.sprites.push(circleSprite);
+            }
+            // Add the triangle sprite at the end
+            let triangleSprite = this.my_scene.add.sprite(0, 0, 'filledTriangle');
+            triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51));
+            this.sprites.push(triangleSprite);
+        } else {
+            // Adjust sprite array if necessary
+            while (this.sprites.length - 1 > numCircles) {
+                let spriteToRemove = this.sprites.shift();
+                spriteToRemove.destroy();
+            }
+            while (this.sprites.length - 1 < numCircles) {
+                let circleSprite = this.my_scene.add.sprite(0, 0, this.flowing ? 'filledCircle' : 'outlinedCircle');
+                circleSprite.setTint(color);
+                this.sprites.unshift(circleSprite);  // Add to the start
+            }
+        }
+    
+        // Update positions of existing circle sprites
+        for (let i = 0; i < numCircles; i++) {
+            let circleSprite = this.sprites[i];
+            if (spacing != this.spacing) {
+                let x = startX + i * spacing * normX;
+                let y = startY + i * spacing * normY;
+                
+                circleSprite.x = x;
+                circleSprite.y = y;
+            }
+            circleSprite.setTint(color);
+        }
+    
+        // Always update the position and properties of the terminal triangle sprite
+        let triangleSprite = this.sprites[this.sprites.length - 1];
+        triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51)); 
+        if (spacing != this.spacing) {
+            let x = startX + numCircles * spacing * normX;
+            let y = startY + numCircles * spacing * normY;
+            let angle = Math.atan2(normY, normX);
 
-        for (let i = 1; i < numCircles - 1; i++) {
-            let x = startX + i * spacing * normX + circleRadius * normX;
-            let y = startY + i * spacing * normY + circleRadius * normY;
-
-            let circlSprite = this.my_scene.add.sprite(x, y, this.flowing ? 'filledCircle' : 'outlinedCircle')
-            circlSprite.setTint(color); // Set color
-            this.sprites.push(circlSprite);
+            triangleSprite.x = x;
+            triangleSprite.y = y;
+            triangleSprite.setRotation(angle + Math.PI / 2);
         }
 
-        let x = startX + (numCircles - 0.5) * spacing * normX;
-        let y = startY + (numCircles - 0.5) * spacing * normY;
-        let angle = Math.atan2(normY, normX);
+        this.spacing = spacing;
 
-        let triangleSprite = this.my_scene.add.sprite(x, y, 'filledTriangle');
-        triangleSprite.setRotation(angle + Math.PI / 2); // Set rotation
-        triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51)); // Set color
-        this.sprites.push(triangleSprite);
     }
+    
 
     isNear(position: Phaser.Math.Vector2): boolean {
         const pointerCircle = new Phaser.Geom.Circle(

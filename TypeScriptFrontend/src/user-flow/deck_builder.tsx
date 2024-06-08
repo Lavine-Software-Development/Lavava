@@ -167,7 +167,7 @@ const DeckBuilder: React.FC = () => {
                             handleButtonClick(ability.name, false);
                         }}
                     >
-                        {/* icon in background */}
+                        {/* icon in background 
                         <div style={{zIndex: 0, opacity: 0.25}}>
                             <img src={`./public/assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
                             style={{objectFit: 'contain', width: '90%', height: '90%'}}/>
@@ -177,15 +177,15 @@ const DeckBuilder: React.FC = () => {
                             <div className="ability-name">{ability.name}</div>
                             <div className="ability-cost">Cost: {ability.cost}</div>
                             <div className="ability-count">{selectedCounts[ability.name] || 0}</div>
-                        </div>
+                        </div>*/}
 
                         {/* icon placement on top of text */}
-                        {/* <img src={`./public/assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
+                        <img src={`./public/assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
                         style={{ width: '50%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
 
                         <div className="ability-name">{ability.name}</div>
                         <div className="ability-cost">Cost: {ability.cost}</div>
-                        <div className="ability-count">{selectedCounts[ability.name] || 0}</div> */}
+                        <div className="ability-count">{selectedCounts[ability.name] || 0}</div>
                     </button>
                 ))}
             </div>
