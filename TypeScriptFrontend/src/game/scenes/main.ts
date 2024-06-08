@@ -68,6 +68,24 @@ export class MainScene extends Scene {
         this.network.setupUser()
     }
 
+    preload ()
+    {
+        //  load ability icon assets
+        this.load.setPath('assets/abilityIcons/');
+
+        this.load.image('Bridge', 'Bridge.png');
+        this.load.image('Burn', 'Burn.png');
+        this.load.image('Cannon', 'Cannon.png');
+        this.load.image('Capital', 'Capital.png');
+        this.load.image('D-Bridge', 'D-Bridge.png');
+        this.load.image('Freeze', 'Freeze.png');
+        this.load.image('Nuke', 'Nuke.png');
+        this.load.image('Poison', 'Poison.png');
+        this.load.image('Rage', 'Rage.png');
+        this.load.image('Spawn', 'Spawn.png');
+        this.load.image('Zombie', 'Zombie.png');
+    }
+
     create(): void {
         this.graphics = this.add.graphics();
         const main = new Main();
@@ -116,7 +134,7 @@ export class MainScene extends Scene {
                 AbilityCredits[abilityCode],
                 AbilityReloadTimes[abilityCode],
                 count,  // Use the count from abilityCounts
-                1
+                0.6
             );
         });
         
