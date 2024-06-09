@@ -124,7 +124,7 @@ export class Main {
                         n[id]["is_port"]
                             ? random_equal_distributed_angles(PORT_COUNT)
                             : [],
-                        stateDict[n[id]["state"]],
+                        stateDict[n[id]["state"]](),
                         n[id]["value"]
                         // scene
                     ),
