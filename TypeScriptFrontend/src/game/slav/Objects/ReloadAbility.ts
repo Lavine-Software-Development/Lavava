@@ -63,7 +63,7 @@ export class ReloadAbility {
         this.graphics.fillRect(x, y, squareSize, squareSize);
 
         const imageKey = this.visual.name;
-        // this.addImageToScene(scene, x, y, imageKey, squareSize, this.percentage);
+        this.addImageToScene(scene, x, y, imageKey, squareSize, this.percentage);
 
         // Draw the filled part based on the percentage
         this.graphics.fillStyle(colorValue, 1);
@@ -112,8 +112,9 @@ export class ReloadAbility {
         }
     
         // Apply cropping to show progression
-        const offset = (squareSize - imageSize) / 2;
-        this.imageVisible.setCrop(0, imageSize * (1 - percentage), imageSize, imageSize * percentage);
+        const offset = squareSize / 2 - imageSize / 2 - 10;
+        this.imageVisible.setCrop(0, squareSize - (offset * (percentage - 0.1) * 10) + 2.5, squareSize, squareSize);
+        
     }
     
     
