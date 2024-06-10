@@ -155,6 +155,11 @@ export class MainScene extends Scene {
 
         this.input.keyboard!.on("keydown", (event: KeyboardEvent) => {
             this.keydown(event.key.charCodeAt(0));
+            this.checkHighlight();
+        });
+
+        this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+            this.checkHighlight();
         });
     }
 
@@ -177,11 +182,9 @@ export class MainScene extends Scene {
     }
 
     update(): void {
-        //refresh board state
-        this.checkHighlight();
         this.abilityManager.draw(this);
         this.nodes.forEach((node) => node.draw());
-        this.highlight.draw();
+        
         this.edges.forEach((edge) => edge.draw());
         if (this.abilityManager.ability?.visual.name == "Nuke") {
             const capitals = this.nodes.filter((node) => node.stateName === "capital" && node.owner === this.mainPlayer);
@@ -212,6 +215,7 @@ export class MainScene extends Scene {
         } else {
             this.highlight.wipe();
         }
+        this.highlight.draw();
     }
 
     validHover(position: Phaser.Math.Vector2): [IDItem, number] | false {

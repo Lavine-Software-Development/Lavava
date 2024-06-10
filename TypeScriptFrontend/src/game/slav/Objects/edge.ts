@@ -11,6 +11,7 @@ export class Edge extends IDItem {
     on: boolean;
     flowing: boolean;
     line: Phaser.Geom.Line;
+    hover_line: Phaser.Geom.Line;
     graphics: Phaser.GameObjects.Graphics;
     my_scene: Phaser.Scene;
     sprites: Phaser.GameObjects.Sprite[];
@@ -41,6 +42,13 @@ export class Edge extends IDItem {
             toNode.pos.x,
             toNode.pos.y
         );
+        this.hover_line = new Phaser.Geom.Line(
+            fromNode.pos.x,
+            fromNode.pos.y,
+            toNode.pos.x,
+            toNode.pos.y
+        );
+
         this.sprites = [];
         this.spacing = 0;
     }
@@ -105,6 +113,21 @@ export class Edge extends IDItem {
         // Adjust the magnitude for both node sizes
         const adjustedMagnitude =
             magnitude - (this.toNode.size + this.fromNode.size);
+
+        // update this.hover_line to start at the adjusted values and be magnitude long
+
+        const shorterStartX = adjustedStartX + normX * adjustedMagnitude * 0.15; // Move start point inwards
+        const shorterStartY = adjustedStartY + normY * adjustedMagnitude * 0.15;
+        const shorterEndX = adjustedStartX + normX * adjustedMagnitude * 0.85; // Move end point inwards
+        const shorterEndY = adjustedStartY + normY * adjustedMagnitude * 0.85;
+
+
+        this.hover_line.setTo(
+            shorterStartX,
+            shorterStartY,
+            shorterEndX,
+            shorterEndY
+        );
 
         const color = this.phaserColor;
 
@@ -262,7 +285,7 @@ export class Edge extends IDItem {
             position.y,
             10
         ); // 10 pixels radius
-        return Phaser.Geom.Intersects.LineToCircle(this.line, pointerCircle);
+        return Phaser.Geom.Intersects.LineToCircle(this.hover_line, pointerCircle);
     }
 }
 

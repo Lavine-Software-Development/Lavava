@@ -67,8 +67,37 @@ export class Highlight {
                 const edge = this.item as Edge;
                 const [r, g, b] = this.color;
                 this.graphics.lineStyle(2, Phaser.Display.Color.GetColor(r, g, b), 1); // Set line color and alpha
-                const leftLine = new Phaser.Geom.Line(edge.line.x1 - 6, edge.line.y1, edge.line.x2 - 6, edge.line.y2);
-                const rightLine = new Phaser.Geom.Line(edge.line.x1 + 6, edge.line.y1, edge.line.x2 + 6, edge.line.y2);
+        
+                const startX = edge.line.x1;
+                const startY = edge.line.y1;
+                const endX = edge.line.x2;
+                const endY = edge.line.y2;
+        
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const magnitude = Math.sqrt(dx * dx + dy * dy);
+        
+                // Normal vector components perpendicular to the line
+                const perpX = -dy / magnitude;
+                const perpY = dx / magnitude;
+        
+                const spacing = 6; // Distance to offset the parallel lines
+        
+                // Calculate positions for left and right lines using perpendicular vector
+                const leftLine = new Phaser.Geom.Line(
+                    startX + perpX * spacing,
+                    startY + perpY * spacing,
+                    endX + perpX * spacing,
+                    endY + perpY * spacing
+                );
+                const rightLine = new Phaser.Geom.Line(
+                    startX - perpX * spacing,
+                    startY - perpY * spacing,
+                    endX - perpX * spacing,
+                    endY - perpY * spacing
+                );
+        
+                // Draw the lines
                 this.graphics.strokeLineShape(leftLine);
                 this.graphics.strokeLineShape(rightLine);
                 this.graphics.closePath();
