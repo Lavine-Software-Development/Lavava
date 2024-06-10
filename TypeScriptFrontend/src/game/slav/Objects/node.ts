@@ -18,6 +18,7 @@ export class Node extends IDItem {
     private _scene: Phaser.Scene;
     private graphics: Phaser.GameObjects.Graphics;
     private cannonGraphics: Phaser.GameObjects.Graphics;
+    private starSprite: Phaser.GameObjects.Image | null = null;
 
     constructor(
         id: number,
@@ -122,13 +123,6 @@ export class Node extends IDItem {
         }
 
         this.graphics.fillStyle(this.phaserColor, 1);
-        // console.log(
-        //     "Trying to draw a circle at: ",
-        //     this.pos.x,
-        //     this.pos.y,
-        //     this.size,
-        //     this.pos
-        // );
         this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
 
         if (this.effects.has("rage")) {
@@ -152,9 +146,25 @@ export class Node extends IDItem {
             this.stateName === "capital" &&
             (this.state as CapitalState).capitalized
         ) {
-            this.drawStar(this.graphics, phaserColor(Colors.BLACK), false);
-            this.drawStar(this.graphics, phaserColor(Colors.PINK), true);
-        } else if (this.state instanceof CannonState) {
+            if (!this.starSprite) {
+                // If not, create the star sprite
+                // let starTexture = this._scene.textures.get('star');
+                this.starSprite = this._scene.add.image(this.pos.x, this.pos.y, 'star');
+                this.starSprite.setOrigin(0.5, 0.5); // Set origin to center for proper scaling
+            }
+            // Always resize the star according to the node size
+            let currentScale = this.size / 12; // displayWidth considers current scale
+            if (Math.abs(this.starSprite.scaleX - currentScale) > 0.01) { // threshold to avoid minor changes
+                this.starSprite.setScale(currentScale);
+            }
+        } else {
+            if (this.starSprite) {
+                this.starSprite.destroy();
+                this.starSprite = null;
+            }
+        }
+
+        if (this.state instanceof CannonState) {
             if (this.state.selected) {
                 this.cannonGraphics.clear();
                 let mousePos = this.scene.input.activePointer.position;
@@ -225,50 +235,5 @@ export class Node extends IDItem {
         graphics.fillPath();
     }
 
-    drawStar(
-        graphics: Phaser.GameObjects.Graphics,
-        color: number,
-        filled: boolean = true
-    ): void {
-        const innerRadius = this.size / 3;
-        const outerRadius = this.size / 1.5;
-        const starPoints = [];
-
-        for (let i = 0; i < 5; i++) {
-            // Outer points
-            let angle = Phaser.Math.DegToRad(i * 72 + 55); // Start at top point
-            starPoints.push(
-                new Phaser.Math.Vector2(
-                    this.pos.x + outerRadius * Math.cos(angle),
-                    this.pos.y + outerRadius * Math.sin(angle)
-                )
-            );
-
-            // Inner points
-            angle += Phaser.Math.DegToRad(36); // Halfway between outer points
-            starPoints.push(
-                new Phaser.Math.Vector2(
-                    this.pos.x + innerRadius * Math.cos(angle),
-                    this.pos.y + innerRadius * Math.sin(angle)
-                )
-            );
-        }
-
-        // Draw the star
-        graphics.beginPath();
-        graphics.fillStyle(color, 1);
-        graphics.moveTo(starPoints[0].x, starPoints[0].y);
-        starPoints.forEach((point, index) => {
-            if (index > 0) graphics.lineTo(point.x, point.y);
-        });
-        graphics.closePath();
-
-        if (filled) {
-            graphics.fillPath();
-        } else {
-            graphics.lineStyle(1, color);
-            graphics.strokePath();
-        }
-    }
 }
 
