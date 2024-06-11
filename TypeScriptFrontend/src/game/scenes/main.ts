@@ -34,8 +34,8 @@ import { Main } from "../slav/Objects/parse";
 import board_data from "../slav/Objects/board_data.json";
 import { BoardJSON } from "../slav/Objects/parse";
 export class MainScene extends Scene {
-    private nodes: Node[] = [];
-    private edges: Edge[] = [];
+    private nodes: { [key: string]: Node } = {};
+    private edges: { [key: string]: Edge } = {};
     private highlight: Highlight;
     private ps: PSE;
     private abilityManager: AbstractAbilityManager;
@@ -44,51 +44,63 @@ export class MainScene extends Scene {
     private network: Network;
     private burning: Node[] = [];
     private abilityCounts: { [key: string]: number };
-
+    private timer: number;
     constructor() {
         super({ key: "MainScene" });
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
-        this.network = new Network("ws://localhost:5553");
+        this.network = new Network(
+            "ws://localhost:5553",
+            this.update_board.bind(this)
+        );
         this.burning = [];
-        const storedAbilities = sessionStorage.getItem('selectedAbilities');
-        const abilitiesFromStorage = storedAbilities ? JSON.parse(storedAbilities) : [];
+        const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        const abilitiesFromStorage = storedAbilities
+            ? JSON.parse(storedAbilities)
+            : [];
 
         // Create a map from ability code to count using the NameToCode mapping
-        this.abilityCounts = abilitiesFromStorage.reduce((acc: { [x: string]: any; }, ability: { name: string ; count: number; }) => {
-            const code = NameToCode[ability.name];
-            if (code) {
-                acc[code] = ability.count;
-            }
-            return acc;
-        }, {});
+        this.abilityCounts = abilitiesFromStorage.reduce(
+            (
+                acc: { [x: string]: any },
+                ability: { name: string; count: number }
+            ) => {
+                const code = NameToCode[ability.name];
+                if (code) {
+                    acc[code] = ability.count;
+                }
+                return acc;
+            },
+            {}
+        );
 
-        this.network.setupUser()
+        this.network.setupUser();
+        this.network.connectWebSocket();
     }
 
     create(): void {
         const main = new Main();
         main.setup(board_data as BoardJSON);
         for (let i in main.nodes) {
-            console.log(main.nodes[i].pos);
+            // console.log(main.nodes[i].pos);
             let node = main.nodes[i];
             node.scene = this;
-            this.nodes.push(node);
+            node.owner = this.mainPlayer;
+            this.nodes[i] = node;
         }
         for (let i in main.edges) {
             let edge = main.edges[i];
             edge.scene = this;
-            this.edges.push(edge);
+            this.edges[i] = edge;
         }
-        this.network.connectWebSocket();
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
         const ev = makeEventValidators(this.mainPlayer);
         const ab = makeAbilityValidators(
             this.mainPlayer,
-            this.nodes,
-            this.edges
+            Object.values(this.nodes),
+            Object.values(this.edges)
         );
         const events: { [key: number]: Event } = {};
         const abilities: { [key: number]: ReloadAbility } = {};
@@ -104,7 +116,7 @@ export class MainScene extends Scene {
         Object.entries(this.abilityCounts).forEach(([abk, count]) => {
             // abk here is the ability code (converted from the name via NameToCode)
             const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
-        
+
             abilities[abilityCode] = new ReloadAbility(
                 VISUALS[abilityCode] as AbilityVisual,
                 CLICKS[abilityCode][0],
@@ -112,11 +124,11 @@ export class MainScene extends Scene {
                 ab[abilityCode],
                 AbilityCredits[abilityCode],
                 AbilityReloadTimes[abilityCode],
-                count,  // Use the count from abilityCounts
+                count, // Use the count from abilityCounts
                 1
             );
         });
-        
+
         this.abilityManager = new AbstractAbilityManager(
             this,
             abilities,
@@ -134,6 +146,9 @@ export class MainScene extends Scene {
         this.input.keyboard!.on("keydown", (event: KeyboardEvent) => {
             this.keydown(event.key.charCodeAt(0));
         });
+        this.simple_send(0);
+        Object.values(this.nodes).forEach((node) => node.draw());
+        Object.values(this.edges).forEach((edge) => edge.draw());
     }
 
     keydown(key: number): void {
@@ -158,9 +173,9 @@ export class MainScene extends Scene {
         //refresh board state
         this.checkHighlight();
         this.abilityManager.draw(this);
-        this.nodes.forEach((node) => node.draw());
+        // Object.values(this.nodes).forEach((node) => node.draw());
         this.highlight.draw();
-        this.edges.forEach((edge) => edge.draw());
+        // Object.values(this.edges).forEach((edge) => edge.draw());
     }
 
     tick(): void {
@@ -186,7 +201,7 @@ export class MainScene extends Scene {
     }
 
     validHover(position: Phaser.Math.Vector2): [IDItem, number] | false {
-        for (const node of this.nodes) {
+        for (const node of Object.values(this.nodes)) {
             if (node.pos.distance(position) < node.size) {
                 // Assuming a proximity check
                 if (this.ps === PSE.START_SELECTION) {
@@ -202,7 +217,7 @@ export class MainScene extends Scene {
             }
         }
 
-        for (const edge of this.edges) {
+        for (const edge of Object.values(this.edges)) {
             if (edge.isNear(position)) {
                 // You need to define how to check proximity to an edge
                 if (this.ps === PSE.PLAY) {
@@ -248,32 +263,55 @@ export class MainScene extends Scene {
     }
 
     send(items?: number[], code?: number): void {
-        this.network.sendMessage(
-            JSON.stringify(this.highlight.sendFormat(items, code))
-        );
+        console.log("trying to send message");
+        console.log(this.highlight.sendFormat(items, code));
+        // this.network.sendMessage(
+        //     JSON.stringify(this.highlight.sendFormat(items, code))
+        // );
     }
 
     simple_send(code: number): void {
-        this.network.sendMessage(JSON.stringify({ code: code, items: {} }));
+        console.log("trying to send simple message", code);
+        this.network.sendMessage(
+            JSON.stringify({ type: "HOST", players: "1", mode: "default" })
+        );
     }
     update_board(new_data) {
+        if (new_data != "Players may join") {
+            new_data = JSON.parse(new_data);
+            if (!("abilities" in new_data)) {
+                // console.log("new_data: ", new_data);
+                // console.log("new_data: ", typeof new_data, new_data["player"]);
+                // console.log(new_data["countdown_timer"]);
+                this.ps = new_data["player"]["ps"];
+                this.timer = new_data["countdown_timer"];
+
+                this.parse(this.nodes, new_data["board"]["nodes"]);
+                this.parse(this.edges, new_data["board"]["edges"]);
+            }
+        }
+        // Object.values(this.nodes).forEach((node) => node.draw());
+        // Object.values(this.edges).forEach((edge) => edge.draw());
+
         //call parse on new data
     }
-    parse(items, updates) {
-        if (!items || typeof items !== "object" || Array.isArray(items)) {
-            throw new Error("Invalid 'items' parameter; expected an object.");
-        }
-        if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
-            throw new Error("Invalid 'updates' parameter; expected an object.");
-        }
-
+    parse(this, items, updates) {
+        // if (!items || typeof items !== "object" || Array.isArray(items)) {
+        //     throw new Error("Invalid 'items' parameter; expected an object.");
+        // }
+        // if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+        //     throw new Error("Invalid 'updates' parameter; expected an object.");
+        // }
+        // console.log(updates);
         for (const u in updates) {
+            // console.log("here");
             if (!items.hasOwnProperty(u)) {
                 console.error(`No item found for key ${u}`);
                 continue;
             }
 
             let obj = items[u];
+            // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
             if (typeof obj !== "object" || obj === null) {
                 console.error(`Invalid item at key ${u}; expected an object.`);
                 continue;
@@ -285,7 +323,7 @@ export class MainScene extends Scene {
                     continue;
                 }
 
-                console.log("before: " + obj[key]);
+                // console.log("before: " + obj[key]);
                 let updateVal;
                 try {
                     updateVal = this.getObject(obj, key, val);
@@ -297,8 +335,8 @@ export class MainScene extends Scene {
                 }
 
                 obj[key] = updateVal;
-                console.log("updated key: ", key, " with value: ", val);
-                console.log("after: " + obj[key]);
+                // console.log("updated key: ", key, " with value: ", val);
+                // console.log("after: " + obj[key]);
             }
         }
     }

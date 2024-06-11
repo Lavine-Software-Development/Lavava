@@ -83,15 +83,17 @@ export class Main {
     }
     setup(startData: BoardJSON): void {
         this.test(nodeData["0"] as NodeData);
+        console.log(startData);
         if (
             startData &&
             startData.board &&
             startData.board.nodes &&
             startData.board.edges &&
             startData.player_count &&
-            startData.player_id &&
+            // startData.player_id &&
             startData.abilities
         ) {
+            console.log("trying to parse");
             const pi = Number(startData.player_id.toString());
             const pc = startData.player_count;
             const n = startData.board.nodes;
@@ -159,12 +161,12 @@ export class Main {
         }
     }
     parse(items, updates) {
-        if (!items || typeof items !== "object" || Array.isArray(items)) {
-            throw new Error("Invalid 'items' parameter; expected an object.");
-        }
-        if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
-            throw new Error("Invalid 'updates' parameter; expected an object.");
-        }
+        // if (!items || typeof items !== "object" || Array.isArray(items)) {
+        //     throw new Error("Invalid 'items' parameter; expected an object.");
+        // }
+        // if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+        //     throw new Error("Invalid 'updates' parameter; expected an object.");
+        // }
 
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {

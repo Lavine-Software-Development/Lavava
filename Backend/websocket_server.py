@@ -15,8 +15,6 @@ class WebSocketServer():
 
     async def handler1(self, websocket):
         async for message in websocket:
-            print("message")
-            print(message)
             data = json.loads(message)
             await self.process_message(websocket, data)
     async def handler(self, websocket, path):
@@ -29,7 +27,7 @@ class WebSocketServer():
         finally:
             del self.locks[websocket]
 
-    async def process_message(self, websocket ,data):
+    async def process_message(self, websocket,data):
         player_type = data["type"]
         if player_type == "test":
             await websocket.send("test received!")
@@ -40,7 +38,11 @@ class WebSocketServer():
        
         if player_type == "HOST":
             player_count = int(player_count)
+<<<<<<< HEAD
             self.waiting_players = Batch(player_count, mode, websocket, abilities)
+=======
+            self.waiting_players = Batch(1, mode, websocket)
+>>>>>>> ts-main
             await websocket.send("Players may join")
         elif player_type == "JOIN":
             if self.waiting_players:
@@ -68,16 +70,32 @@ class WebSocketServer():
                     batch_json = batch.tick_repr_json(i)
                     await websocket.send(batch_json)
             await asyncio.sleep(0.1)
+    async def send_test_ticks(self, batch):
+        json_list = []
+        file_path = "/Users/akashilangovan/ian_game/Lavava/Backend/server_json.txt"
+        # Open the file and read line by line
+        with open(file_path, 'r') as file:
+            for line in file:
+                json_object = json.loads(line.strip())
+                json_list.append(json_object)
+        idx = 0
+        while True:
 
-    async def start_game1(self, batch):
-        print("start game")
-        asyncio.create_task(self.send_ticks(batch))
-        for i, websocket in enumerate(batch.connections):
-            asyncio.create_task(self.threaded_client_in_game(i, websocket, batch))
+
+            await asyncio.sleep(0.1)
+            # batch.tick()
+            for i, websocket in enumerate(batch.connections):
+                if True:
+                    batch_json = json_list[idx] if idx < len(json_list) else json_list[1]
+                    idx += 1
+                    # print(json.dumps(batch_json))
+                    await websocket.send(json.dumps(batch_json))
+            await asyncio.sleep(0.1)
+        
     async def start_game(self, batch):
         tasks = []
         print("start game")
-        tasks.append(asyncio.create_task(self.send_ticks(batch)))
+        tasks.append(asyncio.create_task(self.send_test_ticks(batch)))
         for i, websocket in enumerate(batch.connections):
             tasks.append(asyncio.create_task(self.threaded_client_in_game(i, websocket, batch)))
         

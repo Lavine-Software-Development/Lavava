@@ -33,13 +33,16 @@ class Server:
                 if batch.send_ready(i):
                     # print("Sending tick")
                     batch_json = batch.tick_repr_json(i)
-                    batch_tick = batch_json.encode()
-                    connection.sendall(batch_tick)
+                    self.send(connection, batch_json)
                     # print(i, 'sent tick')
                 # except OSError as e:
                 #     print(f"Error on connection {i}: {e}")
                 #     del batch.connections[i]
             time.sleep(0.1)
+
+    def send(self, connection, batch_json):
+        batch_tick = batch_json.encode()
+        connection.sendall(batch_tick)
 
     def threaded_client(self, conn):
 
@@ -81,8 +84,12 @@ class Server:
         for i, conn in enumerate(batch.connections):
             start_new_thread(self.threaded_client_in_game, (i, conn, batch))
 
-    def threaded_client_in_game(self, player, conn, batch: Batch):
+    def send_batch(self, player, conn, batch: Batch):
         conn.send(batch.start_repr_json(player).encode())
+
+    def threaded_client_in_game(self, player, conn, batch: Batch):
+        self.send_batch(player, conn, batch)
+        
         print("Sent start data to player")
         while True:
             try:
@@ -112,6 +119,23 @@ class Server:
             print(conn)
 
             start_new_thread(self.threaded_client, (conn,))
+
+
+class PrintServer(Server):
+    def send(self, connection, batch_json):
+        with open("output.txt", "a") as f:
+            f.write(batch_json)
+            f.write("\n")
+        batch_tick = batch_json.encode()
+        connection.sendall(batch_tick)
+
+    def send_batch(self, player, conn, batch: Batch):
+        to_encode = batch.start_repr_json(player)
+        with open("output.txt", "a") as f:
+            f.write(to_encode)
+            f.write("\n")
+        conn.send(to_encode.encode())
+
 
 
 server = Server(5553)

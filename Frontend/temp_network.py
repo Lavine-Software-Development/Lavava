@@ -28,10 +28,13 @@ class Network:
         else:
             self.init_data = json.dumps({"type": "JOIN", "players": 0, "mode": 0, "abilities": abilities})
 
+    def first_send(self):
+        self.client.send(self.init_data.encode())
+
     def establish_connection(self):
         try:
             self.client.connect(self.addr)
-            self.client.send(self.init_data.encode())
+            self.first_send()
             data = self.client.recv(1024)
             response = data.decode()
             if response == "FAIL":
@@ -84,3 +87,22 @@ class Network:
     def stop(self):
         self.running = False
         self.client.close()
+
+
+class PrintNetwork(Network):
+
+    def first_send(self):
+        with open("client.txt", "a") as file:
+            file.write(self.init_data)
+            file.write("\n")
+        super().first_send()
+
+    def send(self, data):
+        print(data)
+        with open("client.txt", "a") as file:
+            file.write(json.dumps(data))
+            file.write("\n")
+        try:
+            self.client.send(json.dumps(data).encode())
+        except socket.error as e:
+            print(e)
