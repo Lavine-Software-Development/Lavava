@@ -38,11 +38,7 @@ class WebSocketServer():
        
         if player_type == "HOST":
             player_count = int(player_count)
-<<<<<<< HEAD
             self.waiting_players = Batch(player_count, mode, websocket, abilities)
-=======
-            self.waiting_players = Batch(1, mode, websocket)
->>>>>>> ts-main
             await websocket.send("Players may join")
         elif player_type == "JOIN":
             if self.waiting_players:

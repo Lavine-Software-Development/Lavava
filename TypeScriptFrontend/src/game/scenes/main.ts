@@ -11,7 +11,7 @@ import {
     AbilityCredits,
     AbilityReloadTimes,
 } from "../slav/constants";
-import { PlayerStateEnum as PSE } from "../slav/enums";
+import { PlayerStateEnum as PSE, PlayerStateEnum } from "../slav/enums";
 import { ReloadAbility } from "../slav/Objects/ReloadAbility";
 import { Event } from "../slav/Objects/event";
 import { AbstractAbilityManager } from "../slav/abilityManager";
@@ -56,6 +56,8 @@ export class MainScene extends Scene {
         );
         this.burning = [];
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        const type = sessionStorage.getItem("TYPE");
+        const playerCount = Number(sessionStorage.getItem("player_count")) || 0;
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
             : [];
@@ -265,44 +267,35 @@ export class MainScene extends Scene {
     send(items?: number[], code?: number): void {
         console.log("trying to send message");
         console.log(this.highlight.sendFormat(items, code));
-        // this.network.sendMessage(
-        //     JSON.stringify(this.highlight.sendFormat(items, code))
-        // );
     }
-
     simple_send(code: number): void {
         console.log("trying to send simple message", code);
         this.network.sendMessage(
-            JSON.stringify({ type: "HOST", players: "1", mode: "default" })
+            JSON.stringify({
+                type: "HOST",
+                players: "1",
+                mode: "default",
+                abilities: [],
+            })
         );
     }
+
     update_board(new_data) {
         if (new_data != "Players may join") {
             new_data = JSON.parse(new_data);
             if (!("abilities" in new_data)) {
-                // console.log("new_data: ", new_data);
-                // console.log("new_data: ", typeof new_data, new_data["player"]);
-                // console.log(new_data["countdown_timer"]);
-                this.ps = new_data["player"]["ps"];
+                this.ps = new_data["player"]["ps"] - 1;
                 this.timer = new_data["countdown_timer"];
 
                 this.parse(this.nodes, new_data["board"]["nodes"]);
                 this.parse(this.edges, new_data["board"]["edges"]);
+            } else {
+                console.log(new_data);
             }
         }
-        // Object.values(this.nodes).forEach((node) => node.draw());
-        // Object.values(this.edges).forEach((edge) => edge.draw());
-
-        //call parse on new data
     }
+
     parse(this, items, updates) {
-        // if (!items || typeof items !== "object" || Array.isArray(items)) {
-        //     throw new Error("Invalid 'items' parameter; expected an object.");
-        // }
-        // if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
-        //     throw new Error("Invalid 'updates' parameter; expected an object.");
-        // }
-        // console.log(updates);
         for (const u in updates) {
             // console.log("here");
             if (!items.hasOwnProperty(u)) {

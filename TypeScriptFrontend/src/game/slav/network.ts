@@ -23,7 +23,7 @@ export class Network {
 
         this.socket.onmessage = (event) => {
             // console.log("Received message: ", event.data);
-            // this.updateCallback(event.data);
+            this.updateCallback(event.data);
         };
 
         this.socket.onclose = () => {
