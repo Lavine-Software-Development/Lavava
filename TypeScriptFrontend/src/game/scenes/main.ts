@@ -93,7 +93,8 @@ export class MainScene extends Scene {
         for (let i in main.nodes) {
             console.log(main.nodes[i].pos);
             let node = main.nodes[i];
-            node.owner = this.mainPlayer;
+            // randomly select an owner from the other players
+            node.owner = this.otherPlayers[Math.floor(Math.random() * this.otherPlayers.length)];
             node.scene = this;
             this.nodes.push(node);
         }
@@ -134,7 +135,7 @@ export class MainScene extends Scene {
                 AbilityCredits[abilityCode],
                 AbilityReloadTimes[abilityCode],
                 count,  // Use the count from abilityCounts
-                0.5,
+                1,
                 this
             );
         });

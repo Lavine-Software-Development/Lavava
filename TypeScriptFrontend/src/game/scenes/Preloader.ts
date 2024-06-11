@@ -65,6 +65,12 @@ export class Preloader extends Scene
         this.drawStar(star, centre, centre, siz * 12); // siz * 12 to make the star large
         star.generateTexture('star', 60, 60);
         star.destroy();
+
+        // big black square
+        let square = this.add.graphics({ fillStyle: { color: 0x000000 } });
+        square.fillRect(0, 0, 60, 60);
+        square.generateTexture('blackSquare', 60, 60);
+        square.destroy();
     }
 
     create() {

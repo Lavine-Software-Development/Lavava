@@ -249,11 +249,11 @@ export class Edge extends IDItem {
         }
     
         // Update positions of existing circle sprites
-        for (let i = 0; i < numCircles; i++) {
+        for (let i = 1; i < numCircles; i++) {
             let circleSprite = this.sprites[i];
             if (spacing != this.spacing) {
-                let x = startX + i * spacing * normX;
-                let y = startY + i * spacing * normY;
+                let x = startX + (i + 1) * spacing * normX;
+                let y = startY + (i + 1) * spacing * normY;
                 
                 circleSprite.x = x;
                 circleSprite.y = y;
@@ -265,13 +265,13 @@ export class Edge extends IDItem {
         let triangleSprite = this.sprites[this.sprites.length - 1];
         triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51)); 
         if (spacing != this.spacing) {
-            let x = startX + numCircles * spacing * normX;
-            let y = startY + numCircles * spacing * normY;
+            let x = startX + spacing * normX;
+            let y = startY + spacing * normY;
             let angle = Math.atan2(normY, normX);
 
             triangleSprite.x = x;
             triangleSprite.y = y;
-            triangleSprite.setRotation(angle + Math.PI / 2);
+            triangleSprite.setRotation(angle - Math.PI / 2);
         }
 
         this.spacing = spacing;

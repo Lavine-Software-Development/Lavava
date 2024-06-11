@@ -19,7 +19,7 @@ function standardPortNode(data: IDItem[]): boolean {
 }
 
 const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
-    const node = data[0] as Node; 
+    const node = data as Node; 
     return (
         node.owner !== player &&
         node.owner !== undefined &&
