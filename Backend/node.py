@@ -61,21 +61,21 @@ class Node(JsonableTracked):
     def new_state(self, state_name, data=None):
         self.updated = True
         if state_name == "default":
-            return DefaultState(self.id)
+            return DefaultState(self)
         elif state_name == "mine":
             # if data is True and mode.MODE == 3:
             self.port_count = 3
-            return MineState(self.id, self.absorbing, data)
+            return MineState(self, self.absorbing, data)
         elif state_name == "zombie":
-            return ZombieState(self.id)
+            return ZombieState(self)
         elif state_name == "capital":
             if data:
-                return StartingCapitalState(self.id)
-            return CapitalState(self.id)
+                return StartingCapitalState(self)
+            return CapitalState(self)
         elif state_name == "cannon":
-            return CannonState(self.id)
+            return CannonState(self)
         else:
-            return DefaultState(self.id)
+            return DefaultState(self)
 
 
     def new_effect(self, effect_name):

@@ -15,8 +15,9 @@ import math
 
 
 class AbstractState(JsonableSkeleton):
-    def __init__(self, id, reset_on_capture, flow_ownership, update_on_new_owner, visual_id):
-        self.id = id
+    def __init__(self, node, reset_on_capture, flow_ownership, update_on_new_owner, visual_id):
+        self.node = node
+        self.id = node.id
         self.reset_on_capture = reset_on_capture
         self.flow_ownership = flow_ownership
         self.update_on_new_owner = update_on_new_owner
@@ -25,7 +26,7 @@ class AbstractState(JsonableSkeleton):
         self.visual_id = visual_id
 
     def grow(self, multiplier):
-        return GROWTH_RATE * multiplier
+        return GROWTH_RATE * self.node.grow_multiplier
 
     @abstractmethod
     def intake(self, amount, multiplier, contested):
@@ -63,8 +64,8 @@ class AbstractState(JsonableSkeleton):
 
 
 class DefaultState(AbstractState):
-    def __init__(self, id):
-        super().__init__(id, False, False, False, 0)
+    def __init__(self, node):
+        super().__init__(node, False, False, False, 0)
 
     def intake(self, amount, multiplier, contested):
         change = amount * multiplier
@@ -81,8 +82,8 @@ class DefaultState(AbstractState):
 
 class ZombieState(DefaultState):
 
-    def __init__(self, id):
-        AbstractState.__init__(self, id, True, False, False, 1)
+    def __init__(self, node):
+        AbstractState.__init__(self, node, True, False, False, 1)
 
     def grow(self, multiplier):
         return 0
@@ -93,16 +94,16 @@ class ZombieState(DefaultState):
 
 class CannonState(DefaultState):
     
-    def __init__(self, id):
-        AbstractState.__init__(self, id, False, False, False, 5)
+    def __init__(self, node):
+        AbstractState.__init__(self, node, False, False, False, 5)
 
     def grow(self, multiplier):
         return 0
 
 
 class CapitalState(DefaultState):
-    def __init__(self, id, reset=True, update_on_new_owner=False):
-        AbstractState.__init__(self, id, reset, False, update_on_new_owner, 2)
+    def __init__(self, node, reset=True, update_on_new_owner=False):
+        AbstractState.__init__(self, node, reset, False, update_on_new_owner, 2)
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
@@ -136,8 +137,8 @@ class CapitalState(DefaultState):
 
 
 class StartingCapitalState(CapitalState):
-    def __init__(self, id, is_owned=False):
-        super().__init__(id, False, True)
+    def __init__(self, node, is_owned=False):
+        super().__init__(node, False, True)
         self.capitalized = True
         self.is_owned = is_owned
 
@@ -146,9 +147,9 @@ class StartingCapitalState(CapitalState):
 
 
 class MineState(AbstractState):
-    def __init__(self, id, absorbing_func, island):
+    def __init__(self, node, absorbing_func, island):
         self.bonus, self.bubble, self.ring_color, visual_id = MINE_DICT[island]
-        super().__init__(id, True, True, False, visual_id)
+        super().__init__(node, True, True, False, visual_id)
         self.absorbing_func = absorbing_func
         self.swap_status = BELOW_SWAP_STATUS
 
