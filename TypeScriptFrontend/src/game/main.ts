@@ -3,6 +3,7 @@ import { GameOver } from "./scenes/GameOver";
 import { Game as MainGame } from "./scenes/Game";
 import { MainMenu } from "./scenes/MainMenu";
 import { MainScene } from "./scenes/main";
+import { SpriteCreatorScene } from "./scenes/creator";
 import { AUTO, Game } from "phaser";
 import { Preloader } from "./scenes/Preloader";
 
@@ -14,7 +15,7 @@ const config: Phaser.Types.Core.GameConfig = {
     height: 768,
     parent: "game-container",
     backgroundColor: "#ffffff",
-    scene: [MainScene],
+    scene: [Preloader, MainScene],
     input: {
         keyboard: true,
         mouse: true,

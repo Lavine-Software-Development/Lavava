@@ -58,7 +58,7 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.BRIDGE_CODE]: [2, ClickType.NODE],
     [KeyCodes.D_BRIDGE_CODE]: [2, ClickType.NODE],
     [KeyCodes.NUKE_CODE]: [1, ClickType.NODE],
-    [KeyCodes.POISON_CODE]: [1, ClickType.NODE],
+    [KeyCodes.POISON_CODE]: [1, ClickType.EDGE],
     [KeyCodes.FREEZE_CODE]: [1, ClickType.EDGE],
     [KeyCodes.CAPITAL_CODE]: [1, ClickType.NODE],
     [KeyCodes.ZOMBIE_CODE]: [1, ClickType.NODE],

@@ -54,8 +54,8 @@ def zombie_effect(data, player):
     node.value = ZOMBIE_FULL_SIZE
 
 def poison_effect(data, player):
-    node = data[0]
-    node.set_state("poison")
+    edge = data[0]
+    edge.to_node.set_state("poison")
 
 def burn_effect(data, player):
     node = data[0]

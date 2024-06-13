@@ -1,6 +1,6 @@
 import { IDItem } from "./Objects/idItem";
 import { OtherPlayer } from "./Objects/otherPlayer";
-import { KeyCodes, MINIMUM_TRANSFER_VALUE, EventCodes } from "./constants";
+import { KeyCodes, MINIMUM_TRANSFER_VALUE, EventCodes, NUKE_RANGE } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./Objects/node";
 import { Edge } from "./Objects/edge";
@@ -21,6 +21,33 @@ function noClick(data: IDItem[]): boolean {
 function standardPortNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
     return node.owner !== undefined && node.isPort && node.stateName !== "mine";
+}
+
+const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
+    const node = data as Node; 
+    return (
+        node.owner !== player &&
+        node.owner !== undefined &&
+        node.stateName !== "capital" &&
+        node.stateName !== "mine"
+    );
+};
+
+function attackValidators(nodes: Node[], player: OtherPlayer) {
+    return function capitalRangedNodeAttack(data: IDItem[]): boolean {
+        const node = data[0] as Node;
+        const capitals = nodes.filter((node) => node.stateName === "capital" && node.owner === player);
+
+        const inCapitalRange = (capital: Node): boolean => {
+            const { x: x1, y: y1 } = node.pos;
+            const { x: x2, y: y2 } = capital.pos;
+            const distance = (x1 - x2) ** 2 + (y1 - y2) ** 2;
+            const capitalNukeRange = (NUKE_RANGE * capital.value) ** 2;
+            return distance <= capitalNukeRange;
+        };
+
+        return standardNodeAttack(node, player) && capitals.some(capital => inCapitalRange(capital));
+    };
 }
 
 function capitalValidator(edges: Edge[], player: OtherPlayer): ValidatorFunc {
@@ -64,15 +91,6 @@ function playerValidators(player: OtherPlayer): {
     [key: string]: ValidatorFunc;
 } {
     // Validator that checks if a node is attackable
-    const standardNodeAttack = (data: IDItem[]): boolean => {
-        const node = data[0] as Node; // Type casting to Node for TypeScript
-        return (
-            node.owner !== player &&
-            node.owner !== undefined &&
-            node.stateName !== "capital" &&
-            node.stateName !== "mine"
-        );
-    };
 
     // Validator that checks if a node belongs to the player
     const myNode = (data: IDItem[]): boolean => {
@@ -86,10 +104,14 @@ function playerValidators(player: OtherPlayer): {
         return edge.dynamic && edge.fromNode.owner === player;
     };
 
+    const attackingEdge = (data: IDItem[]): boolean => {
+        const edge = data[0] as Edge;
+        return edge.fromNode.owner == player && standardNodeAttack(edge.toNode, player)
+    }
+
     // Return an object mapping codes to their respective validator functions
     return {
-        [KeyCodes.POISON_CODE]: standardNodeAttack,
-        [KeyCodes.NUKE_CODE]: standardNodeAttack,
+        [KeyCodes.POISON_CODE]: attackingEdge,
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEither,
         [KeyCodes.ZOMBIE_CODE]: myNode,
         [KeyCodes.CANNON_CODE]: myNode,
@@ -159,6 +181,7 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: standardPortNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
+        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player)
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`

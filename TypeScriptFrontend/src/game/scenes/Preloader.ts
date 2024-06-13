@@ -2,46 +2,79 @@ import { Scene } from 'phaser';
 
 export class Preloader extends Scene
 {
-    constructor ()
-    {
+    constructor() {
         super('Preloader');
     }
 
-    init ()
-    {
-        //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(512, 384, 'background');
+    preload() {
 
-        //  A simple progress bar. This is the outline of the bar.
-        this.add.rectangle(512, 384, 468, 32).setStrokeStyle(1, 0xffffff);
-
-        //  This is the progress bar itself. It will increase in size from the left based on the % of progress.
-        const bar = this.add.rectangle(512-230, 384, 4, 28, 0xffffff);
-
-        //  Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
-        this.load.on('progress', (progress: number) => {
-
-            //  Update the progress bar (our bar is 464px wide, so 100% = 464px)
-            bar.width = 4 + (460 * progress);
-
-        });
+        // Prepare graphics assets
+        this.createShapeTextures();
     }
 
-    preload ()
-    {
-        //  Load the assets for the game - Replace with your own assets
-        this.load.setPath('assets');
-
-        this.load.image('logo', 'logo.png');
-        this.load.image('star', 'star.png');
+    drawStar(graphics, centerX, centerY, radius) {
+        let points = 5;
+        let innerRadius = radius / 2;
+    
+        graphics.beginPath();
+        graphics.moveTo(
+            centerX + radius * Math.cos(0),
+            centerY + radius * Math.sin(0)
+        );
+    
+        for (let i = 1; i < points * 2; i++) {
+            const angle = Math.PI / points * i;
+            const r = (i % 2 === 0) ? radius : innerRadius;
+            graphics.lineTo(
+                centerX + r * Math.cos(angle),
+                centerY + r * Math.sin(angle)
+            );
+        }
+    
+        graphics.closePath();
+        graphics.fillPath();
+        graphics.strokePath();
     }
 
-    create ()
-    {
-        //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
-        //  For example, you can define global animations here, so we can use them in other scenes.
+    createShapeTextures() {
+        const centre = 30;
+        const siz = 0.8;
+        const radius = 4 * siz; 
 
-        //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-        this.scene.start('MainMenu');
+        let filledTriangle = this.add.graphics({ fillStyle: { color: 0xffffff } });
+        filledTriangle.fillTriangle(centre + 0, centre - 8 * siz, centre - 7 * siz, centre + 4 * siz, centre + 7 * siz, centre + 4 * siz)
+        filledTriangle.generateTexture('filledTriangle', 60, 60); // Bigger texture size
+        filledTriangle.destroy();
+    
+        let outlinedTriangle = this.add.graphics({ lineStyle: { width: 0.5, color: 0xffffff } });
+        outlinedTriangle.strokeTriangle(centre + 0, centre - 8 * siz, centre - 7 * siz, centre + 4 * siz, centre + 7 * siz, centre + 4 * siz); // Larger triangle
+        outlinedTriangle.generateTexture('outlinedTriangle', 60, 60); // Bigger texture size
+        outlinedTriangle.destroy();
+
+        let filledCircle = this.add.graphics({ fillStyle: { color: 0xffffff } });
+        filledCircle.fillCircle(centre, centre, radius);
+        filledCircle.generateTexture('filledCircle', 60, 60);
+        filledCircle.destroy();
+    
+        let outlinedCircle = this.add.graphics({ lineStyle: { width: 0.5, color: 0xffffff } });
+        outlinedCircle.strokeCircle(centre, centre, radius);
+        outlinedCircle.generateTexture('outlinedCircle', 60, 60);
+        outlinedCircle.destroy();
+
+        let star = this.add.graphics({ fillStyle: { color: 0xff69b4 }, lineStyle: { width: 0.5, color: 0x000000 } });
+        this.drawStar(star, centre, centre, siz * 12); // siz * 12 to make the star large
+        star.generateTexture('star', 60, 60);
+        star.destroy();
+
+        // big black square
+        let square = this.add.graphics({ fillStyle: { color: 0x000000 } });
+        square.fillRect(0, 0, 60, 60);
+        square.generateTexture('blackSquare', 60, 60);
+        square.destroy();
+    }
+
+    create() {
+        // Transition to next scene
+        this.scene.start('MainScene');
     }
 }

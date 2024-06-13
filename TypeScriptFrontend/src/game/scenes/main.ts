@@ -25,7 +25,10 @@ import {
 import { IDItem } from "../slav/Objects/idItem";
 import { CLICKS, EVENTS, VISUALS } from "../slav/default_abilities";
 import { Network } from "../slav/network";
-import { random_equal_distributed_angles } from "../slav/utilities";
+import {
+    phaserColor,
+    random_equal_distributed_angles,
+} from "../slav/utilities";
 import { AbilityVisual } from "../slav/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
@@ -47,6 +50,8 @@ export class MainScene extends Scene {
     private timer: number;
     private playerCount: number;
     private gameType: string;
+    private graphics: Phaser.GameObjects.Graphics;
+
     constructor() {
         super({ key: "MainScene" });
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
@@ -78,16 +83,36 @@ export class MainScene extends Scene {
             },
             {}
         );
-
-        this.network.connectWebSocket();
     }
 
+    preload() {
+        //  load ability icon assets
+        this.load.setPath("assets/abilityIcons/");
+
+        this.load.image("Bridge", "Bridge.png");
+        this.load.image("Burn", "Burn.png");
+        this.load.image("Cannon", "Cannon.png");
+        this.load.image("Capital", "Capital.png");
+        this.load.image("D-Bridge", "D-Bridge.png");
+        this.load.image("Freeze", "Freeze.png");
+        this.load.image("Nuke", "Nuke.png");
+        this.load.image("Poison", "Poison.png");
+        this.load.image("Rage", "Rage.png");
+        this.load.image("Spawn", "Spawn.png");
+        this.load.image("Zombie", "Zombie.png");
+    }
     create(): void {
+        this.graphics = this.add.graphics();
         const main = new Main();
         main.setup(board_data as BoardJSON);
         for (let i in main.nodes) {
             // console.log(main.nodes[i].pos);
             let node = main.nodes[i];
+            // randomly select an owner from the other players
+            node.owner =
+                this.otherPlayers[
+                    Math.floor(Math.random() * this.otherPlayers.length)
+                ];
             node.scene = this;
             // node.owner = this.mainPlayer;
             this.nodes[i] = node;
@@ -128,7 +153,8 @@ export class MainScene extends Scene {
                 AbilityCredits[abilityCode],
                 AbilityReloadTimes[abilityCode],
                 count, // Use the count from abilityCounts
-                1
+                1,
+                this
             );
         });
 
@@ -148,9 +174,15 @@ export class MainScene extends Scene {
 
         this.input.keyboard!.on("keydown", (event: KeyboardEvent) => {
             this.keydown(event.key.charCodeAt(0));
+            this.checkHighlight();
+        });
+
+        this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+            this.checkHighlight();
         });
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
+        this.network.connectWebSocket();
         this.network.setupUser(this.abilityCounts);
     }
 
@@ -173,12 +205,31 @@ export class MainScene extends Scene {
     }
 
     update(): void {
-        //refresh board state
-        this.checkHighlight();
         this.abilityManager.draw(this);
-        // Object.values(this.nodes).forEach((node) => node.draw());
-        this.highlight.draw();
-        // Object.values(this.edges).forEach((edge) => edge.draw());
+
+        // Iterate over the values of the dictionary to draw each node
+        Object.values(this.nodes).forEach((node) => node.draw());
+
+        Object.values(this.edges).forEach((edge) => edge.draw());
+
+        if (this.abilityManager.ability?.visual.name == "Nuke") {
+            // Filter the dictionary values to find the capitals
+            const capitals = Object.values(this.nodes).filter(
+                (node) =>
+                    node.stateName === "capital" &&
+                    node.owner === this.mainPlayer
+            );
+
+            // For each node in capitals, draw a pink hollow circle on the node of the size of its this.value
+            capitals.forEach((node) => {
+                this.graphics.lineStyle(6, phaserColor(Colors.PINK), 1);
+                this.graphics.strokeCircle(
+                    node.pos.x,
+                    node.pos.y,
+                    node.size + 4
+                );
+            });
+        }
     }
 
     tick(): void {
@@ -196,11 +247,11 @@ export class MainScene extends Scene {
         );
 
         if (hoverResult !== false) {
-            console.log("Hovering over: ", hoverResult[0].id, hoverResult[1]);
             this.highlight.set(hoverResult[0], hoverResult[1]);
         } else {
             this.highlight.wipe();
         }
+        this.highlight.draw();
     }
 
     validHover(position: Phaser.Math.Vector2): [IDItem, number] | false {

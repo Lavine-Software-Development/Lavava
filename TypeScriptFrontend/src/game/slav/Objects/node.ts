@@ -96,80 +96,64 @@ export class Node extends IDItem {
 
     draw(): void {
         this.graphics.clear();
-        if (this.stateName === "zombie") {
-            // Handle drawing for zombie state
-            this.graphics.fillStyle(this.phaserColor, 1); // Set the fill color for the rectangle
-            this.graphics.fillRect(
-                this.pos.x - this.size / 2,
-                this.pos.y - this.size / 2,
-                this.size,
-                this.size
-            );
-            return; // Return early to prevent drawing the normal node graphics
+        if (this.state.graphic_override) {
+            this.state.draw(this._scene, this.size, this.pos);
+            return;
         }
-
-        if (this.effects.has("poison")) {
-            this.graphics.lineStyle(6, phaserColor(Colors.PURPLE), 1);
-            this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 4);
-        }
-
-        if (this.owner) {
-            if (this.isPort) {
-                this.drawPorts(Colors.BROWN);
-            } else if (this.ports.length > 0) {
-                this.drawPorts(Colors.ORANGE);
+        else {
+            if (this.effects.has("poison")) {
+                this.graphics.lineStyle(6, phaserColor(Colors.PURPLE), 1);
+                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 4);
             }
-        }
+    
+            if (this.owner) {
+                if (this.isPort) {
+                    this.drawPorts(Colors.BROWN);
+                } else if (this.ports.length > 0) {
+                    this.drawPorts(Colors.ORANGE);
+                }
+            }
+    
+            this.graphics.fillStyle(this.phaserColor, 1);
+            this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
+    
+            if (this.effects.has("rage")) {
+                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
+                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size - 2);
+            }
+            if (this.full) {
+                this.graphics.lineStyle(2, phaserColor(Colors.BLACK), 1);
+                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 1);
+                if (this.stateName === "capital") {
+                    this.graphics.lineStyle(2, phaserColor(Colors.PINK), 1);
+                    this.graphics.strokeCircle(
+                        this.pos.x,
+                        this.pos.y,
+                        this.size + 3
+                    );
+                }
+            }
 
-        this.graphics.fillStyle(this.phaserColor, 1);
-        // console.log(
-        //     "Trying to draw a circle at: ",
-        //     this.pos.x,
-        //     this.pos.y,
-        //     this.size,
-        //     this.pos
-        // );
-        this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
-
-        if (this.effects.has("rage")) {
-            this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
-            this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size - 2);
-        }
-        if (this.full) {
-            this.graphics.lineStyle(2, phaserColor(Colors.BLACK), 1);
-            this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 1);
-            if (this.stateName === "capital") {
-                this.graphics.lineStyle(2, phaserColor(Colors.PINK), 1);
-                this.graphics.strokeCircle(
-                    this.pos.x,
-                    this.pos.y,
-                    this.size + 3
+            this.state.draw(this._scene, this.size, this.pos);
+    
+            if (this.state instanceof CannonState) {
+                if (this.state.selected) {
+                    this.cannonGraphics.clear();
+                    let mousePos = this.scene.input.activePointer.position;
+                    // Calculate angle between the spot and the mouse cursor
+                    let dx = mousePos.x - this.pos.x;
+                    let dy = mousePos.y - this.pos.y;
+                    this.state.angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
+                }
+                this.drawRotatedRectangle(
+                    this.state.angle,
+                    this.size * 2,
+                    this.size,
+                    Colors.GREY,
+                    this.cannonGraphics
                 );
             }
-        }
 
-        if (
-            this.stateName === "capital" &&
-            (this.state as CapitalState).capitalized
-        ) {
-            this.drawStar(this.graphics, phaserColor(Colors.BLACK), false);
-            this.drawStar(this.graphics, phaserColor(Colors.PINK), true);
-        } else if (this.state instanceof CannonState) {
-            if (this.state.selected) {
-                this.cannonGraphics.clear();
-                let mousePos = this.scene.input.activePointer.position;
-                // Calculate angle between the spot and the mouse cursor
-                let dx = mousePos.x - this.pos.x;
-                let dy = mousePos.y - this.pos.y;
-                this.state.angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
-            }
-            this.drawRotatedRectangle(
-                this.state.angle,
-                this.size * 2,
-                this.size,
-                Colors.GREY,
-                this.cannonGraphics
-            );
         }
     }
 
@@ -225,50 +209,5 @@ export class Node extends IDItem {
         graphics.fillPath();
     }
 
-    drawStar(
-        graphics: Phaser.GameObjects.Graphics,
-        color: number,
-        filled: boolean = true
-    ): void {
-        const innerRadius = this.size / 3;
-        const outerRadius = this.size / 1.5;
-        const starPoints = [];
-
-        for (let i = 0; i < 5; i++) {
-            // Outer points
-            let angle = Phaser.Math.DegToRad(i * 72 + 55); // Start at top point
-            starPoints.push(
-                new Phaser.Math.Vector2(
-                    this.pos.x + outerRadius * Math.cos(angle),
-                    this.pos.y + outerRadius * Math.sin(angle)
-                )
-            );
-
-            // Inner points
-            angle += Phaser.Math.DegToRad(36); // Halfway between outer points
-            starPoints.push(
-                new Phaser.Math.Vector2(
-                    this.pos.x + innerRadius * Math.cos(angle),
-                    this.pos.y + innerRadius * Math.sin(angle)
-                )
-            );
-        }
-
-        // Draw the star
-        graphics.beginPath();
-        graphics.fillStyle(color, 1);
-        graphics.moveTo(starPoints[0].x, starPoints[0].y);
-        starPoints.forEach((point, index) => {
-            if (index > 0) graphics.lineTo(point.x, point.y);
-        });
-        graphics.closePath();
-
-        if (filled) {
-            graphics.fillPath();
-        } else {
-            graphics.lineStyle(1, color);
-            graphics.strokePath();
-        }
-    }
 }
 
