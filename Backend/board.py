@@ -37,9 +37,9 @@ class Board(JsonableTracked):
         super().__init__("board", recurse_values, recurse_values)
 
 
-    def board_wide_effect(self, player, effect):
+    def board_wide_effect(self, effect, player):
         for node in self.nodes:
-            if node.owner == player:
+            if (not player) or node.owner == player:
                 node.set_state(effect)
 
     def track_starting_states(self):

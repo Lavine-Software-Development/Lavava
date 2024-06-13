@@ -1,3 +1,4 @@
+from abstractEffect import AbstractSpreadingEffect
 from jsonable import JsonableTracked
 from constants import (
     NODE,
@@ -30,7 +31,7 @@ class Node(JsonableTracked):
         self.outgoing = set()
         self.pos = pos
         self.type = NODE
-        self.effects = {}
+        self.effects: dict[str, AbstractSpreadingEffect] = {}
         self.expel_multiplier = 1
         self.intake_multiplier = 1
         self.grow_multiplier = 1
@@ -55,7 +56,7 @@ class Node(JsonableTracked):
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
         elif status_name in EFFECT_NAMES:
-            self.effects[status_name] = self.new_effect(status_name)
+            self.effects[status_name] = self.new_effect(status_name, data)
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
@@ -78,11 +79,14 @@ class Node(JsonableTracked):
             return DefaultState(self.id)
 
 
-    def new_effect(self, effect_name):
+    def new_effect(self, effect_name, data=[]):
         if effect_name == 'poison':
-            return Poisoned(self.spread_poison)
+            originator, length = data
+            return Poisoned(originator, length)
         elif effect_name == 'rage':
             return NodeEnraged()
+        else:
+            print("Effect not found")
 
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1
@@ -136,22 +140,9 @@ class Node(JsonableTracked):
 
     def relocate(self, width, height):
         self.pos = (self.pos_x_per * width, self.pos_y_per * height)
-
-    # def owned_and_alive(self):
-    #     return self.owner is not None and not self.owner.eliminate
         
     def owned_and_alive(self):
         return self.owner is not None
-
-    def spread_poison(self):
-        for edge in self.outgoing:
-            if (
-                edge.to_node != self
-                and edge.on
-                and not edge.contested
-                and edge.to_node.state_name == "default"
-            ):
-                edge.to_node.set_state("poison")
 
     def grow(self):
         if self.can_grow():
@@ -171,29 +162,13 @@ class Node(JsonableTracked):
 
         if removed_effects:
             self.calculate_interactions()
-
-        self.spread_effects()
     
     def effects_tick(self):
         effects_to_remove = [key for key, effect in self.effects.items() if not effect.count()]
         for key in effects_to_remove:
-            self.effects[key].complete()
-        for key in effects_to_remove:
             del self.effects[key]
 
         return effects_to_remove
-
-    def spread_effects(self):
-        for key, effect in self.effects.items():
-            if effect.can_spread_func(effect):
-                for edge in self.edges:
-                    neighbor = edge.opposite(self)
-                    if key not in neighbor.effects and effect.spread_criteria_func(edge, neighbor):
-                        neighbor.set_state(key)
-
-    def delivery(self, amount, player):
-        self.value += self.delivery_value_update(amount, player != self.owner)
-        self.delivery_status_update(player)
 
     def delivery_value_update(self, amount, contested):
         return self.state.intake(
@@ -204,6 +179,8 @@ class Node(JsonableTracked):
             self.owner = player
         if self.state.killed(self.value):
             self.capture(player)
+            return True
+        return False
 
     def accept_delivery(self, player):
         return self.state.accept_intake(player != self.owner, self.value)
@@ -219,7 +196,6 @@ class Node(JsonableTracked):
             self.owner.count -= 1
         if player is not None:
             player.count += 1
-            player.pass_on_effects(self)
         self.owner = player
         if self.state.update_on_new_owner:
             self.updated = True
@@ -265,5 +241,9 @@ class Node(JsonableTracked):
         if self.owner:
             return self.owner.color
         return BLACK
+    
+    @property
+    def effect_keys(self):
+        return self.effects.keys()
 
     
