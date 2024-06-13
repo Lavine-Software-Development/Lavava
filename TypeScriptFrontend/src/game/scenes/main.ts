@@ -45,6 +45,8 @@ export class MainScene extends Scene {
     private burning: Node[] = [];
     private abilityCounts: { [key: string]: number };
     private timer: number;
+    private playerCount: number;
+    private gameType: string;
     constructor() {
         super({ key: "MainScene" });
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
@@ -56,8 +58,8 @@ export class MainScene extends Scene {
         );
         this.burning = [];
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
-        const type = sessionStorage.getItem("TYPE");
-        const playerCount = Number(sessionStorage.getItem("player_count")) || 0;
+        this.gameType = String(sessionStorage.getItem("type"));
+        this.playerCount = Number(sessionStorage.getItem("player_count")) || 0;
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
             : [];
@@ -77,7 +79,6 @@ export class MainScene extends Scene {
             {}
         );
 
-        this.network.setupUser();
         this.network.connectWebSocket();
     }
 
@@ -88,7 +89,7 @@ export class MainScene extends Scene {
             // console.log(main.nodes[i].pos);
             let node = main.nodes[i];
             node.scene = this;
-            node.owner = this.mainPlayer;
+            // node.owner = this.mainPlayer;
             this.nodes[i] = node;
         }
         for (let i in main.edges) {
@@ -148,9 +149,9 @@ export class MainScene extends Scene {
         this.input.keyboard!.on("keydown", (event: KeyboardEvent) => {
             this.keydown(event.key.charCodeAt(0));
         });
-        this.simple_send(0);
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
+        this.network.setupUser(this.abilityCounts);
     }
 
     keydown(key: number): void {
@@ -245,6 +246,7 @@ export class MainScene extends Scene {
                     const event_data = this.abilityManager.useEvent(
                         this.highlight
                     );
+                    console.log("event data: ", event_data);
                     if (event_data !== false) {
                         if (
                             button === EventCodes.STANDARD_RIGHT_CLICK &&
@@ -265,17 +267,16 @@ export class MainScene extends Scene {
     }
 
     send(items?: number[], code?: number): void {
-        console.log("trying to send message");
-        console.log(this.highlight.sendFormat(items, code));
+        this.network.sendMessage(
+            JSON.stringify(this.highlight.sendFormat(items, code))
+        );
     }
     simple_send(code: number): void {
         console.log("trying to send simple message", code);
         this.network.sendMessage(
             JSON.stringify({
-                type: "HOST",
-                players: "1",
-                mode: "default",
-                abilities: [],
+                code: code,
+                items: {},
             })
         );
     }

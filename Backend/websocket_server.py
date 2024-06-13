@@ -58,13 +58,9 @@ class WebSocketServer():
         while True:
             await asyncio.sleep(1)
             batch.tick()
-            print("tick")
             for i, websocket in enumerate(batch.connections):
-                print(batch.send_ready(i))
-                # if batch.send_ready(i):
-                if True:
-                    batch_json = batch.tick_repr_json(i)
-                    await websocket.send(batch_json)
+                batch_json = batch.tick_repr_json(i)
+                await websocket.send(batch_json)
             await asyncio.sleep(0.1)
     async def send_test_ticks(self, batch):
         json_list = []
@@ -91,7 +87,7 @@ class WebSocketServer():
     async def start_game(self, batch):
         tasks = []
         print("start game")
-        tasks.append(asyncio.create_task(self.send_test_ticks(batch)))
+        tasks.append(asyncio.create_task(self.send_ticks(batch)))
         for i, websocket in enumerate(batch.connections):
             tasks.append(asyncio.create_task(self.threaded_client_in_game(i, websocket, batch)))
         

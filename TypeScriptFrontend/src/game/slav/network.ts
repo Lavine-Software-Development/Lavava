@@ -50,25 +50,26 @@ export class Network {
         }
     }
 
-    setupUser() {
+    setupUser(abilities: { [x: string]: any }) {
+        console.log("setup called");
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
             : [];
-        abilitiesFromStorage.reduce(
+        const transformedAbilities = abilitiesFromStorage.reduce(
             (
                 acc: { [x: string]: any },
                 ability: { name: string; count: number }
             ) => {
                 const code = NameToCode[ability.name];
+                console.log("code is: ", code);
                 if (code) {
                     acc[code] = ability.count;
                 }
+                console.log("acc is: ", acc);
                 return acc;
-            },
-            {}
+            }
         );
-
         const code = sessionStorage.getItem("key_code");
         const type = sessionStorage.getItem("type");
         const playerCount = Number(sessionStorage.getItem("player_count")) || 0;
@@ -77,8 +78,11 @@ export class Network {
             type: type,
             players: playerCount,
             code: code,
-            abilities: abilitiesFromStorage,
+            mode: "default",
+            abilities: abilities,
         };
+        console.log("Trying to setp user with: ", send_dict);
+        this.sendMessage(JSON.stringify(send_dict));
     }
 }
 

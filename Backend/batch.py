@@ -18,8 +18,7 @@ class Batch:
         self.tick_dict = dict()
 
     def add_player(self, conn, ability_data):
-        print("adding player")
-        player = len(self.connections)
+        player = len(self.connections) if len(self.connections) == 0 else len(self.connections) - 1 #TODO: Look into why the indices are off
         if self.ability_process(player, ability_data):
             self.connections.append(conn)
             return False
