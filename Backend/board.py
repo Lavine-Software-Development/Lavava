@@ -180,10 +180,9 @@ class Board(JsonableTracked):
 
     def remove_node(self, node):
         node.owner.count -= 1
-        for edge in node.outgoing | node.incoming:
+        for edge in node.edges:
             opp = edge.opposite(node)
-            opp.incoming.discard(edge)
-            opp.outgoing.discard(edge)
+            opp.edges.discard(edge)
             if edge.id in self.id_dict:
                 self.id_dict.pop(edge.id)
                 self.edges.remove(edge)

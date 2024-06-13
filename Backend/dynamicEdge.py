@@ -4,18 +4,16 @@ from tracking_decorator.track_changes import track_changes
 
 @track_changes('to_node', 'from_node')
 class DynamicEdge(Edge):
-    def __init__(self, node1, node2, id, initial=False):
+    def __init__(self, node1, node2, id):
 
-        super().__init__(node1, node2, id, initial, set())
+        super().__init__(node1, node2, id, set())
 
         self.dynamic = True
         self.item_type = DYNAMIC_EDGE
 
-    def update_nodes(self, initial=False):
-        self.to_node.new_edge(self, "incoming", initial)
-        self.from_node.new_edge(self, "outgoing", initial)
-        self.to_node.new_edge(self, "outgoing", initial)
-        self.from_node.new_edge(self, "incoming", initial)
+    def update_nodes(self):
+        self.to_node.new_edge(self)
+        self.from_node.new_edge(self)
 
     def click_swap(self):
         self.on = True

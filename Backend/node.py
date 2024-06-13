@@ -26,8 +26,7 @@ class Node(JsonableTracked):
         self.value = 0
         self.owner = None
         self.item_type = NODE
-        self.incoming = set()
-        self.outgoing = set()
+        self.edges = set()
         self.pos = pos
         self.type = NODE
         self.effects = {}
@@ -44,11 +43,8 @@ class Node(JsonableTracked):
     def __str__(self):
         return str(self.id)
 
-    def new_edge(self, edge, dir, initial):
-        if dir == "incoming":
-            self.incoming.add(edge)
-        else:
-            self.outgoing.add(edge)
+    def new_edge(self, edge):
+        self.edges.add(edge)
 
     def set_state(self, status_name, data=None):
         if status_name in STATE_NAMES:
@@ -125,9 +121,7 @@ class Node(JsonableTracked):
                 edge.popped = False
 
     def check_edge_stati(self):
-        for edge in self.incoming:
-            edge.check_status()
-        for edge in self.outgoing:
+        for edge in self.edges:
             edge.check_status()
 
     def set_pos_per(self):
@@ -233,7 +227,7 @@ class Node(JsonableTracked):
             self.set_default_state()
 
     def absorbing(self):
-        for edge in self.current_incoming:
+        for edge in self.incoming:
             if edge.flowing:
                 return True
         return False
@@ -247,14 +241,14 @@ class Node(JsonableTracked):
 
     def full(self):
         return self.value >= self.state.full_size
-
+    
     @property
-    def edges(self):
-        return self.incoming | self.outgoing
-
+    def incoming(self):
+        return {edge for edge in self.edges if edge.to_node == self}
+    
     @property
-    def current_incoming(self):
-        return [edge for edge in self.incoming if edge.to_node == self]
+    def outgoing(self):
+        return {edge for edge in self.edges if edge.from_node == self}
 
     @property
     def neighbors(self):
