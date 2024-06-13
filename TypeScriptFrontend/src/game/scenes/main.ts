@@ -1,6 +1,6 @@
-import { Node } from "../slav/Objects/node";
-import { Highlight } from "../slav/highlight";
-import { stateDict } from "../slav/Objects/States";
+import { Node } from "../objects/node";
+import { Highlight } from "../objects/highlight";
+import { stateDict } from "../objects/States";
 import {
     Colors,
     KeyCodes,
@@ -10,32 +10,32 @@ import {
     GROWTH_STOP,
     AbilityCredits,
     AbilityReloadTimes,
-} from "../slav/constants";
-import { PlayerStateEnum as PSE, PlayerStateEnum } from "../slav/enums";
-import { ReloadAbility } from "../slav/Objects/ReloadAbility";
-import { Event } from "../slav/Objects/event";
-import { AbstractAbilityManager } from "../slav/abilityManager";
-import { OtherPlayer } from "../slav/Objects/otherPlayer";
-import { MyPlayer } from "../slav/Objects/myPlayer";
+} from "../objects/constants";
+import { PlayerStateEnum as PSE, PlayerStateEnum } from "../objects/enums";
+import { ReloadAbility } from "../objects/ReloadAbility";
+import { Event } from "../objects/event";
+import { AbstractAbilityManager } from "../objects/abilityManager";
+import { OtherPlayer } from "../objects/otherPlayer";
+import { MyPlayer } from "../objects/myPlayer";
 import {
     makeEventValidators,
     unownedNode,
     makeAbilityValidators,
-} from "../slav/ability_validators";
-import { IDItem } from "../slav/Objects/idItem";
-import { CLICKS, EVENTS, VISUALS } from "../slav/default_abilities";
-import { Network } from "../slav/network";
+} from "../objects/ability_validators";
+import { IDItem } from "../objects/idItem";
+import { CLICKS, EVENTS, VISUALS } from "../objects/default_abilities";
+import { Network } from "../objects/network";
 import {
     phaserColor,
     random_equal_distributed_angles,
-} from "../slav/utilities";
-import { AbilityVisual } from "../slav/immutable_visuals";
+} from "../objects/utilities";
+import { AbilityVisual } from "../objects/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
-import { Edge } from "../slav/Objects/edge";
-import { Main } from "../slav/Objects/parse";
-import board_data from "../slav/Objects/board_data.json";
-import { BoardJSON } from "../slav/Objects/parse";
+import { Edge } from "../objects/edge";
+import { Main } from "../objects/parse";
+import board_data from "../data/board_data.json";
+import { BoardJSON } from "../objects/parse";
 export class MainScene extends Scene {
     private nodes: { [key: string]: Node } = {};
     private edges: { [key: string]: Edge } = {};

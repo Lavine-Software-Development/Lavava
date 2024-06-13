@@ -1,9 +1,9 @@
 import { State } from "./States";
-import { Colors, GROWTH_STOP } from "../constants";
+import { Colors, GROWTH_STOP } from "./constants";
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
-import { ClickType } from "../enums";
-import { phaserColor } from "../utilities";
+import { ClickType } from "./enums";
+import { phaserColor } from "./utilities";
 import { CapitalState, CannonState } from "./States";
 
 export class Node extends IDItem {
@@ -99,13 +99,16 @@ export class Node extends IDItem {
         if (this.state.graphic_override) {
             this.state.draw(this._scene, this.size, this.pos);
             return;
-        }
-        else {
+        } else {
             if (this.effects.has("poison")) {
                 this.graphics.lineStyle(6, phaserColor(Colors.PURPLE), 1);
-                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 4);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size + 4
+                );
             }
-    
+
             if (this.owner) {
                 if (this.isPort) {
                     this.drawPorts(Colors.BROWN);
@@ -113,17 +116,25 @@ export class Node extends IDItem {
                     this.drawPorts(Colors.ORANGE);
                 }
             }
-    
+
             this.graphics.fillStyle(this.phaserColor, 1);
             this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
-    
+
             if (this.effects.has("rage")) {
                 this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
-                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size - 2);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size - 2
+                );
             }
             if (this.full) {
                 this.graphics.lineStyle(2, phaserColor(Colors.BLACK), 1);
-                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 1);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size + 1
+                );
                 if (this.stateName === "capital") {
                     this.graphics.lineStyle(2, phaserColor(Colors.PINK), 1);
                     this.graphics.strokeCircle(
@@ -135,7 +146,7 @@ export class Node extends IDItem {
             }
 
             this.state.draw(this._scene, this.size, this.pos);
-    
+
             if (this.state instanceof CannonState) {
                 if (this.state.selected) {
                     this.cannonGraphics.clear();
@@ -153,7 +164,6 @@ export class Node extends IDItem {
                     this.cannonGraphics
                 );
             }
-
         }
     }
 
@@ -208,6 +218,5 @@ export class Node extends IDItem {
         graphics.closePath();
         graphics.fillPath();
     }
-
 }
 

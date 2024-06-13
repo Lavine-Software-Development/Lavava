@@ -1,18 +1,12 @@
 import { Node } from "./node";
-// import { State } from "./States";
 import { Edge } from "./edge";
 import { OtherPlayer } from "./otherPlayer";
 import { MyPlayer } from "./myPlayer";
-// import { ClickType } from "../enums";
-import { PlayerColors, PORT_COUNT } from "../constants";
+import { PlayerColors, PORT_COUNT } from "./constants";
 import { stateDict } from "./States";
-import { random_equal_distributed_angles } from "../utilities";
-// import * as Phaser from "phaser";
+import { random_equal_distributed_angles } from "./utilities";
 import { Scene } from "phaser";
-import nodeData from "./nodeData.json";
-// const Phaserr = require("phaser");
-
-// Define the Node interface
+import nodeData from "../data/nodeData.json";
 interface NodeData {
     effects: any[]; // Define the type for effects if known, 'any' is a placeholder
     is_port: boolean;
@@ -147,60 +141,6 @@ export class Main {
             // console.log("num edges: ", Object.keys(this.nodes).length);
         } else {
             console.log("not here");
-        }
-    }
-    getObject(object, attribute, value) {
-        if (object[attribute] instanceof Node) {
-            return this.nodes[value];
-        } else if (object[attribute] instanceof Edge) {
-            return this.edges[value];
-        }
-        //TODO: check for State and OtherPlayer types after adding those
-        else {
-            return value;
-        }
-    }
-    parse(items, updates) {
-        // if (!items || typeof items !== "object" || Array.isArray(items)) {
-        //     throw new Error("Invalid 'items' parameter; expected an object.");
-        // }
-        // if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
-        //     throw new Error("Invalid 'updates' parameter; expected an object.");
-        // }
-
-        for (const u in updates) {
-            if (!items.hasOwnProperty(u)) {
-                console.error(`No item found for key ${u}`);
-                continue;
-            }
-
-            let obj = items[u];
-            if (typeof obj !== "object" || obj === null) {
-                console.error(`Invalid item at key ${u}; expected an object.`);
-                continue;
-            }
-
-            for (const [key, val] of Object.entries(updates[u])) {
-                if (typeof obj[key] === "undefined") {
-                    console.error(`Key ${key} not found in item ${u}.`);
-                    continue;
-                }
-
-                console.log("before: " + obj[key]);
-                let updateVal;
-                try {
-                    updateVal = this.getObject(obj, key, val);
-                } catch (error) {
-                    console.error(
-                        `Error updating key ${key} in item ${u}: ${error.message}`
-                    );
-                    continue;
-                }
-
-                obj[key] = updateVal;
-                console.log("updated key: ", key, " with value: ", val);
-                console.log("after: " + obj[key]);
-            }
         }
     }
 }

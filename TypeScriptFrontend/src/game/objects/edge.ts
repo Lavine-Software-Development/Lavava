@@ -1,8 +1,8 @@
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
-import { ClickType } from "../enums";
+import { ClickType } from "./enums";
 import { Node } from "./node";
-import { Colors } from "../constants";
+import { Colors } from "./constants";
 
 export class Edge extends IDItem {
     fromNode: Node;
@@ -87,12 +87,12 @@ export class Edge extends IDItem {
 
     clearSprites(): void {
         // Clear existing sprites from the scene
-        this.sprites.forEach(sprite => {
+        this.sprites.forEach((sprite) => {
             sprite.destroy();
         });
-        this.sprites = [];  // Reset the sprite storage
+        this.sprites = []; // Reset the sprite storage
     }
-    
+
     draw(): void {
         const startX = this.fromNode.pos.x;
         const startY = this.fromNode.pos.y;
@@ -120,7 +120,6 @@ export class Edge extends IDItem {
         const shorterStartY = adjustedStartY + normY * adjustedMagnitude * 0.15;
         const shorterEndX = adjustedStartX + normX * adjustedMagnitude * 0.85; // Move end point inwards
         const shorterEndY = adjustedStartY + normY * adjustedMagnitude * 0.85;
-
 
         this.hover_line.setTo(
             shorterStartX,
@@ -164,17 +163,21 @@ export class Edge extends IDItem {
     ): void {
         const triangleSize = 11;
         const minSpacing = 13;
-    
+
         const numTriangles = Math.floor(magnitude / minSpacing);
         const spacing = magnitude / numTriangles;
         let angle = Math.atan2(normY, normX) - Math.PI / 2;
-    
+
         if (this.sprites.length !== numTriangles) {
             // Adjust the number of sprites if the count has changed
             if (this.sprites.length < numTriangles) {
                 // Add more sprites
                 for (let i = this.sprites.length; i < numTriangles; i++) {
-                    let triangleSprite = this.my_scene.add.sprite(0, 0, this.flowing ? 'filledTriangle' : 'outlinedTriangle');
+                    let triangleSprite = this.my_scene.add.sprite(
+                        0,
+                        0,
+                        this.flowing ? "filledTriangle" : "outlinedTriangle"
+                    );
                     triangleSprite.setRotation(angle);
                     triangleSprite.setTint(color);
                     this.sprites.push(triangleSprite);
@@ -187,14 +190,14 @@ export class Edge extends IDItem {
                 }
             }
         }
-    
+
         // Update positions of existing sprites
         for (let i = 0; i < numTriangles; i++) {
             let triangleSprite = this.sprites[i];
             if (spacing != this.spacing) {
                 let x = startX + i * spacing * normX + triangleSize * normX;
                 let y = startY + i * spacing * normY + triangleSize * normY;
-        
+
                 triangleSprite.x = x;
                 triangleSprite.y = y;
             }
@@ -215,24 +218,38 @@ export class Edge extends IDItem {
     ): void {
         const circleRadius = 3;
         const minSpacing = 8;
-    
-        const numCircles = Math.floor((magnitude - 2 * circleRadius) / minSpacing);
+
+        const numCircles = Math.floor(
+            (magnitude - 2 * circleRadius) / minSpacing
+        );
         const spacing = (magnitude - 2 * circleRadius) / numCircles;
-    
+
         // Initialize the triangle sprite if not already present or if there are no sprites at all
-        if (this.sprites.length === 0 || this.sprites[this.sprites.length - 1].texture.key !== 'filledTriangle') {
+        if (
+            this.sprites.length === 0 ||
+            this.sprites[this.sprites.length - 1].texture.key !==
+                "filledTriangle"
+        ) {
             // First, clear any inappropriate sprites
-            this.sprites.forEach(sprite => sprite.destroy());
+            this.sprites.forEach((sprite) => sprite.destroy());
             this.sprites = [];
-    
+
             // Then, populate the array correctly
             for (let i = 0; i < numCircles; i++) {
-                let circleSprite = this.my_scene.add.sprite(0, 0, this.flowing ? 'filledCircle' : 'outlinedCircle');
+                let circleSprite = this.my_scene.add.sprite(
+                    0,
+                    0,
+                    this.flowing ? "filledCircle" : "outlinedCircle"
+                );
                 circleSprite.setTint(color);
                 this.sprites.push(circleSprite);
             }
             // Add the triangle sprite at the end
-            let triangleSprite = this.my_scene.add.sprite(0, 0, 'filledTriangle');
+            let triangleSprite = this.my_scene.add.sprite(
+                0,
+                0,
+                "filledTriangle"
+            );
             triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51));
             this.sprites.push(triangleSprite);
         } else {
@@ -242,28 +259,32 @@ export class Edge extends IDItem {
                 spriteToRemove.destroy();
             }
             while (this.sprites.length - 1 < numCircles) {
-                let circleSprite = this.my_scene.add.sprite(0, 0, this.flowing ? 'filledCircle' : 'outlinedCircle');
+                let circleSprite = this.my_scene.add.sprite(
+                    0,
+                    0,
+                    this.flowing ? "filledCircle" : "outlinedCircle"
+                );
                 circleSprite.setTint(color);
-                this.sprites.unshift(circleSprite);  // Add to the start
+                this.sprites.unshift(circleSprite); // Add to the start
             }
         }
-    
+
         // Update positions of existing circle sprites
         for (let i = 1; i < numCircles; i++) {
             let circleSprite = this.sprites[i];
             if (spacing != this.spacing) {
                 let x = startX + (i + 1) * spacing * normX;
                 let y = startY + (i + 1) * spacing * normY;
-                
+
                 circleSprite.x = x;
                 circleSprite.y = y;
             }
             circleSprite.setTint(color);
         }
-    
+
         // Always update the position and properties of the terminal triangle sprite
         let triangleSprite = this.sprites[this.sprites.length - 1];
-        triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51)); 
+        triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51));
         if (spacing != this.spacing) {
             let x = startX + spacing * normX;
             let y = startY + spacing * normY;
@@ -275,9 +296,7 @@ export class Edge extends IDItem {
         }
 
         this.spacing = spacing;
-
     }
-    
 
     isNear(position: Phaser.Math.Vector2): boolean {
         const pointerCircle = new Phaser.Geom.Circle(
@@ -285,7 +304,10 @@ export class Edge extends IDItem {
             position.y,
             10
         ); // 10 pixels radius
-        return Phaser.Geom.Intersects.LineToCircle(this.hover_line, pointerCircle);
+        return Phaser.Geom.Intersects.LineToCircle(
+            this.hover_line,
+            pointerCircle
+        );
     }
 }
 

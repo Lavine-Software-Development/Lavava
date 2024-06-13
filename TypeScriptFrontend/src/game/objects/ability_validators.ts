@@ -1,9 +1,14 @@
-import { IDItem } from "./Objects/idItem";
-import { OtherPlayer } from "./Objects/otherPlayer";
-import { KeyCodes, MINIMUM_TRANSFER_VALUE, EventCodes, NUKE_RANGE } from "./constants";
+import { IDItem } from "./idItem";
+import { OtherPlayer } from "./otherPlayer";
+import {
+    KeyCodes,
+    MINIMUM_TRANSFER_VALUE,
+    EventCodes,
+    NUKE_RANGE,
+} from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
-import { Node } from "./Objects/node";
-import { Edge } from "./Objects/edge";
+import { Node } from "./node";
+import { Edge } from "./edge";
 
 function hasAnySame(
     num1: number,
@@ -24,7 +29,7 @@ function standardPortNode(data: IDItem[]): boolean {
 }
 
 const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
-    const node = data as Node; 
+    const node = data as Node;
     return (
         node.owner !== player &&
         node.owner !== undefined &&
@@ -36,7 +41,9 @@ const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
 function attackValidators(nodes: Node[], player: OtherPlayer) {
     return function capitalRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
-        const capitals = nodes.filter((node) => node.stateName === "capital" && node.owner === player);
+        const capitals = nodes.filter(
+            (node) => node.stateName === "capital" && node.owner === player
+        );
 
         const inCapitalRange = (capital: Node): boolean => {
             const { x: x1, y: y1 } = node.pos;
@@ -46,7 +53,10 @@ function attackValidators(nodes: Node[], player: OtherPlayer) {
             return distance <= capitalNukeRange;
         };
 
-        return standardNodeAttack(node, player) && capitals.some(capital => inCapitalRange(capital));
+        return (
+            standardNodeAttack(node, player) &&
+            capitals.some((capital) => inCapitalRange(capital))
+        );
     };
 }
 
@@ -106,8 +116,11 @@ function playerValidators(player: OtherPlayer): {
 
     const attackingEdge = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge;
-        return edge.fromNode.owner == player && standardNodeAttack(edge.toNode, player)
-    }
+        return (
+            edge.fromNode.owner == player &&
+            standardNodeAttack(edge.toNode, player)
+        );
+    };
 
     // Return an object mapping codes to their respective validator functions
     return {
@@ -181,7 +194,7 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: standardPortNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
-        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player)
+        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
