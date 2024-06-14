@@ -43,10 +43,12 @@ export const KeyCodes = {
     POISON_CODE: 112,
     CAPITAL_CODE: 99,
     CANNON_CODE: 101,
+    PUMP_CODE: 117,
 };
 
 export const EventCodes = {
     CANNON_SHOT_CODE: 4,
+    PUMP_DRAIN_CODE: 5,
     STANDARD_LEFT_CLICK: 1,
     STANDARD_RIGHT_CLICK: 3,
 };

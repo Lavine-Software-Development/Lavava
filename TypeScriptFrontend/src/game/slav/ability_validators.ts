@@ -1,6 +1,6 @@
 import { IDItem } from "./Objects/idItem";
 import { OtherPlayer } from "./Objects/otherPlayer";
-import { KeyCodes, MINIMUM_TRANSFER_VALUE, EventCodes, NUKE_RANGE } from "./constants";
+import { KeyCodes, MINIMUM_TRANSFER_VALUE, GROWTH_STOP, EventCodes, NUKE_RANGE } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./Objects/node";
 import { Edge } from "./Objects/edge";
@@ -191,6 +191,15 @@ export function makeEventValidators(player: OtherPlayer): {
         return false;
     }
 
+    function pumpDrainValidator(data: IDItem[]): boolean {
+        const node = data[0] as Node;
+        return (
+            node.owner === player &&
+            node.stateName === "pump" &&
+            node.full
+        );
+    }
+
     function edgeValidator(data: IDItem[]): boolean {
         if (
             data instanceof Array &&
@@ -205,6 +214,7 @@ export function makeEventValidators(player: OtherPlayer): {
 
     return {
         [EventCodes.CANNON_SHOT_CODE]: cannonShotValidator,
+        [EventCodes.PUMP_DRAIN_CODE]: pumpDrainValidator,
         [EventCodes.STANDARD_LEFT_CLICK]: edgeValidator,
         [EventCodes.STANDARD_RIGHT_CLICK]: edgeValidator,
     };
