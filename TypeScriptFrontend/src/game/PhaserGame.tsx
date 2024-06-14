@@ -1,4 +1,4 @@
-import React from "react"; // Add import statement for 'React' module
+import React from "react";
 
 import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
 import StartGame from "./main";
@@ -11,15 +11,16 @@ export interface IRefPhaserGame {
 
 interface IProps {
     currentActiveScene?: (scene_instance: Phaser.Scene) => void;
+    props?: any;
 }
 
 export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
-    function PhaserGame({ currentActiveScene }, ref) {
+    function PhaserGame({ currentActiveScene, props }, ref) {
         const game = useRef<Phaser.Game | null>(null!);
 
         useLayoutEffect(() => {
             if (game.current === null) {
-                game.current = StartGame("game-container");
+                game.current = StartGame("game-container", props);
 
                 if (typeof ref === "function") {
                     ref({ game: game.current, scene: null });

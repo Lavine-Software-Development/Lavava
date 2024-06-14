@@ -52,8 +52,10 @@ export class MainScene extends Scene {
     private gameType: string;
     private graphics: Phaser.GameObjects.Graphics;
 
-    constructor() {
+    constructor(config, props) {
         super({ key: "MainScene" });
+        console.log("config: ", config);
+        console.log("props: ", props);
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));

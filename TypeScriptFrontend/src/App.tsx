@@ -21,17 +21,10 @@ import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
 import Profile from "./user-flow/Profile";
 import DeckBuilder from "./user-flow/deck_builder";
+import Lobby from "./user-flow/lobby";
+// import board_data from "./game/data/board_data.json";
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
-
-    const testMain = () => {
-        const main = new Main();
-        console.log("test");
-        console.log(typeof board_data);
-        main.setup(board_data as BoardJSON);
-        const updates = { "97": { on: true } };
-        console.log(main.parse(main.edges, updates));
-    };
 
     // Event emitted from the PhaserGame component
     const currentScene = (scene: Phaser.Scene) => {};
@@ -50,6 +43,7 @@ function App() {
                                 <PhaserGame
                                     ref={phaserRef}
                                     currentActiveScene={currentScene}
+                                    props={board_data}
                                 />
                             </div>
                         }
