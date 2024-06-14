@@ -14,6 +14,7 @@ from constants import (
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
     PUMP_DRAIN_CODE,
+    NODE_MINIMUM_VALUE,
 )
 from helpers import do_intersect
 from edge import Edge
@@ -211,13 +212,9 @@ class Board(JsonableTracked):
 
     def pump_drain(self, player, data): #should only be called when clicked on?
         pump = self.id_dict[data[0]]
-        if pump.value == 10: #whats full value
-            
-        # if node.val = full && click on it occurs
-        # increase player.abilities all by 1 then set node.value = 5
+        player.pump_increase_abilities()
+        pump.value = NODE_MINIMUM_VALUE
     
-    # check if node is full here, increase player.abilities all by 1 then set node.value = 5
-
     def make_events_dict(self):
         return {
             CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot),

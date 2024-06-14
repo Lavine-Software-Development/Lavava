@@ -1,6 +1,6 @@
 import { IDItem } from "./Objects/idItem";
 import { OtherPlayer } from "./Objects/otherPlayer";
-import { KeyCodes, MINIMUM_TRANSFER_VALUE, GROWTH_STOP, EventCodes, NUKE_RANGE } from "./constants";
+import { KeyCodes, MINIMUM_TRANSFER_VALUE, EventCodes, NUKE_RANGE } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./Objects/node";
 import { Edge } from "./Objects/edge";
