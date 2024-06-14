@@ -33,6 +33,7 @@ class Batch:
         start_dict["player_count"] = self.player_count
         start_dict["player_id"] = player
         start_dict["abilities"] = json_abilities.start_json()
+        start_dict['isFirst'] = True
         start_json = plain_json(start_dict)
         return start_json
     
@@ -41,6 +42,7 @@ class Batch:
     
     def tick_repr_json(self, player):
         self.tick_dict["player"] = self.player_tick_repr(player)
+        self.tick_dict["isFirst"] = False 
         tick_json = plain_json(self.tick_dict)
         return tick_json
 

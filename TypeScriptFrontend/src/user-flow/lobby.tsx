@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Network } from "../game/objects/network";
 const Lobby: React.FC = () => {
     return (
         <div>
@@ -8,5 +8,10 @@ const Lobby: React.FC = () => {
         </div>
     );
 };
+function getBoard() {
+    const network = new Network("ws://localhost:5553", () => null);
+    network.connectWebSocket();
+}
 
 export default Lobby;
+

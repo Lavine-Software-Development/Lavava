@@ -58,12 +58,8 @@ class Main:
         self.can_draw = False
 
         data, port = self.settings()
-<<<<<<< HEAD
         abilities = {BRIDGE_CODE: 2, CANNON_CODE: 2, CAPITAL_CODE: 2}
         self.network = Network(self.setup, self.update, data, abilities, port)
-=======
-        self.network = PrintNetwork(self.setup, self.update, data, port)
->>>>>>> ts-main
         self.network.receive_board_data()
 
         self.run()
