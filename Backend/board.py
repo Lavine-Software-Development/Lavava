@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from node import Node
 from event import Event
 from jsonable import JsonableTracked
 from constants import (
@@ -25,7 +26,7 @@ from tracking_decorator.track_changes import track_changes
 class Board(JsonableTracked):
     def __init__(self, gs):
         self.gs = gs
-        self.nodes = []
+        self.nodes: list[Node] = []
         self.edges = []
         self.events = self.make_events_dict()
         self.edge_dict = defaultdict(set)
@@ -105,7 +106,7 @@ class Board(JsonableTracked):
 
         for spot in self.nodes:
             if spot.owned_and_alive():  # keep
-                spot.grow()
+                spot.tick()
             if spot.updated:
                 updated_nodes.append(spot)
 
