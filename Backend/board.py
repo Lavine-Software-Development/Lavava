@@ -210,11 +210,15 @@ class Board(JsonableTracked):
         cannon.value -= transfer
         target.delivery(transfer, player)
 
-    def pump_drain(self, player, data): #should only be called when clicked on?
+    def pump_drain(self, player, data):
         pump = self.id_dict[data[0]]
         player.pump_increase_abilities()
         pump.value = NODE_MINIMUM_VALUE
     
+    def pump_drain_check(self, player, data):
+        pump = self.id_dict[data[0]]
+        return pump.state_name == "pump" and pump.owner == player and pump.full
+
     def make_events_dict(self):
         return {
             CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot),
