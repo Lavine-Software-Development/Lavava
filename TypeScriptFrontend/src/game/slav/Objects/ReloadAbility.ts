@@ -2,8 +2,9 @@ import { AbilityVisual } from "../immutable_visuals"; // Assuming these are defi
 import { ClickType } from "../enums"; // Assuming this is defined
 import { ValidationFunction } from "../types"; // Assuming this is defined
 import { phaserColor } from "../utilities";
+import { IDItem } from "./idItem";
 
-export class ReloadAbility {
+export class ReloadAbility extends IDItem {
     visual: AbilityVisual;
     clickCount: number;
     clickType: ClickType;
@@ -25,10 +26,12 @@ export class ReloadAbility {
         verificationFunc: ValidationFunction,
         credits: number,
         reload: number,
+        id: number,
         remaining: number = 0,
         percentage: number = 1.0,
         scene: Phaser.Scene
     ) {
+        super(id, ClickType.ABILITY);
         this.visual = visual;
         this.clickCount = clickCount;
         this.clickType = clickType;

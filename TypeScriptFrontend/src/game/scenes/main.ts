@@ -134,6 +134,7 @@ export class MainScene extends Scene {
                 ab[abilityCode],
                 AbilityCredits[abilityCode],
                 AbilityReloadTimes[abilityCode],
+                abilityCode,
                 count,  // Use the count from abilityCounts
                 1,
                 this

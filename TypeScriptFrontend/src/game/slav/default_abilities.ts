@@ -78,7 +78,7 @@ interface EventParameters {
 
 export const EVENTS: EventParameters = {
     [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE],
-    [EventCodes.PUMP_DRAIN_CODE]: [1, ClickType.NODE],
+    [EventCodes.PUMP_DRAIN_CODE]: [2, ClickType.NODE],
     [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE],
     [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE],
 };

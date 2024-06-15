@@ -4,6 +4,7 @@ import { KeyCodes, MINIMUM_TRANSFER_VALUE, EventCodes, NUKE_RANGE } from "./cons
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./Objects/node";
 import { Edge } from "./Objects/edge";
+import { ReloadAbility } from "./Objects/ReloadAbility";
 
 function hasAnySame(num1: number, num2: number, num3: number, num4: number): boolean {
     return num1 === num3 || num1 === num4 || num2 === num4 || num2 === num3
@@ -110,6 +111,7 @@ function playerValidators(player: OtherPlayer): {
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEither,
         [KeyCodes.ZOMBIE_CODE]: myNode,
         [KeyCodes.CANNON_CODE]: myNode,
+        [KeyCodes.PUMP_CODE]: myNode,
     };
 }
 
@@ -193,11 +195,17 @@ export function makeEventValidators(player: OtherPlayer): {
 
     function pumpDrainValidator(data: IDItem[]): boolean {
         const node = data[0] as Node;
-        return (
-            node.owner === player &&
-            node.stateName === "pump" &&
-            node.full
-        );
+        if (data.length === 1) {
+            return (
+                node.owner === player &&
+                node.stateName === "pump" &&
+                node.full
+            );
+        } else if (data.length > 1) {
+            const ability = data[1] as ReloadAbility;
+            return ability.credits < 3;
+        }
+        return false;
     }
 
     function edgeValidator(data: IDItem[]): boolean {
