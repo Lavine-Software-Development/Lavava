@@ -94,6 +94,22 @@ export class CannonState extends State {
     }
 }
 
+export class PumpState extends State {
+    private plusSprite: Phaser.GameObjects.Image | null = null;
+
+    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
+        if (!this.plusSprite) {
+            this.plusSprite = scene.add.image(pos.x, pos.y, 'plus');
+            this.plusSprite.setOrigin(0.5, 0.5); // Set origin to center for proper scaling
+        }
+        let currentScale = size / 12; // displayWidth considers current scale
+        if (Math.abs(this.plusSprite.scaleX - currentScale) > 0.01) { // threshold to avoid minor changes
+            this.plusSprite.setScale(currentScale);
+        }
+    }
+
+}
+
 export const stateDict: { [key: number]: () => State } = {
     0: () => new State("default"),
     1: () => new ZombieState("zombie"),
@@ -101,5 +117,6 @@ export const stateDict: { [key: number]: () => State } = {
     3: () => new MineState("mine", MineVisuals.RESOURCE_BUBBLE, Colors.DARK_YELLOW),
     4: () => new MineState("mine", MineVisuals.ISLAND_RESOURCE_BUBBLE, Colors.YELLOW),
     5: () => new CannonState("cannon"),
+    6: () => new PumpState("pump"),
 };
 

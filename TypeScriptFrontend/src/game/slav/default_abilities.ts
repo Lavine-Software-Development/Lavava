@@ -19,7 +19,7 @@ const ZOMBIE_V = createAbilityVisual("Zombie", "square", Colors.BLACK);
 const BURN_V = createAbilityVisual("Burn", "square", Colors.DARK_ORANGE);
 const RAGE_V = createAbilityVisual("Rage", "cross", Colors.GREEN);
 const CANNON_V = createAbilityVisual("Cannon", "cannon", Colors.GREY, "E");
-const PUMP_V = createAbilityVisual("Pump", "circle", Colors.GREEN, "U");
+const PUMP_V = createAbilityVisual("Pump", "circle", Colors.DARK_PURPLE, "U");
 
 // Create instances of EventVisual using the factory function
 const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.DARK_PINK);

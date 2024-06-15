@@ -217,12 +217,12 @@ class Board(JsonableTracked):
     
     def pump_drain_check(self, player, data):
         pump = self.id_dict[data[0]]
-        return pump.state_name == "pump" and pump.owner == player and pump.full
+        return pump.state_name == "pump" and pump.owner == player and pump.full()
 
     def make_events_dict(self):
         return {
             CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot),
-            PUMP_DRAIN_CODE: Event(self.pump_drain),
+            PUMP_DRAIN_CODE: Event(self.pump_drain_check, self.pump_drain),
             STANDARD_LEFT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_left_click(player),
                                         lambda player, data: self.id_dict[data[0]].switch()),
             STANDARD_RIGHT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_right_click(player), 

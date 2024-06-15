@@ -102,7 +102,7 @@ class CannonState(DefaultState):
 class PumpState(DefaultState):
 
     def __init__(self, id):
-        AbstractState.__init__(self, id, False, False, False, 5)
+        AbstractState.__init__(self, id, False, False, False, 6)
 
     def grow(self, multiplier):
         return 0
