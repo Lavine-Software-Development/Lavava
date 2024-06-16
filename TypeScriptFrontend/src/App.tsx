@@ -62,6 +62,7 @@ function App() {
                     <Route path="/home" element={<Home />} />
                     <Route path="/builder" element={<DeckBuilder />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/lobby" element={<Lobby />} />
                 </Routes>
             </div>
         </Router>

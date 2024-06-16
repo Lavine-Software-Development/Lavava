@@ -28,6 +28,7 @@ class WebSocketServer():
             del self.locks[websocket]
 
     async def process_message(self, websocket,data):
+        print("Received message: ", data)
         player_type = data["type"]
         if player_type == "test":
             await websocket.send("test received!")
@@ -39,10 +40,11 @@ class WebSocketServer():
         if player_type == "HOST":
             player_count = int(player_count)
             self.waiting_players = Batch(player_count, mode, websocket, abilities)
-            await websocket.send("Players may join")
+            message = json.dumps({"msg": "Players may join"})
         elif player_type == "JOIN":
             if self.waiting_players:
-                await websocket.send("JOINED")
+                message = json.dumps({"msg": "JOINED"})
+                await websocket.send(message)
                 if message := self.waiting_players.add_player(websocket, abilities):
                     await self.problem(websocket, message)
             else:
@@ -86,8 +88,9 @@ class WebSocketServer():
         
     async def start_game(self, batch):
         tasks = []
-        print("start game")
+        print("start game", len(batch.connections))
         tasks.append(asyncio.create_task(self.send_ticks(batch)))
+
         for i, websocket in enumerate(batch.connections):
             tasks.append(asyncio.create_task(self.threaded_client_in_game(i, websocket, batch)))
         

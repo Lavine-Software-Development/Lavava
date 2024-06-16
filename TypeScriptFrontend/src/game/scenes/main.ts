@@ -51,11 +51,13 @@ export class MainScene extends Scene {
     private playerCount: number;
     private gameType: string;
     private graphics: Phaser.GameObjects.Graphics;
+    private board: BoardJSON;
 
     constructor(config, props) {
         super({ key: "MainScene" });
         console.log("config: ", config);
-        console.log("props: ", props);
+        console.log("props yeaaa: ", props);
+        this.board = props;
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
@@ -106,15 +108,15 @@ export class MainScene extends Scene {
     create(): void {
         this.graphics = this.add.graphics();
         const main = new Main();
-        main.setup(board_data as BoardJSON);
+        main.setup(this.board);
         for (let i in main.nodes) {
             // console.log(main.nodes[i].pos);
             let node = main.nodes[i];
             // randomly select an owner from the other players
-            node.owner =
-                this.otherPlayers[
-                    Math.floor(Math.random() * this.otherPlayers.length)
-                ];
+            // node.owner =
+            //     this.otherPlayers[
+            //         Math.floor(Math.random() * this.otherPlayers.length)
+            //     ];
             node.scene = this;
             // node.owner = this.mainPlayer;
             this.nodes[i] = node;
@@ -210,9 +212,6 @@ export class MainScene extends Scene {
         this.abilityManager.draw(this);
 
         // Iterate over the values of the dictionary to draw each node
-        Object.values(this.nodes).forEach((node) => node.draw());
-
-        Object.values(this.edges).forEach((edge) => edge.draw());
 
         if (this.abilityManager.ability?.visual.name == "Nuke") {
             // Filter the dictionary values to find the capitals
@@ -249,6 +248,7 @@ export class MainScene extends Scene {
         );
 
         if (hoverResult !== false) {
+            console.log("hovering");
             this.highlight.set(hoverResult[0], hoverResult[1]);
         } else {
             this.highlight.wipe();
@@ -261,10 +261,12 @@ export class MainScene extends Scene {
             if (node.pos.distance(position) < node.size) {
                 // Assuming a proximity check
                 if (this.ps === PSE.START_SELECTION) {
+                    console.log("start selection");
                     if (unownedNode([node])) {
                         return [node, KeyCodes.SPAWN_CODE];
                     }
                 } else if (this.ps === PSE.PLAY) {
+                    console.log("play");
                     let validation = this.abilityManager.validate(node);
                     if (validation) {
                         return validation;
@@ -335,16 +337,18 @@ export class MainScene extends Scene {
     }
 
     update_board(new_data) {
+        console.log("update");
         if (new_data != "Players may join") {
-            new_data = JSON.parse(new_data);
+            // console.log(new_data);
+            // new_data = JSON.parse(new_data);
             if (!("abilities" in new_data)) {
-                this.ps = new_data["player"]["ps"] - 1;
+                // this.ps = new_data["player"]["ps"];
+                console.log("after");
                 this.timer = new_data["countdown_timer"];
-
                 this.parse(this.nodes, new_data["board"]["nodes"]);
                 this.parse(this.edges, new_data["board"]["edges"]);
             } else {
-                console.log(new_data);
+                // console.log(new_data);
             }
         }
     }
