@@ -137,9 +137,9 @@ export class Node extends IDItem {
             this.state.draw(this._scene, this.size, this.pos);
     
             if (this.state instanceof CannonState) {
-                if (this.state.selected) {
+                if (this.state.selected && this._scene) {
                     this.cannonGraphics.clear();
-                    let mousePos = this.scene.input.activePointer.position;
+                    let mousePos = this._scene.input.activePointer.position;
                     // Calculate angle between the spot and the mouse cursor
                     let dx = mousePos.x - this.pos.x;
                     let dy = mousePos.y - this.pos.y;

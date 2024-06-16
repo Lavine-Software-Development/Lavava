@@ -84,6 +84,7 @@ export class MainScene extends Scene {
         this.load.image('Rage', 'Rage.png');
         this.load.image('Spawn', 'Spawn.png');
         this.load.image('Zombie', 'Zombie.png');
+        this.load.image('Pump', 'Pump.png');
     }
 
     create(): void {
@@ -244,6 +245,11 @@ export class MainScene extends Scene {
                     return this.abilityManager.validate(edge);
                 }
             }
+        }
+
+        let ability = this.abilityManager.ability_validate(position);
+        if (ability) {
+            return ability;
         }
 
         return false;

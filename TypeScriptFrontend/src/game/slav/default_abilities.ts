@@ -22,8 +22,8 @@ const CANNON_V = createAbilityVisual("Cannon", "cannon", Colors.GREY, "E");
 const PUMP_V = createAbilityVisual("Pump", "circle", Colors.DARK_PURPLE, "U");
 
 // Create instances of EventVisual using the factory function
-const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.DARK_PINK);
-const PUMP_DRAIN_V = createEventVisual("Pump Drain", Colors.YELLOW);
+const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.PINK);
+const PUMP_DRAIN_V = createEventVisual("Pump Drain", Colors.DARK_PURPLE);
 const STANDARD_LEFT_CLICK_V = createEventVisual("Switch", Colors.GREY);
 const STANDARD_RIGHT_CLICK_V = createEventVisual("Swap", Colors.GREY);
 

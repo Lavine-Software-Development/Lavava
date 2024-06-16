@@ -90,7 +90,7 @@ export class CannonState extends State {
     ) {
         super(name);
         this.angle = angle;
-        this.selected = true;
+        this.selected = false;
     }
 }
 

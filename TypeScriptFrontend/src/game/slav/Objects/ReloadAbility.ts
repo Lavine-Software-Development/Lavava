@@ -18,6 +18,8 @@ export class ReloadAbility extends IDItem {
     numberText: Phaser.GameObjects.Text;
     imageGreyed: Phaser.GameObjects.Image;
     imageVisible: Phaser.GameObjects.Image;
+    pointerTriangle: Phaser.GameObjects.Image;
+    pointerTriangleText: Phaser.GameObjects.Text;
 
     constructor(
         visual: AbilityVisual,
@@ -51,7 +53,22 @@ export class ReloadAbility extends IDItem {
         return this.remaining > 0 && this.percentage === 1.0;
     }
 
-    draw(scene, x, y, isSelected) {
+    overlapsWithPosition(position: Phaser.Math.Vector2) {
+        // Assuming pointerTriangle has x, y, width, and height properties
+        if (this.pointerTriangle) {
+            const bounds = new Phaser.Geom.Rectangle(
+                this.pointerTriangle.x - this.pointerTriangle.originX * this.pointerTriangle.width,
+                this.pointerTriangle.y - this.pointerTriangle.originY * this.pointerTriangle.height,
+                this.pointerTriangle.width,
+                this.pointerTriangle.height
+            );
+
+            return bounds.contains(position.x, position.y);
+        }
+        return false;
+    }
+
+    draw(scene, x, y, isSelected, clickable) {
         this.graphics.clear();
         const squareSize = 150;  // Size of the square
         const borderThickness = 3;  // Thickness of the border
@@ -95,6 +112,36 @@ export class ReloadAbility extends IDItem {
                 strokeThickness: 3
             });
         }
+
+        if (clickable) {
+            if (!this.pointerTriangle) {
+                // If clickable is true and the pointerTriangle doesn't exist, create it
+                this.pointerTriangle = scene.add.sprite(x - 30, y + squareSize / 2, 'filledTriangle');
+                this.pointerTriangle.setTint(Phaser.Display.Color.GetColor(255, 102, 102)); // Light red color
+                this.pointerTriangle.setOrigin(0.5, 0.5);
+                this.pointerTriangle.setScale(4); // Scale up the triangle to make it bigger
+                this.pointerTriangle.angle = 90; // Pointing to the right
+        
+                // Create the text associated with the pointerTriangle
+                let z = 3 - this.credits;  // Calculate the value of z
+                this.pointerTriangleText = scene.add.text(x - 45, y + squareSize / 2, `+${z}`, {
+                    font: 'bold 24px Arial',
+                    fill: '#000000'
+                });
+                this.pointerTriangleText.setOrigin(1, 0.5); // Align right to the triangle, centered vertically
+            }
+        } else {
+            if (this.pointerTriangle) {
+                // If clickable is false and the pointerTriangle exists, destroy both it and the text
+                this.pointerTriangle.destroy();
+                this.pointerTriangle = null; // Clean up by setting to null
+        
+                // Destroy the text as well
+                this.pointerTriangleText.destroy();
+                this.pointerTriangleText = null;
+            }
+        }
+        
     }
     
     addImageToScene(scene, x, y, imageKey, squareSize, percentage) {

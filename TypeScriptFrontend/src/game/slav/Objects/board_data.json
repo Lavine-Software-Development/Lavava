@@ -151,15 +151,15 @@
                 "effects": [],
                 "is_port": true,
                 "pos": [281.44955300127714, 380],
-                "state": 0,
-                "value": 0
+                "state": 6,
+                "value": 250
             },
             "13": {
                 "effects": [],
                 "is_port": false,
                 "pos": [564.463601532567, 455],
-                "state": 0,
-                "value": 0
+                "state": 5,
+                "value": 50
             },
             "14": {
                 "effects": [],
