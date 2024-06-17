@@ -10,6 +10,10 @@ export class State {
         this.graphic_override = gaphic_override;
     }
 
+    select(on: boolean) {
+        
+    }
+
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
         // Draw the state
     }
@@ -91,6 +95,10 @@ export class CannonState extends State {
         super(name);
         this.angle = angle;
         this.selected = false;
+    }
+
+    select(on: boolean) {
+        this.selected = on;
     }
 }
 

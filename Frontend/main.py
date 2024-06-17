@@ -1,5 +1,6 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
+from constants import PUMP_CODE
 from constants import BURN_CODE, CAPITAL_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, BRIDGE_CODE, CANNON_CODE, STANDARD_LEFT_CLICK, RESTART_GAME_VAL
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
@@ -69,6 +70,7 @@ class Main:
         pc = start_data["player_count"]
         n, e = start_data["board"]["nodes"], start_data["board"]["edges"]
         abi, credits = start_data["abilities"]['values'], start_data["abilities"]['credits']
+        abi.pop(PUMP_CODE)
 
         self.my_player = MyPlayer(str(pi), PLAYER_COLORS[pi])
         self.players = {id: OtherPlayer(str(id), PLAYER_COLORS[id]) for id in range(pc) if id != pi} | {pi: self.my_player}

@@ -1,13 +1,12 @@
 from collections import defaultdict
 
 from node import Node
+from ae_effects import make_event_effects
 from event import Event
 from jsonable import JsonableTracked
 from constants import (
     CANNON_SHOT_CODE,
     DYNAMIC_EDGE,
-    GROWTH_STOP,
-    MINIMUM_TRANSFER_VALUE,
     SCREEN_WIDTH,
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
@@ -15,13 +14,14 @@ from constants import (
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
     PUMP_DRAIN_CODE,
-    NODE_MINIMUM_VALUE,
+    EVENT_CODES
 )
 from helpers import do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from tracker import Tracker
 from tracking_decorator.track_changes import track_changes
+from ae_validators import make_effect_validators
 
 
 @track_changes("nodes_r", "edges_r")
@@ -30,7 +30,6 @@ class Board(JsonableTracked):
         self.gs = gs
         self.nodes: list[Node] = []
         self.edges = []
-        self.events = self.make_events_dict()
         self.edge_dict = defaultdict(set)
         self.extra_edges = 0
         self.tracker = Tracker()
@@ -72,6 +71,7 @@ class Board(JsonableTracked):
         self.id_dict = {node.id: node for node in self.nodes} | {
             edge.id: edge for edge in self.edges
         }
+        self.events = self.make_events_dict()
         self.extra_edges = 0
         self.tracker.reset()
         self.player_capitals.clear()
@@ -194,40 +194,11 @@ class Board(JsonableTracked):
 
     def click(self, id, player, key):
         self.id_dict[id].click(player, key)
-
-    def cannon_shot_check(self, player, data):
-        cannon, target = self.id_dict[data[0]], self.id_dict[data[1]]
-        can_shoot = cannon.state_name == "cannon" and cannon.owner == player
-        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full())
-        return can_shoot and can_accept
-
-    def cannon_shot(self, player, data):
-        cannon, target = self.id_dict[data[0]], self.id_dict[data[1]]
-        if target.owner == player:
-            transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
-        else:
-            transfer = cannon.value - MINIMUM_TRANSFER_VALUE
-        cannon.value -= transfer
-        target.delivery(transfer, player)
-
-    def pump_drain(self, player, data):
-        pump = self.id_dict[data[0]]
-        player.pump_increase_abilities()
-        pump.value = NODE_MINIMUM_VALUE
     
-    def pump_drain_check(self, player, data):
-        pump = self.id_dict[data[0]]
-        return pump.state_name == "pump" and pump.owner == player and pump.full()
-
     def make_events_dict(self):
-        return {
-            CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot),
-            PUMP_DRAIN_CODE: Event(self.pump_drain_check, self.pump_drain),
-            STANDARD_LEFT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_left_click(player),
-                                        lambda player, data: self.id_dict[data[0]].switch()),
-            STANDARD_RIGHT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_right_click(player), 
-                                        lambda player, data: self.id_dict[data[0]].click_swap()),
-        }
+        validators = make_effect_validators(self)
+        effects = make_event_effects(self)
+        return {code: Event(validators[code], effects[code]) for code in EVENT_CODES}
     
     def player_node_count(self, player_count):
         for node in self.nodes:

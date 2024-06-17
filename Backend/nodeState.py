@@ -2,7 +2,7 @@ from jsonable import JsonableSkeleton
 from constants import (
     GROWTH_RATE,
     MINIMUM_TRANSFER_VALUE,
-    CAPITAL_SHRINK_SPEED,
+    STANDARD_SHRINK_SPEED,
     MINE_DICT,
     GROWTH_STOP,
     GREY,
@@ -107,14 +107,30 @@ class CannonState(DefaultState):
 
 class PumpState(DefaultState):
 
-    def __init__(self, id):
-        AbstractState.__init__(self, id, False, False, False, 6)
+    def __init__(self, node):
+        AbstractState.__init__(self, node, False, False, False, 6)
+        self.prep_shrink()
+
+    def prep_shrink(self):
+        self.draining = False
+        self.shrink_count = math.floor(
+            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
+        )
 
     def grow(self, multiplier):
+        if self.draining:
+            self.drain()
         return 0
     
-    def intake(self, amount, multiplier, contested):
-        return super().intake(amount, multiplier, contested) / 2
+    def drain(self):
+        if self.shrink_count == 0:
+            self.prep_shrink()
+            return 0
+        self.shrink_count -= 1
+        return STANDARD_SHRINK_SPEED
+    
+    def intake(self, amount, incoming_player):
+        return super().intake(amount, incoming_player) / 2
 
 class CapitalState(DefaultState):
     def __init__(self, node, reset=True, update_on_new_owner=False):
@@ -122,7 +138,7 @@ class CapitalState(DefaultState):
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
-            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED)
+            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
         )
 
     def grow(self):
@@ -135,7 +151,7 @@ class CapitalState(DefaultState):
             self.capitalized = True
             return 0
         self.shrink_count -= 1
-        return CAPITAL_SHRINK_SPEED
+        return STANDARD_SHRINK_SPEED
     
     def accept_intake(self, incoming_player):
         return self.capitalized and super().accept_intake(incoming_player)

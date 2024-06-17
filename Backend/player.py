@@ -9,8 +9,8 @@ from constants import (
     CAPITAL_BONUS,
     BREAKDOWNS,
 )
-from ability_validators import make_ability_validators
-from ability_effects import make_ability_effects
+from ae_validators import make_ability_validators
+from ae_effects import make_ability_effects
 from player_state import PlayerState
 from jsonable import Jsonable
 
@@ -25,6 +25,7 @@ class DefaultPlayer(Jsonable):
 
     def set_abilities(self, abilities, board):
         validators = make_ability_validators(board, self)
+
         effects = make_ability_effects(board)
         for ab in abilities:
             self.abilities[ab] = ReloadAbility(ab, validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
@@ -65,11 +66,7 @@ class DefaultPlayer(Jsonable):
 
     def check_capital_win(self):
         return self.full_capital_count == CAPITAL_WIN_COUNT
-    
-    def pump_increase_abilities(self):
-        for ability in self.abilities:
-            ability.remaining += 1
-    
+
 
 class MoneyPlayer(DefaultPlayer):
     def default_values(self):
