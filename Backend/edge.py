@@ -73,8 +73,18 @@ class Edge(JsonableTracked):
 
     def flow(self):
         amount_transferred = self.from_node.send_amount()
-        self.to_node.delivery(amount_transferred, self.from_node.owner)
+        amount_changed = self.to_node.delivery_value_update(amount_transferred, self.contested)
+        self.to_node.value += amount_changed
+        killed = self.to_node.delivery_status_update(self.from_node.owner)
         self.from_node.value -= self.from_node.lost_amount(amount_transferred, self.contested)
+
+        self.spread_effects(killed)
+
+    def spread_effects(self, killed):
+        for key, effect in self.from_node.effects.items():
+            if key not in self.to_node.effects and effect.past_incubation:
+                if effect.can_spread(killed, self.to_node.owner):
+                    self.to_node.set_state(key, effect.spread())
 
     def check_status(self):
         pass
