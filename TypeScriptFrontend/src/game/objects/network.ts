@@ -120,7 +120,7 @@ export class Network {
         };
 
         this.socket.onmessage = (event) => {
-            console.log("Received message: ", event.data);
+            // console.log("Received message: ", event.data);
             let data = JSON.parse(event.data);
             if (data.hasOwnProperty("msg")) {
                 console.log("Message: ", data.msg);
@@ -150,7 +150,9 @@ export class Network {
     sendMessage(message: string): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             console.log("Sending message: ", message);
-            this.socket.send(message);
+            console.log("Socket: ", this.socket);
+            const result = this.socket.send(message);
+            console.log("Result: ", result);
         } else if (
             this.socket &&
             this.socket.readyState === WebSocket.CONNECTING

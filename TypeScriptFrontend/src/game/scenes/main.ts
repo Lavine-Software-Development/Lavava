@@ -127,7 +127,7 @@ export class MainScene extends Scene {
             this.edges[i] = edge;
         }
         this.highlight = new Highlight(this, this.mainPlayer.color);
-        this.ps = PSE.PLAY;
+        this.ps = PSE.START_SELECTION;
         const ev = makeEventValidators(this.mainPlayer);
         const ab = makeAbilityValidators(
             this.mainPlayer,
@@ -248,7 +248,6 @@ export class MainScene extends Scene {
         );
 
         if (hoverResult !== false) {
-            console.log("hovering");
             this.highlight.set(hoverResult[0], hoverResult[1]);
         } else {
             this.highlight.wipe();
@@ -261,12 +260,10 @@ export class MainScene extends Scene {
             if (node.pos.distance(position) < node.size) {
                 // Assuming a proximity check
                 if (this.ps === PSE.START_SELECTION) {
-                    console.log("start selection");
                     if (unownedNode([node])) {
                         return [node, KeyCodes.SPAWN_CODE];
                     }
                 } else if (this.ps === PSE.PLAY) {
-                    console.log("play");
                     let validation = this.abilityManager.validate(node);
                     if (validation) {
                         return validation;
@@ -337,13 +334,13 @@ export class MainScene extends Scene {
     }
 
     update_board(new_data) {
-        console.log("update");
+        // console.log("update");
         if (new_data != "Players may join") {
             // console.log(new_data);
             // new_data = JSON.parse(new_data);
             if (!("abilities" in new_data)) {
                 // this.ps = new_data["player"]["ps"];
-                console.log("after");
+                // console.log("after");
                 this.timer = new_data["countdown_timer"];
                 this.parse(this.nodes, new_data["board"]["nodes"]);
                 this.parse(this.edges, new_data["board"]["edges"]);

@@ -32,7 +32,7 @@ class ServerGame(Jsonable):
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
-
+        print(player.ps.state, PSE.START_SELECTION)
         if player.ps.state == PSE.START_SELECTION:
             if key == SPAWN_CODE:
                 data_items = [self.board.id_dict[d] for d in data]
@@ -42,7 +42,9 @@ class ServerGame(Jsonable):
                 return False
         else:  
             new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
+            print("sign")
             player.use_ability(key, new_data)
+            print("huh")
         
     def event(self, key, player_id, data):
         player = self.player_dict[player_id]

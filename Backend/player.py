@@ -31,7 +31,10 @@ class DefaultPlayer(Jsonable):
         self.ps.next()
 
     def use_ability(self, key, data) -> Optional[dict]:
+        print("one")
+        print(self.abilities, key)
         if self.abilities[key].can_use(data):
+            print("two")
             self.abilities[key].use(data)
 
     def default_values(self):

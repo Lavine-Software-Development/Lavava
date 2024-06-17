@@ -53,6 +53,8 @@ class Batch:
         return self.game.player_dict[player].tick_json
     
     def tick(self):
+        # print(self.game.gs.value, GS.START_SELECTION.value)
+
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
         self.set_group_tick_repr()
@@ -75,9 +77,12 @@ class Batch:
         elif key == ELIMINATE_VAL:
             self.game.eliminate(player)
         elif key in ALL_ABILITIES:
+            print("ABILITY")
             self.game.effect(key, player, data['items'])
         elif key in EVENTS:
+            print("EVENT")
             self.game.event(key, player, data['items'])
         else:
             print("NOT ALLOWED")
+        print("Done processing")
         
