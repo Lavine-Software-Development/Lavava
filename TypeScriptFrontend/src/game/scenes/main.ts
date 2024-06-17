@@ -106,7 +106,7 @@ export class MainScene extends Scene {
         this.network.connectWebSocket();
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
-        const ev = makeEventValidators(this.mainPlayer);
+        const ev = makeEventValidators(this.mainPlayer, this.nodes, this.edges);
         const ab = makeAbilityValidators(
             this.mainPlayer,
             this.nodes,

@@ -28,6 +28,19 @@ const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     );
 };
 
+const checkNewEdge = (nodeFromId: number, nodeToId: number, nodes: Node[], edges: Edge[]): boolean => {
+
+    const newLine = new Phaser.Geom.Line(nodes[nodeFromId].pos.x, nodes[nodeFromId].pos.y, nodes[nodeToId].pos.x, nodes[nodeToId].pos.y);
+    // Check for overlaps with all other edges
+    for (let edge of edges) {
+        if (hasAnySame(nodeFromId, nodeToId, edge.fromNode.id, edge.toNode.id) || 
+            Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
+            return false;
+        }
+    }
+    return true;
+};
+
 function attackValidators(nodes: Node[], player: OtherPlayer) {
     return function capitalRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
@@ -118,18 +131,6 @@ function newEdgeValidator(
     edges: Edge[],
     player: OtherPlayer
 ): ValidatorFunc {
-    const checkNewEdge = (nodeFromId: number, nodeToId: number): boolean => {
-
-        const newLine = new Phaser.Geom.Line(nodes[nodeFromId].pos.x, nodes[nodeFromId].pos.y, nodes[nodeToId].pos.x, nodes[nodeToId].pos.y);
-        // Check for overlaps with all other edges
-        for (let edge of edges) {
-            if (hasAnySame(nodeFromId, nodeToId, edge.fromNode.id, edge.toNode.id) || 
-                Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
-                return false;
-            }
-        }
-        return true;
-    };
 
     const newEdgeStandard = (data: Node[]): boolean => {
         if (data.length === 1) {
@@ -140,7 +141,7 @@ function newEdgeValidator(
             const secondNode = data[1];
             return (
                 firstNode.id !== secondNode.id &&
-                checkNewEdge(firstNode.id, secondNode.id)
+                checkNewEdge(firstNode.id, secondNode.id, nodes, edges)
             );
         }
     };
@@ -173,7 +174,7 @@ export function makeAbilityValidators(
     return { ...abilityValidators, ...playerValidatorsMap };
 }
 
-export function makeEventValidators(player: OtherPlayer): {
+export function makeEventValidators(player: OtherPlayer, nodes: Node[], edges: Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {
@@ -186,7 +187,8 @@ export function makeEventValidators(player: OtherPlayer): {
             );
         } else if (data.length > 1) {
             const secondNode = data[1] as Node;
-            return !(secondNode.owner === player && secondNode.full);
+            return !(secondNode.owner === player && secondNode.full) &&
+            checkNewEdge(data[0].id, data[1].id, nodes, edges);
         }
         return false;
     }
