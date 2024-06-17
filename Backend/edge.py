@@ -13,14 +13,14 @@ class Edge(JsonableTracked):
     to_node: Node
     from_node: Node
 
-    def __init__(self, to_node, from_node, id, initial=False, given_track_values=set()):
+    def __init__(self, to_node, from_node, id, given_track_values=set()):
         self.item_type = EDGE
         self.to_node = to_node
         self.from_node = from_node
         self.on = False
         self.flowing = False
         self.popped = False
-        self.update_nodes(initial)
+        self.update_nodes()
         self.dynamic = False
         self.type = EDGE
 
@@ -30,9 +30,9 @@ class Edge(JsonableTracked):
     def __str__(self):
         return str(self.id)
 
-    def update_nodes(self, initial):
-        self.to_node.new_edge(self, "incoming", initial)
-        self.from_node.new_edge(self, "outgoing", initial)
+    def update_nodes(self):
+        self.to_node.new_edge(self)
+        self.from_node.new_edge(self)
 
     def valid_left_click(self, clicker):
         return self.controlled_by(clicker)
@@ -64,7 +64,7 @@ class Edge(JsonableTracked):
                 self.pop()
 
     def flow_allowed(self):
-        return self.to_node.accept_delivery(self.owner)
+        return self.to_node.state.accept_intake(self.owner)
 
     def pop(self):
         self.popped = True
