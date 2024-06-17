@@ -15,7 +15,6 @@ from constants import (
     DYNAMIC_EDGE,
     ZOMBIE_FULL_SIZE,
 )
-from playerEffect import PlayerEnraged
 
 def make_bridge(buy_new_edge, bridge_type):
     def bridge_effect(data, player):

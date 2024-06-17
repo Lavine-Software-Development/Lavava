@@ -161,7 +161,7 @@ class Node(JsonableTracked):
 
     def delivery(self, amount, player):
         self.value += self.state.intake(amount, player)
-        self.delivery_status_update(player)
+        return self.delivery_status_update(player)
         
     def delivery_status_update(self, player):
         if self.state.flow_ownership:
