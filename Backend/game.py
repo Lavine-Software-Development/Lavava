@@ -4,7 +4,7 @@ from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GSE
 from board import Board
 from map_builder import MapBuilder
-from Backend.ae_effects import make_ability_effects
+from ae_effects import make_ability_effects
 from player import DefaultPlayer
 from node import Node
 

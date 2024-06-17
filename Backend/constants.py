@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from Frontend.constants import EVENT_CODES
-
 @dataclass(frozen=True)
 class AbilityBreakdown:
     letter: str

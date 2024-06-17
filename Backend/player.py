@@ -9,8 +9,8 @@ from constants import (
     CAPITAL_BONUS,
     BREAKDOWNS,
 )
-from Backend.ae_validators import make_ability_validators
-from Backend.ae_effects import make_ability_effects
+from ae_validators import make_ability_validators
+from ae_effects import make_ability_effects
 from player_state import PlayerState
 from jsonable import Jsonable
 

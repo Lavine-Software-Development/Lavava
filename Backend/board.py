@@ -30,7 +30,6 @@ class Board(JsonableTracked):
         self.gs = gs
         self.nodes: list[Node] = []
         self.edges = []
-        self.events = self.make_events_dict()
         self.edge_dict = defaultdict(set)
         self.extra_edges = 0
         self.tracker = Tracker()
@@ -72,6 +71,7 @@ class Board(JsonableTracked):
         self.id_dict = {node.id: node for node in self.nodes} | {
             edge.id: edge for edge in self.edges
         }
+        self.events = self.make_events_dict()
         self.extra_edges = 0
         self.tracker.reset()
         self.player_capitals.clear()
