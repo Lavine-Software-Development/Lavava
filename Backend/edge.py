@@ -64,7 +64,7 @@ class Edge(JsonableTracked):
                 self.pop()
 
     def flow_allowed(self):
-        return self.to_node.accept_delivery(self.owner)
+        return self.to_node.state.accept_intake(self.owner)
 
     def pop(self):
         self.popped = True

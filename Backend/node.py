@@ -23,7 +23,7 @@ class Node(JsonableTracked):
 
     def __init__(self, id, pos):
 
-        self.value = 0
+        self.value: float = 0
         self.owner = None
         self.item_type = NODE
         self.edges = set()
@@ -57,21 +57,21 @@ class Node(JsonableTracked):
     def new_state(self, state_name, data=None):
         self.updated = True
         if state_name == "default":
-            return DefaultState(self.id)
+            return DefaultState(self)
         elif state_name == "mine":
             # if data is True and mode.MODE == 3:
             self.port_count = 3
-            return MineState(self.id, self.absorbing, data)
+            return MineState(self, self.absorbing, data)
         elif state_name == "zombie":
-            return ZombieState(self.id)
+            return ZombieState(self)
         elif state_name == "capital":
             if data:
-                return StartingCapitalState(self.id)
-            return CapitalState(self.id)
+                return StartingCapitalState(self)
+            return CapitalState(self)
         elif state_name == "cannon":
-            return CannonState(self.id)
+            return CannonState(self)
         else:
-            return DefaultState(self.id)
+            return DefaultState(self)
 
 
     def new_effect(self, effect_name):
@@ -147,17 +147,9 @@ class Node(JsonableTracked):
             ):
                 edge.to_node.set_state("poison")
 
-    def grow(self):
-        if self.can_grow():
-            self.value += self.value_grow()
+    def tick(self):
+        self.value += self.state.grow()
         self.effects_update()
-
-    def value_grow(self):
-        return self.state.grow(self.grow_multiplier)
-
-    def can_grow(self):
-        if self.state.can_grow(self.value, self.grow_multiplier):
-            return True
 
     def effects_update(self):
 
@@ -186,24 +178,17 @@ class Node(JsonableTracked):
                         neighbor.set_state(key)
 
     def delivery(self, amount, player):
-        self.value += self.delivery_value_update(amount, player != self.owner)
+        self.value += self.state.intake(amount, player)
         self.delivery_status_update(player)
-
-    def delivery_value_update(self, amount, contested):
-        return self.state.intake(
-            amount, self.intake_multiplier, contested)
         
     def delivery_status_update(self, player):
         if self.state.flow_ownership:
             self.owner = player
-        if self.state.killed(self.value):
+        if self.state.killed():
             self.capture(player)
 
-    def accept_delivery(self, player):
-        return self.state.accept_intake(player != self.owner, self.value)
-
     def send_amount(self):
-        return self.state.expel(self.expel_multiplier, self.value)
+        return self.state.expel()
     
     def lost_amount(self, amount, contested):
         return amount
@@ -219,7 +204,7 @@ class Node(JsonableTracked):
             self.updated = True
 
     def capture(self, player):
-        self.value = self.state.capture_event()(self.value)
+        self.value = self.state.capture_event()
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()
