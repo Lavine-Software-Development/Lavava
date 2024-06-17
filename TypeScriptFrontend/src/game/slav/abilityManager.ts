@@ -5,6 +5,7 @@ import { Event } from "./Objects/event";
 import { Node } from "./Objects/node";
 import { phaserColor } from "./utilities";
 import { Colors } from "./constants";
+import { ClickType } from "./enums";
 
 export class AbstractAbilityManager {
     private abilities: { [key: number]: ReloadAbility };
@@ -122,7 +123,7 @@ export class AbstractAbilityManager {
     validate(item: IDItem): [IDItem, number] | false {
         if (
             this.event &&
-            item.type === this.event.clickType &&
+            (item.type === this.event.clickType || item.type === ClickType.ABILITY) &&
             this.event.verificationFunc(this.clicks.concat([item]))
         ) {
             return [item, this.mode!]; // Assuming mode is set
@@ -137,6 +138,20 @@ export class AbstractAbilityManager {
                 const ev = this.events[code];
                 if (item.type === ev.clickType && ev.verificationFunc([item])) {
                     return [item, parseInt(code)];
+                }
+            }
+        }
+        return false;
+    }
+
+    ability_validate(position: Phaser.Math.Vector2): [IDItem, number] | false {
+        // loop through all the abilities values, and pass them into validate
+        for (const key in this.abilities) {
+            const ability = this.abilities[key];
+            if (ability.overlapsWithPosition(position)) {
+                const item = this.validate(ability);
+                if (item) {
+                    return item;
                 }
             }
         }
@@ -183,7 +198,7 @@ export class AbstractAbilityManager {
                 this.abilityText.setPosition(x, y);
             }
             if (
-                this.ability.visual.name == "Bridge" &&
+                this.ability?.visual.name == "Bridge" &&
                 this.clicks.length > 0
             ) {
                 this.BridgeGraphics.clear();
@@ -204,6 +219,7 @@ export class AbstractAbilityManager {
                 const color = phaserColor(Colors.YELLOW);
                 this.drawArrow(startX, startY, normX, normY, magnitude, color);
             }
+
         }
 
         let y_position = 20;
@@ -213,7 +229,8 @@ export class AbstractAbilityManager {
     
         for (let key in this.abilities) {
             const isSelected = this.mode === parseInt(key);
-            this.abilities[key].draw(scene, x_position, y_position, isSelected);
+            let clickable = this.event?.visual.name == "Pump Drain" && this.abilities[key].credits < 3;
+            this.abilities[key].draw(scene, x_position, y_position, isSelected, clickable);
             y_position += squareSize + spacing;  // Move down for the next square
         }
     }

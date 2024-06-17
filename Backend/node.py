@@ -10,7 +10,7 @@ from constants import (
     AUTO_EXPAND,
     BLACK,
 )
-from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState
+from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState, PumpState
 from nodeEffect import Poisoned, NodeEnraged
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
@@ -71,6 +71,8 @@ class Node(JsonableTracked):
             return CapitalState(self)
         elif state_name == "cannon":
             return CannonState(self)
+        elif state_name == "pump":
+            return PumpState(self)
         else:
             return DefaultState(self)
 

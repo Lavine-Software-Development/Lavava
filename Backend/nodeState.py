@@ -105,6 +105,16 @@ class CannonState(DefaultState):
     def grow(self):
         return 0
 
+class PumpState(DefaultState):
+
+    def __init__(self, id):
+        AbstractState.__init__(self, id, False, False, False, 6)
+
+    def grow(self, multiplier):
+        return 0
+    
+    def intake(self, amount, multiplier, contested):
+        return super().intake(amount, multiplier, contested) / 2
 
 class CapitalState(DefaultState):
     def __init__(self, node, reset=True, update_on_new_owner=False):

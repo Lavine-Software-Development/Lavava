@@ -1,4 +1,4 @@
-from constants import MINIMUM_TRANSFER_VALUE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE
+from constants import MINIMUM_TRANSFER_VALUE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
 
 
 def no_click(data):
@@ -75,6 +75,7 @@ def validators_needing_player(player):
         FREEZE_CODE: dynamic_edge_own_either,
         ZOMBIE_CODE: my_node,
         CANNON_CODE: my_node,
+        PUMP_CODE: my_node,
     }
 
 

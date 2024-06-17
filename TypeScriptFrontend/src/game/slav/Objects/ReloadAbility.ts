@@ -2,8 +2,9 @@ import { AbilityVisual } from "../immutable_visuals"; // Assuming these are defi
 import { ClickType } from "../enums"; // Assuming this is defined
 import { ValidationFunction } from "../types"; // Assuming this is defined
 import { phaserColor } from "../utilities";
+import { IDItem } from "./idItem";
 
-export class ReloadAbility {
+export class ReloadAbility extends IDItem {
     visual: AbilityVisual;
     clickCount: number;
     clickType: ClickType;
@@ -17,6 +18,8 @@ export class ReloadAbility {
     numberText: Phaser.GameObjects.Text;
     imageGreyed: Phaser.GameObjects.Image;
     imageVisible: Phaser.GameObjects.Image;
+    pointerTriangle: Phaser.GameObjects.Image;
+    pointerTriangleText: Phaser.GameObjects.Text;
 
     constructor(
         visual: AbilityVisual,
@@ -25,10 +28,12 @@ export class ReloadAbility {
         verificationFunc: ValidationFunction,
         credits: number,
         reload: number,
+        id: number,
         remaining: number = 0,
         percentage: number = 1.0,
         scene: Phaser.Scene
     ) {
+        super(id, ClickType.ABILITY);
         this.visual = visual;
         this.clickCount = clickCount;
         this.clickType = clickType;
@@ -48,7 +53,22 @@ export class ReloadAbility {
         return this.remaining > 0 && this.percentage === 1.0;
     }
 
-    draw(scene, x, y, isSelected) {
+    overlapsWithPosition(position: Phaser.Math.Vector2) {
+        // Assuming pointerTriangle has x, y, width, and height properties
+        if (this.pointerTriangle) {
+            const bounds = new Phaser.Geom.Rectangle(
+                this.pointerTriangle.x - this.pointerTriangle.originX * this.pointerTriangle.width,
+                this.pointerTriangle.y - this.pointerTriangle.originY * this.pointerTriangle.height,
+                this.pointerTriangle.width,
+                this.pointerTriangle.height
+            );
+
+            return bounds.contains(position.x, position.y);
+        }
+        return false;
+    }
+
+    draw(scene, x, y, isSelected, clickable) {
         this.graphics.clear();
         const squareSize = 150;  // Size of the square
         const borderThickness = 3;  // Thickness of the border
@@ -92,6 +112,36 @@ export class ReloadAbility {
                 strokeThickness: 3
             });
         }
+
+        if (clickable) {
+            if (!this.pointerTriangle) {
+                // If clickable is true and the pointerTriangle doesn't exist, create it
+                this.pointerTriangle = scene.add.sprite(x - 30, y + squareSize / 2, 'filledTriangle');
+                this.pointerTriangle.setTint(Phaser.Display.Color.GetColor(255, 102, 102)); // Light red color
+                this.pointerTriangle.setOrigin(0.5, 0.5);
+                this.pointerTriangle.setScale(4); // Scale up the triangle to make it bigger
+                this.pointerTriangle.angle = 90; // Pointing to the right
+        
+                // Create the text associated with the pointerTriangle
+                let z = 3 - this.credits;  // Calculate the value of z
+                this.pointerTriangleText = scene.add.text(x - 45, y + squareSize / 2, `+${z}`, {
+                    font: 'bold 24px Arial',
+                    fill: '#000000'
+                });
+                this.pointerTriangleText.setOrigin(1, 0.5); // Align right to the triangle, centered vertically
+            }
+        } else {
+            if (this.pointerTriangle) {
+                // If clickable is false and the pointerTriangle exists, destroy both it and the text
+                this.pointerTriangle.destroy();
+                this.pointerTriangle = null; // Clean up by setting to null
+        
+                // Destroy the text as well
+                this.pointerTriangleText.destroy();
+                this.pointerTriangleText = null;
+            }
+        }
+        
     }
     
     addImageToScene(scene, x, y, imageKey, squareSize, percentage) {

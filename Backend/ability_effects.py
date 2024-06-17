@@ -14,6 +14,7 @@ from constants import (
     EDGE,
     DYNAMIC_EDGE,
     ZOMBIE_FULL_SIZE,
+    PUMP_CODE,
 )
 
 def make_bridge(buy_new_edge, bridge_type):
@@ -68,6 +69,10 @@ def cannon_effect(data, player):
     node = data[0]
     node.set_state("cannon")
 
+def pump_effect(data, player):
+    node = data[0]
+    node.set_state("pump")
+
 def make_ability_effects(board):
     return {
         BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE),
@@ -80,7 +85,8 @@ def make_ability_effects(board):
         CAPITAL_CODE: capital_effect,
         ZOMBIE_CODE: zombie_effect,
         RAGE_CODE: make_rage(board.board_wide_effect),
-        CANNON_CODE: cannon_effect
+        CANNON_CODE: cannon_effect,
+        PUMP_CODE: pump_effect,
     }
 
 

@@ -35,7 +35,7 @@ def login():
         # Create a token
         token = jwt.encode({
             'user': username,
-            'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=72)  # Token expires in 24 hours
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)  # Token expires in 24 hours
         }, app.config['SECRET_KEY'], algorithm="HS256")
         return jsonify({"token": token}), 200
     else:
@@ -99,6 +99,7 @@ def get_abilities():
         {"name": "Capital", "cost": 3},
         {"name": "Nuke", "cost": 3},
         {"name": "Cannon", "cost": 3},
+        {"name": "Pump", "cost": 3},
     ]
     return jsonify({"abilities": abilities, "salary": 15})
 
