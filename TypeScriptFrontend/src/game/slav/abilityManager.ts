@@ -5,6 +5,7 @@ import { Event } from "./Objects/event";
 import { Node } from "./Objects/node";
 import { phaserColor } from "./utilities";
 import { Colors } from "./constants";
+import { ClickType } from "./enums";
 
 export class AbstractAbilityManager {
     private abilities: { [key: number]: ReloadAbility };
@@ -25,6 +26,13 @@ export class AbstractAbilityManager {
         this.BridgeGraphics = scene.add.graphics();
     }
 
+    updateSelection(): void {
+        if (this.clicks.length > 0 && this.clicks[this.clicks.length - 1].type === ClickType.NODE) {
+            let node = this.clicks[this.clicks.length - 1] as Node;
+            node.select(true);
+        }
+    }
+
     inAbilities(key: number): boolean {
         return key in this.abilities;
     }
@@ -35,6 +43,7 @@ export class AbstractAbilityManager {
         }
         this.mode = highlight.usage;
         this.clicks.push(highlight.item!); // Assuming item is always present
+        this.updateSelection();
         if (this.completeCheck(highlight.usage)) {
             const clicks = this.clicks.map((click) => click.id);
             this.backupReset();
@@ -51,6 +60,7 @@ export class AbstractAbilityManager {
             highlight.item
         ) {
             this.clicks.push(highlight.item);
+            this.updateSelection();
             return true;
         }
         return false;
@@ -84,8 +94,14 @@ export class AbstractAbilityManager {
     }
 
     wipe(): void {
+        for (const click of this.clicks) {
+            if (click.type === ClickType.NODE) {
+                let node = click as Node;
+                node.select(false);
+        }
         this.clicks = [];
         this.BridgeGraphics.clear();
+        }
     }
 
     switchTo(key: number): boolean {
