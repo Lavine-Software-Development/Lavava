@@ -2,6 +2,7 @@ from constants import (
     BRIDGE_CODE,
     CANNON_CODE,
     D_BRIDGE_CODE,
+    POISON_TICKS,
     SPAWN_CODE,
     FREEZE_CODE,
     NUKE_CODE,
@@ -15,7 +16,6 @@ from constants import (
     ZOMBIE_FULL_SIZE,
     PUMP_CODE,
 )
-from playerEffect import PlayerEnraged
 
 def make_bridge(buy_new_edge, bridge_type):
     def bridge_effect(data, player):
@@ -33,10 +33,9 @@ def make_nuke(remove_node):
     return nuke_effect
 
 
-def make_rage(rage):
+def make_rage(board_wide_effect):
     def rage_effect(data, player):
-        rage(player, 'rage')
-        player.effects.add(PlayerEnraged())
+        board_wide_effect('rage', player)
     return rage_effect
 
 
@@ -56,7 +55,7 @@ def zombie_effect(data, player):
 
 def poison_effect(data, player):
     edge = data[0]
-    edge.to_node.set_state("poison")
+    edge.to_node.set_state("poison", (player, POISON_TICKS))
 
 def burn_effect(data, player):
     node = data[0]
