@@ -93,9 +93,18 @@ def make_cannon_shot_check(check_new_edge, id_dict):
     return cannon_shot_check
 
 def make_pump_drain_check(id_dict):
+
+    def valid_node(node, player):
+        return node.state_name == "pump" and node.owner == player and node.full()
+    
+    def valid_ability(ability_code, player):
+        return ability_code in player.abilities and player.abilities[ability_code].credits < 3
+
     def pump_drain_check(player, data):
         pump = id_dict[data[0]]
-        return pump.state_name == "pump" and pump.owner == player and pump.full()
+        ability_code = data[1]
+        return valid_node(pump, player) and valid_ability(ability_code, player)
+        
     return pump_drain_check
 
 def make_new_edge_ports(check_new_edge, player):

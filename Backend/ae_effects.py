@@ -59,9 +59,10 @@ def make_cannon_shot(id_dict):
 
 def make_pump_drain(id_dict):
     def pump_drain(player, data):
-        pump = id_dict[data[0]]
-        player.pump_increase_abilities()
-        pump.value = NODE_MINIMUM_VALUE
+        pump_node = id_dict[data[0]]
+        ability_code = data[1]
+        player.abilities[ability_code].credits += 1
+        pump_node.state.draining = True
         
     return pump_drain
 

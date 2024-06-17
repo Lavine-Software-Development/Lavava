@@ -66,11 +66,7 @@ class DefaultPlayer(Jsonable):
 
     def check_capital_win(self):
         return self.full_capital_count == CAPITAL_WIN_COUNT
-    
-    def pump_increase_abilities(self):
-        for ability in self.abilities:
-            ability.remaining += 1
-    
+
 
 class MoneyPlayer(DefaultPlayer):
     def default_values(self):
