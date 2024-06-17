@@ -10,6 +10,7 @@ import {
     GROWTH_STOP,
     AbilityCredits,
     AbilityReloadTimes,
+    NUKE_RANGE,
 } from "../slav/constants";
 import { PlayerStateEnum as PSE } from "../slav/enums";
 import { ReloadAbility } from "../slav/Objects/ReloadAbility";
@@ -95,7 +96,12 @@ export class MainScene extends Scene {
             console.log(main.nodes[i].pos);
             let node = main.nodes[i];
             // randomly select an owner from the other players
-            node.owner = this.otherPlayers[Math.floor(Math.random() * this.otherPlayers.length)];
+            if (node.stateName === "capital") {
+                node.owner = this.mainPlayer;
+            }
+            else {
+                node.owner = this.otherPlayers[Math.floor(Math.random() * this.otherPlayers.length)];
+            }
             node.scene = this;
             this.nodes.push(node);
         }
@@ -107,7 +113,7 @@ export class MainScene extends Scene {
         this.network.connectWebSocket();
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.PLAY;
-        const ev = makeEventValidators(this.mainPlayer, this.nodes, this.edges);
+        const ev = makeEventValidators(this.mainPlayer, this.edges);
         const ab = makeAbilityValidators(
             this.mainPlayer,
             this.nodes,
@@ -185,6 +191,7 @@ export class MainScene extends Scene {
     }
 
     update(): void {
+        this.graphics.clear();
         this.abilityManager.draw(this);
         this.nodes.forEach((node) => node.draw());
         
@@ -193,8 +200,8 @@ export class MainScene extends Scene {
             const capitals = this.nodes.filter((node) => node.stateName === "capital" && node.owner === this.mainPlayer);
             // for each node in capitals, draw a pink hollow circle on the node of the size of its this.value
             capitals.forEach((node) => {
-                this.graphics.lineStyle(6, phaserColor(Colors.PINK), 1);
-                this.graphics.strokeCircle(node.pos.x, node.pos.y, node.size + 4);
+                this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
+                this.graphics.strokeCircle(node.pos.x, node.pos.y, (node.value * NUKE_RANGE));
             });
         }
     }

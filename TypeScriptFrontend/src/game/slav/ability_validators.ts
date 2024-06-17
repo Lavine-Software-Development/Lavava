@@ -29,13 +29,12 @@ const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     );
 };
 
-const checkNewEdge = (nodeFromId: number, nodeToId: number, nodes: Node[], edges: Edge[]): boolean => {
+const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
 
-    const newLine = new Phaser.Geom.Line(nodes[nodeFromId].pos.x, nodes[nodeFromId].pos.y, nodes[nodeToId].pos.x, nodes[nodeToId].pos.y);
+    const newLine = new Phaser.Geom.Line(nodeFrom.pos.x, nodeFrom.pos.y, nodeTo.pos.x, nodeTo.pos.y);
     // Check for overlaps with all other edges
     for (let edge of edges) {
-        if (hasAnySame(nodeFromId, nodeToId, edge.fromNode.id, edge.toNode.id) || 
-            Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
+        if (!hasAnySame(nodeFrom.id, nodeTo.id, edge.fromNode.id, edge.toNode.id) && Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
             return false;
         }
     }
@@ -129,7 +128,6 @@ function playerValidators(player: OtherPlayer): {
 }
 
 function newEdgeValidator(
-    nodes: Node[],
     edges: Edge[],
     player: OtherPlayer
 ): ValidatorFunc {
@@ -143,7 +141,7 @@ function newEdgeValidator(
             const secondNode = data[1];
             return (
                 firstNode.id !== secondNode.id &&
-                checkNewEdge(firstNode.id, secondNode.id, nodes, edges)
+                checkNewEdge(firstNode, secondNode, edges)
             );
         }
     };
@@ -163,8 +161,8 @@ export function makeAbilityValidators(
 ): { [key: string]: ValidatorFunc } {
     const abilityValidators: { [key: string]: ValidatorFunc } = {
         [KeyCodes.SPAWN_CODE]: unownedNode,
-        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(nodes, edges, player),
-        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(nodes, edges, player),
+        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(edges, player),
+        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(edges, player),
         [KeyCodes.BURN_CODE]: standardPortNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
@@ -176,7 +174,7 @@ export function makeAbilityValidators(
     return { ...abilityValidators, ...playerValidatorsMap };
 }
 
-export function makeEventValidators(player: OtherPlayer, nodes: Node[], edges: Edge[]): {
+export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {
@@ -188,9 +186,10 @@ export function makeEventValidators(player: OtherPlayer, nodes: Node[], edges: E
                 firstNode.value > MINIMUM_TRANSFER_VALUE
             );
         } else if (data.length > 1) {
+            const firstNode = data[0] as Node;
             const secondNode = data[1] as Node;
             return !(secondNode.owner === player && secondNode.full) &&
-            checkNewEdge(data[0].id, data[1].id, nodes, edges);
+            checkNewEdge(firstNode, secondNode, edges);
         }
         return false;
     }
