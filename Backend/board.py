@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from ae_effects import make_event_effects
 from event import Event
 from jsonable import JsonableTracked
 from constants import (
@@ -19,6 +20,7 @@ from edge import Edge
 from dynamicEdge import DynamicEdge
 from tracker import Tracker
 from tracking_decorator.track_changes import track_changes
+from ae_validators import make_effect_validators
 
 
 @track_changes("nodes_r", "edges_r")
@@ -193,28 +195,13 @@ class Board(JsonableTracked):
     def click(self, id, player, key):
         self.id_dict[id].click(player, key)
 
-    def cannon_shot_check(self, player, data):
-        cannon, target = self.id_dict[data[0]], self.id_dict[data[1]]
-        can_shoot = cannon.state_name == "cannon" and cannon.owner == player
-        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full())
-        return can_shoot and can_accept
-
-    def cannon_shot(self, player, data):
-        cannon, target = self.id_dict[data[0]], self.id_dict[data[1]]
-        if target.owner == player:
-            transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
-        else:
-            transfer = cannon.value - MINIMUM_TRANSFER_VALUE
-        cannon.value -= transfer
-        target.delivery(transfer, player)
-
     def make_events_dict(self):
+        validators = make_effect_validators(self)
+        effects = make_event_effects(self)
         return {
-            CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot),
-            STANDARD_LEFT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_left_click(player),
-                                        lambda player, data: self.id_dict[data[0]].switch()),
-            STANDARD_RIGHT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_right_click(player), 
-                                        lambda player, data: self.id_dict[data[0]].click_swap()),
+            CANNON_SHOT_CODE: Event(validators[CANNON_SHOT_CODE], effects[CANNON_SHOT_CODE]),
+            STANDARD_LEFT_CLICK: Event(validators[STANDARD_LEFT_CLICK], effects[STANDARD_LEFT_CLICK]),
+            STANDARD_RIGHT_CLICK: Event(validators[STANDARD_RIGHT_CLICK], effects[STANDARD_RIGHT_CLICK]),
         }
     
     def player_node_count(self, player_count):

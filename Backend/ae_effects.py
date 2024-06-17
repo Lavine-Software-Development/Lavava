@@ -1,6 +1,8 @@
+from curses.ascii import CAN
 from constants import (
     BRIDGE_CODE,
     CANNON_CODE,
+    CANNON_SHOT_CODE,
     D_BRIDGE_CODE,
     SPAWN_CODE,
     FREEZE_CODE,
@@ -9,10 +11,14 @@ from constants import (
     POISON_CODE,
     CAPITAL_CODE,
     RAGE_CODE,
+    STANDARD_LEFT_CLICK,
+    STANDARD_RIGHT_CLICK,
     ZOMBIE_CODE,
     EDGE,
     DYNAMIC_EDGE,
     ZOMBIE_FULL_SIZE,
+    MINIMUM_TRANSFER_VALUE,
+    GROWTH_STOP,
 )
 from playerEffect import PlayerEnraged
 
@@ -38,6 +44,17 @@ def make_rage(rage):
         player.effects.add(PlayerEnraged())
     return rage_effect
 
+def make_cannon_shot(id_dict):
+    def cannon_shot(player, data):
+        cannon, target = id_dict[data[0]], id_dict[data[1]]
+        if target.owner == player:
+            transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
+        else:
+            transfer = cannon.value - MINIMUM_TRANSFER_VALUE
+        cannon.value -= transfer
+        target.delivery(transfer, player)
+
+    return cannon_shot
 
 def freeze_effect(data, player):
     edge = data[0]
@@ -83,5 +100,13 @@ def make_ability_effects(board):
         RAGE_CODE: make_rage(board.board_wide_effect),
         CANNON_CODE: cannon_effect
     }
+
+def make_event_effects(board):
+    return {
+        CANNON_SHOT_CODE: make_cannon_shot(board.id_dict),
+        STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].switch(),
+        STANDARD_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].click_swap(),
+    }
+
 
 
