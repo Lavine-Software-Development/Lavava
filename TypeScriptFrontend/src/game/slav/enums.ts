@@ -1,7 +1,8 @@
 enum ClickType {
     BLANK,
     EDGE,
-    NODE
+    NODE,
+    ABILITY,
 }
 
 enum PlayerStateEnum {

@@ -1,3 +1,4 @@
+from abstractEffect import AbstractSpreadingEffect
 from jsonable import JsonableTracked
 from constants import (
     NODE,
@@ -9,7 +10,7 @@ from constants import (
     AUTO_EXPAND,
     BLACK,
 )
-from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState
+from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState, PumpState
 from nodeEffect import Poisoned, NodeEnraged
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
@@ -18,19 +19,18 @@ from end_game_methods import stall, freeAttack, shrink
 
 
 @track_changes('owner', 'state', 'value', 'effects')
-@method_multipliers({('value_grow', stall), ('lost_amount', freeAttack)})
+@method_multipliers({('grow', stall), ('lost_amount', freeAttack)})
 class Node(JsonableTracked):
 
     def __init__(self, id, pos):
 
-        self.value = 0
+        self.value: float = 0
         self.owner = None
         self.item_type = NODE
-        self.incoming = set()
-        self.outgoing = set()
+        self.edges = set()
         self.pos = pos
         self.type = NODE
-        self.effects = {}
+        self.effects: dict[str, AbstractSpreadingEffect] = {}
         self.expel_multiplier = 1
         self.intake_multiplier = 1
         self.grow_multiplier = 1
@@ -44,45 +44,47 @@ class Node(JsonableTracked):
     def __str__(self):
         return str(self.id)
 
-    def new_edge(self, edge, dir, initial):
-        if dir == "incoming":
-            self.incoming.add(edge)
-        else:
-            self.outgoing.add(edge)
+    def new_edge(self, edge):
+        self.edges.add(edge)
 
     def set_state(self, status_name, data=None):
         if status_name in STATE_NAMES:
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
         elif status_name in EFFECT_NAMES:
-            self.effects[status_name] = self.new_effect(status_name)
+            self.effects[status_name] = self.new_effect(status_name, data)
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
         self.updated = True
         if state_name == "default":
-            return DefaultState(self.id)
+            return DefaultState(self)
         elif state_name == "mine":
             # if data is True and mode.MODE == 3:
             self.port_count = 3
-            return MineState(self.id, self.absorbing, data)
+            return MineState(self, self.absorbing, data)
         elif state_name == "zombie":
-            return ZombieState(self.id)
+            return ZombieState(self)
         elif state_name == "capital":
             if data:
-                return StartingCapitalState(self.id)
-            return CapitalState(self.id)
+                return StartingCapitalState(self)
+            return CapitalState(self)
         elif state_name == "cannon":
-            return CannonState(self.id)
+            return CannonState(self)
+        elif state_name == "pump":
+            return PumpState(self)
         else:
-            return DefaultState(self.id)
+            return DefaultState(self)
 
 
-    def new_effect(self, effect_name):
+    def new_effect(self, effect_name, data=[]):
         if effect_name == 'poison':
-            return Poisoned(self.spread_poison)
+            originator, length = data
+            return Poisoned(originator, length)
         elif effect_name == 'rage':
             return NodeEnraged()
+        else:
+            print("Effect not found")
 
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1
@@ -125,9 +127,7 @@ class Node(JsonableTracked):
                 edge.popped = False
 
     def check_edge_stati(self):
-        for edge in self.incoming:
-            edge.check_status()
-        for edge in self.outgoing:
+        for edge in self.edges:
             edge.check_status()
 
     def set_pos_per(self):
@@ -136,34 +136,16 @@ class Node(JsonableTracked):
 
     def relocate(self, width, height):
         self.pos = (self.pos_x_per * width, self.pos_y_per * height)
-
-    # def owned_and_alive(self):
-    #     return self.owner is not None and not self.owner.eliminate
         
     def owned_and_alive(self):
         return self.owner is not None
 
-    def spread_poison(self):
-        for edge in self.outgoing:
-            if (
-                edge.to_node != self
-                and edge.on
-                and not edge.contested
-                and edge.to_node.state_name == "default"
-            ):
-                edge.to_node.set_state("poison")
-
-    def grow(self):
-        if self.can_grow():
-            self.value += self.value_grow()
+    def tick(self):
+        self.value += self.grow()
         self.effects_update()
 
-    def value_grow(self):
-        return self.state.grow(self.grow_multiplier)
-
-    def can_grow(self):
-        if self.state.can_grow(self.value, self.grow_multiplier):
-            return True
+    def grow(self):
+        return self.state.grow()
 
     def effects_update(self):
 
@@ -171,45 +153,28 @@ class Node(JsonableTracked):
 
         if removed_effects:
             self.calculate_interactions()
-
-        self.spread_effects()
     
     def effects_tick(self):
         effects_to_remove = [key for key, effect in self.effects.items() if not effect.count()]
-        for key in effects_to_remove:
-            self.effects[key].complete()
         for key in effects_to_remove:
             del self.effects[key]
 
         return effects_to_remove
 
-    def spread_effects(self):
-        for key, effect in self.effects.items():
-            if effect.can_spread_func(effect):
-                for edge in self.edges:
-                    neighbor = edge.opposite(self)
-                    if key not in neighbor.effects and effect.spread_criteria_func(edge, neighbor):
-                        neighbor.set_state(key)
-
     def delivery(self, amount, player):
-        self.value += self.delivery_value_update(amount, player != self.owner)
-        self.delivery_status_update(player)
-
-    def delivery_value_update(self, amount, contested):
-        return self.state.intake(
-            amount, self.intake_multiplier, contested)
+        self.value += self.state.intake(amount, player)
+        return self.delivery_status_update(player)
         
     def delivery_status_update(self, player):
         if self.state.flow_ownership:
             self.owner = player
-        if self.state.killed(self.value):
+        if self.state.killed():
             self.capture(player)
-
-    def accept_delivery(self, player):
-        return self.state.accept_intake(player != self.owner, self.value)
+            return True
+        return False
 
     def send_amount(self):
-        return self.state.expel(self.expel_multiplier, self.value)
+        return self.state.expel()
     
     def lost_amount(self, amount, contested):
         return amount
@@ -219,13 +184,12 @@ class Node(JsonableTracked):
             self.owner.count -= 1
         if player is not None:
             player.count += 1
-            player.pass_on_effects(self)
         self.owner = player
         if self.state.update_on_new_owner:
             self.updated = True
 
     def capture(self, player):
-        self.value = self.state.capture_event()(self.value)
+        self.value = self.state.capture_event()
         self.update_ownerships(player)
         self.check_edge_stati()
         self.expand()
@@ -233,7 +197,7 @@ class Node(JsonableTracked):
             self.set_default_state()
 
     def absorbing(self):
-        for edge in self.current_incoming:
+        for edge in self.incoming:
             if edge.flowing:
                 return True
         return False
@@ -247,14 +211,14 @@ class Node(JsonableTracked):
 
     def full(self):
         return self.value >= self.state.full_size
-
+    
     @property
-    def edges(self):
-        return self.incoming | self.outgoing
-
+    def incoming(self):
+        return {edge for edge in self.edges if edge.to_node == self}
+    
     @property
-    def current_incoming(self):
-        return [edge for edge in self.incoming if edge.to_node == self]
+    def outgoing(self):
+        return {edge for edge in self.edges if edge.from_node == self}
 
     @property
     def neighbors(self):
@@ -265,5 +229,9 @@ class Node(JsonableTracked):
         if self.owner:
             return self.owner.color
         return BLACK
+    
+    @property
+    def effect_keys(self):
+        return self.effects.keys()
 
     

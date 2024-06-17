@@ -1,4 +1,4 @@
-from constants import CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE
+from constants import CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
 
 
 def no_click(data):
@@ -75,38 +75,41 @@ def validators_needing_player(player):
         FREEZE_CODE: dynamic_edge_own_either,
         ZOMBIE_CODE: my_node,
         CANNON_CODE: my_node,
+        PUMP_CODE: my_node,
     }
 
+def no_crossovers(check_new_edge, data, player):
+    first_node, second_node = data[0], data[1]
+    return first_node.owner == player and first_node.id != second_node.id and check_new_edge(
+        first_node.id, second_node.id
+    )
 
-def crossover_validators(check_new_edge, player=None):
-    def no_crossovers(data, override_player=player):
-        first_node, second_node = data[0], data[1]
-        return first_node.owner == override_player and first_node.id != second_node.id and check_new_edge(
-            first_node.id, second_node.id
-        )
+def make_cannon_shot_check(check_new_edge, id_dict):
+    def cannon_shot_check(player, data):
+        cannon, target = id_dict[data[0]], id_dict[data[1]]
+        can_shoot = cannon.state_name == "cannon" and cannon.owner == player
+        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full())
+        return can_shoot and can_accept and no_crossovers(check_new_edge, data, player)
+    return cannon_shot_check
 
+def make_pump_drain_check(id_dict):
+    def pump_drain_check(player, data):
+        pump = id_dict[data[0]]
+        return pump.state_name == "pump" and pump.owner == player and pump.full()
+    return pump_drain_check
+
+def make_new_edge_ports(check_new_edge, player):
     def new_edge_ports(data):
         if all([node.is_port for node in data]):
-            return no_crossovers(data)
+            return no_crossovers(check_new_edge, data, player)
         return False
-    
-    def cannon_shot_check(self, override_player, data):
-        cannon, target = self.id_dict[data[0]], self.id_dict[data[1]]
-        can_shoot = cannon.state_name == "cannon" and cannon.owner == override_player
-        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != override_player or not target.full())
-        return can_shoot and can_accept and no_crossovers(data, override_player)
-
-    return (new_edge_ports, cannon_shot_check)
-
-
-
-
+    return new_edge_ports
 
 def make_ability_validators(board, player):
     return {
         SPAWN_CODE: unowned_node,
-        BRIDGE_CODE: crossover_validators(board.check_new_edge, player)[0],
-        D_BRIDGE_CODE: crossover_validators(board.check_new_edge, player)[0],
+        BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
+        D_BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
         BURN_CODE: standard_port_node,
         RAGE_CODE: no_click,
         NUKE_CODE: attack_validators(board.player_capitals, player),
@@ -115,7 +118,8 @@ def make_ability_validators(board, player):
 
 def make_effect_validators(board):
     return {
-        CANNON_SHOT_CODE: crossover_validators(board.check_new_edge)[1],
+        CANNON_SHOT_CODE: make_cannon_shot_check(board.check_new_edge, board.id_dict),
+        PUMP_DRAIN_CODE: make_pump_drain_check(board.id_dict),
         STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].valid_left_click(player),
         STANDARD_RIGHT_CLICK: lambda player, data: board.id_dict[data[0]].valid_right_click(player),
     }

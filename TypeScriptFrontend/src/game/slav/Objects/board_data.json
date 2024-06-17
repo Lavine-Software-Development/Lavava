@@ -151,8 +151,8 @@
                 "effects": [],
                 "is_port": true,
                 "pos": [281.44955300127714, 380],
-                "state": 0,
-                "value": 0
+                "state": 6,
+                "value": 250
             },
             "13": {
                 "effects": [],

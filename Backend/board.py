@@ -1,19 +1,20 @@
 from collections import defaultdict
 
+from node import Node
 from ae_effects import make_event_effects
 from event import Event
 from jsonable import JsonableTracked
 from constants import (
     CANNON_SHOT_CODE,
     DYNAMIC_EDGE,
-    GROWTH_STOP,
-    MINIMUM_TRANSFER_VALUE,
     SCREEN_WIDTH,
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
     EDGE_COUNT,
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
+    PUMP_DRAIN_CODE,
+    EVENT_CODES
 )
 from helpers import do_intersect
 from edge import Edge
@@ -27,7 +28,7 @@ from ae_validators import make_effect_validators
 class Board(JsonableTracked):
     def __init__(self, gs):
         self.gs = gs
-        self.nodes = []
+        self.nodes: list[Node] = []
         self.edges = []
         self.events = self.make_events_dict()
         self.edge_dict = defaultdict(set)
@@ -39,9 +40,9 @@ class Board(JsonableTracked):
         super().__init__("board", recurse_values, recurse_values)
 
 
-    def board_wide_effect(self, player, effect):
+    def board_wide_effect(self, effect, player):
         for node in self.nodes:
-            if node.owner == player:
+            if (not player) or node.owner == player:
                 node.set_state(effect)
 
     def track_starting_states(self):
@@ -107,7 +108,7 @@ class Board(JsonableTracked):
 
         for spot in self.nodes:
             if spot.owned_and_alive():  # keep
-                spot.grow()
+                spot.tick()
             if spot.updated:
                 updated_nodes.append(spot)
 
@@ -182,10 +183,9 @@ class Board(JsonableTracked):
 
     def remove_node(self, node):
         node.owner.count -= 1
-        for edge in node.outgoing | node.incoming:
+        for edge in node.edges:
             opp = edge.opposite(node)
-            opp.incoming.discard(edge)
-            opp.outgoing.discard(edge)
+            opp.edges.discard(edge)
             if edge.id in self.id_dict:
                 self.id_dict.pop(edge.id)
                 self.edges.remove(edge)
@@ -194,15 +194,11 @@ class Board(JsonableTracked):
 
     def click(self, id, player, key):
         self.id_dict[id].click(player, key)
-
+    
     def make_events_dict(self):
         validators = make_effect_validators(self)
         effects = make_event_effects(self)
-        return {
-            CANNON_SHOT_CODE: Event(validators[CANNON_SHOT_CODE], effects[CANNON_SHOT_CODE]),
-            STANDARD_LEFT_CLICK: Event(validators[STANDARD_LEFT_CLICK], effects[STANDARD_LEFT_CLICK]),
-            STANDARD_RIGHT_CLICK: Event(validators[STANDARD_RIGHT_CLICK], effects[STANDARD_RIGHT_CLICK]),
-        }
+        return {code: Event(validators[code], effects[code]) for code in EVENT_CODES}
     
     def player_node_count(self, player_count):
         for node in self.nodes:

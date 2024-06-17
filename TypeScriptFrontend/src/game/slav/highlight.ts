@@ -5,12 +5,14 @@ import { ClickType } from "./enums"; // Assume this is defined
 import { AbilityVisual } from "./immutable_visuals"; // Assume this is defined
 import { VISUALS } from "./default_abilities"; // Assume this is defined
 import { KeyCodes, EventCodes } from "./constants";
+import { ReloadAbility } from "./Objects/ReloadAbility";
 
 export class Highlight {
     private graphics: Phaser.GameObjects.Graphics;
     item: IDItem | null = null;
     usage: number | null = null;
     playerColor: readonly [number, number, number];
+    alt_colored_item: Phaser.GameObjects.Image | null;
 
     constructor(scene: Phaser.Scene, playerColor: readonly [number, number, number]) {
         this.graphics = scene.add.graphics();
@@ -56,6 +58,10 @@ export class Highlight {
 
     draw(): void {
         this.graphics.clear();
+        if (this.alt_colored_item) {
+            this.alt_colored_item.setTint(Phaser.Display.Color.GetColor(255, 102, 102));
+            this.alt_colored_item = null;
+        } 
         if (this.item) {
             if (this.type === ClickType.NODE) {
                 const node = this.item as Node;
@@ -101,6 +107,14 @@ export class Highlight {
                 this.graphics.strokeLineShape(leftLine);
                 this.graphics.strokeLineShape(rightLine);
                 this.graphics.closePath();
+            }
+            else if (this.type === ClickType.ABILITY) {
+                const ability = this.item as ReloadAbility;
+                const [r, g, b] = this.color; // Your highlight color components
+                const highlightColor = Phaser.Display.Color.GetColor(r, g, b);
+                this.alt_colored_item = ability.pointerTriangle;
+                // Set the tint of the pointerTriangle to highlight color
+                ability.pointerTriangle.setTint(highlightColor);
             }
         }
     }
