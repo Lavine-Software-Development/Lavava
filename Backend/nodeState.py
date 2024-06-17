@@ -1,4 +1,3 @@
-from node import Node
 from jsonable import JsonableSkeleton
 from constants import (
     GROWTH_RATE,
@@ -17,7 +16,7 @@ import math
 
 class AbstractState(JsonableSkeleton):
     def __init__(self, node, reset_on_capture, flow_ownership, update_on_new_owner, visual_id):
-        self.node: Node = node
+        self.node = node
         self.id = node.id
         self.reset_on_capture = reset_on_capture
         self.flow_ownership = flow_ownership

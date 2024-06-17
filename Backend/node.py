@@ -18,7 +18,7 @@ from end_game_methods import stall, freeAttack, shrink
 
 
 @track_changes('owner', 'state', 'value', 'effects')
-@method_multipliers({('value_grow', stall), ('lost_amount', freeAttack)})
+@method_multipliers({('grow', stall), ('lost_amount', freeAttack)})
 class Node(JsonableTracked):
 
     def __init__(self, id, pos):
@@ -148,8 +148,11 @@ class Node(JsonableTracked):
                 edge.to_node.set_state("poison")
 
     def tick(self):
-        self.value += self.state.grow()
+        self.value += self.grow()
         self.effects_update()
+
+    def grow(self):
+        return self.state.grow()
 
     def effects_update(self):
 
