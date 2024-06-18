@@ -48,10 +48,10 @@ export class Node extends IDItem {
     }
 
     get color(): readonly [number, number, number] {
-        if (!this.owner) {
+        // if (!this.owner ) {
             return this.isPort ? Colors.BROWN : Colors.BLACK;
-        }
-        return this.owner.color;
+        // }
+        // return this.owner.color;
     }
 
     get phaserColor(): number {

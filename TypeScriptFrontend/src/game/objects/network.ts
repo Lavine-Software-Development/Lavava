@@ -120,19 +120,19 @@ export class Network {
         };
 
         this.socket.onmessage = (event) => {
-            console.log("Received message: ", event.data);
+            // console.log("Received message: ", event.data);
             let data = JSON.parse(event.data);
             if (data.hasOwnProperty("msg")) {
-                console.log("Message: ", data.msg);
+                // console.log("Message: ", data.msg);
             } else {
                 if (data.isFirst === true) {
-                    console.log("Board data received");
+                    // console.log("Board data received");
                     if (this.boardDataResolver) {
                         this.boardDataResolver(data);
                         this.boardDataResolver = null; // Ensure the resolver is called only once
                     }
                 } else {
-                    console.log("Calling update callback");
+                    // console.log("Calling update callback");
                     this.updateCallback(data);
                 }
                 // Call the update callback with the received data

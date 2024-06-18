@@ -355,50 +355,55 @@ export class MainScene extends Scene {
     }
 
     parse(this, items, updates) {
-        console.log("parse");
-        console.log(updates);
-        // for (const u in updates) {
-        //     // console.log("here");
-        //     if (!items.hasOwnProperty(u)) {
-        //         console.error(`No item found for key ${u}`);
-        //         continue;
-        //     }
+        // console.log("parse");
+        // console.log(updates);
+        for (const u in updates) {
+            // console.log("u: ", u);
+            // console.log("here");
+            if (!items.hasOwnProperty(u)) {
+                console.error(`No item found for key ${u}`);
+                continue;
+            }
 
-        //     let obj = items[u];
-        //     // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
-        //     if (typeof obj !== "object" || obj === null) {
-        //         console.error(`Invalid item at key ${u}; expected an object.`);
-        //         continue;
-        //     }
+            let obj = items[u];
+            // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
+            if (typeof obj !== "object" || obj === null) {
+                // console.error(`Invalid item at key ${u}; expected an object.`);
+                continue;
+            }
 
-        //     for (const [key, val] of Object.entries(updates[u])) {
-        //         if (typeof obj[key] === "undefined") {
-        //             console.error(`Key ${key} not found in item ${u}.`);
-        //             continue;
-        //         }
+            for (const [key, val] of Object.entries(updates[u])) {
+                if (typeof obj[key] === "undefined") {
+                    // console.error(`Key ${key} not found in item ${u}.`);
+                    continue;
+                }
 
-        //         console.log("before: " + obj[key]);
-        //         let updateVal;
-        //         try {
-        //             updateVal = this.getObject(obj, key, val);
-        //         } catch (error) {
-        //             console.error(
-        //                 `Error updating key ${key} in item ${u}: ${error.message}`
-        //             );
-        //             continue;
-        //         }
+                // console.log("before: " + obj[key]);
+                let updateVal;
+                try {
+                    updateVal = this.getObject(obj, key, val);
+                } catch (error) {
+                    console.error(
+                        // `Error updating key ${key} in item ${u}: ${error.message}`
+                    );
+                    continue;
+                }
 
-        //         obj[key] = updateVal;
-        //         console.log("updated key: ", key, " with value: ", val);
-        //         console.log("after: " + obj[key]);
-        //     }
-        // }
+                obj[key] = updateVal;
+                // console.log("updated key: ", key, " with value: ", val);
+                // console.log("after: " + obj[key]);
+            }
+        }
     }
     getObject(object, attribute, value) {
         if (object[attribute] instanceof Node) {
             return this.nodes[value];
         } else if (object[attribute] instanceof Edge) {
             return this.edges[value];
+        } else if (object[attribute] instanceof OtherPlayer) {
+            console.log("other player");
+            console.log(this.otherPlayers[value].name);
+            return this.otherPlayers[value];
         }
         //TODO: check for State and OtherPlayer types after adding those
         else {
