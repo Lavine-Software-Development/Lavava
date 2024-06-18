@@ -63,7 +63,7 @@ class WebSocketServer():
 
     async def send_ticks(self, batch:Batch):
         while True:
-            await asyncio.sleep(1)
+            # await asyncio.sleep(1)
             # print("tick")
             batch.tick()
             for i, websocket in enumerate(batch.connections):

@@ -56,10 +56,10 @@ export class MainScene extends Scene {
 
     constructor(config, props, network: Network) {
         super({ key: "MainScene" });
-        console.log("config: ", config);
-        console.log("props yeaaa: ", props);
-        console.log(network);
-        console.log("network: ", network.test());
+        // console.log("config: ", config);
+        // console.log("props yeaaa: ", props);
+        // console.log(network);
+        // console.log("network: ", network.test());
         this.board = props;
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
@@ -303,7 +303,7 @@ export class MainScene extends Scene {
                     const event_data = this.abilityManager.useEvent(
                         this.highlight
                     );
-                    console.log("event data: ", event_data);
+                    // console.log("event data: ", event_data);
                     if (event_data !== false) {
                         if (
                             button === EventCodes.STANDARD_RIGHT_CLICK &&
@@ -329,7 +329,6 @@ export class MainScene extends Scene {
         );
     }
     simple_send(code: number): void {
-        console.log("trying to send simple message", code);
         this.network.sendMessage(
             JSON.stringify({
                 code: code,
@@ -339,13 +338,11 @@ export class MainScene extends Scene {
     }
 
     update_board(new_data) {
-        console.log("update");
         if (new_data != "Players may join") {
             // console.log(new_data);
             // new_data = JSON.parse(new_data);
             if (!("abilities" in new_data)) {
                 // this.ps = new_data["player"]["ps"];
-                console.log("after");
                 this.timer = new_data["countdown_timer"];
                 this.parse(this.nodes, new_data["board"]["nodes"]);
                 this.parse(this.edges, new_data["board"]["edges"]);
@@ -358,43 +355,44 @@ export class MainScene extends Scene {
     }
 
     parse(this, items, updates) {
-        console.log(items, updates);
-        for (const u in updates) {
-            // console.log("here");
-            if (!items.hasOwnProperty(u)) {
-                console.error(`No item found for key ${u}`);
-                continue;
-            }
+        console.log("parse");
+        console.log(updates);
+        // for (const u in updates) {
+        //     // console.log("here");
+        //     if (!items.hasOwnProperty(u)) {
+        //         console.error(`No item found for key ${u}`);
+        //         continue;
+        //     }
 
-            let obj = items[u];
-            // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
-            if (typeof obj !== "object" || obj === null) {
-                console.error(`Invalid item at key ${u}; expected an object.`);
-                continue;
-            }
+        //     let obj = items[u];
+        //     // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
+        //     if (typeof obj !== "object" || obj === null) {
+        //         console.error(`Invalid item at key ${u}; expected an object.`);
+        //         continue;
+        //     }
 
-            for (const [key, val] of Object.entries(updates[u])) {
-                if (typeof obj[key] === "undefined") {
-                    console.error(`Key ${key} not found in item ${u}.`);
-                    continue;
-                }
+        //     for (const [key, val] of Object.entries(updates[u])) {
+        //         if (typeof obj[key] === "undefined") {
+        //             console.error(`Key ${key} not found in item ${u}.`);
+        //             continue;
+        //         }
 
-                console.log("before: " + obj[key]);
-                let updateVal;
-                try {
-                    updateVal = this.getObject(obj, key, val);
-                } catch (error) {
-                    console.error(
-                        `Error updating key ${key} in item ${u}: ${error.message}`
-                    );
-                    continue;
-                }
+        //         console.log("before: " + obj[key]);
+        //         let updateVal;
+        //         try {
+        //             updateVal = this.getObject(obj, key, val);
+        //         } catch (error) {
+        //             console.error(
+        //                 `Error updating key ${key} in item ${u}: ${error.message}`
+        //             );
+        //             continue;
+        //         }
 
-                obj[key] = updateVal;
-                console.log("updated key: ", key, " with value: ", val);
-                console.log("after: " + obj[key]);
-            }
-        }
+        //         obj[key] = updateVal;
+        //         console.log("updated key: ", key, " with value: ", val);
+        //         console.log("after: " + obj[key]);
+        //     }
+        // }
     }
     getObject(object, attribute, value) {
         if (object[attribute] instanceof Node) {
