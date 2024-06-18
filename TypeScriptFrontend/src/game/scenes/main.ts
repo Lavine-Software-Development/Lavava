@@ -400,7 +400,7 @@ export class MainScene extends Scene {
             return this.nodes[value];
         } else if (object[attribute] instanceof Edge) {
             return this.edges[value];
-        } else if (object[attribute] instanceof OtherPlayer) {
+        } else if (attribute === "owner") {
             console.log("other player");
             console.log(this.otherPlayers[value].name);
             return this.otherPlayers[value];
