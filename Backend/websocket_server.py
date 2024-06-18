@@ -17,6 +17,8 @@ class WebSocketServer():
     async def handler(self, websocket, path):
         # self.locks[websocket] = asyncio.Lock()
         print("handler called for socket", websocket)
+        if len(self.players) >= 2: 
+            self.players = {}
         curr_players = len(self.players)
         self.players[websocket] = curr_players
         # try:

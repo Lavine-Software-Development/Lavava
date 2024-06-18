@@ -36,6 +36,7 @@ import { Edge } from "../objects/edge";
 import { Main } from "../objects/parse";
 import board_data from "../data/board_data.json";
 import { BoardJSON } from "../objects/parse";
+// import { NetworkContext } from "../NetworkContext";
 export class MainScene extends Scene {
     private nodes: { [key: string]: Node } = {};
     private edges: { [key: string]: Edge } = {};
@@ -53,18 +54,22 @@ export class MainScene extends Scene {
     private graphics: Phaser.GameObjects.Graphics;
     private board: BoardJSON;
 
-    constructor(config, props) {
+    constructor(config, props, network: Network) {
         super({ key: "MainScene" });
         console.log("config: ", config);
         console.log("props yeaaa: ", props);
+        console.log(network);
+        console.log("network: ", network.test());
         this.board = props;
         this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
-        this.network = new Network(
-            "ws://localhost:5553",
-            this.update_board.bind(this)
-        );
+        // this.network = new Network(
+        //     "ws://localhost:5553",
+        //     this.update_board.bind(this)
+        // );
+        this.network = network;
+        this.network.updateCallback = this.update_board.bind(this);
         this.burning = [];
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         this.gameType = String(sessionStorage.getItem("type"));
@@ -187,7 +192,7 @@ export class MainScene extends Scene {
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
         this.network.connectWebSocket();
-        this.network.setupUser(this.abilityCounts);
+        // this.network.setupUser(this.abilityCounts);
     }
 
     keydown(key: number): void {
@@ -334,16 +339,18 @@ export class MainScene extends Scene {
     }
 
     update_board(new_data) {
-        // console.log("update");
+        console.log("update");
         if (new_data != "Players may join") {
             // console.log(new_data);
             // new_data = JSON.parse(new_data);
             if (!("abilities" in new_data)) {
                 // this.ps = new_data["player"]["ps"];
-                // console.log("after");
+                console.log("after");
                 this.timer = new_data["countdown_timer"];
                 this.parse(this.nodes, new_data["board"]["nodes"]);
                 this.parse(this.edges, new_data["board"]["edges"]);
+                Object.values(this.nodes).forEach((node) => node.draw());
+                Object.values(this.edges).forEach((edge) => edge.draw());
             } else {
                 // console.log(new_data);
             }
@@ -351,6 +358,7 @@ export class MainScene extends Scene {
     }
 
     parse(this, items, updates) {
+        console.log(items, updates);
         for (const u in updates) {
             // console.log("here");
             if (!items.hasOwnProperty(u)) {
@@ -371,7 +379,7 @@ export class MainScene extends Scene {
                     continue;
                 }
 
-                // console.log("before: " + obj[key]);
+                console.log("before: " + obj[key]);
                 let updateVal;
                 try {
                     updateVal = this.getObject(obj, key, val);
@@ -383,8 +391,8 @@ export class MainScene extends Scene {
                 }
 
                 obj[key] = updateVal;
-                // console.log("updated key: ", key, " with value: ", val);
-                // console.log("after: " + obj[key]);
+                console.log("updated key: ", key, " with value: ", val);
+                console.log("after: " + obj[key]);
             }
         }
     }

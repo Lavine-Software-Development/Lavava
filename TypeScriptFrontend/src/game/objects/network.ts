@@ -92,7 +92,7 @@
 import { NameToCode } from "./constants";
 
 export class Network {
-    private socket: WebSocket | null = null;
+    public socket: WebSocket | null = null;
     serverURL: string;
     updateCallback: (board_data) => void;
     messageQueue: string[] = [];
@@ -120,7 +120,7 @@ export class Network {
         };
 
         this.socket.onmessage = (event) => {
-            // console.log("Received message: ", event.data);
+            console.log("Received message: ", event.data);
             let data = JSON.parse(event.data);
             if (data.hasOwnProperty("msg")) {
                 console.log("Message: ", data.msg);
@@ -132,6 +132,7 @@ export class Network {
                         this.boardDataResolver = null; // Ensure the resolver is called only once
                     }
                 } else {
+                    console.log("Calling update callback");
                     this.updateCallback(data);
                 }
                 // Call the update callback with the received data
@@ -203,6 +204,12 @@ export class Network {
     // Method to get the board data promise
     getBoardData(): Promise<any> {
         return this.boardDataPromise!;
+    }
+    setCallback(callback: (data: any) => void) {
+        this.updateCallback = callback;
+    }
+    test() {
+        return "Test called";
     }
 }
 

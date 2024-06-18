@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { NetworkContext } from "../game/NetworkContext";
 import { Network } from "../game/objects/network";
 import { NameToCode } from "../game/objects/constants";
 const serverURL = "ws://localhost:5553";
@@ -11,6 +11,7 @@ const updateCallback = () => {
 const Lobby: React.FC = () => {
     const [boardData, setBoardData] = useState(null);
     const navigate = useNavigate();
+    const network = useContext(NetworkContext);
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const gameType = String(sessionStorage.getItem("type"));
@@ -33,11 +34,13 @@ const Lobby: React.FC = () => {
             },
             {}
         );
-        const network = new Network(serverURL, updateCallback);
-        network.connectWebSocket();
-        network.setupUser(abilityCounts);
+        // const network = new Network(serverURL, updateCallback);
+        console.log("Got network from context");
+        // const network = new Network(serverURL, updateCallback);
+        // network?.connectWebSocket();
+        network?.setupUser(abilityCounts);
         // Wait for the board data
-        network.getBoardData().then((data) => {
+        network?.getBoardData().then((data) => {
             console.log("Board data received in component:", data);
             navigate("/play", { state: { boardData: data } });
             // setBoardData(data);
@@ -45,8 +48,8 @@ const Lobby: React.FC = () => {
 
         // Cleanup function to close the WebSocket when the component unmounts
         // return () => {
-        //     if (network.socket) {
-        //         network.socket.close();
+        //     if (network?.socket) {
+        //         network?.socket.close();
         //     }
         // };
     }, []);
