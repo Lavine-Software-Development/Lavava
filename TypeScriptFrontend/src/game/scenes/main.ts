@@ -49,9 +49,9 @@ export class MainScene extends Scene {
 
     constructor() {
         super({ key: "MainScene" });
-        this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
+        this.mainPlayer = new MyPlayer("Player 1", Colors.RED);
         this.otherPlayers.push(this.mainPlayer);
-        this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
+        this.otherPlayers.push(new OtherPlayer("Player 2", Colors.BLUE));
         this.network = new Network("ws://localhost:5553");
         this.burning = [];
         const storedAbilities = sessionStorage.getItem('selectedAbilities');
