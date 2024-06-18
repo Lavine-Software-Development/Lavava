@@ -38,7 +38,6 @@ class DefaultPlayer(Jsonable):
     def default_values(self):
         self.count = 0
         self.abilities = dict()
-        self.effects = set()
         self.ps = PlayerState()
         self.full_capital_count = 0
 
@@ -47,13 +46,8 @@ class DefaultPlayer(Jsonable):
         self.color = GREY
 
     def update(self):
-        self.effects = set(filter(lambda effect : (effect.count()), self.effects))
         for ability in self.abilities.values():
             ability.update()
-
-    def pass_on_effects(self, node):
-        for effect in self.effects:
-            effect.spread(node)
 
     def win(self):
         self.ps.victory()
