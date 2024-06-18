@@ -71,12 +71,13 @@ export class ReloadAbility extends IDItem {
     draw(scene, x, y, isSelected, clickable) {
         this.graphics.clear();
         const squareSize = 150;  // Size of the square
-        const borderThickness = 3;  // Thickness of the border
+          // Thickness of the border
     
         // Calculate colors
         const colorValue = phaserColor(this.visual.color);
         const darkColor = Phaser.Display.Color.ValueToColor(colorValue).darken(35).color; // Darker shade of the ability color
         const borderColor = isSelected ? 0x990000 : 0x000000; // Dark red if selected, black otherwise
+        const borderThickness = isSelected ? 7 : 3;
     
         // Draw the background square with darker color
         this.graphics.fillStyle (darkColor, 1);

@@ -13,7 +13,7 @@ export class AbstractAbilityManager {
     private mode: number | null = null;
     private backupMode: number | null = null;
     private clicks: IDItem[] = [];
-    abilityText: any;
+    abilityText: Phaser.GameObjects.Text | null = null;
     BridgeGraphics: Phaser.GameObjects.Graphics;
 
     constructor(
@@ -237,6 +237,10 @@ export class AbstractAbilityManager {
                     this.drawArrow(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
                 }
                 
+            }
+        } else {
+            if (this.abilityText) {
+                this.abilityText.setText("");
             }
         }
 
