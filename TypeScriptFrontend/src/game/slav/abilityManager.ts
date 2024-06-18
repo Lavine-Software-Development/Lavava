@@ -213,7 +213,7 @@ export class AbstractAbilityManager {
                 this.abilityText.setPosition(x, y);
             }
             if (
-                this.ability?.visual.name == "Bridge" &&
+                (this.ability?.visual.name == "Bridge" || this.ability?.visual.name == "D-Bridge") &&
                 this.clicks.length > 0
             ) {
                 this.BridgeGraphics.clear();
@@ -230,11 +230,14 @@ export class AbstractAbilityManager {
 
                 const normX = dx / magnitude;
                 const normY = dy / magnitude;
-
-                const color = phaserColor(Colors.YELLOW);
-                this.drawArrow(startX, startY, normX, normY, magnitude, color);
+                if (this.ability?.visual.name == "D-Bridge") {
+                    this.drawArrowWithCircles(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
+                }
+                else {
+                    this.drawArrow(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
+                }
+                
             }
-
         }
 
         let y_position = 20;
@@ -259,7 +262,7 @@ export class AbstractAbilityManager {
         color: number
     ): void {
         const triangleSize = 11;
-        const minSpacing = 11;
+        const minSpacing = 12;
 
         const numTriangles = Math.floor(
             (magnitude - 2 * triangleSize) / minSpacing
@@ -287,5 +290,56 @@ export class AbstractAbilityManager {
             this.BridgeGraphics.fillPath();
         }
     }
+
+    drawArrowWithCircles(
+        startX: number,
+        startY: number,
+        normX: number,
+        normY: number,
+        magnitude: number,
+        color: number
+    ): void {
+        const circleRadius = 3;
+        const triangleSize = 11;
+        const minSpacing = 8;
+    
+        // Calculate the number of circles to draw based on the space and circle radius
+        const numCircles = Math.floor((magnitude - triangleSize) / minSpacing);
+        const spacing = (magnitude - triangleSize) / numCircles;
+    
+        for (let i = 1; i < numCircles; i++) {
+            let x = startX + i * spacing * normX;
+            let y = startY + i * spacing * normY;
+    
+            this.BridgeGraphics.beginPath();
+            this.BridgeGraphics.arc(x, y, circleRadius, 0, 2 * Math.PI);
+            this.BridgeGraphics.closePath();
+    
+            this.BridgeGraphics.fillStyle(color);
+            this.BridgeGraphics.fill();
+        }
+    
+        // Draw the final triangle in light green
+        let finalX = startX + (magnitude - spacing) * normX;
+        let finalY = startY + (magnitude - spacing) * normY;
+        let angle = Math.atan2(normY, normX);
+    
+        this.BridgeGraphics.beginPath();
+        this.BridgeGraphics.moveTo(finalX, finalY);
+        this.BridgeGraphics.lineTo(
+            finalX - Math.cos(angle - Math.PI / 6) * triangleSize,
+            finalY - Math.sin(angle - Math.PI / 6) * triangleSize
+        );
+        this.BridgeGraphics.lineTo(
+            finalX - Math.cos(angle + Math.PI / 6) * triangleSize,
+            finalY - Math.sin(angle + Math.PI / 6) * triangleSize
+        );
+        this.BridgeGraphics.closePath();
+    
+        // Define the light green color for the final triangle
+        this.BridgeGraphics.fillStyle(Phaser.Display.Color.GetColor(144, 238, 144)); // Light green
+        this.BridgeGraphics.fill();
+    }
+    
 }
 
