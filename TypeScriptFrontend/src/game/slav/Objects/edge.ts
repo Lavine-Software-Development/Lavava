@@ -3,6 +3,7 @@ import { IDItem } from "./idItem";
 import { ClickType } from "../enums";
 import { Node } from "./node";
 import { Colors } from "../constants";
+import { phaserColor } from "../utilities";
 
 export class Edge extends IDItem {
     fromNode: Node;
@@ -133,7 +134,7 @@ export class Edge extends IDItem {
             shorterEndY
         );
 
-        const color = this.phaserColor;
+        let color = this.fromNode.effects.has("rage") ? phaserColor(Colors.DARK_GREEN) : this.phaserColor;
 
         if (!this.dynamic) {
             // Draw Arrow from adjusted start point to the adjusted length

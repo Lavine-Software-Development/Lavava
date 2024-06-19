@@ -94,7 +94,7 @@ export class MainScene extends Scene {
         main.setup(board_data as BoardJSON);
         for (let i in main.nodes) {
             console.log(main.nodes[i].pos);
-            let node = main.nodes[i];
+            let node = main.nodes[i] as Node;
             // randomly select an owner from the other players
             if (node.stateName === "capital") {
                 node.owner = this.mainPlayer;
@@ -106,7 +106,7 @@ export class MainScene extends Scene {
             this.nodes.push(node);
         }
         for (let i in main.edges) {
-            let edge = main.edges[i];
+            let edge = main.edges[i] as Edge;
             edge.scene = this;
             this.edges.push(edge);
         }

@@ -4,7 +4,7 @@ import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
 import { ClickType } from "../enums";
 import { phaserColor } from "../utilities";
-import { CapitalState, CannonState } from "./States";
+import { CannonState } from "./States";
 
 export class Node extends IDItem {
     pos: Phaser.Math.Vector2;
