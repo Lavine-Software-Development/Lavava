@@ -75,6 +75,16 @@ export class AbstractAbilityManager {
         return false;
     }
 
+    clickSelect(position): number | null {
+        for (const key in this.abilities) {
+            const ability = this.abilities[key];
+            if (ability.overlapsWithPosition(position)) {
+                return ability.id;
+            }
+        }
+        return null;
+    }
+
     backupReset(): void {
         if (this.backupMode) {
             this.mode = this.backupMode;
@@ -159,7 +169,7 @@ export class AbstractAbilityManager {
         return false;
     }
 
-    ability_validate(position: Phaser.Math.Vector2): [IDItem, number] | false {
+    triangle_validate(position: Phaser.Math.Vector2): [IDItem, number] | false {
         // loop through all the abilities values, and pass them into validate
         for (const key in this.abilities) {
             const ability = this.abilities[key];
@@ -250,9 +260,12 @@ export class AbstractAbilityManager {
         const x_position = scene.scale.width - squareSize - 10;  // Position on the right side of the screen
     
         for (let key in this.abilities) {
+            if (this.abilities[key].x == 0) {
+                this.abilities[key].setPos(x_position, y_position);
+            }
             const isSelected = this.mode === parseInt(key);
             let clickable = this.event?.visual.name == "Pump Drain" && this.abilities[key].credits < 3;
-            this.abilities[key].draw(scene, x_position, y_position, isSelected, clickable);
+            this.abilities[key].draw(scene, isSelected, clickable);
             y_position += squareSize + spacing;  // Move down for the next square
         }
     }

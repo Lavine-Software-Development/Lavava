@@ -178,15 +178,20 @@ export class MainScene extends Scene {
         } else if (this.ps === PSE.VICTORY && key === stateCodes.RESTART_CODE) {
             this.simple_send(stateCodes.RESTART_CODE);
         } else if (this.ps === PSE.PLAY) {
-            if (this.abilityManager.inAbilities(key)) {
-                if (this.abilityManager.select(key)) {
-                    this.simple_send(key);
-                }
-            } else if (key === stateCodes.FORFEIT_CODE) {
+            this.abilitySelection(key);
+            if (key === stateCodes.FORFEIT_CODE) {
                 this.simple_send(stateCodes.FORFEIT_CODE);
             }
         } else {
             console.log("Not playing");
+        }
+    }
+
+    abilitySelection(key: number): void {
+        if (this.abilityManager.inAbilities(key)) {
+            if (this.abilityManager.select(key)) {
+                this.simple_send(key);
+            }
         }
     }
 
@@ -254,7 +259,7 @@ export class MainScene extends Scene {
             }
         }
 
-        let ability = this.abilityManager.ability_validate(position);
+        let ability = this.abilityManager.triangle_validate(position);
         if (ability) {
             return ability;
         }
@@ -292,6 +297,10 @@ export class MainScene extends Scene {
                     }
                 }
             }
+        }
+        let key = this.abilityManager.clickSelect(this.input.activePointer.position);
+        if (key) {
+            this.abilitySelection(key);
         }
     }
 
