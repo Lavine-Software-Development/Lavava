@@ -139,7 +139,7 @@ class MapBuilder:
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
             if dynamic:
-                edges.append(DynamicEdge(nodes[id1], nodes[id2], id3, True))
+                edges.append(DynamicEdge(nodes[id1], nodes[id2], id3))
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3, True))
 

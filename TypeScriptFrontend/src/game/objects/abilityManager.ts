@@ -5,6 +5,7 @@ import { Event } from "./Objects/event";
 import { Node } from "./Objects/node";
 import { phaserColor } from "./utilities";
 import { Colors } from "./constants";
+import { ClickType } from "./enums";
 
 export class AbstractAbilityManager {
     private abilities: { [key: number]: ReloadAbility };
@@ -12,7 +13,7 @@ export class AbstractAbilityManager {
     private mode: number | null = null;
     private backupMode: number | null = null;
     private clicks: IDItem[] = [];
-    abilityText: any;
+    abilityText: Phaser.GameObjects.Text | null = null;
     BridgeGraphics: Phaser.GameObjects.Graphics;
 
     constructor(
@@ -25,6 +26,13 @@ export class AbstractAbilityManager {
         this.BridgeGraphics = scene.add.graphics();
     }
 
+    updateSelection(): void {
+        if (this.clicks.length > 0 && this.clicks[this.clicks.length - 1].type === ClickType.NODE) {
+            let node = this.clicks[this.clicks.length - 1] as Node;
+            node.select(true);
+        }
+    }
+
     inAbilities(key: number): boolean {
         return key in this.abilities;
     }
@@ -35,6 +43,7 @@ export class AbstractAbilityManager {
         }
         this.mode = highlight.usage;
         this.clicks.push(highlight.item!); // Assuming item is always present
+        this.updateSelection();
         if (this.completeCheck(highlight.usage)) {
             const clicks = this.clicks.map((click) => click.id);
             this.backupReset();
@@ -51,6 +60,7 @@ export class AbstractAbilityManager {
             highlight.item
         ) {
             this.clicks.push(highlight.item);
+            this.updateSelection();
             return true;
         }
         return false;
@@ -63,6 +73,16 @@ export class AbstractAbilityManager {
             return clicks;
         }
         return false;
+    }
+
+    clickSelect(position): number | null {
+        for (const key in this.abilities) {
+            const ability = this.abilities[key];
+            if (ability.overlapsWithPosition(position)) {
+                return ability.id;
+            }
+        }
+        return null;
     }
 
     backupReset(): void {
@@ -84,8 +104,14 @@ export class AbstractAbilityManager {
     }
 
     wipe(): void {
+        for (const click of this.clicks) {
+            if (click.type === ClickType.NODE) {
+                let node = click as Node;
+                node.select(false);
+        }
         this.clicks = [];
         this.BridgeGraphics.clear();
+        }
     }
 
     switchTo(key: number): boolean {
@@ -122,7 +148,7 @@ export class AbstractAbilityManager {
     validate(item: IDItem): [IDItem, number] | false {
         if (
             this.event &&
-            item.type === this.event.clickType &&
+            (item.type === this.event.clickType || item.type === ClickType.ABILITY) &&
             this.event.verificationFunc(this.clicks.concat([item]))
         ) {
             return [item, this.mode!]; // Assuming mode is set
@@ -137,6 +163,20 @@ export class AbstractAbilityManager {
                 const ev = this.events[code];
                 if (item.type === ev.clickType && ev.verificationFunc([item])) {
                     return [item, parseInt(code)];
+                }
+            }
+        }
+        return false;
+    }
+
+    triangle_validate(position: Phaser.Math.Vector2): [IDItem, number] | false {
+        // loop through all the abilities values, and pass them into validate
+        for (const key in this.abilities) {
+            const ability = this.abilities[key];
+            if (ability.overlapsWithPosition(position)) {
+                const item = this.validate(ability);
+                if (item) {
+                    return item;
                 }
             }
         }
@@ -183,7 +223,7 @@ export class AbstractAbilityManager {
                 this.abilityText.setPosition(x, y);
             }
             if (
-                this.ability.visual.name == "Bridge" &&
+                (this.ability?.visual.name == "Bridge" || this.ability?.visual.name == "D-Bridge") &&
                 this.clicks.length > 0
             ) {
                 this.BridgeGraphics.clear();
@@ -200,9 +240,17 @@ export class AbstractAbilityManager {
 
                 const normX = dx / magnitude;
                 const normY = dy / magnitude;
-
-                const color = phaserColor(Colors.YELLOW);
-                this.drawArrow(startX, startY, normX, normY, magnitude, color);
+                if (this.ability?.visual.name == "D-Bridge") {
+                    this.drawArrowWithCircles(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
+                }
+                else {
+                    this.drawArrow(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
+                }
+                
+            }
+        } else {
+            if (this.abilityText) {
+                this.abilityText.setText("");
             }
         }
 
@@ -212,8 +260,12 @@ export class AbstractAbilityManager {
         const x_position = scene.scale.width - squareSize - 10;  // Position on the right side of the screen
     
         for (let key in this.abilities) {
+            if (this.abilities[key].x == 0) {
+                this.abilities[key].setPos(x_position, y_position);
+            }
             const isSelected = this.mode === parseInt(key);
-            this.abilities[key].draw(scene, x_position, y_position, isSelected);
+            let clickable = this.event?.visual.name == "Pump Drain" && this.abilities[key].credits < 3;
+            this.abilities[key].draw(scene, isSelected, clickable);
             y_position += squareSize + spacing;  // Move down for the next square
         }
     }
@@ -227,7 +279,7 @@ export class AbstractAbilityManager {
         color: number
     ): void {
         const triangleSize = 11;
-        const minSpacing = 11;
+        const minSpacing = 12;
 
         const numTriangles = Math.floor(
             (magnitude - 2 * triangleSize) / minSpacing
@@ -255,5 +307,56 @@ export class AbstractAbilityManager {
             this.BridgeGraphics.fillPath();
         }
     }
+
+    drawArrowWithCircles(
+        startX: number,
+        startY: number,
+        normX: number,
+        normY: number,
+        magnitude: number,
+        color: number
+    ): void {
+        const circleRadius = 3;
+        const triangleSize = 11;
+        const minSpacing = 8;
+    
+        // Calculate the number of circles to draw based on the space and circle radius
+        const numCircles = Math.floor((magnitude - triangleSize) / minSpacing);
+        const spacing = (magnitude - triangleSize) / numCircles;
+    
+        for (let i = 1; i < numCircles; i++) {
+            let x = startX + i * spacing * normX;
+            let y = startY + i * spacing * normY;
+    
+            this.BridgeGraphics.beginPath();
+            this.BridgeGraphics.arc(x, y, circleRadius, 0, 2 * Math.PI);
+            this.BridgeGraphics.closePath();
+    
+            this.BridgeGraphics.fillStyle(color);
+            this.BridgeGraphics.fill();
+        }
+    
+        // Draw the final triangle in light green
+        let finalX = startX + (magnitude - spacing) * normX;
+        let finalY = startY + (magnitude - spacing) * normY;
+        let angle = Math.atan2(normY, normX);
+    
+        this.BridgeGraphics.beginPath();
+        this.BridgeGraphics.moveTo(finalX, finalY);
+        this.BridgeGraphics.lineTo(
+            finalX - Math.cos(angle - Math.PI / 6) * triangleSize,
+            finalY - Math.sin(angle - Math.PI / 6) * triangleSize
+        );
+        this.BridgeGraphics.lineTo(
+            finalX - Math.cos(angle + Math.PI / 6) * triangleSize,
+            finalY - Math.sin(angle + Math.PI / 6) * triangleSize
+        );
+        this.BridgeGraphics.closePath();
+    
+        // Define the light green color for the final triangle
+        this.BridgeGraphics.fillStyle(Phaser.Display.Color.GetColor(144, 238, 144)); // Light green
+        this.BridgeGraphics.fill();
+    }
+    
 }
 

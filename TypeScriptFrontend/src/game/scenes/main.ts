@@ -10,8 +10,9 @@ import {
     GROWTH_STOP,
     AbilityCredits,
     AbilityReloadTimes,
+    NUKE_RANGE,
 } from "../objects/constants";
-import { PlayerStateEnum as PSE, PlayerStateEnum } from "../objects/enums";
+import { PlayerStateEnum as PSE} from "../objects/enums";
 import { ReloadAbility } from "../objects/ReloadAbility";
 import { Event } from "../objects/event";
 import { AbstractAbilityManager } from "../objects/abilityManager";
@@ -61,7 +62,7 @@ export class MainScene extends Scene {
         // console.log(network);
         // console.log("network: ", network.test());
         this.board = props;
-        this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
+        this.mainPlayer = new MyPlayer("Player 1", Colors.RED);
         this.otherPlayers.push(this.mainPlayer);
         this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
         // this.network = new Network(
@@ -109,6 +110,7 @@ export class MainScene extends Scene {
         this.load.image("Rage", "Rage.png");
         this.load.image("Spawn", "Spawn.png");
         this.load.image("Zombie", "Zombie.png");
+        this.load.image('Pump', 'Pump.png');
     }
     create(): void {
         this.graphics = this.add.graphics();
@@ -127,7 +129,7 @@ export class MainScene extends Scene {
             this.nodes[i] = node;
         }
         for (let i in main.edges) {
-            let edge = main.edges[i];
+            let edge = main.edges[i] as Edge;
             edge.scene = this;
             this.edges[i] = edge;
         }
@@ -161,7 +163,8 @@ export class MainScene extends Scene {
                 ab[abilityCode],
                 AbilityCredits[abilityCode],
                 AbilityReloadTimes[abilityCode],
-                count, // Use the count from abilityCounts
+                abilityCode,
+                count,  // Use the count from abilityCounts
                 1,
                 this
             );
@@ -201,11 +204,8 @@ export class MainScene extends Scene {
         } else if (this.ps === PSE.VICTORY && key === stateCodes.RESTART_CODE) {
             this.simple_send(stateCodes.RESTART_CODE);
         } else if (this.ps === PSE.PLAY) {
-            if (this.abilityManager.inAbilities(key)) {
-                if (this.abilityManager.select(key)) {
-                    this.simple_send(key);
-                }
-            } else if (key === stateCodes.FORFEIT_CODE) {
+            this.abilitySelection(key);
+            if (key === stateCodes.FORFEIT_CODE) {
                 this.simple_send(stateCodes.FORFEIT_CODE);
             }
         } else {
@@ -213,7 +213,16 @@ export class MainScene extends Scene {
         }
     }
 
+    abilitySelection(key: number): void {
+        if (this.abilityManager.inAbilities(key)) {
+            if (this.abilityManager.select(key)) {
+                this.simple_send(key);
+            }
+        }
+    }
+
     update(): void {
+        this.graphics.clear();
         this.abilityManager.draw(this);
 
         // Iterate over the values of the dictionary to draw each node
@@ -228,12 +237,8 @@ export class MainScene extends Scene {
 
             // For each node in capitals, draw a pink hollow circle on the node of the size of its this.value
             capitals.forEach((node) => {
-                this.graphics.lineStyle(6, phaserColor(Colors.PINK), 1);
-                this.graphics.strokeCircle(
-                    node.pos.x,
-                    node.pos.y,
-                    node.size + 4
-                );
+                this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
+                this.graphics.strokeCircle(node.pos.x, node.pos.y, (node.value * NUKE_RANGE));
             });
         }
     }
@@ -286,6 +291,11 @@ export class MainScene extends Scene {
             }
         }
 
+        let ability = this.abilityManager.triangle_validate(position);
+        if (ability) {
+            return ability;
+        }
+
         return false;
     }
 
@@ -320,6 +330,10 @@ export class MainScene extends Scene {
                     }
                 }
             }
+        }
+        let key = this.abilityManager.clickSelect(this.input.activePointer.position);
+        if (key) {
+            this.abilitySelection(key);
         }
     }
 

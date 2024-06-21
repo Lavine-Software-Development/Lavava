@@ -10,6 +10,10 @@ export class State {
         this.graphic_override = gaphic_override;
     }
 
+    select(on: boolean) {
+        
+    }
+
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
         // Draw the state
     }
@@ -90,8 +94,28 @@ export class CannonState extends State {
     ) {
         super(name);
         this.angle = angle;
-        this.selected = true;
+        this.selected = false;
     }
+
+    select(on: boolean) {
+        this.selected = on;
+    }
+}
+
+export class PumpState extends State {
+    private plusSprite: Phaser.GameObjects.Image | null = null;
+
+    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
+        if (!this.plusSprite) {
+            this.plusSprite = scene.add.image(pos.x, pos.y, 'plus');
+            this.plusSprite.setOrigin(0.5, 0.5); // Set origin to center for proper scaling
+        }
+        let currentScale = size / 12; // displayWidth considers current scale
+        if (Math.abs(this.plusSprite.scaleX - currentScale) > 0.01) { // threshold to avoid minor changes
+            this.plusSprite.setScale(currentScale);
+        }
+    }
+
 }
 
 export const stateDict: { [key: number]: () => State } = {
@@ -107,5 +131,6 @@ export const stateDict: { [key: number]: () => State } = {
             Colors.YELLOW
         ),
     5: () => new CannonState("cannon"),
+    6: () => new PumpState("pump"),
 };
 

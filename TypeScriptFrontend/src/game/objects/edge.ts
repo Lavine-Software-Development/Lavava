@@ -3,6 +3,7 @@ import { IDItem } from "./idItem";
 import { ClickType } from "./enums";
 import { Node } from "./node";
 import { Colors } from "./constants";
+import { phaserColor } from "./utilities";
 
 export class Edge extends IDItem {
     fromNode: Node;
@@ -110,6 +111,10 @@ export class Edge extends IDItem {
         const adjustedStartX = startX + normX * this.fromNode.size;
         const adjustedStartY = startY + normY * this.fromNode.size;
 
+        // Calculate adjusted starting coordinates from the other end
+        const adjustedEndX = endX - normX * this.toNode.size;
+        const adjustedEndY = endY - normY * this.toNode.size;
+
         // Adjust the magnitude for both node sizes
         const adjustedMagnitude =
             magnitude - (this.toNode.size + this.fromNode.size);
@@ -128,7 +133,7 @@ export class Edge extends IDItem {
             shorterEndY
         );
 
-        const color = this.phaserColor;
+        let color = this.fromNode.effects.has("rage") ? phaserColor(Colors.DARK_GREEN) : this.phaserColor;
 
         if (!this.dynamic) {
             // Draw Arrow from adjusted start point to the adjusted length
@@ -143,10 +148,10 @@ export class Edge extends IDItem {
         } else {
             // Draw Circles from adjusted start point to the adjusted length
             this.drawCircle(
-                adjustedStartX,
-                adjustedStartY,
-                normX,
-                normY,
+                adjustedEndX,
+                adjustedEndY,
+                -normX,
+                -normY,
                 adjustedMagnitude,
                 color
             );
@@ -162,12 +167,12 @@ export class Edge extends IDItem {
         color: number
     ): void {
         const triangleSize = 11;
-        const minSpacing = 13;
-
+        const minSpacing = 12;
+    
         const numTriangles = Math.floor(magnitude / minSpacing);
         const spacing = magnitude / numTriangles;
-        let angle = Math.atan2(normY, normX) - Math.PI / 2;
-
+        let angle = Math.atan2(normY, normX) + Math.PI / 2;
+    
         if (this.sprites.length !== numTriangles) {
             // Adjust the number of sprites if the count has changed
             if (this.sprites.length < numTriangles) {
@@ -192,12 +197,13 @@ export class Edge extends IDItem {
         }
 
         // Update positions of existing sprites
+        let bias = 0.4;
         for (let i = 0; i < numTriangles; i++) {
             let triangleSprite = this.sprites[i];
             if (spacing != this.spacing) {
-                let x = startX + i * spacing * normX + triangleSize * normX;
-                let y = startY + i * spacing * normY + triangleSize * normY;
-
+                let x = startX + (i - bias) * spacing * normX + triangleSize * normX;
+                let y = startY + (i - bias) * spacing * normY + triangleSize * normY;
+        
                 triangleSprite.x = x;
                 triangleSprite.y = y;
             }
@@ -225,15 +231,18 @@ export class Edge extends IDItem {
         const spacing = (magnitude - 2 * circleRadius) / numCircles;
 
         // Initialize the triangle sprite if not already present or if there are no sprites at all
-        if (
-            this.sprites.length === 0 ||
-            this.sprites[this.sprites.length - 1].texture.key !==
-                "filledTriangle"
-        ) {
+        if (this.sprites.length === 0) {
             // First, clear any inappropriate sprites
             this.sprites.forEach((sprite) => sprite.destroy());
             this.sprites = [];
 
+                        // Add the triangle sprite at the end
+            let triangleSprite = this.my_scene.add.sprite(0, 0, 'filledTriangle');
+            triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51));
+            let angle = Math.atan2(normY, normX);
+            triangleSprite.setRotation(angle - Math.PI / 2);
+            this.sprites.push(triangleSprite);
+    
             // Then, populate the array correctly
             for (let i = 0; i < numCircles; i++) {
                 let circleSprite = this.my_scene.add.sprite(
@@ -244,28 +253,16 @@ export class Edge extends IDItem {
                 circleSprite.setTint(color);
                 this.sprites.push(circleSprite);
             }
-            // Add the triangle sprite at the end
-            let triangleSprite = this.my_scene.add.sprite(
-                0,
-                0,
-                "filledTriangle"
-            );
-            triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51));
-            this.sprites.push(triangleSprite);
         } else {
             // Adjust sprite array if necessary
-            while (this.sprites.length - 1 > numCircles) {
-                let spriteToRemove = this.sprites.shift();
+            while (this.sprites.length > numCircles) {
+                let spriteToRemove = this.sprites.pop();
                 spriteToRemove.destroy();
             }
-            while (this.sprites.length - 1 < numCircles) {
-                let circleSprite = this.my_scene.add.sprite(
-                    0,
-                    0,
-                    this.flowing ? "filledCircle" : "outlinedCircle"
-                );
+            while (this.sprites.length < numCircles) {
+                let circleSprite = this.my_scene.add.sprite(0, 0, this.flowing ? 'filledCircle' : 'outlinedCircle');
                 circleSprite.setTint(color);
-                this.sprites.unshift(circleSprite); // Add to the start
+                this.sprites.push(circleSprite);  // Add to the start
             }
         }
 
@@ -283,16 +280,10 @@ export class Edge extends IDItem {
         }
 
         // Always update the position and properties of the terminal triangle sprite
-        let triangleSprite = this.sprites[this.sprites.length - 1];
-        triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51));
+        let triangleSprite = this.sprites[0];
         if (spacing != this.spacing) {
-            let x = startX + spacing * normX;
-            let y = startY + spacing * normY;
-            let angle = Math.atan2(normY, normX);
-
-            triangleSprite.x = x;
-            triangleSprite.y = y;
-            triangleSprite.setRotation(angle - Math.PI / 2);
+            triangleSprite.x = startX + spacing * normX;
+            triangleSprite.y = startY + spacing * normY;
         }
 
         this.spacing = spacing;

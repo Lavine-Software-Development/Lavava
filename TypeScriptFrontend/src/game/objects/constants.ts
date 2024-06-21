@@ -11,10 +11,12 @@ export const Colors = {
     DARK_ORANGE: [193, 106, 8] as const,
     STRONG_ORANGE: [255, 77, 0] as const,
     YELLOW: [255, 255, 0] as const,
+    LIGHT_YELLOW: [255, 255, 153] as const,
     DARK_YELLOW: [204, 204, 0] as const,
     GREY: [128, 128, 128] as const,
     LIGHT_GREY: [192, 192, 192] as const,
     PURPLE: [153, 51, 255] as const,
+    DARK_PURPLE: [102, 0, 204] as const,
     PINK: [255, 51, 153] as const,
     DARK_PINK: [255, 0, 127] as const,
     LIGHT_BLUE: [173, 216, 230] as const,
@@ -43,10 +45,12 @@ export const KeyCodes = {
     POISON_CODE: 112,
     CAPITAL_CODE: 99,
     CANNON_CODE: 101,
+    PUMP_CODE: 117,
 };
 
 export const EventCodes = {
     CANNON_SHOT_CODE: 4,
+    PUMP_DRAIN_CODE: 5,
     STANDARD_LEFT_CLICK: 1,
     STANDARD_RIGHT_CLICK: 3,
 };
@@ -74,6 +78,7 @@ export const NameToCode = {
     "Poison": KeyCodes.POISON_CODE,
     "Capital": KeyCodes.CAPITAL_CODE,
     "Cannon": KeyCodes.CANNON_CODE,
+    "Pump": KeyCodes.PUMP_CODE,
 };
 
 

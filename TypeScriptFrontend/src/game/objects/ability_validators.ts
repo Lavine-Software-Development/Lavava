@@ -9,6 +9,7 @@ import {
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./node";
 import { Edge } from "./edge";
+import { ReloadAbility } from "./ReloadAbility";
 
 function hasAnySame(
     num1: number,
@@ -36,6 +37,18 @@ const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
         node.stateName !== "capital" &&
         node.stateName !== "mine"
     );
+};
+
+const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
+
+    const newLine = new Phaser.Geom.Line(nodeFrom.pos.x, nodeFrom.pos.y, nodeTo.pos.x, nodeTo.pos.y);
+    // Check for overlaps with all other edges
+    for (let edge of edges) {
+        if (!hasAnySame(nodeFrom.id, nodeTo.id, edge.fromNode.id, edge.toNode.id) && Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
+            return false;
+        }
+    }
+    return true;
 };
 
 function attackValidators(nodes: Node[], player: OtherPlayer) {
@@ -128,37 +141,14 @@ function playerValidators(player: OtherPlayer): {
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEither,
         [KeyCodes.ZOMBIE_CODE]: myNode,
         [KeyCodes.CANNON_CODE]: myNode,
+        [KeyCodes.PUMP_CODE]: myNode,
     };
 }
 
 function newEdgeValidator(
-    nodes: Node[],
     edges: Edge[],
     player: OtherPlayer
 ): ValidatorFunc {
-    const checkNewEdge = (nodeFromId: number, nodeToId: number): boolean => {
-        const newLine = new Phaser.Geom.Line(
-            nodes[nodeFromId].pos.x,
-            nodes[nodeFromId].pos.y,
-            nodes[nodeToId].pos.x,
-            nodes[nodeToId].pos.y
-        );
-        // Check for overlaps with all other edges
-        for (let edge of edges) {
-            if (
-                hasAnySame(
-                    nodeFromId,
-                    nodeToId,
-                    edge.fromNode.id,
-                    edge.toNode.id
-                ) ||
-                Phaser.Geom.Intersects.LineToLine(newLine, edge.line)
-            ) {
-                return false;
-            }
-        }
-        return true;
-    };
 
     const newEdgeStandard = (data: Node[]): boolean => {
         if (data.length === 1) {
@@ -169,7 +159,7 @@ function newEdgeValidator(
             const secondNode = data[1];
             return (
                 firstNode.id !== secondNode.id &&
-                checkNewEdge(firstNode.id, secondNode.id)
+                checkNewEdge(firstNode, secondNode, edges)
             );
         }
     };
@@ -189,8 +179,8 @@ export function makeAbilityValidators(
 ): { [key: string]: ValidatorFunc } {
     const abilityValidators: { [key: string]: ValidatorFunc } = {
         [KeyCodes.SPAWN_CODE]: unownedNode,
-        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(nodes, edges, player),
-        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(nodes, edges, player),
+        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(edges, player),
+        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(edges, player),
         [KeyCodes.BURN_CODE]: standardPortNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
@@ -202,7 +192,7 @@ export function makeAbilityValidators(
     return { ...abilityValidators, ...playerValidatorsMap };
 }
 
-export function makeEventValidators(player: OtherPlayer): {
+export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {
@@ -214,8 +204,25 @@ export function makeEventValidators(player: OtherPlayer): {
                 firstNode.value > MINIMUM_TRANSFER_VALUE
             );
         } else if (data.length > 1) {
+            const firstNode = data[0] as Node;
             const secondNode = data[1] as Node;
-            return !(secondNode.owner === player && secondNode.full);
+            return !(secondNode.owner === player && secondNode.full) &&
+            checkNewEdge(firstNode, secondNode, edges);
+        }
+        return false;
+    }
+
+    function pumpDrainValidator(data: IDItem[]): boolean {
+        const node = data[0] as Node;
+        if (data.length === 1) {
+            return (
+                node.owner === player &&
+                node.stateName === "pump" &&
+                node.full
+            );
+        } else if (data.length > 1) {
+            const ability = data[1] as ReloadAbility;
+            return ability.credits < 3;
         }
         return false;
     }
@@ -234,6 +241,7 @@ export function makeEventValidators(player: OtherPlayer): {
 
     return {
         [EventCodes.CANNON_SHOT_CODE]: cannonShotValidator,
+        [EventCodes.PUMP_DRAIN_CODE]: pumpDrainValidator,
         [EventCodes.STANDARD_LEFT_CLICK]: edgeValidator,
         [EventCodes.STANDARD_RIGHT_CLICK]: edgeValidator,
     };

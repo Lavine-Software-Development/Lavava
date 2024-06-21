@@ -4,7 +4,7 @@ import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
 import { ClickType } from "./enums";
 import { phaserColor } from "./utilities";
-import { CapitalState, CannonState } from "./States";
+import { CannonState } from "./States";
 
 export class Node extends IDItem {
     pos: Phaser.Math.Vector2;
@@ -45,6 +45,10 @@ export class Node extends IDItem {
             this.graphics = _scene.add.graphics();
             this.cannonGraphics = _scene.add.graphics();
         }
+    }
+
+    select(on: boolean): void {
+            this.state.select(on);
     }
 
     get color(): readonly [number, number, number] {
@@ -148,14 +152,29 @@ export class Node extends IDItem {
             this.state.draw(this._scene, this.size, this.pos);
 
             if (this.state instanceof CannonState) {
+                this.cannonGraphics.clear();
                 if (this.state.selected) {
-                    this.cannonGraphics.clear();
-                    let mousePos = this.scene.input.activePointer.position;
+                    let mousePos = this._scene.input.activePointer.position;
                     // Calculate angle between the spot and the mouse cursor
                     let dx = mousePos.x - this.pos.x;
                     let dy = mousePos.y - this.pos.y;
                     this.state.angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
+            
+                    // Calculate distance to mouse cursor
+                    let distanceToMouse = Math.sqrt(dx * dx + dy * dy) - this.size * 1.2;
+            
+                    // Draw the yellow rectangle from the cannon to the mouse cursor
+                    this.drawRotatedRectangle(
+                        this.state.angle,
+                        distanceToMouse,  // Width is the distance to the mouse
+                        this.size,        // Height remains the same as the cannon
+                        Colors.LIGHT_YELLOW,  // Light yellow color
+                        this.cannonGraphics,
+                        0.8,  // Optional: a lesser alpha for lighter visibility
+                        distanceToMouse / 2
+                    );
                 }
+
                 this.drawRotatedRectangle(
                     this.state.angle,
                     this.size * 2,
@@ -180,35 +199,34 @@ export class Node extends IDItem {
         portWidth: number,
         portHeight: number,
         col: readonly [number, number, number],
-        graphics: Phaser.GameObjects.Graphics = this.graphics
+        graphics: Phaser.GameObjects.Graphics = this.graphics,
+        alpha: number = 1,  // Default opacity is 100%
+        xOffset: number = 0  // Default to no offset
     ): void {
         const rad = Phaser.Math.DegToRad(angle);
         const halfWidth = portWidth / 2;
         const halfHeight = portHeight / 2;
-        const distanceFromCenter = this.size * 1.2; // Define how far each port should be from the center of the node
-
+        const distanceFromCenter = this.size * 1.2;
+    
         const portCenter = new Phaser.Math.Vector2(
-            this.pos.x + Math.cos(rad) * distanceFromCenter,
-            this.pos.y + Math.sin(rad) * distanceFromCenter
+            this.pos.x + Math.cos(rad) * (distanceFromCenter + xOffset),
+            this.pos.y + Math.sin(rad) * (distanceFromCenter + xOffset)
         );
-
+    
         // Calculate the corners of the rotated rectangle
         const corners = [
             new Phaser.Math.Vector2(-halfWidth, -halfHeight),
             new Phaser.Math.Vector2(halfWidth, -halfHeight),
             new Phaser.Math.Vector2(halfWidth, halfHeight),
             new Phaser.Math.Vector2(-halfWidth, halfHeight),
-        ].map((corner) => {
-            // Rotate and then translate each corner
-            return corner.rotate(rad).add(portCenter);
-        });
-
+        ].map(corner => corner.rotate(rad).add(portCenter));
+    
         // Change graphics fill style here if needed
         graphics.fillStyle(
             Phaser.Display.Color.GetColor(col[0], col[1], col[2]),
-            1
-        ); // Set the color to Orange
-
+            alpha
+        );
+    
         // Draw the polygon
         graphics.beginPath();
         graphics.moveTo(corners[0].x, corners[0].y);

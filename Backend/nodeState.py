@@ -2,7 +2,7 @@ from jsonable import JsonableSkeleton
 from constants import (
     GROWTH_RATE,
     MINIMUM_TRANSFER_VALUE,
-    CAPITAL_SHRINK_SPEED,
+    STANDARD_SHRINK_SPEED,
     MINE_DICT,
     GROWTH_STOP,
     GREY,
@@ -15,8 +15,9 @@ import math
 
 
 class AbstractState(JsonableSkeleton):
-    def __init__(self, id, reset_on_capture, flow_ownership, update_on_new_owner, visual_id):
-        self.id = id
+    def __init__(self, node, reset_on_capture, flow_ownership, update_on_new_owner, visual_id):
+        self.node = node
+        self.id = node.id
         self.reset_on_capture = reset_on_capture
         self.flow_ownership = flow_ownership
         self.update_on_new_owner = update_on_new_owner
@@ -24,31 +25,40 @@ class AbstractState(JsonableSkeleton):
         self.swap_status = STANDARD_SWAP_STATUS
         self.visual_id = visual_id
 
-    def grow(self, multiplier):
-        return GROWTH_RATE * multiplier
+    def grow(self):
+        change = GROWTH_RATE * self.node.grow_multiplier
+        if self.can_grow(change):
+            return change
+        return 0
+    
+    def can_grow(self, change):
+        return 0 < self.node.value + change < self.full_size
 
     @abstractmethod
-    def intake(self, amount, multiplier, contested):
+    def intake(self, amount, incoming_player):
         pass
 
-    def accept_intake(self, contested, value):
-        return value < self.full_size or contested
+    def accept_intake(self, incoming_player):
+        return self.node.value < self.full_size or self.contested(incoming_player)
 
-    def expel(self, multiplier, value):
-        return TRANSFER_RATE * multiplier * value
+    def expel(self):
+        return TRANSFER_RATE * self.node.expel_multiplier * self.node.value
 
     @abstractmethod
     def capture_event(self):
         pass
 
     @abstractmethod
-    def killed(self, value):
+    def killed(self):
         pass
 
     def size_factor(self, value):
         if value < 5:
             return 0
         return max(math.log10(value / 10) / 2 + value / 1000 + 0.15, 0)
+    
+    def contested(self, incoming_player):
+        return incoming_player != self.node.owner
     
     @property
     def json_repr(self):
@@ -57,115 +67,127 @@ class AbstractState(JsonableSkeleton):
     @property
     def full_size(self):
         return GROWTH_STOP
-    
-    def can_grow(self, size, change):
-        return 0 < size + change < self.full_size
-
 
 class DefaultState(AbstractState):
-    def __init__(self, id):
-        super().__init__(id, False, False, False, 0)
+    def __init__(self, node):
+        super().__init__(node, False, False, False, 0)
 
-    def intake(self, amount, multiplier, contested):
-        change = amount * multiplier
-        if contested:
+    def intake(self, amount, incoming_player):
+        change = amount * self.node.intake_multiplier
+        if self.contested(incoming_player):
             change *= -1
         return change
 
     def capture_event(self):
-        return lambda value: value * -1
+        return self.node.value * -1
 
-    def killed(self, value):
-        return value < 0
+    def killed(self):
+        return self.node.value < 0
 
 
 class ZombieState(DefaultState):
 
-    def __init__(self, id):
-        AbstractState.__init__(self, id, True, False, False, 1)
+    def __init__(self, node):
+        AbstractState.__init__(self, node, True, False, False, 1)
 
-    def grow(self, multiplier):
+    def grow(self):
         return 0
 
-    def intake(self, amount, multiplier, contested):
-        return super().intake(amount, multiplier, contested) / 2
+    def intake(self, amount, incoming_player):
+        return super().intake(amount, incoming_player) / 2
     
 
 class CannonState(DefaultState):
     
-    def __init__(self, id):
-        AbstractState.__init__(self, id, False, False, False, 5)
+    def __init__(self, node):
+        AbstractState.__init__(self, node, False, False, False, 5)
 
-    def grow(self, multiplier):
+    def grow(self):
         return 0
 
+class PumpState(DefaultState):
 
-class CapitalState(DefaultState):
-    def __init__(self, id, reset=True, update_on_new_owner=False):
-        AbstractState.__init__(self, id, reset, False, update_on_new_owner, 2)
-        self.capitalized = False
-        self.acceptBridge = False
+    def __init__(self, node):
+        AbstractState.__init__(self, node, False, False, False, 6)
+        self.prep_shrink()
+
+    def prep_shrink(self):
+        self.draining = False
         self.shrink_count = math.floor(
-            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(CAPITAL_SHRINK_SPEED)
+            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
         )
 
     def grow(self, multiplier):
+        if self.draining:
+            self.drain()
+        return 0
+    
+    def drain(self):
+        if self.shrink_count == 0:
+            self.prep_shrink()
+            return 0
+        self.shrink_count -= 1
+        return STANDARD_SHRINK_SPEED
+    
+    def intake(self, amount, incoming_player):
+        return super().intake(amount, incoming_player) / 2
+
+class CapitalState(DefaultState):
+    def __init__(self, node, reset=True, update_on_new_owner=False):
+        AbstractState.__init__(self, node, reset, False, update_on_new_owner, 2)
+        self.capitalized = False
+        self.acceptBridge = False
+        self.shrink_count = math.floor(
+            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
+        )
+
+    def grow(self):
         if not self.capitalized:
             return self.shrink()
         return 0
-    
-    def can_grow(self, size, change):
-        if not self.capitalized:
-            return True
-        return super().can_grow(size, change)
 
     def shrink(self):
         if self.shrink_count == 0:
             self.capitalized = True
             return 0
         self.shrink_count -= 1
-        return CAPITAL_SHRINK_SPEED
-
-    def killed(self, value):
-        return value < 0
+        return STANDARD_SHRINK_SPEED
     
-    def accept_intake(self, contested, value):
-        if self.capitalized:
-            return value < self.full_size or contested
-        return False
+    def accept_intake(self, incoming_player):
+        return self.capitalized and super().accept_intake(incoming_player)
 
 
 class StartingCapitalState(CapitalState):
-    def __init__(self, id, is_owned=False):
-        super().__init__(id, False, True)
+    def __init__(self, node, is_owned=False):
+        super().__init__(node, False, True)
         self.capitalized = True
         self.is_owned = is_owned
 
-    def grow(self, multiplier):
+    def grow(self):
         return 0
 
 
 class MineState(AbstractState):
-    def __init__(self, id, absorbing_func, island):
+    def __init__(self, node, absorbing_func, island):
         self.bonus, self.bubble, self.ring_color, visual_id = MINE_DICT[island]
-        super().__init__(id, True, True, False, visual_id)
+        super().__init__(node, True, True, False, visual_id)
         self.absorbing_func = absorbing_func
         self.swap_status = BELOW_SWAP_STATUS
 
-    def grow(self, multiplier):
+    def grow(self):
         return 0
 
-    def intake(self, amount, multiplier, contested):
-        return amount * multiplier
+    def intake(self, amount, incoming_player):
+        return amount * self.node.intake_multiplier
 
-    def accept_intake(self, contested, value):
-        return not contested or not self.absorbing_func()
+    def accept_intake(self, incoming_player):
+        return not self.contested(incoming_player) or not self.absorbing_func()
 
-    def killed(self, value):
-        return value >= self.bubble
+    def killed(self):
+        return self.node.value >= self.bubble
 
     def capture_event(self):
-        return lambda value: MINIMUM_TRANSFER_VALUE
+        return MINIMUM_TRANSFER_VALUE
 
     def size_factor(self, value):
         return super().size_factor(self.bubble) / 2
