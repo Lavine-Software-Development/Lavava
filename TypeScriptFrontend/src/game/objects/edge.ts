@@ -6,8 +6,8 @@ import { Colors } from "./constants";
 import { phaserColor } from "./utilities";
 
 export class Edge extends IDItem {
-    fromNode: Node;
-    toNode: Node;
+    _fromNode: Node;
+    _toNode: Node;
     dynamic: boolean;
     on: boolean;
     flowing: boolean;
@@ -17,6 +17,7 @@ export class Edge extends IDItem {
     my_scene: Phaser.Scene;
     sprites: Phaser.GameObjects.Sprite[];
     spacing: number;
+    swapped: boolean;
 
     constructor(
         id: number,
@@ -28,8 +29,8 @@ export class Edge extends IDItem {
         _scene?: Phaser.Scene
     ) {
         super(id, ClickType.EDGE); // Example ID logic
-        this.fromNode = fromNode;
-        this.toNode = toNode;
+        this._fromNode = fromNode;
+        this._toNode = toNode;
         this.dynamic = dynamic;
         this.on = on;
         this.flowing = flowing;
@@ -59,6 +60,33 @@ export class Edge extends IDItem {
             return Colors.GREEN;
         }
         return this.on ? this.fromNode.color : [50, 50, 50];
+    }
+
+    get fromNode(): Node {
+        return this._fromNode;
+    }
+
+    set fromNode(value: Node) {
+        if (this._fromNode !== value) {
+            this._fromNode = value;
+            this.swapped = true;
+            console.log("from swapped");
+        }
+        console.log("from called");
+    }
+
+    // Getter and Setter for toNode
+    get toNode(): Node {
+        return this._toNode;
+    }
+
+    set toNode(value: Node) {
+        if (this._toNode !== value) {
+            this._toNode = value;
+            this.swapped = true;
+            console.log("to swapped");
+        }
+        console.log("to called");
     }
 
     controlledBy(player: OtherPlayer): boolean {
@@ -231,7 +259,8 @@ export class Edge extends IDItem {
         const spacing = (magnitude - 2 * circleRadius) / numCircles;
 
         // Initialize the triangle sprite if not already present or if there are no sprites at all
-        if (this.sprites.length === 0) {
+        if (this.sprites.length === 0 || this.swapped) {
+            this.swapped = false;
             // First, clear any inappropriate sprites
             this.sprites.forEach((sprite) => sprite.destroy());
             this.sprites = [];

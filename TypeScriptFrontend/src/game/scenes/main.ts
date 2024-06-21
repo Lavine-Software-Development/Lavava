@@ -64,7 +64,7 @@ export class MainScene extends Scene {
         this.board = props;
         this.mainPlayer = new MyPlayer("Player 1", Colors.RED);
         this.otherPlayers.push(this.mainPlayer);
-        this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
+        this.otherPlayers.push(new OtherPlayer("Player 2", Colors.BLUE));
         // this.network = new Network(
         //     "ws://localhost:5553",
         //     this.update_board.bind(this)
@@ -135,7 +135,7 @@ export class MainScene extends Scene {
         }
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.START_SELECTION;
-        const ev = makeEventValidators(this.mainPlayer);
+        const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
         const ab = makeAbilityValidators(
             this.mainPlayer,
             Object.values(this.nodes),
@@ -415,8 +415,8 @@ export class MainScene extends Scene {
         } else if (object[attribute] instanceof Edge) {
             return this.edges[value];
         } else if (attribute === "owner") {
-            console.log("other player");
-            console.log(this.otherPlayers[value].name);
+            // console.log("other player");
+            // console.log(this.otherPlayers[value].name);
             return this.otherPlayers[value];
         }
         //TODO: check for State and OtherPlayer types after adding those
