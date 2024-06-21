@@ -19,6 +19,7 @@ class DefaultPlayer(Jsonable):
 
         recurse_values = {'abilities'}
         tick_values = {'ps'}
+        # tick_values = {'ps', 'count'}
         super().__init__(id, set(), recurse_values, tick_values)
 
         self.default_values()

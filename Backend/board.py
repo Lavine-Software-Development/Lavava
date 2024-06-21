@@ -25,6 +25,7 @@ from ae_validators import make_effect_validators
 
 
 @track_changes("nodes_r", "edges_r")
+# @track_changes("nodes_r", "edges_r", 'full_player_capitals')
 class Board(JsonableTracked):
     def __init__(self, gs):
         self.gs = gs
@@ -34,6 +35,7 @@ class Board(JsonableTracked):
         self.extra_edges = 0
         self.tracker = Tracker()
         self.player_capitals = defaultdict(set)
+        self.full_player_capitals = dict()
 
         recurse_values = {"nodes", "edges"}
         super().__init__("board", recurse_values, recurse_values)
@@ -81,6 +83,10 @@ class Board(JsonableTracked):
         for edge in self.edges:
             if edge.controlled_by(player):
                 edge.switch(False)
+        for node in self.nodes:
+            if node.owner == player:
+                node.owner = None
+                node.set_state("default")
 
     def expand_nodes(self):
         far_left_node = min(self.nodes, key=lambda node: node.pos[0])
@@ -118,8 +124,7 @@ class Board(JsonableTracked):
         if updated_nodes:
             self.track_state_changes(updated_nodes)
 
-        for player in self.player_capitals:
-            player.full_capital_count = len([n for n in self.player_capitals[player] if n.full()])
+        self.full_player_capitals = {player.id: len([n for n in self.player_capitals[player] if n.full()]) for player in self.player_capitals}
 
     def check_new_edge(self, node_from, node_to):
         if node_to == node_from:
@@ -130,6 +135,9 @@ class Board(JsonableTracked):
         if not self.check_all_overlaps((node_to, node_from)):
             return False
         return True
+    
+    def victory_check(self):
+        return any(count > 3 for count in self.full_player_capitals.values())
 
     def new_edge_id(self):
         return (
@@ -192,19 +200,11 @@ class Board(JsonableTracked):
         self.id_dict.pop(node.id)
         self.nodes.remove(node)
 
-    def click(self, id, player, key):
-        self.id_dict[id].click(player, key)
     
     def make_events_dict(self):
         validators = make_effect_validators(self)
         effects = make_event_effects(self)
         return {code: Event(validators[code], effects[code]) for code in EVENT_CODES}
-    
-    def player_node_count(self, player_count):
-        for node in self.nodes:
-            if node.owner:
-                player_count[node.owner.id] += 1
-        return player_count
     
     def player_energy_count(self, player_energy):
         for node in self.nodes:
