@@ -1,14 +1,14 @@
-import { ReloadAbility } from "./Objects/ReloadAbility";
-import { IDItem } from "./Objects/idItem";
+import { ReloadAbility } from "./ReloadAbility";
+import { IDItem } from "./idItem";
 import { Highlight } from "./highlight";
-import { Event } from "./Objects/event";
-import { Node } from "./Objects/node";
+import { Event } from "./event";
+import { Node } from "./node";
 import { phaserColor } from "./utilities";
 import { Colors } from "./constants";
 import { ClickType } from "./enums";
 
 export class AbstractAbilityManager {
-    private abilities: { [key: number]: ReloadAbility };
+    abilities: { [key: number]: ReloadAbility };
     private events: { [key: number]: Event };
     private mode: number | null = null;
     private backupMode: number | null = null;

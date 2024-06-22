@@ -6,18 +6,18 @@ import { Colors } from "./constants";
 import { phaserColor } from "./utilities";
 
 export class Edge extends IDItem {
-    _fromNode: Node;
-    _toNode: Node;
-    dynamic: boolean;
+    private _fromNode: Node;
+    private _toNode: Node;
+    private _dynamic: boolean;
     on: boolean;
-    flowing: boolean;
+    private _flowing: boolean;
     line: Phaser.Geom.Line;
     hover_line: Phaser.Geom.Line;
     graphics: Phaser.GameObjects.Graphics;
     my_scene: Phaser.Scene;
     sprites: Phaser.GameObjects.Sprite[];
     spacing: number;
-    swapped: boolean;
+    redraw: boolean;
 
     constructor(
         id: number,
@@ -31,9 +31,9 @@ export class Edge extends IDItem {
         super(id, ClickType.EDGE); // Example ID logic
         this._fromNode = fromNode;
         this._toNode = toNode;
-        this.dynamic = dynamic;
+        this._dynamic = dynamic;
         this.on = on;
-        this.flowing = flowing;
+        this._flowing = flowing;
         if (_scene) {
             this.my_scene = _scene;
             this.graphics = _scene.add.graphics();
@@ -56,51 +56,68 @@ export class Edge extends IDItem {
     }
 
     get color(): readonly [number, number, number] {
-        if (this.fromNode.effects.has("rage")) {
+        if (this._fromNode.effects.has("rage")) {
             return Colors.GREEN;
         }
-        return this.on ? this.fromNode.color : [50, 50, 50];
+        return this.on ? this._fromNode.color : [50, 50, 50];
     }
 
-    get fromNode(): Node {
+    get from_node(): Node {
         return this._fromNode;
     }
 
-    set fromNode(value: Node) {
+    set from_node(value: Node) {
         if (this._fromNode !== value) {
             this._fromNode = value;
-            this.swapped = true;
-            console.log("from swapped");
         }
-        console.log("from called");
     }
 
     // Getter and Setter for toNode
-    get toNode(): Node {
+    get to_node(): Node {
         return this._toNode;
     }
 
-    set toNode(value: Node) {
+    set to_node(value: Node) {
         if (this._toNode !== value) {
             this._toNode = value;
-            this.swapped = true;
-            console.log("to swapped");
+            this.redraw = true;
         }
-        console.log("to called");
+    }
+
+    get dynamic(): boolean {
+        return this._dynamic;
+    }
+
+    set dynamic(value: boolean) {
+        if (this._dynamic !== value) {
+            this._dynamic = value;
+            this.redraw = true;
+        }
+    }
+
+    get flowing(): boolean {
+        return this._flowing;
+    }
+
+    set flowing(value: boolean) {
+        if (this._flowing !== value) {
+            this._flowing = value;
+            this.redraw = true;
+        }
     }
 
     controlledBy(player: OtherPlayer): boolean {
         return (
-            this.fromNode.owner === player ||
-            (this.dynamic && this.toNode.owner === player && this.toNode.full)
+            this._fromNode.owner === player ||
+            (this.dynamic && this._toNode.owner === player && this._toNode.full)
         );
     }
 
     other(node: Node): Node {
-        if (node === this.fromNode) {
-            return this.toNode;
-        } else if (node === this.toNode) {
-            return this.fromNode;
+        if (node === this._fromNode) {
+            return this._toNode;
+        } else if (node === this._toNode) {
+            return this._fromNode;
         }
         throw new Error("Node not in edge");
     }
@@ -123,10 +140,10 @@ export class Edge extends IDItem {
     }
 
     draw(): void {
-        const startX = this.fromNode.pos.x;
-        const startY = this.fromNode.pos.y;
-        const endX = this.toNode.pos.x;
-        const endY = this.toNode.pos.y;
+        const startX = this._fromNode.pos.x;
+        const startY = this._fromNode.pos.y;
+        const endX = this._toNode.pos.x;
+        const endY = this._toNode.pos.y;
 
         const dx = endX - startX;
         const dy = endY - startY;
@@ -136,16 +153,16 @@ export class Edge extends IDItem {
         const normY = dy / magnitude;
 
         // Calculate adjusted starting coordinates
-        const adjustedStartX = startX + normX * this.fromNode.size;
-        const adjustedStartY = startY + normY * this.fromNode.size;
+        const adjustedStartX = startX + normX * this._fromNode.size;
+        const adjustedStartY = startY + normY * this._fromNode.size;
 
         // Calculate adjusted starting coordinates from the other end
-        const adjustedEndX = endX - normX * this.toNode.size;
-        const adjustedEndY = endY - normY * this.toNode.size;
+        const adjustedEndX = endX - normX * this._toNode.size;
+        const adjustedEndY = endY - normY * this._toNode.size;
 
         // Adjust the magnitude for both node sizes
         const adjustedMagnitude =
-            magnitude - (this.toNode.size + this.fromNode.size);
+            magnitude - (this._toNode.size + this._fromNode.size);
 
         // update this.hover_line to start at the adjusted values and be magnitude long
 
@@ -161,7 +178,7 @@ export class Edge extends IDItem {
             shorterEndY
         );
 
-        let color = this.fromNode.effects.has("rage") ? phaserColor(Colors.DARK_GREEN) : this.phaserColor;
+        let color = this._fromNode.effects.has("rage") ? phaserColor(Colors.DARK_GREEN) : this.phaserColor;
 
         if (!this.dynamic) {
             // Draw Arrow from adjusted start point to the adjusted length
@@ -200,6 +217,14 @@ export class Edge extends IDItem {
         const numTriangles = Math.floor(magnitude / minSpacing);
         const spacing = magnitude / numTriangles;
         let angle = Math.atan2(normY, normX) + Math.PI / 2;
+
+        if (this.redraw) {
+            this.redraw = false;
+            this.spacing = 0;
+            // First, clear any inappropriate sprites
+            this.sprites.forEach((sprite) => sprite.destroy());
+            this.sprites = [];
+        }
     
         if (this.sprites.length !== numTriangles) {
             // Adjust the number of sprites if the count has changed
@@ -259,13 +284,14 @@ export class Edge extends IDItem {
         const spacing = (magnitude - 2 * circleRadius) / numCircles;
 
         // Initialize the triangle sprite if not already present or if there are no sprites at all
-        if (this.sprites.length === 0 || this.swapped) {
-            this.swapped = false;
+        if (this.sprites.length === 0 || this.redraw) {
+            this.redraw = false;
+            this.spacing = 0;
             // First, clear any inappropriate sprites
             this.sprites.forEach((sprite) => sprite.destroy());
             this.sprites = [];
 
-                        // Add the triangle sprite at the end
+            // Add the triangle sprite at the end
             let triangleSprite = this.my_scene.add.sprite(0, 0, 'filledTriangle');
             triangleSprite.setTint(Phaser.Display.Color.GetColor(153, 255, 51));
             let angle = Math.atan2(normY, normX);

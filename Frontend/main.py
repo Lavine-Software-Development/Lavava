@@ -18,6 +18,7 @@ from ability_validators import make_ability_validators, unowned_node, make_event
 from playerStateEnums import PlayerStateEnum as PSE
 from clickTypeEnum import ClickType
 from collections import defaultdict
+from temp_network import Network
 import sys
 import math
 
@@ -50,7 +51,7 @@ class Main:
     def __init__(self):
         py.init() 
 
-        self.ps = PSE.ABILITY_SELECTION.value
+        self.ps = PSE.WAITING.value
         self.timer = 60
         self.highlight = Highlight()
         self.effect_visuals = defaultdict(dict)
@@ -308,4 +309,4 @@ class TestMain(Main):
 
 
 if __name__ == "__main__":
-   TestMain()
+   Main()

@@ -76,6 +76,7 @@ class Server:
             
 
     def start_game(self, batch):
+        batch.start()
 
         tick_thread = Thread(target=self.send_ticks, args=(batch,))
         tick_thread.daemon = True

@@ -62,9 +62,6 @@ export class MainScene extends Scene {
         // console.log(network);
         // console.log("network: ", network.test());
         this.board = props;
-        this.mainPlayer = new MyPlayer("Player 1", Colors.RED);
-        this.otherPlayers.push(this.mainPlayer);
-        this.otherPlayers.push(new OtherPlayer("Player 2", Colors.BLUE));
         // this.network = new Network(
         //     "ws://localhost:5553",
         //     this.update_board.bind(this)
@@ -133,6 +130,8 @@ export class MainScene extends Scene {
             edge.scene = this;
             this.edges[i] = edge;
         }
+        this.otherPlayers = Object.values(main.players);
+        this.mainPlayer = main.myPlayer;
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.START_SELECTION;
         const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
@@ -350,16 +349,22 @@ export class MainScene extends Scene {
             })
         );
     }
-
+ 
     update_board(new_data) {
         if (new_data != "Players may join") {
-            // console.log(new_data);
+            // console.log("new data");
             // new_data = JSON.parse(new_data);
             if (!("abilities" in new_data)) {
-                // this.ps = new_data["player"]["ps"];
+                // console.log("no abilities");
+                if (new_data["player"]["ps"] != this.ps) {
+                    console.log("from: ", this.ps);
+                    console.log("Player state changed to: ", new_data["player"]["ps"]);
+                    this.ps = new_data["player"]["ps"] as PSE;
+                }
                 this.timer = new_data["countdown_timer"];
                 this.parse(this.nodes, new_data["board"]["nodes"]);
                 this.parse(this.edges, new_data["board"]["edges"]);
+                this.parse(this.abilityManager.abilities, new_data["player"]["abilities"], true);
                 Object.values(this.nodes).forEach((node) => node.draw());
                 Object.values(this.edges).forEach((edge) => edge.draw());
             } else {
@@ -368,9 +373,7 @@ export class MainScene extends Scene {
         }
     }
 
-    parse(this, items, updates) {
-        // console.log("parse");
-        // console.log(updates);
+    parse(this, items, updates, print = false) {
         for (const u in updates) {
             // console.log("u: ", u);
             // console.log("here");
@@ -382,11 +385,18 @@ export class MainScene extends Scene {
             let obj = items[u];
             // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
             if (typeof obj !== "object" || obj === null) {
-                // console.error(`Invalid item at key ${u}; expected an object.`);
+                console.error(`Invalid item at key ${u}; expected an object.`);
                 continue;
             }
 
+            // print the length of the object if greater than 0
+            // if (Object.keys(obj).length > 0) {
+            //     console.log("obj length: ", Object.keys(obj).length);
+            // }
             for (const [key, val] of Object.entries(updates[u])) {
+                if (print) {
+                    console.log("key: ", key, " val: ", val);
+                }
                 if (typeof obj[key] === "undefined") {
                     // console.error(`Key ${key} not found in item ${u}.`);
                     continue;
@@ -412,12 +422,21 @@ export class MainScene extends Scene {
     getObject(object, attribute, value) {
         if (object[attribute] instanceof Node) {
             return this.nodes[value];
+            
         } else if (object[attribute] instanceof Edge) {
             return this.edges[value];
+            
         } else if (attribute === "owner") {
             // console.log("other player");
             // console.log(this.otherPlayers[value].name);
             return this.otherPlayers[value];
+        }
+        else if (attribute === "state") {
+            return stateDict[value]();
+        }
+        else if (attribute === "remaining") {
+            console.log("so yes its being recieved");
+            return value;
         }
         //TODO: check for State and OtherPlayer types after adding those
         else {

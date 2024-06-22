@@ -78,17 +78,10 @@ class ServerGame(Jsonable):
 
     def set_abilities(self, player, abilities):
         self.player_dict[player].set_abilities(abilities, self.board)
-        if self.all_player_abilities_set:
-            self.gs.next()
-            self.all_player_next()
 
     def all_player_next(self):
         for player in self.player_dict.values():
             player.ps.next()
-
-    @property
-    def all_player_abilities_set(self):
-        return all([p.ps.state == PSE.ABILITY_WAITING for p in self.player_dict.values()])
     
     @property
     def all_player_starts_selected(self):

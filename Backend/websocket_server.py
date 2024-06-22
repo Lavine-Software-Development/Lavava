@@ -16,14 +16,14 @@ class WebSocketServer():
 
     async def handler(self, websocket, path):
         # self.locks[websocket] = asyncio.Lock()
-        print("handler called for socket", websocket)
+        # print("handler called for socket", websocket)
         if len(self.players) >= 2: 
             self.players = {}
         curr_players = len(self.players)
         self.players[websocket] = curr_players
         # try:
         async for message in websocket:
-            print(f"message {message} from {websocket}")
+            # print(f"message {message} from {websocket}")
             # async with self.locks[websocket]:
             data = json.loads(message)
             await self.process_message(websocket, data)
@@ -31,10 +31,10 @@ class WebSocketServer():
         #     print(f"Error processing message from {websocket}: {e}")
 
     async def process_message(self, websocket,data):
-        print(self.players)
-        print("Received message in process: ", data)
+        # print(self.players)
+        # print("Received message in process: ", data)
         if 'code' and 'items' in data:
-            print("yoooooo")
+            # print("yoooooo")
             self.waiting_players.process(self.players[websocket], data)
         else:
             player_type = data["type"]
@@ -95,6 +95,7 @@ class WebSocketServer():
     async def start_game(self, batch):
         tasks = []
         print("start game", len(batch.connections))
+        batch.start()
         tasks.append(asyncio.create_task(self.send_ticks(batch)))
 
         for i, websocket in enumerate(batch.connections):

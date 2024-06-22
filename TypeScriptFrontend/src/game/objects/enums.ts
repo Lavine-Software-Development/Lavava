@@ -6,8 +6,7 @@ enum ClickType {
 }
 
 enum PlayerStateEnum {
-    ABILITY_SELECTION,
-    ABILITY_WAITING,
+    WAITING = 1,
     START_SELECTION,
     START_WAITING,
     PLAY,

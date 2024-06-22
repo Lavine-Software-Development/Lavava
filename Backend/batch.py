@@ -20,10 +20,14 @@ class Batch:
     def add_player(self, conn, ability_data):
         player = len(self.connections)
         if self.ability_process(player, ability_data):
-            self.connections.append(conn)
+            self.connections.insert(0, conn)
             return False
         else:
             return "CHEATING: INVALID ABILITY SELECTION"
+        
+    def start(self):
+        self.gs.next()
+        self.game.all_player_next()
 
     def is_ready(self):
         return len(self.connections) == self.player_count
@@ -38,7 +42,7 @@ class Batch:
         return start_json
     
     def send_ready(self, player):
-        return self.game.player_dict[player].ps.value >= PS.ABILITY_WAITING.value
+        return self.game.player_dict[player].ps.value >= PS.WAITING.value
     
     def tick_repr_json(self, player):
         self.tick_dict["player"] = self.player_tick_repr(player)

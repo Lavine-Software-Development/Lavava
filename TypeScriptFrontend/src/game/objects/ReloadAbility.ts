@@ -11,7 +11,7 @@ export class ReloadAbility extends IDItem {
     verificationFunc: ValidationFunction;
     credits: number;
     reload: number;
-    remaining: number;
+    private _remaining: number;
     percentage: number;
     graphics: Phaser.GameObjects.Graphics;
     nameText: Phaser.GameObjects.Text;
@@ -23,6 +23,7 @@ export class ReloadAbility extends IDItem {
     pointerTriangleText: Phaser.GameObjects.Text;
     x: number;
     y: number;
+    redraw: boolean;
 
     constructor(
         visual: AbilityVisual,
@@ -43,11 +44,12 @@ export class ReloadAbility extends IDItem {
         this.verificationFunc = verificationFunc;
         this.credits = credits;
         this.reload = reload;
-        this.remaining = remaining;
+        this._remaining = remaining;
         this.percentage = percentage;
         this.graphics = scene.add.graphics();
         this.x = 0;
         this.y = 0;
+        this.redraw = false;
     }
 
     get gameDisplayNum(): number {
@@ -56,6 +58,15 @@ export class ReloadAbility extends IDItem {
 
     get selectable(): boolean {
         return this.remaining > 0 && this.percentage === 1.0;
+    }
+
+    get remaining(): number {
+        return this._remaining;
+    }
+
+    set remaining(value: number) {
+        this._remaining = value;
+        this.redraw = true;
     }
 
     overlapsWithPosition(position: Phaser.Math.Vector2): boolean {
@@ -121,7 +132,9 @@ export class ReloadAbility extends IDItem {
             this.nameText.setOrigin(0.5, 1);
         }
 
-        if (!this.numberText) {
+        if (!this.numberText || this.redraw) {
+            this.numberText?.destroy();
+            this.redraw = false;
             this.numberText = scene.add.text(this.x + 5, this.y + 5, `${this.remaining}`, {
                 font: '18px Arial',
                 fill: '#ffffff',

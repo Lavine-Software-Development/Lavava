@@ -89,7 +89,7 @@ def make_cannon_shot_check(check_new_edge, id_dict):
         cannon, target = id_dict[data[0]], id_dict[data[1]]
         can_shoot = cannon.state_name == "cannon" and cannon.owner == player
         can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full())
-        return can_shoot and can_accept and no_crossovers(check_new_edge, data, player)
+        return can_shoot and can_accept and no_crossovers(check_new_edge, [id_dict[data[0]], id_dict[data[1]]], player)
     return cannon_shot_check
 
 def make_pump_drain_check(id_dict):

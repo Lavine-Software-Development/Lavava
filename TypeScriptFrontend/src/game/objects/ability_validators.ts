@@ -44,7 +44,7 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
     const newLine = new Phaser.Geom.Line(nodeFrom.pos.x, nodeFrom.pos.y, nodeTo.pos.x, nodeTo.pos.y);
     // Check for overlaps with all other edges
     for (let edge of edges) {
-        if (!hasAnySame(nodeFrom.id, nodeTo.id, edge.fromNode.id, edge.toNode.id) && Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
+        if (!hasAnySame(nodeFrom.id, nodeTo.id, edge.from_node.id, edge.to_node.id) && Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
             return false;
         }
     }
@@ -124,14 +124,14 @@ function playerValidators(player: OtherPlayer): {
     // Validator that checks if either node of a dynamic edge belongs to the player
     const dynamicEdgeOwnEither = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge; // Type casting to Edge for TypeScript
-        return edge.dynamic && edge.fromNode.owner === player;
+        return edge.dynamic && edge.from_node.owner === player;
     };
 
     const attackingEdge = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge;
         return (
-            edge.fromNode.owner == player &&
-            standardNodeAttack(edge.toNode, player)
+            edge.from_node.owner == player &&
+            standardNodeAttack(edge.to_node, player)
         );
     };
 

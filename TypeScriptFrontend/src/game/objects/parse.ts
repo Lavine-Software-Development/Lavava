@@ -89,6 +89,7 @@ export class Main {
         ) {
             console.log("trying to parse");
             const pi = Number(startData.player_id.toString());
+            console.log("pi: ", pi);
             const pc = startData.player_count;
             const n = startData.board.nodes;
             const e = startData.board.edges;
@@ -97,18 +98,20 @@ export class Main {
 
             this.myPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
             this.players = Object.fromEntries(
-                Object.keys([...Array(pc).keys()].filter((id) => id != pi)).map(
-                    (id) => [
-                        id,
+                [...Array(pc).keys()]
+                    .filter((id) => id !== pi)  // Use strict equality
+                    .map((id) => [
+                        String(id),  // Convert to string to be consistent
                         new OtherPlayer(
-                            id.toString(),
-                            PlayerColors[Number(id)]
+                            String(id),
+                            PlayerColors[id]
                         ),
-                    ]
-                )
+                    ])
             );
             const scene = new Scene();
+            this.players[String(pi)] = this.myPlayer;  // Use string key
             this.players[pi] = this.myPlayer;
+            console.log(this.players);
             this.nodes = Object.fromEntries(
                 Object.keys(n).map((id) => [
                     id,

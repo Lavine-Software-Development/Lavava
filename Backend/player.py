@@ -29,13 +29,9 @@ class DefaultPlayer(Jsonable):
         effects = make_ability_effects(board)
         for ab in abilities:
             self.abilities[ab] = ReloadAbility(ab, validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
-        self.ps.next()
 
     def use_ability(self, key, data) -> Optional[dict]:
-        print("one")
-        print(self.abilities, key)
         if self.abilities[key].can_use(data):
-            print("two")
             self.abilities[key].use(data)
 
     def default_values(self):
