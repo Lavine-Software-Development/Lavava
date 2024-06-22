@@ -117,7 +117,7 @@ class PumpState(DefaultState):
             (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
         )
 
-    def grow(self, multiplier):
+    def grow(self):
         if self.draining:
             self.drain()
         return 0

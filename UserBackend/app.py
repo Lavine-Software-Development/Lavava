@@ -81,7 +81,7 @@ def get_profile(current_user):
 
 def user_decks(current_user):
     if current_user == "default":
-        return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 2}, {"name": "Burn", "count": 3}]
+        return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 1}, {"name": "Rage", "count": 2}, {"name": "Poison", "count": 1}]
     else:
         return []
     

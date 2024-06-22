@@ -63,7 +63,7 @@ def validators_needing_player(player):
     
     def attacking_edge(data):
         edge = data[0]
-        return edge.from_node.owner == player and standard_node_attack(edge.to_node, player)
+        return edge.from_node.owner == player and standard_node_attack([edge.to_node], player)
 
     def dynamic_edge_own_either(data):
         edge = data[0]

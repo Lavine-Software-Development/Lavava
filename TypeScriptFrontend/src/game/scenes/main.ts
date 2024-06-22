@@ -364,7 +364,7 @@ export class MainScene extends Scene {
                 this.timer = new_data["countdown_timer"];
                 this.parse(this.nodes, new_data["board"]["nodes"]);
                 this.parse(this.edges, new_data["board"]["edges"]);
-                this.parse(this.abilityManager.abilities, new_data["player"]["abilities"], true);
+                this.parse(this.abilityManager.abilities, new_data["player"]["abilities"]);
                 Object.values(this.nodes).forEach((node) => node.draw());
                 Object.values(this.edges).forEach((edge) => edge.draw());
             } else {
@@ -434,8 +434,9 @@ export class MainScene extends Scene {
         else if (attribute === "state") {
             return stateDict[value]();
         }
-        else if (attribute === "remaining") {
+        else if (attribute === "effects") {
             console.log("so yes its being recieved");
+            console.log(value);
             return value;
         }
         //TODO: check for State and OtherPlayer types after adding those

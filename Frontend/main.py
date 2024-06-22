@@ -1,7 +1,7 @@
 from typing import Any, Union, Tuple, get_type_hints
 import pygame as py
 from constants import PUMP_CODE
-from constants import BURN_CODE, CAPITAL_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, BRIDGE_CODE, CANNON_CODE, STANDARD_LEFT_CLICK, RESTART_GAME_VAL
+from constants import BURN_CODE, CAPITAL_CODE, EVENT_CODES, RAGE_CODE, PORT_COUNT, SPAWN_CODE, FREEZE_CODE, ZOMBIE_CODE, NUKE_CODE, CANNON_SHOT_CODE, BRIDGE_CODE, CANNON_CODE, STANDARD_LEFT_CLICK, RESTART_GAME_VAL, POISON_CODE
 from highlight import Highlight
 from constants import ABILITIES_SELECTED, EDGE_CODE, SPAWN_CODE, STANDARD_RIGHT_CLICK, OVERRIDE_RESTART_CODE, RESTART_CODE, FORFEIT_CODE
 from drawClasses import EventVisual, Node, Edge, OtherPlayer, MyPlayer, ReloadAbility, IDItem, State, Event
@@ -60,7 +60,7 @@ class Main:
         self.can_draw = False
 
         data, port = self.settings()
-        abilities = {BRIDGE_CODE: 2, CANNON_CODE: 2, CAPITAL_CODE: 2}
+        abilities = {POISON_CODE: 2, CANNON_CODE: 2, RAGE_CODE: 2}
         self.network = Network(self.setup, self.update, data, abilities, port)
         self.network.receive_board_data()
 
@@ -172,9 +172,9 @@ class Main:
         for box in boxes.values():
             if box.visual.color[0] is None:
                 box.visual.color = self.my_player.color
-        boxes[BRIDGE_CODE].remaining = 2
+        boxes[POISON_CODE].remaining = 2
         boxes[CANNON_CODE].remaining = 2
-        boxes[CAPITAL_CODE].remaining = 2
+        boxes[RAGE_CODE].remaining = 2
         return {b: v for b, v in boxes.items() if v.remaining > 0}
 
     def valid_hover(self, position) -> Union[Tuple[IDItem, int], bool]:
