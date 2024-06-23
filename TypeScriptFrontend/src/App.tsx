@@ -15,6 +15,10 @@ import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
 import Profile from "./user-flow/Profile";
 import DeckBuilder from "./user-flow/deck_builder";
+import { NavBar } from "./NavBar";
+import Leaderboard from "./user-flow/Leaderboard";
+import HowToPlay from "./user-flow/How_to_play";
+
 function App() {
 
     const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -33,6 +37,7 @@ function App() {
 
     return (
         <Router>
+            <NavBar />
             <div
                 id="app"
                 style={{ fontFamily: "Arial, sans-serif", lineHeight: "1.6" }}
@@ -57,6 +62,8 @@ function App() {
                     <Route path="/home" element={<Home />} />
                     <Route path="/builder" element={<DeckBuilder />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/leaderboard" element={<Leaderboard />} />
+                    <Route path="/how-to-play" element={<HowToPlay />} />
                 </Routes>
             </div>
         </Router>

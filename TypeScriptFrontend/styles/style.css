@@ -2,7 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", monospace;
 }
 
 .required {
@@ -31,7 +31,7 @@
 }
 
 body {
-    background-image: url('../images/Background.png');
+    background-image: url("../images/Background.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -59,7 +59,7 @@ form {
     font-weight: bold; /* Make the text bold */
     text-align: center; /* Center the text */
     margin-bottom: 0.4rem;
-    font-family: 'JetBrains Mono', monospace; /* Apply the imported Google Font */
+    font-family: "JetBrains Mono", monospace; /* Apply the imported Google Font */
 }
 
 .form-subtitle {
@@ -95,7 +95,7 @@ input {
 input:focus {
     background-color: transparent;
     outline: none;
-    border: 2px solid rgb(0, 0, 0);  /* Increase the border-width here for the focused state */
+    border: 2px solid rgb(0, 0, 0); /* Increase the border-width here for the focused state */
 }
 
 input::placeholder {
@@ -127,7 +127,7 @@ input::placeholder {
 
 .btn {
     font-size: 1.1rem;
-    padding: 8px 0;
+    padding: 15px 0;
     border-radius: 5px;
     outline: none;
     border: none;
@@ -149,7 +149,8 @@ input::placeholder {
     gap: 20px;
 }
 
-.profile-card, .info-card {
+.profile-card,
+.info-card {
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
@@ -157,7 +158,7 @@ input::placeholder {
 }
 
 .profile-card {
-    width: 300px;
+    width: 400px;
 }
 
 .profile-card i {
@@ -214,4 +215,104 @@ input::placeholder {
     margin-top: 10px;
     font-size: 1.5em;
     font-weight: bold;
+}
+
+.navbar {
+    position: initial;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    background: rgba(51, 170, 51, 0.5);
+    height: 70px;
+}
+
+.fixed-top {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+}
+
+.app-drop-down-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.app-drop-down-container button {
+    padding: 15px 0;
+    box-shadow: 0 0 25px -20px #dbdbdb;
+    flex: 1;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #8cc751;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 0.1rem 0 1.5rem 0;
+    font-size: 1.1rem;
+}
+
+.app-drop-down-container button:hover {
+    background-color: #80bd43;
+}
+
+.app-drop-down-container ul {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 55px;
+    min-width: 100%;
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    box-shadow: 0 0 5px #d4d4d4;
+    list-style: none;
+}
+
+.app-drop-down-container ul li {
+    background-color: #fcfcfc;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color ease 0.2s;
+}
+
+.app-drop-down-container ul li:hover {
+    background-color: #89cff0;
+    color: #fcfcfc;
+}
+
+.navLinkContainer {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.navLinkImage {
+    margin-right: 10px; /*adjust margin between image and text */
+}
+
+.scrollable-container {
+    height: 100vh;
+    overflow: scroll;
+    padding: 7vh;
+    background-color: #fcfcfc;
+}
+
+.space {
+    margin-top: 20px;
+}
+
+ul {
+    list-style-position: inside;
 }

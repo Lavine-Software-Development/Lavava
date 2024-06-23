@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 
 const Home: React.FC = () => {
@@ -57,11 +57,33 @@ const Home: React.FC = () => {
         navigate('/play');
     };
 
+    const [open, setOpen] = useState<boolean>(false);
+    const dropdrownRef = useRef<HTMLDivElement>(null)
+    const handleDropDownFocus = (state: boolean) => {
+        setOpen(!state);
+    };
+    const handleClickOutsideDropdown = (e:any) => {
+        if(open && !dropdrownRef.current?.contains(e.target as Node)){
+            setOpen(false)
+        }
+    }
+    window.addEventListener("click", handleClickOutsideDropdown)
+
     return (
         <div className="dashboard-container" id="home">
             <div className="profile-card">
                 <h1 className="form-title">Home</h1>
-                <a href="profile">Profile</a>
+                <div className="app-drop-down-container" ref={dropdrownRef}> 
+                    <button onClick={(e) => handleDropDownFocus(open)}> 
+                        Play
+                    </button>
+                    {open && (
+                        <ul> 
+                            <li>Host</li> {/* update to link to host a game */}
+                            <li>Join</li> {/* update to link to join a game */}
+                        </ul>
+                    )}
+                </div>
                 <input type="submit" className="btn" value="Build Deck" onClick={() => navigate('/builder')} />
                 <nav style={{
                     backgroundColor: "#f0f0f0",
@@ -82,6 +104,7 @@ const Home: React.FC = () => {
                         }}>WebSocket Test</Link>
                     </div>
                 </nav>
+                <input type="submit" className="btn" value="How To Play" onClick={() => navigate('/how-to-play')} />
                 <input type="submit" className="btn" value="Log Out" onClick={handleLogout} />
             </div>
             {selectedAbilities.length > 0 && (
