@@ -124,16 +124,18 @@ export class Main {
                             ? random_equal_distributed_angles(PORT_COUNT)
                             : [],
                         stateDict[n[id]["state"]](),
-                        n[id]["value"]
+                        n[id]["value"],
+                        null,
+                        new Set(),
                         // scene
                     ),
                 ])
             );
+
             this.edges = Object.fromEntries(
                 Object.keys(e).map((id) => [
                     id,
                     new Edge(
-                        // scene,
                         Number(id),
                         this.nodes[e[id]["from_node"]],
                         this.nodes[e[id]["to_node"]],
@@ -141,7 +143,6 @@ export class Main {
                     ),
                 ])
             );
-            // console.log("num edges: ", Object.keys(this.nodes).length);
         } else {
             console.log("not here");
         }

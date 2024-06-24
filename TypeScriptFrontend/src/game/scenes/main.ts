@@ -427,17 +427,13 @@ export class MainScene extends Scene {
             return this.edges[value];
             
         } else if (attribute === "owner") {
-            // console.log("other player");
-            // console.log(this.otherPlayers[value].name);
             return this.otherPlayers[value];
         }
         else if (attribute === "state") {
             return stateDict[value]();
         }
         else if (attribute === "effects") {
-            console.log("so yes its being recieved");
-            console.log(value);
-            return value;
+            return new Set(value);
         }
         //TODO: check for State and OtherPlayer types after adding those
         else {
