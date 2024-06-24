@@ -26,7 +26,7 @@ function noClick(data: IDItem[]): boolean {
 
 function standardPortNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
-    return node.owner !== undefined && node.isPort && node.stateName !== "mine";
+    return node.owner !== undefined && node.is_port && node.stateName !== "mine";
 }
 
 const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
@@ -153,12 +153,13 @@ function newEdgeValidator(
     const newEdgeStandard = (data: Node[]): boolean => {
         if (data.length === 1) {
             const firstNode = data[0];
-            return firstNode.owner === player;
+            return firstNode.owner === player && firstNode.is_port;
         } else {
             const firstNode = data[0];
             const secondNode = data[1];
             return (
                 firstNode.id !== secondNode.id &&
+                secondNode.is_port &&
                 checkNewEdge(firstNode, secondNode, edges)
             );
         }

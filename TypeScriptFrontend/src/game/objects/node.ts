@@ -8,7 +8,7 @@ import { CannonState } from "./States";
 
 export class Node extends IDItem {
     pos: Phaser.Math.Vector2;
-    isPort: boolean;
+    is_port: boolean;
     portPercent: number;
     ports: Array<number>;
     state: State;
@@ -22,7 +22,7 @@ export class Node extends IDItem {
     constructor(
         id: number,
         pos: [number, number],
-        isPort: boolean,
+        is_port: boolean,
         portPercent: number,
         ports: Array<any>,
         state: State,
@@ -33,7 +33,7 @@ export class Node extends IDItem {
     ) {
         super(id, ClickType.NODE);
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
-        this.isPort = isPort;
+        this.is_port = is_port;
         this.portPercent = portPercent;
         this.ports = ports;
         this.state = state;
@@ -53,7 +53,7 @@ export class Node extends IDItem {
 
     get color(): readonly [number, number, number] {
         if (!this.owner ) {
-            return this.isPort ? Colors.BROWN : Colors.BLACK;
+            return this.is_port ? Colors.BROWN : Colors.BLACK;
         }
         return this.owner.color;
     }
@@ -114,10 +114,16 @@ export class Node extends IDItem {
             }
 
             if (this.owner) {
-                if (this.isPort) {
+                if (this.is_port) {
                     this.drawPorts(Colors.BROWN);
                 } else if (this.ports.length > 0) {
                     this.drawPorts(Colors.ORANGE);
+                    if (this.portPercent > 0) {
+                        this.portPercent -= 0.05;
+                    }
+                    else {
+                        this.ports = [];
+                    }
                 }
             }
 
@@ -190,7 +196,7 @@ export class Node extends IDItem {
         const portWidth = this.size;
         const portHeight = this.size * 1.3;
         this.ports.forEach((angle) => {
-            this.drawRotatedRectangle(angle, portWidth, portHeight, color);
+            this.drawRotatedRectangle(angle, portWidth * this.portPercent, portHeight * this.portPercent, color);
         });
     }
 
