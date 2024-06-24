@@ -375,47 +375,43 @@ export class MainScene extends Scene {
 
     parse(this, items, updates, print = false) {
         for (const u in updates) {
-            // console.log("u: ", u);
-            // console.log("here");
             if (!items.hasOwnProperty(u)) {
-                console.error(`No item found for key ${u}`);
+
+                let new_edge = new Edge(Number(u) , this.nodes[updates[u]["from_node"]], this.nodes[updates[u]["to_node"]], updates[u]["dynamic"], true, true, this)
+                this.edges[Number(u)] = new_edge;
+                continue;
+            }
+
+            if (updates[u] === "Deleted") {
+                items[u].delete();
+                delete items[u];
                 continue;
             }
 
             let obj = items[u];
-            // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
             if (typeof obj !== "object" || obj === null) {
                 console.error(`Invalid item at key ${u}; expected an object.`);
                 continue;
             }
 
-            // print the length of the object if greater than 0
-            // if (Object.keys(obj).length > 0) {
-            //     console.log("obj length: ", Object.keys(obj).length);
-            // }
             for (const [key, val] of Object.entries(updates[u])) {
                 if (print) {
                     console.log("key: ", key, " val: ", val);
                 }
                 if (typeof obj[key] === "undefined") {
-                    // console.error(`Key ${key} not found in item ${u}.`);
                     continue;
                 }
 
-                // console.log("before: " + obj[key]);
                 let updateVal;
                 try {
                     updateVal = this.getObject(obj, key, val);
                 } catch (error) {
                     console.error(
-                        // `Error updating key ${key} in item ${u}: ${error.message}`
                     );
                     continue;
                 }
 
                 obj[key] = updateVal;
-                // console.log("updated key: ", key, " with value: ", val);
-                // console.log("after: " + obj[key]);
             }
         }
     }
@@ -435,7 +431,6 @@ export class MainScene extends Scene {
         else if (attribute === "effects") {
             return new Set(value);
         }
-        //TODO: check for State and OtherPlayer types after adding those
         else {
             return value;
         }

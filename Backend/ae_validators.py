@@ -34,7 +34,7 @@ def attack_validators(capital_func, player):
             capital_nuke_range = (NUKE_RANGE * capital.value) ** 2
             return distance <= capital_nuke_range
 
-        return standard_node_attack(node, player) and any(in_capital_range(capital) for capital in capitals)
+        return standard_node_attack([node], player) and any(in_capital_range(capital) for capital in capitals)
 
     return capital_ranged_node_attack
 

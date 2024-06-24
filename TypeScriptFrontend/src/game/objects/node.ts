@@ -47,6 +47,19 @@ export class Node extends IDItem {
         }
     }
 
+    public delete(): void {
+        // Remove graphics from the scene
+        if (this.graphics) {
+            this.graphics.clear();
+            this.graphics.destroy();
+        }
+    
+        if (this.cannonGraphics) {
+            this.cannonGraphics.clear();
+            this.cannonGraphics.destroy();
+        }
+    }
+
     select(on: boolean): void {
             this.state.select(on);
     }
