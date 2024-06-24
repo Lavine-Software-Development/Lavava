@@ -55,6 +55,17 @@ export class Edge extends IDItem {
         this.spacing = 0;
     }
 
+    delete(): void {
+        // Clear all sprites
+        this.clearSprites();
+    
+        // Remove the graphics object if it exists
+        if (this.graphics) {
+            this.graphics.clear();
+            this.graphics.destroy();
+        }
+    }
+
     get color(): readonly [number, number, number] {
         if (this._fromNode.effects.has("rage")) {
             return Colors.GREEN;

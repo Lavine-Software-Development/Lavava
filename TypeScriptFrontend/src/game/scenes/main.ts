@@ -382,6 +382,12 @@ export class MainScene extends Scene {
                 continue;
             }
 
+            if (updates[u] === "Deleted") {
+                items[u].delete();
+                delete items[u];
+                continue;
+            }
+
             let obj = items[u];
             // console.log("obj: ", obj, " key: ", u, " updates: ", updates[u]);
             if (typeof obj !== "object" || obj === null) {
