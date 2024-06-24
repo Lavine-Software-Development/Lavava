@@ -119,7 +119,7 @@ export class Main {
                         Number(id),
                         n[id]["pos"] as [number, number],
                         n[id]["is_port"],
-                        0.0, // Placeholder: replace with actual value of portPercent
+                        1, // Placeholder: replace with actual value of portPercent
                         n[id]["is_port"]
                             ? random_equal_distributed_angles(PORT_COUNT)
                             : [],
