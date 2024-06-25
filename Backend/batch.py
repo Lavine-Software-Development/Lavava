@@ -20,7 +20,7 @@ class Batch:
     def add_player(self, conn, ability_data):
         player = len(self.connections)
         if self.ability_process(player, ability_data):
-            self.connections.insert(0, conn)
+            self.connections.append(0, conn)
             return False
         else:
             return "CHEATING: INVALID ABILITY SELECTION"
