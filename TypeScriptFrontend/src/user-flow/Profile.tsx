@@ -54,7 +54,6 @@ const Profile: React.FC = () => {
 
     return (
         <div className="dashboard-container" id="dashboard-container">
-            <a href="home">Home</a>
             <div className="profile-card">
                 <h2>My Profile</h2>
                 <p>User Name: {profileData.userName}</p>

@@ -99,7 +99,7 @@ input:focus {
 }
 
 input::placeholder {
-    color: transparent;
+    color: grey;
 }
 
 .input-group i {
@@ -132,7 +132,7 @@ input::placeholder {
     outline: none;
     border: none;
     width: 100%;
-    background: rgb(0, 0, 0);
+    background: rgb(44, 79, 175);
     color: white;
     cursor: pointer;
     transition: 0.9s;
@@ -141,7 +141,7 @@ input::placeholder {
 }
 
 .btn:hover {
-    background: rgb(80, 80, 80);
+    background: rgb(151, 163, 214);
 }
 
 .dashboard-container {
@@ -259,10 +259,11 @@ input::placeholder {
     font-weight: bold;
     margin: 0.1rem 0 1.5rem 0;
     font-size: 1.1rem;
+    transition: 0.9s;
 }
 
 .app-drop-down-container button:hover {
-    background-color: #80bd43;
+    background-color: #6ca336;
 }
 
 .app-drop-down-container ul {
@@ -287,6 +288,63 @@ input::placeholder {
 }
 
 .app-drop-down-container ul li:hover {
+    background-color: #89cff0;
+    color: #fcfcfc;
+}
+
+.player-count-drop-down-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.player-count-drop-down-container button {
+    padding: 15px 0;
+    box-shadow: 0 0 25px -20px #dbdbdb;
+    flex: 1;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #eb2a2a;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 0.1rem 0 1.5rem 0;
+    font-size: 1.1rem;
+    transition: 0.9s;
+}
+
+.player-count-drop-down-container button:hover {
+    background-color: #eb6363;
+}
+
+.player-count-drop-down-container ul {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 55px;
+    min-width: 100%;
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    box-shadow: 0 0 5px #d4d4d4;
+    list-style: none;
+}
+
+.player-count-drop-down-container ul li {
+    background-color: #fcfcfc;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color ease 0.2s;
+}
+
+.player-count-drop-down-container ul li:hover {
     background-color: #89cff0;
     color: #fcfcfc;
 }

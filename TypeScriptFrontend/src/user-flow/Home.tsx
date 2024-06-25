@@ -1,137 +1,207 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
     const [selectedAbilities, setSelectedAbilities] = useState<any[]>([]);
-    const [tab, setTab] = useState('HOST'); // State to manage tabs
-    const [playerCount, setPlayerCount] = useState(2);  // Default to 2 players
-    const [keyCode, setKeyCode] = useState('');
+    const [tab, setTab] = useState("HOST"); // State to manage tabs
+    const [playerCount, setPlayerCount] = useState(2); // Default to 2 players
+    const [keyCode, setKeyCode] = useState("");
 
     useEffect(() => {
-        const storedAbilities = sessionStorage.getItem('selectedAbilities');
-        const token = localStorage.getItem('userToken');
+        const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        const token = localStorage.getItem("userToken");
         if (storedAbilities) {
             setSelectedAbilities(JSON.parse(storedAbilities));
         } else if (token) {
-            fetch('http://localhost:5001/user_abilities', {
+            fetch("http://localhost:5001/user_abilities", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.abilities) {
-                    const abilities = data.abilities;
-                    sessionStorage.setItem('selectedAbilities', JSON.stringify(abilities));
-                    setSelectedAbilities(abilities);
-                }
-            })
-            .catch(error => {
-                console.error('Failed to fetch abilities:', error);
-            });
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data && data.abilities) {
+                        const abilities = data.abilities;
+                        sessionStorage.setItem(
+                            "selectedAbilities",
+                            JSON.stringify(abilities)
+                        );
+                        setSelectedAbilities(abilities);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch abilities:", error);
+                });
         }
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('userToken');
+        localStorage.removeItem("userToken");
         sessionStorage.clear();
-        navigate('/login');
+        navigate("/login");
     };
 
     const hostTab = (e: number, code: string) => {
         setPlayerCount(e);
         setKeyCode(code);
+        setPlayerCountDropdownOpen(false); // Close the player count dropdown when selecting count
     };
 
     const handleHostGame = () => {
-        sessionStorage.setItem('type', 'HOST');
-        sessionStorage.setItem('player_count', playerCount.toString());
-        sessionStorage.setItem('key_code', keyCode);
-        navigate('/play');
-    };
-    
-    const handleJoinGame = () => {
-        sessionStorage.setItem('type', 'JOIN');
-        sessionStorage.setItem('key_code', keyCode);
-        navigate('/play');
+        sessionStorage.setItem("type", "HOST");
+        sessionStorage.setItem("player_count", playerCount.toString());
+        sessionStorage.setItem("key_code", keyCode);
+        navigate("/play");
     };
 
-    const [open, setOpen] = useState<boolean>(false);
-    const dropdrownRef = useRef<HTMLDivElement>(null)
-    const handleDropDownFocus = (state: boolean) => {
-        setOpen(!state);
+    const handleJoinGame = () => {
+        sessionStorage.setItem("type", "JOIN");
+        sessionStorage.setItem("key_code", keyCode);
+        navigate("/play");
     };
-    const handleClickOutsideDropdown = (e:any) => {
-        if(open && !dropdrownRef.current?.contains(e.target as Node)){
-            setOpen(false)
+
+    // State and handlers for "Play" button dropdown
+    const [playDropdownOpen, setPlayDropdownOpen] = useState<boolean>(false);
+    const playDropdownRef = useRef<HTMLDivElement>(null);
+    const handlePlayDropdownFocus = () => {
+        setPlayDropdownOpen(!playDropdownOpen);
+    };
+
+    const setTabAndCloseDropdown = (tab: string) => {
+        setTab(tab); // update tab state
+        setPlayDropdownOpen(false); // Close the play dropdown
+    };
+
+    // State and handlers for player count dropdown
+    const [playerCountDropdownOpen, setPlayerCountDropdownOpen] =
+        useState<boolean>(false);
+    const playerCountDropdownRef = useRef<HTMLDivElement>(null);
+    const handlePlayerCountDropdownFocus = () => {
+        setPlayerCountDropdownOpen(!playerCountDropdownOpen);
+    };
+
+    const handleClickOutsideDropdown = (e: any) => {
+        if (
+            playDropdownOpen &&
+            playDropdownRef.current &&
+            !playDropdownRef.current.contains(e.target)
+        ) {
+            setPlayDropdownOpen(false);
         }
-    }
-    window.addEventListener("click", handleClickOutsideDropdown)
+
+        if (
+            playerCountDropdownOpen &&
+            playerCountDropdownRef.current &&
+            !playerCountDropdownRef.current.contains(e.target)
+        ) {
+            setPlayerCountDropdownOpen(false);
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener("click", handleClickOutsideDropdown);
+        return () => {
+            window.removeEventListener("click", handleClickOutsideDropdown);
+        };
+    }, [playDropdownOpen, playerCountDropdownOpen]);
 
     return (
         <div className="dashboard-container" id="home">
             <div className="profile-card">
                 <h1 className="form-title">Home</h1>
-                <div className="app-drop-down-container" ref={dropdrownRef}> 
-                    <button onClick={(e) => handleDropDownFocus(open)}> 
-                        Play
-                    </button>
-                    {open && (
-                        <ul> 
-                            <li>Host</li> {/* update to link to host a game */}
-                            <li>Join</li> {/* update to link to join a game */}
+                <div className="app-drop-down-container" ref={playDropdownRef}>
+                    <button onClick={handlePlayDropdownFocus}>Play</button>
+                    {playDropdownOpen && (
+                        <ul>
+                            <li onClick={() => setTabAndCloseDropdown("HOST")}>
+                                Host
+                            </li>
+                            <li onClick={() => setTabAndCloseDropdown("JOIN")}>
+                                Join
+                            </li>
                         </ul>
                     )}
                 </div>
-                <input type="submit" className="btn" value="Build Deck" onClick={() => navigate('/builder')} />
-                <nav style={{
-                    backgroundColor: "#f0f0f0",
-                    padding: "10px 0",
-                    borderBottom: "2px solid #ccc",
-                    marginBottom: "20px",
-                }}>
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "20px",
-                    }}>
-                        <Link to="/websocket-test" style={{
-                            padding: "10px 20px",
-                            textDecoration: "none",
-                            color: "#333",
-                            fontWeight: "bold",
-                        }}>WebSocket Test</Link>
-                    </div>
-                </nav>
-                <input type="submit" className="btn" value="How To Play" onClick={() => navigate('/how-to-play')} />
-                <input type="submit" className="btn" value="Log Out" onClick={handleLogout} />
+                <input
+                    type="submit"
+                    className="btn"
+                    value="Build Deck"
+                    onClick={() => navigate("/builder")}
+                />
+                <input
+                    type="submit"
+                    className="btn"
+                    value="How To Play"
+                    onClick={() => navigate("/how-to-play")}
+                />
+                <input
+                    type="submit"
+                    className="btn"
+                    value="Log Out"
+                    onClick={handleLogout}
+                />
             </div>
             {selectedAbilities.length > 0 && (
                 <div className="profile-card">
-                    <div className="tab-header">
-                        <button onClick={() => setTab('HOST')}>HOST</button>
-                        <button onClick={() => setTab('JOIN')}>JOIN</button>
-                    </div>
                     <ul>
                         {selectedAbilities.map((ability, index) => (
-                            <li key={index}>{ability.name} - Count: {ability.count}</li>
+                            <li key={index}>
+                                {ability.name} - Count: {ability.count}
+                            </li>
                         ))}
                     </ul>
-                    {tab === 'HOST' ? (
-                    <div>
+                    {tab === "HOST" ? (
+                        <div>
                             <label>Player Count:</label>
-                            <select onChange={(e) => hostTab(Number(e.target.value), '1234')} value={playerCount}>
-                                {[2, 3, 4, 5].map(count => <option key={count} value={count}>{count}</option>)}
-                            </select>
-                            
-                            <button className="btn" onClick={() => handleHostGame()}>Host Game</button>
+                            <div
+                                className="player-count-drop-down-container"
+                                ref={playerCountDropdownRef}
+                            >
+                                <button
+                                    onClick={handlePlayerCountDropdownFocus}
+                                >
+                                    {playerCount}
+                                </button>
+                                {playerCountDropdownOpen && (
+                                    <ul>
+                                        {[2, 3, 4, 5].map((count) => (
+                                            <li
+                                                key={count}
+                                                onClick={() =>
+                                                    hostTab(count, "")
+                                                }
+                                            >
+                                                {" "}
+                                                {/* removed 1234 from here so that when changing to join tab keycode input is empty*/}
+                                                {count}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Enter Keycode"
+                                onChange={(e) => setKeyCode(e.target.value)}
+                                value={keyCode}
+                            />
+                            <button className="btn" onClick={handleHostGame}>
+                                Host Game
+                            </button>
                         </div>
                     ) : (
                         <div>
-                            <input type="text" placeholder="Enter Keycode" onChange={(e) => setKeyCode(e.target.value)} value={keyCode} />
-                            <button className="btn" onClick={() => handleJoinGame()}>Join Game</button>
-                     </div>
+                            <input
+                                type="text"
+                                placeholder="Enter Keycode"
+                                onChange={(e) => setKeyCode(e.target.value)}
+                                value={keyCode}
+                            />
+                            <button className="btn" onClick={handleJoinGame}>
+                                Join Game
+                            </button>
+                        </div>
                     )}
                 </div>
             )}
