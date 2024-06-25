@@ -1,13 +1,12 @@
 from flask import Flask, request, jsonify
 import threading
-import socket
-from server import Server  # Assuming your server class is imported
-
+from websocket_server import WebSocketServer
+import asyncio
 app = Flask(__name__)
 
 # Port management
-next_port = 5001  # Starting port for game servers
-max_port = 5020   # Maximum port, assuming 20 games maximum
+next_port = 5101  # Starting port for game servers
+max_port = 5120   # Maximum port, assuming 20 games maximum
 active_ports = set()
 
 def find_available_port():
@@ -19,7 +18,11 @@ def find_available_port():
     return None  # No ports available
 
 def launch_game_server(port):
-    server = Server(port)
+    # Create and set a new event loop for the thread
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
+    server = WebSocketServer(port)
     server.run()
 
 @app.route('/start_game', methods=['POST'])
