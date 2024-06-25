@@ -7,12 +7,12 @@ import { MainScene } from "./scenes/main";
 import { AUTO, Game } from "phaser";
 import { Preloader } from "./scenes/Preloader";
 import { Network } from "./objects/network";
-const createScene = (SceneClass, sceneProps, network) =>
-    new SceneClass({ key: SceneClass.name }, sceneProps, network);
+const createScene = (SceneClass, sceneProps, network, navigate) =>
+    new SceneClass({ key: SceneClass.name }, sceneProps, network, navigate);
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 
-const StartGame = (parent: string, props: any, network: Network) => {
+const StartGame = (parent: string, props: any, network: Network, navigate: Function) => {
     console.log("Starting game");
     console.log(network);
     const config: Phaser.Types.Core.GameConfig = {
@@ -22,8 +22,8 @@ const StartGame = (parent: string, props: any, network: Network) => {
         parent: "game-container",
         backgroundColor: "#ffffff",
         scene: [
-            createScene(Preloader, props, network),
-            createScene(MainScene, props, network),
+            createScene(Preloader, props, network, navigate),
+            createScene(MainScene, props, network, navigate),
         ],
         input: {
             keyboard: true,
