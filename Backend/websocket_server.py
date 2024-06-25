@@ -110,3 +110,5 @@ class WebSocketServer():
             loop.run_forever()
         finally:
             loop.close()
+server = WebSocketServer(5553)
+server.run()
