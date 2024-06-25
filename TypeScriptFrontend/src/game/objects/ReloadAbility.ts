@@ -69,6 +69,30 @@ export class ReloadAbility extends IDItem {
         this.redraw = true;
     }
 
+    delete(): void {
+        // Destroy graphics
+        if (this.graphics) {
+            this.graphics.clear();
+            this.graphics.destroy();
+        }
+    
+        // Destroy text objects
+        if (this.nameText) this.nameText.destroy();
+        if (this.letterText) this.letterText.destroy();
+        if (this.numberText) this.numberText.destroy();
+        if (this.pointerTriangleText) this.pointerTriangleText.destroy();
+    
+        // Destroy image objects
+        if (this.imageGreyed) this.imageGreyed.destroy();
+        if (this.imageVisible) this.imageVisible.destroy();
+        if (this.pointerTriangle) this.pointerTriangle.destroy();
+
+        // Reset other properties
+        this.x = 0;
+        this.y = 0;
+        this.redraw = false;
+    }
+
     overlapsWithPosition(position: Phaser.Math.Vector2): boolean {
         // Assuming pointerTriangle has x, y, width, and height properties
         if (this.pointerTriangle) {
@@ -174,11 +198,9 @@ export class ReloadAbility extends IDItem {
             if (this.pointerTriangle) {
                 // If clickable is false and the pointerTriangle exists, destroy both it and the text
                 this.pointerTriangle.destroy();
-                this.pointerTriangle = null; // Clean up by setting to null
         
                 // Destroy the text as well
                 this.pointerTriangleText.destroy();
-                this.pointerTriangleText = null;
             }
         }
         

@@ -5,11 +5,12 @@ import React, {
     useRef,
     useContext,
 } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import StartGame from "./main";
 import { EventBus } from "./EventBus";
 import { NetworkContext } from "./NetworkContext";
 import { Network } from "./objects/network";
+
 export interface IRefPhaserGame {
     game: Phaser.Game | null;
     scene: Phaser.Scene | null;
@@ -24,6 +25,7 @@ interface IProps {
 export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
     function PhaserGame({ currentActiveScene }, ref) {
         const network = useContext(NetworkContext);
+        const navigate = useNavigate();
         const game = useRef<Phaser.Game | null>(null!);
         const location = useLocation();
         const boardData = location.state?.boardData;
@@ -33,7 +35,8 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
                 game.current = StartGame(
                     "game-container",
                     boardData,
-                    network as Network
+                    network as Network,
+                    navigate
                 );
 
                 if (typeof ref === "function") {

@@ -1,4 +1,4 @@
-from constants import ALL_ABILITIES, EVENTS, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
+from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
 from playerStateEnums import PlayerStateEnum as PS
@@ -78,7 +78,7 @@ class Batch:
             
         if key == RESTART_GAME_VAL:
             self.game.restart()
-        elif key == ELIMINATE_VAL:
+        elif key in (ELIMINATE_VAL, FORFEIT_CODE):
             self.game.eliminate(player)
         elif key in ALL_ABILITIES:
             print("ABILITY")

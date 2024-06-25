@@ -26,6 +26,23 @@ export class AbstractAbilityManager {
         this.BridgeGraphics = scene.add.graphics();
     }
 
+    delete(): void {
+        // Clear all graphics
+        this.BridgeGraphics.clear();
+        this.BridgeGraphics.destroy();
+    
+        // Remove the ability text if it exists
+        if (this.abilityText) {
+            this.abilityText.destroy();
+            this.abilityText = null;
+        }
+    
+        // Call delete on each ability
+        for (const key in this.abilities) {
+            this.abilities[key].delete();
+        }
+    }
+
     updateSelection(): void {
         if (this.clicks.length > 0 && this.clicks[this.clicks.length - 1].type === ClickType.NODE) {
             let node = this.clicks[this.clicks.length - 1] as Node;
