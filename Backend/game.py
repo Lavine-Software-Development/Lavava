@@ -53,15 +53,14 @@ class ServerGame(Jsonable):
             event.use(player, data)
         else:
             print("failed to use event")
-
-    def click(self, key, player_id, item_id):
-        player = self.player_dict[player_id]
-        self.board.id_dict[item_id].click(player, key)
     
-    def eliminate(self, player):
+    def eliminate(self, player, forced=False):
         self.remaining.remove(player)
         self.player_dict[player].eliminate()
-        self.board.eliminate(self.player_dict[player])
+        # Forced when they already have no nodes
+        # Voluntary when they quit, thus the board needs to clean up what they have that still exists
+        if not forced:
+            self.board.eliminate(self.player_dict[player])
 
     def restart(self):
 
@@ -105,7 +104,7 @@ class ServerGame(Jsonable):
                     else:
                         self.board.end_game()
                 else:
-                    self.determine_ranks()
+                    self.determine_ranks_from_capitalize_or_timeout()
                 
                 self.gs.next()
 
@@ -116,17 +115,40 @@ class ServerGame(Jsonable):
             self.board.update()
             self.player_update()
 
+        if self.board.victory_check():
+            self.determine_ranks_from_capitalize_or_timeout()
+        elif len(self.remaining) == 1:
+            self.determine_ranks_from_elimination(self.remaining.pop())
+
     def player_update(self):
         for player in self.player_dict.values():
             if player.ps.value < PSE.ELIMINATED.value:
                 player.update()
-                # if player.count == 0:
-                #     self.eliminate(player.id)
+                if player.count == 0:
+                    self.eliminate(player.id, True)
 
-    def determine_ranks(self):
-        player_scores = self.board.player_node_count({i: 0 for i in range(len(self.player_dict))})
+    def determine_ranks_from_capitalize_or_timeout(self):
+        # total owned nodes: a
+        # theoretical maximum of 65
+        player_nodes = {player.id: player.count for player in self.player_dict.values()}
+
+        # total owned full capitals: b
+        # maximum of 3
+        player_capitals = {player.id: player.full_capital_count for player in self.player_dict.values()}
+
+        # score equals 100b + a
+        # effectively, the player with the most full capitals wins, with total nodes as a tiebreaker
+        player_scores = {key: val * 100 + player_nodes[key] for key, val in player_capitals.items()}
         sorted_scores = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
         self.player_dict[sorted_scores[0][0]].win()
         for i in range(1, len(sorted_scores)):
             self.player_dict[sorted_scores[i][0]].lose()
+
+    def determine_ranks_from_elimination(self, winner):
+        self.player_dict[winner].win()
+        for player in self.player_dict.values():
+            # all other players should be eliminated so theoretically this gets the rest
+            if player.ps.value == PSE.ELIMINATED.value:
+                player.lose()
+
         

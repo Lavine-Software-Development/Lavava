@@ -27,3 +27,6 @@ class GameState:
     @property
     def value(self):
         return self.state.value
+    
+    def end(self):
+        self.state = GSE.GAME_OVER

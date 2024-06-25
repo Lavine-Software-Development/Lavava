@@ -102,20 +102,6 @@ class Node(JsonableTracked):
     def set_default_state(self):
         self.set_state("default")
 
-    def click(self, clicker, button):
-        if button == 1:
-            self.left_click(clicker)
-        elif button == 3:
-            self.right_click()
-
-    def right_click(self):
-        pass
-
-    def left_click(self, clicker):
-        if self.owner is None:
-            if clicker.buy_node():
-                self.capture(clicker)
-
     def expand(self):
         for edge in self.outgoing:
             if edge.contested:
