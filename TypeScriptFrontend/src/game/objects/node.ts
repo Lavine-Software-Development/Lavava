@@ -101,7 +101,7 @@ export class Node extends IDItem {
     }
     set scene(scene: Phaser.Scene) {
         this._scene = scene;
-        this.resize(this.pos.x / 1000, this.pos.y / 700);
+        this.resize();
         this.graphics = this._scene.add.graphics();
         this.cannonGraphics = this._scene.add.graphics();
     }
