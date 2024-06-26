@@ -6,14 +6,17 @@ from flask_cors import CORS
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import uuid
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.exc import IntegrityError
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
+with app.app_context():
+    db.create_all()
 
 # User table
 class User(db.Model):
@@ -27,12 +30,14 @@ class User(db.Model):
 
 # Deck table
 class Deck(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    ability = db.Column(db.String(50), primary_key=True, autoincrement=False)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    ability = db.Column(db.String(50), nullable=False)
     count = db.Column(db.Integer, nullable=False)
-    # db.CheckConstraint('json_array_length(items) <= 4', name='max_4_items')
-
+    secondary_id = db.Column(db.Integer, nullable=False)
+    
+    __table_args__ = (
+        db.UniqueConstraint('secondary_id', 'ability', name='_deck_secondary_id_ability_uc'),
+    )
 # Game table
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -167,18 +172,24 @@ def user_decks(current_user):
     if current_user == "default":
         return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 1}, {"name": "Rage", "count": 2}, {"name": "Poison", "count": 1}]
     else:
-        return []
+        user = User.query.filter_by(username=current_user).first()
+        decks = Deck.query.filter_by(secondary_id=user.id).all()
+        abilites = []
+        for deck in decks: 
+            abilites.append({"name": deck.ability, "count": deck.count})
+        return abilites
     
 @app.route('/save_deck', methods=['POST'])
 @token_required
 def save_deck(current_user):
     data = request.json
     abilities = data.get('abilities')
+    user = User.query.filter_by(username=current_user).first()
 
     if not abilities:
+        delete_rows_with_secondary_id(user.id)
         return jsonify({"success": False, "message": "Missing abilities"}), 400
 
-    user = User.query.filter_by(username=current_user).first()
     if not user:
         return jsonify({"success": False, "message": "User not found"}), 404
     
@@ -199,8 +210,8 @@ def save_deck(current_user):
     # Save new deck entries
     # deck_id=user.deck_id, 
     for item in abilities:
-        new_deck_entry = Deck(id=user.deck_id, ability=item['name'], count=item['count'])
-        db.session.add(new_deck_entry)
+        new_deck_entry = Deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
+        add_or_replace_deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
     
     db.session.commit()
 
@@ -233,7 +244,31 @@ def get_abilities():
         {"name": "Pump", "cost": 3},
     ]
     return jsonify({"abilities": abilities, "salary": 15})
-
-
+def add_or_replace_deck(secondary_id, ability, count):
+    try:
+        new_deck_entry = Deck(
+            secondary_id=secondary_id,
+            ability=ability,
+            count=count
+        )
+        db.session.add(new_deck_entry)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        existing_deck_entry = db.session.query(Deck).filter_by(
+            secondary_id=secondary_id,
+            ability=ability
+        ).one()
+        existing_deck_entry.count = count
+        db.session.commit()
+def delete_rows_with_secondary_id(secondary_id):
+    try:
+        db.session.query(Deck).filter_by(secondary_id=secondary_id).delete()
+        db.session.commit()
+        print(f"All rows with secondary_id = {secondary_id} have been deleted.")
+    except Exception as e:
+        db.session.rollback()
+        print(f"An error occurred: {e}")
 if __name__ == '__main__':
+    
     app.run(debug=True, host='0.0.0.0', port=5001)
