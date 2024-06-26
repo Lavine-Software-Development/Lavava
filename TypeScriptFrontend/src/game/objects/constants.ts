@@ -11,6 +11,7 @@ export const Colors = {
     DARK_ORANGE: [193, 106, 8] as const,
     STRONG_ORANGE: [255, 77, 0] as const,
     YELLOW: [255, 255, 0] as const,
+    LIGHT_YELLOW: [255, 255, 153] as const,
     DARK_YELLOW: [204, 204, 0] as const,
     GREY: [128, 128, 128] as const,
     LIGHT_GREY: [192, 192, 192] as const,

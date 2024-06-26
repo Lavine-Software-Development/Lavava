@@ -4,7 +4,7 @@ from playerStateEnums import PlayerStateEnum as PSE
 class PlayerState(JsonableSkeleton):
 
     def __init__(self):
-        self._state = PSE.ABILITY_SELECTION
+        self._state = PSE.WAITING
 
     @property
     def state(self):
@@ -17,9 +17,7 @@ class PlayerState(JsonableSkeleton):
             self._state = new_state
             
     def next(self):
-        if self.state == PSE.ABILITY_SELECTION:
-            self.state = PSE.ABILITY_WAITING
-        elif self.state == PSE.ABILITY_WAITING:
+        if self.state == PSE.WAITING:
             self.state = PSE.START_SELECTION
         elif self.state == PSE.START_SELECTION:
             self.state = PSE.START_WAITING
@@ -44,4 +42,4 @@ class PlayerState(JsonableSkeleton):
         self.state = PSE.LOSER
 
     def restart(self):
-        self.state = PSE.ABILITY_SELECTION
+        self.state = PSE.WAITING

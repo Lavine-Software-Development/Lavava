@@ -1,5 +1,5 @@
-import { Colors, MineVisuals } from "../constants";
-import { random_equal_distributed_angles } from "../utilities"; // Ensure you import the angles function
+import { Colors, MineVisuals } from "./constants";
+import { random_equal_distributed_angles } from "./utilities"; // Ensure you import the angles function
 
 export class State {
     name: string;
@@ -8,6 +8,10 @@ export class State {
     constructor(name: string, gaphic_override: boolean = false) {
         this.name = name;
         this.graphic_override = gaphic_override;
+    }
+
+    select(on: boolean) {
+        
     }
 
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
@@ -20,20 +24,19 @@ export class ZombieState extends State {
 
     constructor(name: string) {
         super(name, true);
-
     }
 
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
         if (!this.zombieSprite) {
-            this.zombieSprite = scene.add.image(pos.x, pos.y, 'blackSquare');
+            this.zombieSprite = scene.add.image(pos.x, pos.y, "blackSquare");
             this.zombieSprite.setOrigin(0.5, 0.5); // Set origin to center for proper scaling
         }
         let currentScale = size / 20; // displayWidth considers current scale
-        if (Math.abs(this.zombieSprite.scaleX - currentScale) > 0.01) { // threshold to avoid minor changes
+        if (Math.abs(this.zombieSprite.scaleX - currentScale) > 0.01) {
+            // threshold to avoid minor changes
             this.zombieSprite.setScale(currentScale);
         }
     }
-
 }
 
 export class MineState extends State {
@@ -66,11 +69,12 @@ export class CapitalState extends State {
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
         if (this.capitalized) {
             if (!this.starSprite) {
-                this.starSprite = scene.add.image(pos.x, pos.y, 'star');
+                this.starSprite = scene.add.image(pos.x, pos.y, "star");
                 this.starSprite.setOrigin(0.5, 0.5); // Set origin to center for proper scaling
             }
             let currentScale = size / 12; // displayWidth considers current scale
-            if (Math.abs(this.starSprite.scaleX - currentScale) > 0.01) { // threshold to avoid minor changes
+            if (Math.abs(this.starSprite.scaleX - currentScale) > 0.01) {
+                // threshold to avoid minor changes
                 this.starSprite.setScale(currentScale);
             }
         } else if (this.starSprite) {
@@ -91,6 +95,10 @@ export class CannonState extends State {
         super(name);
         this.angle = angle;
         this.selected = false;
+    }
+
+    select(on: boolean) {
+        this.selected = on;
     }
 }
 
@@ -114,8 +122,14 @@ export const stateDict: { [key: number]: () => State } = {
     0: () => new State("default"),
     1: () => new ZombieState("zombie"),
     2: () => new CapitalState("capital", true),
-    3: () => new MineState("mine", MineVisuals.RESOURCE_BUBBLE, Colors.DARK_YELLOW),
-    4: () => new MineState("mine", MineVisuals.ISLAND_RESOURCE_BUBBLE, Colors.YELLOW),
+    3: () =>
+        new MineState("mine", MineVisuals.RESOURCE_BUBBLE, Colors.DARK_YELLOW),
+    4: () =>
+        new MineState(
+            "mine",
+            MineVisuals.ISLAND_RESOURCE_BUBBLE,
+            Colors.YELLOW
+        ),
     5: () => new CannonState("cannon"),
     6: () => new PumpState("pump"),
 };

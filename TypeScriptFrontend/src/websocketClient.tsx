@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 const WebSocketTest: React.FC = () => {
     const [ws, setWs] = useState<WebSocket | null>(null);
     const [messages, setMessages] = useState<string[]>([]);

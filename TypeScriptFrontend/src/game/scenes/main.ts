@@ -1,6 +1,6 @@
-import { Node } from "../slav/Objects/node";
-import { Highlight } from "../slav/highlight";
-import { stateDict } from "../slav/Objects/States";
+import { Node } from "../objects/node";
+import { Highlight } from "../objects/highlight";
+import { stateDict } from "../objects/States";
 import {
     Colors,
     KeyCodes,
@@ -10,32 +10,38 @@ import {
     GROWTH_STOP,
     AbilityCredits,
     AbilityReloadTimes,
-} from "../slav/constants";
-import { PlayerStateEnum as PSE } from "../slav/enums";
-import { ReloadAbility } from "../slav/Objects/ReloadAbility";
-import { Event } from "../slav/Objects/event";
-import { AbstractAbilityManager } from "../slav/abilityManager";
-import { OtherPlayer } from "../slav/Objects/otherPlayer";
-import { MyPlayer } from "../slav/Objects/myPlayer";
+    NUKE_RANGE,
+} from "../objects/constants";
+import { PlayerStateEnum as PSE} from "../objects/enums";
+import { ReloadAbility } from "../objects/ReloadAbility";
+import { Event } from "../objects/event";
+import { AbstractAbilityManager } from "../objects/abilityManager";
+import { OtherPlayer } from "../objects/otherPlayer";
+import { MyPlayer } from "../objects/myPlayer";
 import {
     makeEventValidators,
     unownedNode,
     makeAbilityValidators,
-} from "../slav/ability_validators";
-import { IDItem } from "../slav/Objects/idItem";
-import { CLICKS, EVENTS, VISUALS } from "../slav/default_abilities";
-import { Network } from "../slav/network";
-import { phaserColor, random_equal_distributed_angles } from "../slav/utilities";
-import { AbilityVisual } from "../slav/immutable_visuals";
+} from "../objects/ability_validators";
+import { IDItem } from "../objects/idItem";
+import { CLICKS, EVENTS, VISUALS } from "../objects/default_abilities";
+import { Network } from "../objects/network";
+import {
+    phaserColor,
+    random_equal_distributed_angles,
+} from "../objects/utilities";
+import { AbilityVisual } from "../objects/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
-import { Edge } from "../slav/Objects/edge";
-import { Main } from "../slav/Objects/parse";
-import board_data from "../slav/Objects/board_data.json";
-import { BoardJSON } from "../slav/Objects/parse";
+import { Edge } from "../objects/edge";
+import { Main } from "../objects/parse";
+import board_data from "../data/board_data.json";
+import { BoardJSON } from "../objects/parse";
+// import { NetworkContext } from "../NetworkContext";
 export class MainScene extends Scene {
-    private nodes: Node[] = [];
-    private edges: Edge[] = [];
+    
+    private nodes: { [key: string]: Node } = {};
+    private edges: { [key: string]: Edge } = {};
     private highlight: Highlight;
     private ps: PSE;
     private abilityManager: AbstractAbilityManager;
@@ -44,78 +50,111 @@ export class MainScene extends Scene {
     private network: Network;
     private burning: Node[] = [];
     private abilityCounts: { [key: string]: number };
+    private timer: number;
+    private playerCount: number;
+    private gameType: string;
     private graphics: Phaser.GameObjects.Graphics;
+    private board: BoardJSON;
+    private countdown: number;
+    private full_capitals: number[];
+    private timerText: Phaser.GameObjects.Text;
+    private capitalsText: Phaser.GameObjects.Text;
+    private statusText: Phaser.GameObjects.Text;
+    private leaveMatchButton: Phaser.GameObjects.Text;
+    private navigate: Function;
 
-    constructor() {
+    constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
-        this.mainPlayer = new MyPlayer("Player 1", Colors.BLUE);
-        this.otherPlayers.push(this.mainPlayer);
-        this.otherPlayers.push(new OtherPlayer("Player 2", Colors.RED));
-        this.network = new Network("ws://localhost:5553");
+        // console.log("config: ", config);
+        // console.log("props yeaaa: ", props);
+        // console.log(network);
+        // console.log("network: ", network.test());
+        this.board = props;
+        // this.network = new Network(
+        //     "ws://localhost:5553",
+        //     this.update_board.bind(this)
+        // );
+        this.network = network;
+        this.navigate = navigate;
+        this.network.updateCallback = this.update_board.bind(this);
         this.burning = [];
-        const storedAbilities = sessionStorage.getItem('selectedAbilities');
-        const abilitiesFromStorage = storedAbilities ? JSON.parse(storedAbilities) : [];
+        const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        this.gameType = String(sessionStorage.getItem("type"));
+        this.playerCount = Number(sessionStorage.getItem("player_count")) || 0;
+        const abilitiesFromStorage = storedAbilities
+            ? JSON.parse(storedAbilities)
+            : [];
 
         // Create a map from ability code to count using the NameToCode mapping
-        this.abilityCounts = abilitiesFromStorage.reduce((acc: { [x: string]: any; }, ability: { name: string ; count: number; }) => {
-            const code = NameToCode[ability.name];
-            if (code) {
-                acc[code] = ability.count;
-            }
-            return acc;
-        }, {});
+        this.abilityCounts = abilitiesFromStorage.reduce(
+            (
+                acc: { [x: string]: any },
+                ability: { name: string; count: number }
+            ) => {
+                const code = NameToCode[ability.name];
+                if (code) {
+                    acc[code] = ability.count;
+                }
+                return acc;
+            },
+            {}
+        );
 
-        this.network.setupUser()
+        this.countdown = 0;
+        this.full_capitals = [0, 0];
     }
 
-    preload ()
-    {
+    preload() {
         //  load ability icon assets
-        this.load.setPath('assets/abilityIcons/');
+        this.load.setPath("assets/abilityIcons/");
 
-        this.load.image('Bridge', 'Bridge.png');
-        this.load.image('Burn', 'Burn.png');
-        this.load.image('Cannon', 'Cannon.png');
-        this.load.image('Capital', 'Capital.png');
-        this.load.image('D-Bridge', 'D-Bridge.png');
-        this.load.image('Freeze', 'Freeze.png');
-        this.load.image('Nuke', 'Nuke.png');
-        this.load.image('Poison', 'Poison.png');
-        this.load.image('Rage', 'Rage.png');
-        this.load.image('Spawn', 'Spawn.png');
-        this.load.image('Zombie', 'Zombie.png');
+        this.load.image("Bridge", "Bridge.png");
+        this.load.image("Burn", "Burn.png");
+        this.load.image("Cannon", "Cannon.png");
+        this.load.image("Capital", "Capital.png");
+        this.load.image("D-Bridge", "D-Bridge.png");
+        this.load.image("Freeze", "Freeze.png");
+        this.load.image("Nuke", "Nuke.png");
+        this.load.image("Poison", "Poison.png");
+        this.load.image("Rage", "Rage.png");
+        this.load.image("Spawn", "Spawn.png");
+        this.load.image("Zombie", "Zombie.png");
         this.load.image('Pump', 'Pump.png');
     }
-
     create(): void {
         this.graphics = this.add.graphics();
         const main = new Main();
-        main.setup(board_data as BoardJSON);
+        main.setup(this.board);
         for (let i in main.nodes) {
-            console.log(main.nodes[i].pos);
+            // console.log(main.nodes[i].pos);
             let node = main.nodes[i];
             // randomly select an owner from the other players
-            node.owner = this.otherPlayers[Math.floor(Math.random() * this.otherPlayers.length)];
+            // node.owner =
+            //     this.otherPlayers[
+            //         Math.floor(Math.random() * this.otherPlayers.length)
+            //     ];
             node.scene = this;
-            this.nodes.push(node);
+            // node.owner = this.mainPlayer;
+            this.nodes[i] = node;
         }
         console.log(window.innerWidth)
         // this.nodes.forEach(node => {
         //     node.resize(newWidth, newHeight);
         // });
         for (let i in main.edges) {
-            let edge = main.edges[i];
+            let edge = main.edges[i] as Edge;
             edge.scene = this;
-            this.edges.push(edge);
+            this.edges[i] = edge;
         }
-        this.network.connectWebSocket();
+        this.otherPlayers = Object.values(main.players);
+        this.mainPlayer = main.myPlayer;
         this.highlight = new Highlight(this, this.mainPlayer.color);
-        this.ps = PSE.PLAY;
-        const ev = makeEventValidators(this.mainPlayer);
+        this.ps = PSE.START_SELECTION;
+        const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
         const ab = makeAbilityValidators(
             this.mainPlayer,
-            this.nodes,
-            this.edges
+            Object.values(this.nodes),
+            Object.values(this.edges)
         );
         const events: { [key: number]: Event } = {};
         const abilities: { [key: number]: ReloadAbility } = {};
@@ -131,7 +170,7 @@ export class MainScene extends Scene {
         Object.entries(this.abilityCounts).forEach(([abk, count]) => {
             // abk here is the ability code (converted from the name via NameToCode)
             const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
-        
+
             abilities[abilityCode] = new ReloadAbility(
                 VISUALS[abilityCode] as AbilityVisual,
                 CLICKS[abilityCode][0],
@@ -145,7 +184,9 @@ export class MainScene extends Scene {
                 this
             );
         });
-        
+
+        this.createLeaveMatchButton();
+
         this.abilityManager = new AbstractAbilityManager(
             this,
             abilities,
@@ -168,6 +209,10 @@ export class MainScene extends Scene {
         this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
             this.checkHighlight();
         });
+        Object.values(this.nodes).forEach((node) => node.draw());
+        Object.values(this.edges).forEach((edge) => edge.draw());
+        this.network.connectWebSocket();
+        // this.network.setupUser(this.abilityCounts);
     }
 
     keydown(key: number): void {
@@ -176,11 +221,8 @@ export class MainScene extends Scene {
         } else if (this.ps === PSE.VICTORY && key === stateCodes.RESTART_CODE) {
             this.simple_send(stateCodes.RESTART_CODE);
         } else if (this.ps === PSE.PLAY) {
-            if (this.abilityManager.inAbilities(key)) {
-                if (this.abilityManager.select(key)) {
-                    this.simple_send(key);
-                }
-            } else if (key === stateCodes.FORFEIT_CODE) {
+            this.abilitySelection(key);
+            if (key === stateCodes.FORFEIT_CODE) {
                 this.simple_send(stateCodes.FORFEIT_CODE);
             }
         } else {
@@ -188,17 +230,32 @@ export class MainScene extends Scene {
         }
     }
 
+    abilitySelection(key: number): void {
+        if (this.abilityManager.inAbilities(key)) {
+            if (this.abilityManager.select(key)) {
+                this.simple_send(key);
+            }
+        }
+    }
+
     update(): void {
+        this.graphics.clear();
         this.abilityManager.draw(this);
-        this.nodes.forEach((node) => node.draw());
-        
-        this.edges.forEach((edge) => edge.draw());
+
+        // Iterate over the values of the dictionary to draw each node
+
         if (this.abilityManager.ability?.visual.name == "Nuke") {
-            const capitals = this.nodes.filter((node) => node.stateName === "capital" && node.owner === this.mainPlayer);
-            // for each node in capitals, draw a pink hollow circle on the node of the size of its this.value
+            // Filter the dictionary values to find the capitals
+            const capitals = Object.values(this.nodes).filter(
+                (node) =>
+                    node.stateName === "capital" &&
+                    node.owner === this.mainPlayer
+            );
+
+            // For each node in capitals, draw a pink hollow circle on the node of the size of its this.value
             capitals.forEach((node) => {
-                this.graphics.lineStyle(6, phaserColor(Colors.PINK), 1);
-                this.graphics.strokeCircle(node.pos.x, node.pos.y, node.size + 4);
+                this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
+                this.graphics.strokeCircle(node.pos.x, node.pos.y, (node.value * NUKE_RANGE));
             });
         }
     }
@@ -212,6 +269,9 @@ export class MainScene extends Scene {
     }
 
     checkHighlight(): void {
+        if (this.ps > PSE.PLAY) {
+            return;
+        }
         let pointer = this.input.activePointer;
         let hoverResult = this.validHover(
             new Phaser.Math.Vector2(pointer.x, pointer.y)
@@ -226,7 +286,7 @@ export class MainScene extends Scene {
     }
 
     validHover(position: Phaser.Math.Vector2): [IDItem, number] | false {
-        for (const node of this.nodes) {
+        for (const node of Object.values(this.nodes)) {
             if (node.pos.distance(position) < node.size) {
                 // Assuming a proximity check
                 if (this.ps === PSE.START_SELECTION) {
@@ -242,7 +302,7 @@ export class MainScene extends Scene {
             }
         }
 
-        for (const edge of this.edges) {
+        for (const edge of Object.values(this.edges)) {
             if (edge.isNear(position)) {
                 // You need to define how to check proximity to an edge
                 if (this.ps === PSE.PLAY) {
@@ -251,7 +311,7 @@ export class MainScene extends Scene {
             }
         }
 
-        let ability = this.abilityManager.ability_validate(position);
+        let ability = this.abilityManager.triangle_validate(position);
         if (ability) {
             return ability;
         }
@@ -273,6 +333,7 @@ export class MainScene extends Scene {
                     const event_data = this.abilityManager.useEvent(
                         this.highlight
                     );
+                    // console.log("event data: ", event_data);
                     if (event_data !== false) {
                         if (
                             button === EventCodes.STANDARD_RIGHT_CLICK &&
@@ -290,6 +351,10 @@ export class MainScene extends Scene {
                 }
             }
         }
+        let key = this.abilityManager.clickSelect(this.input.activePointer.position);
+        if (key) {
+            this.abilitySelection(key);
+        }
     }
 
     send(items?: number[], code?: number): void {
@@ -297,24 +362,130 @@ export class MainScene extends Scene {
             JSON.stringify(this.highlight.sendFormat(items, code))
         );
     }
-
     simple_send(code: number): void {
-        this.network.sendMessage(JSON.stringify({ code: code, items: {} }));
+        this.network.sendMessage(
+            JSON.stringify({
+                code: code,
+                items: {},
+            })
+        );
     }
-    update_board(new_data) {
-        //call parse on new data
-    }
-    parse(items, updates) {
-        if (!items || typeof items !== "object" || Array.isArray(items)) {
-            throw new Error("Invalid 'items' parameter; expected an object.");
-        }
-        if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
-            throw new Error("Invalid 'updates' parameter; expected an object.");
-        }
 
+    private createLeaveMatchButton(): void {
+        this.leaveMatchButton = this.add.text(10, 10, 'Forfeit', {
+            fontFamily: 'Arial',
+            fontSize: '20px',
+            backgroundColor: this.rgbToHex(this.mainPlayer.color),
+            padding: { x: 10, y: 5 },
+            color: '#fff'
+        });
+        this.leaveMatchButton.setInteractive({ useHandCursor: true });
+        this.leaveMatchButton.on('pointerdown', this.leaveMatch, this);
+    }
+
+    private leaveMatch(): void {
+        console.log('Leaving match...');
+        if (this.ps < PSE.ELIMINATED) {
+            this.simple_send(stateCodes.FORFEIT_CODE);
+        }
+        this.navigate("/home");
+    }
+
+    delete_board(): void {
+        Object.values(this.nodes).forEach((node) => node.delete());
+        Object.values(this.edges).forEach((edge) => edge.delete());
+        this.abilityManager.delete();
+        this.nodes = {};
+        this.edges = {};
+    }
+ 
+    update_board(new_data) {
+        if (new_data != "Players may join") {
+            if (!("abilities" in new_data)) {
+
+                if (this.ps != new_data["player"]["ps"]) {
+                    this.ps = new_data["player"]["ps"] as PSE;
+                    if (this.statusText) this.statusText.destroy();
+                    if (this.ps >= PSE.ELIMINATED) {
+                        this.leaveMatchButton.setText('Leave Match');
+                    } 
+                    if (this.ps > PSE.ELIMINATED) {
+                        this.delete_board();
+                        this.statusText = this.add.text(
+                            this.sys.game.config.width as number - 100, 
+                            0, 
+                            `${PSE[this.ps]}`, 
+                            { fontFamily: 'Arial', fontSize: '48px', color: this.rgbToHex(this.mainPlayer.color) }
+                        );
+                        this.statusText.setOrigin(1, 0);
+                    }
+                }
+
+                if (this.countdown != new_data["countdown_timer"].toFixed(0)) {
+                    // make into integer
+                    this.countdown = new_data["countdown_timer"].toFixed(0);
+
+                    if (this.timerText) this.timerText.destroy();
+
+                    let timerColor = this.ps < PSE.PLAY ? this.mainPlayer.color : Colors.BLACK;
+                    let timerWords = this.ps < PSE.PLAY ? `Choose Start: ${this.countdown}` : `Time Remaining: ${this.countdown}`;
+                    this.timerText = this.add.text(
+                        400, 
+                        10, 
+                        timerWords, 
+                        { fontFamily: 'Arial', fontSize: '24px', color: this.rgbToHex(timerColor) }
+                    );
+                    this.timerText.setOrigin(1, 0);
+                }
+
+                if ('full_player_capitals' in new_data['board'] &&
+                    this.full_capitals[this.mainPlayer.name] !== new_data['board']["full_player_capitals"][this.mainPlayer.name]) {
+                    this.full_capitals = new_data['board']["full_player_capitals"];
+
+                    if (this.capitalsText) this.capitalsText.destroy();
+
+                    if (this.full_capitals[this.mainPlayer.name] > 0) {
+                        this.capitalsText = this.add.text(
+                            600, 
+                            10, 
+                            `Capitals: ${this.full_capitals[this.mainPlayer.name]}`, 
+                            { fontFamily: 'Arial', fontSize: '24px', color: this.rgbToHex(this.mainPlayer.color) }
+                        );
+                        this.capitalsText.setOrigin(1, 0);
+                    }
+                }
+
+                this.timer = new_data["countdown_timer"];
+                this.parse(this.nodes, new_data["board"]["nodes"]);
+                this.parse(this.edges, new_data["board"]["edges"]);
+                this.parse(this.abilityManager.abilities, new_data["player"]["abilities"]);
+                Object.values(this.nodes).forEach((node) => node.draw());
+                Object.values(this.edges).forEach((edge) => edge.draw());
+            } else {
+                // console.log(new_data);
+            }
+        }
+    }
+
+    private rgbToHex(color: readonly [number, number, number]): string {
+        return '#' + color.map(x => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    }
+
+    parse(this, items, updates, print = false) {
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {
-                console.error(`No item found for key ${u}`);
+
+                let new_edge = new Edge(Number(u) , this.nodes[updates[u]["from_node"]], this.nodes[updates[u]["to_node"]], updates[u]["dynamic"], true, true, this)
+                this.edges[Number(u)] = new_edge;
+                continue;
+            }
+
+            if (updates[u] === "Deleted") {
+                items[u].delete();
+                delete items[u];
                 continue;
             }
 
@@ -325,35 +496,42 @@ export class MainScene extends Scene {
             }
 
             for (const [key, val] of Object.entries(updates[u])) {
+                if (print) {
+                    console.log("key: ", key, " val: ", val);
+                }
                 if (typeof obj[key] === "undefined") {
-                    console.error(`Key ${key} not found in item ${u}.`);
                     continue;
                 }
 
-                console.log("before: " + obj[key]);
                 let updateVal;
                 try {
                     updateVal = this.getObject(obj, key, val);
                 } catch (error) {
                     console.error(
-                        `Error updating key ${key} in item ${u}: ${error.message}`
                     );
                     continue;
                 }
 
                 obj[key] = updateVal;
-                console.log("updated key: ", key, " with value: ", val);
-                console.log("after: " + obj[key]);
             }
         }
     }
     getObject(object, attribute, value) {
         if (object[attribute] instanceof Node) {
             return this.nodes[value];
+            
         } else if (object[attribute] instanceof Edge) {
             return this.edges[value];
+            
+        } else if (attribute === "owner") {
+            return this.otherPlayers[value];
         }
-        //TODO: check for State and OtherPlayer types after adding those
+        else if (attribute === "state") {
+            return stateDict[value]();
+        }
+        else if (attribute === "effects") {
+            return new Set(value);
+        }
         else {
             return value;
         }

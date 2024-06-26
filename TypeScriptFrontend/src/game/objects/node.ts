@@ -1,14 +1,14 @@
 import { State } from "./States";
-import { Colors, GROWTH_STOP } from "../constants";
+import { Colors, GROWTH_STOP } from "./constants";
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
-import { ClickType } from "../enums";
-import { phaserColor } from "../utilities";
-import { CapitalState, CannonState } from "./States";
+import { ClickType } from "./enums";
+import { phaserColor } from "./utilities";
+import { CannonState } from "./States";
 
 export class Node extends IDItem {
     pos: Phaser.Math.Vector2;
-    isPort: boolean;
+    is_port: boolean;
     portPercent: number;
     ports: Array<number>;
     state: State;
@@ -22,7 +22,7 @@ export class Node extends IDItem {
     constructor(
         id: number,
         pos: [number, number],
-        isPort: boolean,
+        is_port: boolean,
         portPercent: number,
         ports: Array<any>,
         state: State,
@@ -32,13 +32,8 @@ export class Node extends IDItem {
         _scene?: Phaser.Scene
     ) {
         super(id, ClickType.NODE);
-        console.log(_scene);
-        let alter_x_pos = pos[0] * 2;
-        let alter_y_pos = pos[1] * 1.5;
-        this.pos = new Phaser.Math.Vector2(alter_x_pos, alter_y_pos);
-        // this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
-
-        this.isPort = isPort;
+        this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
+        this.is_port = is_port;
         this.portPercent = portPercent;
         this.ports = ports;
         this.state = state;
@@ -52,9 +47,26 @@ export class Node extends IDItem {
         }
     }
 
+    public delete(): void {
+        // Remove graphics from the scene
+        if (this.graphics) {
+            this.graphics.clear();
+            this.graphics.destroy();
+        }
+    
+        if (this.cannonGraphics) {
+            this.cannonGraphics.clear();
+            this.cannonGraphics.destroy();
+        }
+    }
+
+    select(on: boolean): void {
+            this.state.select(on);
+    }
+
     get color(): readonly [number, number, number] {
-        if (!this.owner) {
-            return this.isPort ? Colors.BROWN : Colors.BLACK;
+        if (!this.owner ) {
+            return this.is_port ? Colors.BROWN : Colors.BLACK;
         }
         return this.owner.color;
     }
@@ -104,31 +116,48 @@ export class Node extends IDItem {
         if (this.state.graphic_override) {
             this.state.draw(this._scene, this.size, this.pos);
             return;
-        }
-        else {
+        } else {
             if (this.effects.has("poison")) {
                 this.graphics.lineStyle(6, phaserColor(Colors.PURPLE), 1);
-                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 4);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size + 4
+                );
             }
-    
+
             if (this.owner) {
-                if (this.isPort) {
+                if (this.is_port) {
                     this.drawPorts(Colors.BROWN);
                 } else if (this.ports.length > 0) {
                     this.drawPorts(Colors.ORANGE);
+                    if (this.portPercent > 0) {
+                        this.portPercent -= 0.05;
+                    }
+                    else {
+                        this.ports = [];
+                    }
                 }
             }
-    
+
             this.graphics.fillStyle(this.phaserColor, 1);
             this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
-    
+
             if (this.effects.has("rage")) {
                 this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
-                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size - 2);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size - 2
+                );
             }
             if (this.full) {
                 this.graphics.lineStyle(2, phaserColor(Colors.BLACK), 1);
-                this.graphics.strokeCircle(this.pos.x, this.pos.y, this.size + 1);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size + 1
+                );
                 if (this.stateName === "capital") {
                     this.graphics.lineStyle(2, phaserColor(Colors.PINK), 1);
                     this.graphics.strokeCircle(
@@ -140,16 +169,31 @@ export class Node extends IDItem {
             }
 
             this.state.draw(this._scene, this.size, this.pos);
-    
+
             if (this.state instanceof CannonState) {
-                if (this.state.selected && this._scene) {
-                    this.cannonGraphics.clear();
+                this.cannonGraphics.clear();
+                if (this.state.selected) {
                     let mousePos = this._scene.input.activePointer.position;
                     // Calculate angle between the spot and the mouse cursor
                     let dx = mousePos.x - this.pos.x;
                     let dy = mousePos.y - this.pos.y;
                     this.state.angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
+            
+                    // Calculate distance to mouse cursor
+                    let distanceToMouse = Math.sqrt(dx * dx + dy * dy) - this.size * 1.2;
+            
+                    // Draw the yellow rectangle from the cannon to the mouse cursor
+                    this.drawRotatedRectangle(
+                        this.state.angle,
+                        distanceToMouse,  // Width is the distance to the mouse
+                        this.size,        // Height remains the same as the cannon
+                        Colors.LIGHT_YELLOW,  // Light yellow color
+                        this.cannonGraphics,
+                        0.8,  // Optional: a lesser alpha for lighter visibility
+                        distanceToMouse / 2
+                    );
                 }
+
                 this.drawRotatedRectangle(
                     this.state.angle,
                     this.size * 2,
@@ -158,7 +202,6 @@ export class Node extends IDItem {
                     this.cannonGraphics
                 );
             }
-
         }
     }
 
@@ -166,7 +209,7 @@ export class Node extends IDItem {
         const portWidth = this.size;
         const portHeight = this.size * 1.3;
         this.ports.forEach((angle) => {
-            this.drawRotatedRectangle(angle, portWidth, portHeight, color);
+            this.drawRotatedRectangle(angle, portWidth * this.portPercent, portHeight * this.portPercent, color);
         });
     }
 
@@ -175,35 +218,34 @@ export class Node extends IDItem {
         portWidth: number,
         portHeight: number,
         col: readonly [number, number, number],
-        graphics: Phaser.GameObjects.Graphics = this.graphics
+        graphics: Phaser.GameObjects.Graphics = this.graphics,
+        alpha: number = 1,  // Default opacity is 100%
+        xOffset: number = 0  // Default to no offset
     ): void {
         const rad = Phaser.Math.DegToRad(angle);
         const halfWidth = portWidth / 2;
         const halfHeight = portHeight / 2;
-        const distanceFromCenter = this.size * 1.2; // Define how far each port should be from the center of the node
-
+        const distanceFromCenter = this.size * 1.2;
+    
         const portCenter = new Phaser.Math.Vector2(
-            this.pos.x + Math.cos(rad) * distanceFromCenter,
-            this.pos.y + Math.sin(rad) * distanceFromCenter
+            this.pos.x + Math.cos(rad) * (distanceFromCenter + xOffset),
+            this.pos.y + Math.sin(rad) * (distanceFromCenter + xOffset)
         );
-
+    
         // Calculate the corners of the rotated rectangle
         const corners = [
             new Phaser.Math.Vector2(-halfWidth, -halfHeight),
             new Phaser.Math.Vector2(halfWidth, -halfHeight),
             new Phaser.Math.Vector2(halfWidth, halfHeight),
             new Phaser.Math.Vector2(-halfWidth, halfHeight),
-        ].map((corner) => {
-            // Rotate and then translate each corner
-            return corner.rotate(rad).add(portCenter);
-        });
-
+        ].map(corner => corner.rotate(rad).add(portCenter));
+    
         // Change graphics fill style here if needed
         graphics.fillStyle(
             Phaser.Display.Color.GetColor(col[0], col[1], col[2]),
-            1
-        ); // Set the color to Orange
-
+            alpha
+        );
+    
         // Draw the polygon
         graphics.beginPath();
         graphics.moveTo(corners[0].x, corners[0].y);
@@ -216,8 +258,8 @@ export class Node extends IDItem {
 
     resize(newWidth: number, newHeight: number): void {
         // Adjust the position of the node based on newWidth and newHeight
-        this.pos.x = (this.pos.x / this._scene.game.config.width) * newWidth;
-        this.pos.y = (this.pos.y / this._scene.game.config.height) * newHeight;
+        this.pos.x = (this.pos.x / Number(this._scene.game.config.width)) * newWidth;
+        this.pos.y = (this.pos.y / Number(this._scene.game.config.height)) * newHeight;
         // Optionally, adjust the size or other properties here as needed
     }
 

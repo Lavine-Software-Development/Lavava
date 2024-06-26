@@ -1,13 +1,23 @@
-import { IDItem } from "./Objects/idItem";
-import { OtherPlayer } from "./Objects/otherPlayer";
-import { KeyCodes, MINIMUM_TRANSFER_VALUE, EventCodes, NUKE_RANGE } from "./constants";
+import { IDItem } from "./idItem";
+import { OtherPlayer } from "./otherPlayer";
+import {
+    KeyCodes,
+    MINIMUM_TRANSFER_VALUE,
+    EventCodes,
+    NUKE_RANGE,
+} from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
-import { Node } from "./Objects/node";
-import { Edge } from "./Objects/edge";
-import { ReloadAbility } from "./Objects/ReloadAbility";
+import { Node } from "./node";
+import { Edge } from "./edge";
+import { ReloadAbility } from "./ReloadAbility";
 
-function hasAnySame(num1: number, num2: number, num3: number, num4: number): boolean {
-    return num1 === num3 || num1 === num4 || num2 === num4 || num2 === num3
+function hasAnySame(
+    num1: number,
+    num2: number,
+    num3: number,
+    num4: number
+): boolean {
+    return num1 === num3 || num1 === num4 || num2 === num4 || num2 === num3;
 }
 
 function noClick(data: IDItem[]): boolean {
@@ -16,11 +26,11 @@ function noClick(data: IDItem[]): boolean {
 
 function standardPortNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
-    return node.owner !== undefined && node.isPort && node.stateName !== "mine";
+    return node.owner !== undefined && node.is_port && node.stateName !== "mine";
 }
 
 const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
-    const node = data as Node; 
+    const node = data as Node;
     return (
         node.owner !== player &&
         node.owner !== undefined &&
@@ -29,10 +39,24 @@ const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     );
 };
 
+const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
+
+    const newLine = new Phaser.Geom.Line(nodeFrom.pos.x, nodeFrom.pos.y, nodeTo.pos.x, nodeTo.pos.y);
+    // Check for overlaps with all other edges
+    for (let edge of edges) {
+        if (!hasAnySame(nodeFrom.id, nodeTo.id, edge.from_node.id, edge.to_node.id) && Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
+            return false;
+        }
+    }
+    return true;
+};
+
 function attackValidators(nodes: Node[], player: OtherPlayer) {
     return function capitalRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
-        const capitals = nodes.filter((node) => node.stateName === "capital" && node.owner === player);
+        const capitals = nodes.filter(
+            (node) => node.stateName === "capital" && node.owner === player
+        );
 
         const inCapitalRange = (capital: Node): boolean => {
             const { x: x1, y: y1 } = node.pos;
@@ -42,7 +66,10 @@ function attackValidators(nodes: Node[], player: OtherPlayer) {
             return distance <= capitalNukeRange;
         };
 
-        return standardNodeAttack(node, player) && capitals.some(capital => inCapitalRange(capital));
+        return (
+            standardNodeAttack(node, player) &&
+            capitals.some((capital) => inCapitalRange(capital))
+        );
     };
 }
 
@@ -97,13 +124,16 @@ function playerValidators(player: OtherPlayer): {
     // Validator that checks if either node of a dynamic edge belongs to the player
     const dynamicEdgeOwnEither = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge; // Type casting to Edge for TypeScript
-        return edge.dynamic && edge.fromNode.owner === player;
+        return edge.dynamic && edge.from_node.owner === player;
     };
 
     const attackingEdge = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge;
-        return edge.fromNode.owner == player && standardNodeAttack(edge.toNode, player)
-    }
+        return (
+            edge.from_node.owner == player &&
+            standardNodeAttack(edge.to_node, player)
+        );
+    };
 
     // Return an object mapping codes to their respective validator functions
     return {
@@ -116,33 +146,21 @@ function playerValidators(player: OtherPlayer): {
 }
 
 function newEdgeValidator(
-    nodes: Node[],
     edges: Edge[],
     player: OtherPlayer
 ): ValidatorFunc {
-    const checkNewEdge = (nodeFromId: number, nodeToId: number): boolean => {
-
-        const newLine = new Phaser.Geom.Line(nodes[nodeFromId].pos.x, nodes[nodeFromId].pos.y, nodes[nodeToId].pos.x, nodes[nodeToId].pos.y);
-        // Check for overlaps with all other edges
-        for (let edge of edges) {
-            if (hasAnySame(nodeFromId, nodeToId, edge.fromNode.id, edge.toNode.id) || 
-                Phaser.Geom.Intersects.LineToLine(newLine, edge.line)) {
-                return false;
-            }
-        }
-        return true;
-    };
 
     const newEdgeStandard = (data: Node[]): boolean => {
         if (data.length === 1) {
             const firstNode = data[0];
-            return firstNode.owner === player;
+            return firstNode.owner === player && firstNode.is_port;
         } else {
             const firstNode = data[0];
             const secondNode = data[1];
             return (
                 firstNode.id !== secondNode.id &&
-                checkNewEdge(firstNode.id, secondNode.id)
+                secondNode.is_port &&
+                checkNewEdge(firstNode, secondNode, edges)
             );
         }
     };
@@ -162,12 +180,12 @@ export function makeAbilityValidators(
 ): { [key: string]: ValidatorFunc } {
     const abilityValidators: { [key: string]: ValidatorFunc } = {
         [KeyCodes.SPAWN_CODE]: unownedNode,
-        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(nodes, edges, player),
-        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(nodes, edges, player),
+        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(edges, player),
+        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(edges, player),
         [KeyCodes.BURN_CODE]: standardPortNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
-        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player)
+        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
@@ -175,7 +193,7 @@ export function makeAbilityValidators(
     return { ...abilityValidators, ...playerValidatorsMap };
 }
 
-export function makeEventValidators(player: OtherPlayer): {
+export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {
@@ -187,8 +205,10 @@ export function makeEventValidators(player: OtherPlayer): {
                 firstNode.value > MINIMUM_TRANSFER_VALUE
             );
         } else if (data.length > 1) {
+            const firstNode = data[0] as Node;
             const secondNode = data[1] as Node;
-            return !(secondNode.owner === player && secondNode.full);
+            return !(secondNode.owner === player && secondNode.full) &&
+            checkNewEdge(firstNode, secondNode, edges);
         }
         return false;
     }

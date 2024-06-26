@@ -1,8 +1,15 @@
-import React from "react"; // Add import statement for 'React' module
-
-import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
+import React, {
+    forwardRef,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useContext,
+} from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import StartGame from "./main";
 import { EventBus } from "./EventBus";
+import { NetworkContext } from "./NetworkContext";
+import { Network } from "./objects/network";
 
 export interface IRefPhaserGame {
     game: Phaser.Game | null;
@@ -11,15 +18,26 @@ export interface IRefPhaserGame {
 
 interface IProps {
     currentActiveScene?: (scene_instance: Phaser.Scene) => void;
+    props?: any;
+    network?: Network | null;
 }
 
 export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
     function PhaserGame({ currentActiveScene }, ref) {
+        const network = useContext(NetworkContext);
+        const navigate = useNavigate();
         const game = useRef<Phaser.Game | null>(null!);
-
+        const location = useLocation();
+        const boardData = location.state?.boardData;
+        console.log("location: ", boardData);
         useLayoutEffect(() => {
             if (game.current === null) {
-                game.current = StartGame("game-container");
+                game.current = StartGame(
+                    "game-container",
+                    boardData,
+                    network as Network,
+                    navigate
+                );
 
                 if (typeof ref === "function") {
                     ref({ game: game.current, scene: null });
@@ -36,7 +54,7 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
                     }
                 }
             };
-        }, [ref]);
+        }, [ref, boardData]);
 
         useEffect(() => {
             EventBus.on(

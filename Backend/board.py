@@ -1,13 +1,12 @@
 from collections import defaultdict
 
 from node import Node
+from ae_effects import make_event_effects
 from event import Event
 from jsonable import JsonableTracked
 from constants import (
     CANNON_SHOT_CODE,
     DYNAMIC_EDGE,
-    GROWTH_STOP,
-    MINIMUM_TRANSFER_VALUE,
     SCREEN_WIDTH,
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
@@ -15,26 +14,27 @@ from constants import (
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
     PUMP_DRAIN_CODE,
-    NODE_MINIMUM_VALUE,
+    EVENT_CODES
 )
 from helpers import do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from tracker import Tracker
 from tracking_decorator.track_changes import track_changes
+from ae_validators import make_effect_validators
 
 
-@track_changes("nodes_r", "edges_r")
+@track_changes("nodes_r", "edges_r", 'full_player_capitals')
 class Board(JsonableTracked):
     def __init__(self, gs):
         self.gs = gs
         self.nodes: list[Node] = []
         self.edges = []
-        self.events = self.make_events_dict()
         self.edge_dict = defaultdict(set)
         self.extra_edges = 0
         self.tracker = Tracker()
         self.player_capitals = defaultdict(set)
+        self.full_player_capitals = []
 
         recurse_values = {"nodes", "edges"}
         super().__init__("board", recurse_values, recurse_values)
@@ -72,6 +72,7 @@ class Board(JsonableTracked):
         self.id_dict = {node.id: node for node in self.nodes} | {
             edge.id: edge for edge in self.edges
         }
+        self.events = self.make_events_dict()
         self.extra_edges = 0
         self.tracker.reset()
         self.player_capitals.clear()
@@ -81,6 +82,10 @@ class Board(JsonableTracked):
         for edge in self.edges:
             if edge.controlled_by(player):
                 edge.switch(False)
+        for node in self.nodes:
+            if node.owner == player:
+                node.owner = None
+                node.set_state("default")
 
     def expand_nodes(self):
         far_left_node = min(self.nodes, key=lambda node: node.pos[0])
@@ -118,8 +123,7 @@ class Board(JsonableTracked):
         if updated_nodes:
             self.track_state_changes(updated_nodes)
 
-        for player in self.player_capitals:
-            player.full_capital_count = len([n for n in self.player_capitals[player] if n.full()])
+        self.full_player_capitals = [len([n for n in self.player_capitals[player] if n.full()]) for player in self.player_capitals]
 
     def check_new_edge(self, node_from, node_to):
         if node_to == node_from:
@@ -130,6 +134,9 @@ class Board(JsonableTracked):
         if not self.check_all_overlaps((node_to, node_from)):
             return False
         return True
+    
+    def victory_check(self):
+        return any(count >= 3 for count in self.full_player_capitals)
 
     def new_edge_id(self):
         return (
@@ -192,48 +199,11 @@ class Board(JsonableTracked):
         self.id_dict.pop(node.id)
         self.nodes.remove(node)
 
-    def click(self, id, player, key):
-        self.id_dict[id].click(player, key)
-
-    def cannon_shot_check(self, player, data):
-        cannon, target = self.id_dict[data[0]], self.id_dict[data[1]]
-        can_shoot = cannon.state_name == "cannon" and cannon.owner == player
-        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full())
-        return can_shoot and can_accept
-
-    def cannon_shot(self, player, data):
-        cannon, target = self.id_dict[data[0]], self.id_dict[data[1]]
-        if target.owner == player:
-            transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
-        else:
-            transfer = cannon.value - MINIMUM_TRANSFER_VALUE
-        cannon.value -= transfer
-        target.delivery(transfer, player)
-
-    def pump_drain(self, player, data):
-        pump = self.id_dict[data[0]]
-        player.pump_increase_abilities()
-        pump.value = NODE_MINIMUM_VALUE
     
-    def pump_drain_check(self, player, data):
-        pump = self.id_dict[data[0]]
-        return pump.state_name == "pump" and pump.owner == player and pump.full()
-
     def make_events_dict(self):
-        return {
-            CANNON_SHOT_CODE: Event(self.cannon_shot_check, self.cannon_shot),
-            PUMP_DRAIN_CODE: Event(self.pump_drain_check, self.pump_drain),
-            STANDARD_LEFT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_left_click(player),
-                                        lambda player, data: self.id_dict[data[0]].switch()),
-            STANDARD_RIGHT_CLICK: Event(lambda player, data: self.id_dict[data[0]].valid_right_click(player), 
-                                        lambda player, data: self.id_dict[data[0]].click_swap()),
-        }
-    
-    def player_node_count(self, player_count):
-        for node in self.nodes:
-            if node.owner:
-                player_count[node.owner.id] += 1
-        return player_count
+        validators = make_effect_validators(self)
+        effects = make_event_effects(self)
+        return {code: Event(validators[code], effects[code]) for code in EVENT_CODES}
     
     def player_energy_count(self, player_energy):
         for node in self.nodes:

@@ -1,8 +1,10 @@
 from constants import (
     BRIDGE_CODE,
     CANNON_CODE,
+    CANNON_SHOT_CODE,
     D_BRIDGE_CODE,
     POISON_TICKS,
+    PUMP_DRAIN_CODE,
     SPAWN_CODE,
     FREEZE_CODE,
     NUKE_CODE,
@@ -10,11 +12,16 @@ from constants import (
     POISON_CODE,
     CAPITAL_CODE,
     RAGE_CODE,
+    STANDARD_LEFT_CLICK,
+    STANDARD_RIGHT_CLICK,
     ZOMBIE_CODE,
     EDGE,
     DYNAMIC_EDGE,
     ZOMBIE_FULL_SIZE,
     PUMP_CODE,
+    MINIMUM_TRANSFER_VALUE,
+    GROWTH_STOP,
+    NODE_MINIMUM_VALUE,
 )
 
 def make_bridge(buy_new_edge, bridge_type):
@@ -38,6 +45,26 @@ def make_rage(board_wide_effect):
         board_wide_effect('rage', player)
     return rage_effect
 
+def make_cannon_shot(id_dict):
+    def cannon_shot(player, data):
+        cannon, target = id_dict[data[0]], id_dict[data[1]]
+        if target.owner == player:
+            transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
+        else:
+            transfer = cannon.value - MINIMUM_TRANSFER_VALUE
+        cannon.value -= transfer
+        target.delivery(transfer, player)
+
+    return cannon_shot
+
+def make_pump_drain(id_dict):
+    def pump_drain(player, data):
+        pump_node = id_dict[data[0]]
+        ability_code = data[1]
+        player.abilities[ability_code].credits += 1
+        pump_node.state.draining = True
+        
+    return pump_drain
 
 def freeze_effect(data, player):
     edge = data[0]
@@ -88,5 +115,15 @@ def make_ability_effects(board):
         CANNON_CODE: cannon_effect,
         PUMP_CODE: pump_effect,
     }
+
+
+def make_event_effects(board):
+    return {
+        CANNON_SHOT_CODE: make_cannon_shot(board.id_dict),
+        PUMP_DRAIN_CODE : make_pump_drain(board.id_dict),
+        STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].switch(),
+        STANDARD_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].click_swap(),
+    }
+
 
 

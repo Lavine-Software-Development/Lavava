@@ -30,12 +30,12 @@ class Node(JsonableTracked):
         self.edges = set()
         self.pos = pos
         self.type = NODE
-        self.effects: dict[str, AbstractSpreadingEffect] = {}
+        self.effects: dict[str, AbstractSpreadingEffect] = dict()
         self.expel_multiplier = 1
         self.intake_multiplier = 1
         self.grow_multiplier = 1
 
-        start_values = {'pos', 'state', 'value', 'effects'}
+        start_values = {'pos', 'state', 'value'}
         super().__init__(id, start_values, set())
 
         self.set_default_state()
@@ -52,7 +52,7 @@ class Node(JsonableTracked):
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
         elif status_name in EFFECT_NAMES:
-            self.effects[status_name] = self.new_effect(status_name, data)
+            self.effects = self.effects | {status_name: self.new_effect(status_name, data)}
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
@@ -102,20 +102,6 @@ class Node(JsonableTracked):
     def set_default_state(self):
         self.set_state("default")
 
-    def click(self, clicker, button):
-        if button == 1:
-            self.left_click(clicker)
-        elif button == 3:
-            self.right_click()
-
-    def right_click(self):
-        pass
-
-    def left_click(self, clicker):
-        if self.owner is None:
-            if clicker.buy_node():
-                self.capture(clicker)
-
     def expand(self):
         for edge in self.outgoing:
             if edge.contested:
@@ -156,10 +142,13 @@ class Node(JsonableTracked):
     
     def effects_tick(self):
         effects_to_remove = [key for key, effect in self.effects.items() if not effect.count()]
-        for key in effects_to_remove:
-            del self.effects[key]
-
-        return effects_to_remove
+        if effects_to_remove:
+            copied = self.effects.copy()
+            for key in effects_to_remove:
+                copied.pop(key)
+            self.effects = copied
+            return True
+        return False
 
     def delivery(self, amount, player):
         self.value += self.state.intake(amount, player)

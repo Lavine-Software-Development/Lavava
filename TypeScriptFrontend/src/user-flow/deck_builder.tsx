@@ -180,7 +180,7 @@ const DeckBuilder: React.FC = () => {
                         </div>*/}
 
                         {/* icon placement on top of text */}
-                        <img src={`./public/assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
+                        <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
                         style={{ width: '50%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
 
                         <div className="ability-name">{ability.name}</div>

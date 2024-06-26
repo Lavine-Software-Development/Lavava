@@ -1,72 +1,72 @@
 {
     "board": {
         "edges": {
-            "65": { "dynamic": false, "from_node": 15, "to_node": 41 },
-            "66": { "dynamic": false, "from_node": 5, "to_node": 2 },
-            "67": { "dynamic": false, "from_node": 12, "to_node": 49 },
-            "68": { "dynamic": false, "from_node": 62, "to_node": 64 },
-            "69": { "dynamic": false, "from_node": 58, "to_node": 11 },
-            "70": { "dynamic": false, "from_node": 55, "to_node": 13 },
-            "71": { "dynamic": false, "from_node": 14, "to_node": 13 },
-            "72": { "dynamic": false, "from_node": 50, "to_node": 31 },
-            "73": { "dynamic": false, "from_node": 25, "to_node": 1 },
-            "74": { "dynamic": false, "from_node": 1, "to_node": 51 },
-            "75": { "dynamic": false, "from_node": 59, "to_node": 52 },
-            "76": { "dynamic": false, "from_node": 61, "to_node": 4 },
-            "77": { "dynamic": false, "from_node": 48, "to_node": 10 },
-            "78": { "dynamic": false, "from_node": 63, "to_node": 27 },
-            "79": { "dynamic": false, "from_node": 37, "to_node": 6 },
-            "80": { "dynamic": false, "from_node": 47, "to_node": 53 },
-            "81": { "dynamic": false, "from_node": 32, "to_node": 36 },
-            "82": { "dynamic": true, "from_node": 60, "to_node": 25 },
-            "83": { "dynamic": true, "from_node": 12, "to_node": 9 },
-            "84": { "dynamic": true, "from_node": 55, "to_node": 0 },
-            "85": { "dynamic": true, "from_node": 15, "to_node": 2 },
-            "86": { "dynamic": true, "from_node": 6, "to_node": 61 },
-            "87": { "dynamic": true, "from_node": 60, "to_node": 13 },
-            "88": { "dynamic": true, "from_node": 12, "to_node": 30 },
-            "89": { "dynamic": true, "from_node": 43, "to_node": 3 },
-            "90": { "dynamic": true, "from_node": 57, "to_node": 1 },
-            "91": { "dynamic": true, "from_node": 6, "to_node": 12 },
-            "92": { "dynamic": true, "from_node": 62, "to_node": 26 },
-            "93": { "dynamic": true, "from_node": 1, "to_node": 43 },
-            "94": { "dynamic": true, "from_node": 20, "to_node": 44 },
-            "95": { "dynamic": true, "from_node": 26, "to_node": 51 },
-            "96": { "dynamic": true, "from_node": 25, "to_node": 57 },
-            "97": { "dynamic": true, "from_node": 32, "to_node": 49 },
-            "98": { "dynamic": true, "from_node": 35, "to_node": 7 },
-            "99": { "dynamic": true, "from_node": 17, "to_node": 32 },
-            "100": { "dynamic": true, "from_node": 9, "to_node": 3 },
-            "101": { "dynamic": true, "from_node": 15, "to_node": 30 },
-            "102": { "dynamic": true, "from_node": 30, "to_node": 9 },
-            "103": { "dynamic": true, "from_node": 11, "to_node": 39 },
-            "104": { "dynamic": true, "from_node": 41, "to_node": 28 },
-            "105": { "dynamic": true, "from_node": 15, "to_node": 28 },
-            "106": { "dynamic": true, "from_node": 39, "to_node": 19 },
-            "107": { "dynamic": true, "from_node": 2, "to_node": 59 },
-            "108": { "dynamic": true, "from_node": 31, "to_node": 9 },
-            "109": { "dynamic": true, "from_node": 10, "to_node": 63 },
-            "110": { "dynamic": true, "from_node": 58, "to_node": 53 },
-            "111": { "dynamic": true, "from_node": 45, "to_node": 24 },
-            "112": { "dynamic": true, "from_node": 17, "to_node": 36 },
-            "113": { "dynamic": true, "from_node": 55, "to_node": 7 },
-            "114": { "dynamic": true, "from_node": 35, "to_node": 46 },
-            "115": { "dynamic": true, "from_node": 47, "to_node": 21 },
-            "116": { "dynamic": true, "from_node": 48, "to_node": 27 },
-            "117": { "dynamic": true, "from_node": 38, "to_node": 16 },
-            "118": { "dynamic": true, "from_node": 64, "to_node": 29 },
-            "119": { "dynamic": true, "from_node": 20, "to_node": 26 },
-            "120": { "dynamic": true, "from_node": 42, "to_node": 34 },
-            "121": { "dynamic": true, "from_node": 16, "to_node": 12 },
-            "122": { "dynamic": true, "from_node": 3, "to_node": 25 },
-            "123": { "dynamic": true, "from_node": 21, "to_node": 18 },
-            "124": { "dynamic": true, "from_node": 46, "to_node": 40 }
+            "65": { "dynamic": false, "from_node": 13, "to_node": 29 },
+            "66": { "dynamic": false, "from_node": 15, "to_node": 46 },
+            "67": { "dynamic": false, "from_node": 50, "to_node": 16 },
+            "68": { "dynamic": false, "from_node": 60, "to_node": 25 },
+            "69": { "dynamic": false, "from_node": 30, "to_node": 48 },
+            "70": { "dynamic": false, "from_node": 26, "to_node": 20 },
+            "71": { "dynamic": false, "from_node": 28, "to_node": 63 },
+            "72": { "dynamic": false, "from_node": 14, "to_node": 8 },
+            "73": { "dynamic": false, "from_node": 62, "to_node": 38 },
+            "74": { "dynamic": false, "from_node": 18, "to_node": 44 },
+            "75": { "dynamic": false, "from_node": 39, "to_node": 23 },
+            "76": { "dynamic": false, "from_node": 28, "to_node": 44 },
+            "77": { "dynamic": false, "from_node": 10, "to_node": 7 },
+            "78": { "dynamic": false, "from_node": 26, "to_node": 37 },
+            "79": { "dynamic": false, "from_node": 3, "to_node": 57 },
+            "80": { "dynamic": false, "from_node": 6, "to_node": 62 },
+            "81": { "dynamic": false, "from_node": 49, "to_node": 37 },
+            "82": { "dynamic": true, "from_node": 62, "to_node": 20 },
+            "83": { "dynamic": true, "from_node": 14, "to_node": 12 },
+            "84": { "dynamic": true, "from_node": 19, "to_node": 51 },
+            "85": { "dynamic": true, "from_node": 33, "to_node": 5 },
+            "86": { "dynamic": true, "from_node": 38, "to_node": 37 },
+            "87": { "dynamic": true, "from_node": 64, "to_node": 41 },
+            "88": { "dynamic": true, "from_node": 4, "to_node": 50 },
+            "89": { "dynamic": true, "from_node": 16, "to_node": 46 },
+            "90": { "dynamic": true, "from_node": 23, "to_node": 21 },
+            "91": { "dynamic": true, "from_node": 49, "to_node": 57 },
+            "92": { "dynamic": true, "from_node": 46, "to_node": 5 },
+            "93": { "dynamic": true, "from_node": 58, "to_node": 41 },
+            "94": { "dynamic": true, "from_node": 64, "to_node": 6 },
+            "95": { "dynamic": true, "from_node": 16, "to_node": 4 },
+            "96": { "dynamic": true, "from_node": 21, "to_node": 17 },
+            "97": { "dynamic": true, "from_node": 44, "to_node": 14 },
+            "98": { "dynamic": true, "from_node": 56, "to_node": 21 },
+            "99": { "dynamic": true, "from_node": 58, "to_node": 22 },
+            "100": { "dynamic": true, "from_node": 18, "to_node": 47 },
+            "101": { "dynamic": true, "from_node": 11, "to_node": 2 },
+            "102": { "dynamic": true, "from_node": 63, "to_node": 7 },
+            "103": { "dynamic": true, "from_node": 15, "to_node": 26 },
+            "104": { "dynamic": true, "from_node": 50, "to_node": 46 },
+            "105": { "dynamic": true, "from_node": 44, "to_node": 55 },
+            "106": { "dynamic": true, "from_node": 27, "to_node": 35 },
+            "107": { "dynamic": true, "from_node": 61, "to_node": 30 },
+            "108": { "dynamic": true, "from_node": 61, "to_node": 22 },
+            "109": { "dynamic": true, "from_node": 19, "to_node": 53 },
+            "110": { "dynamic": true, "from_node": 22, "to_node": 11 },
+            "111": { "dynamic": true, "from_node": 8, "to_node": 18 },
+            "112": { "dynamic": true, "from_node": 20, "to_node": 38 },
+            "113": { "dynamic": true, "from_node": 9, "to_node": 61 },
+            "114": { "dynamic": true, "from_node": 36, "to_node": 61 },
+            "115": { "dynamic": true, "from_node": 36, "to_node": 11 },
+            "116": { "dynamic": true, "from_node": 51, "to_node": 42 },
+            "117": { "dynamic": true, "from_node": 51, "to_node": 47 },
+            "118": { "dynamic": true, "from_node": 39, "to_node": 62 },
+            "119": { "dynamic": true, "from_node": 48, "to_node": 0 },
+            "120": { "dynamic": true, "from_node": 3, "to_node": 49 },
+            "121": { "dynamic": true, "from_node": 32, "to_node": 48 },
+            "122": { "dynamic": true, "from_node": 27, "to_node": 57 },
+            "123": { "dynamic": true, "from_node": 2, "to_node": 48 },
+            "124": { "dynamic": true, "from_node": 39, "to_node": 56 }
         },
         "nodes": {
             "0": {
                 "effects": [],
                 "is_port": true,
-                "pos": [690.1340996168583, 397],
+                "pos": [648.8532110091743, 75],
                 "state": 0,
                 "value": 0
             },
@@ -75,77 +75,77 @@
                 "is_port": false,
                 "pos": [619.6360153256705, 245],
                 "state": 2,
-                "value": 100
+                "value": 250
             },
             "2": {
                 "effects": [],
                 "is_port": true,
-                "pos": [478.63984674329504, 480],
+                "pos": [637.3197903014417, 202],
                 "state": 0,
                 "value": 0
             },
             "3": {
                 "effects": [],
                 "is_port": false,
-                "pos": [426.53256704980845, 323],
+                "pos": [201.14678899082568, 463],
                 "state": 0,
                 "value": 0
             },
             "4": {
                 "effects": [],
                 "is_port": true,
-                "pos": [117.97573435504471, 502],
+                "pos": [184.37090432503277, 610],
                 "state": 0,
                 "value": 0
             },
             "5": {
                 "effects": [],
                 "is_port": false,
-                "pos": [476.5964240102171, 398],
+                "pos": [415.03931847968545, 474],
                 "state": 0,
                 "value": 0
             },
             "6": {
                 "effects": [],
                 "is_port": true,
-                "pos": [211.97318007662835, 398],
+                "pos": [304.9475753604194, 261],
                 "state": 0,
                 "value": 0
             },
             "7": {
                 "effects": [],
                 "is_port": false,
-                "pos": [628.8314176245211, 562],
-                "state": 0,
-                "value": 0
+                "pos": [786.2057667103538, 476],
+                "state": 2,
+                "value": 100
             },
             "8": {
                 "effects": [],
                 "is_port": true,
-                "pos": [659.4827586206897, 120],
-                "state": 2,
-                "value": 100
+                "pos": [663.5321100917431, 278],
+                "state": 0,
+                "value": 0
             },
             "9": {
                 "effects": [],
                 "is_port": false,
-                "pos": [387.70753512132825, 382],
+                "pos": [400.36041939711663, 94],
                 "state": 0,
                 "value": 0
             },
             "10": {
                 "effects": [],
                 "is_port": true,
-                "pos": [479.661558109834, 185],
+                "pos": [718.0537352555701, 492],
                 "state": 0,
                 "value": 0
             },
             "11": {
                 "effects": [],
                 "is_port": false,
-                "pos": [131.25798212005108, 325],
-                "state": 2,
-                "value": 100
+                "pos": [570.21625163827, 243],
+                "state": 0,
+                "value": 0
             },
             "12": {
                 "effects": [],
@@ -164,329 +164,308 @@
             "14": {
                 "effects": [],
                 "is_port": true,
-                "pos": [655.3959131545339, 435],
+                "pos": [774.6723460026212, 253],
                 "state": 0,
                 "value": 0
             },
             "15": {
                 "effects": [],
                 "is_port": false,
-                "pos": [396.90293742017883, 498],
+                "pos": [282.9292267365662, 422],
                 "state": 0,
                 "value": 0
             },
             "16": {
                 "effects": [],
                 "is_port": true,
-                "pos": [248.75478927203065, 286],
+                "pos": [263.0078636959371, 562],
                 "state": 0,
                 "value": 0
             },
             "17": {
                 "effects": [],
                 "is_port": false,
-                "pos": [218.10344827586206, 530],
+                "pos": [139.28571428571428, 131],
                 "state": 0,
                 "value": 0
             },
             "18": {
                 "effects": [],
                 "is_port": true,
-                "pos": [59.73818646232439, 87],
+                "pos": [653.0471821756225, 329],
                 "state": 0,
                 "value": 0
             },
             "19": {
                 "effects": [],
                 "is_port": false,
-                "pos": [33.17369093231162, 435],
+                "pos": [575.4587155963303, 536],
                 "state": 0,
                 "value": 0
             },
             "20": {
                 "effects": [],
                 "is_port": true,
-                "pos": [644.1570881226054, 187],
+                "pos": [289.2201834862385, 347],
                 "state": 0,
                 "value": 0
             },
             "21": {
                 "effects": [],
                 "is_port": false,
-                "pos": [37.26053639846744, 132],
+                "pos": [178.07994757536042, 78],
                 "state": 0,
                 "value": 0
+            },
+            "22": {
+                "effects": [],
+                "is_port": true,
+                "pos": [472.70642201834863, 232],
+                "state": 0,
+                "value": 0
+            },
+            "23": {
+                "effects": [],
+                "is_port": false,
+                "pos": [221.0681520314548, 179],
+                "state": 2,
+                "value": 100
             },
             "24": {
                 "effects": [],
                 "is_port": true,
-                "pos": [346.8390804597701, 143],
-                "state": 0,
-                "value": 0
+                "pos": [405.6028833551769, 279],
+                "state": 2,
+                "value": 100
             },
             "25": {
                 "effects": [],
                 "is_port": false,
-                "pos": [540.9642401021712, 320],
+                "pos": [552.391874180865, 584],
                 "state": 0,
                 "value": 0
             },
             "26": {
                 "effects": [],
                 "is_port": true,
-                "pos": [667.6564495530013, 266],
+                "pos": [231.55307994757536, 416],
                 "state": 0,
                 "value": 0
             },
             "27": {
                 "effects": [],
                 "is_port": false,
-                "pos": [488.8569604086846, 80],
+                "pos": [44.921363040629096, 466],
                 "state": 0,
                 "value": 0
             },
             "28": {
                 "effects": [],
                 "is_port": true,
-                "pos": [395.88122605363986, 562],
+                "pos": [795.6422018348624, 303],
                 "state": 0,
                 "value": 0
             },
             "29": {
                 "effects": [],
                 "is_port": false,
-                "pos": [784.1315453384419, 437],
+                "pos": [113.07339449541284, 306],
                 "state": 0,
                 "value": 0
             },
             "30": {
                 "effects": [],
                 "is_port": true,
-                "pos": [338.6653895274585, 409],
-                "state": 0,
-                "value": 0
-            },
-            "31": {
-                "effects": [],
-                "is_port": false,
-                "pos": [377.4904214559387, 332],
+                "pos": [537.7129750982962, 122],
                 "state": 0,
                 "value": 0
             },
             "32": {
                 "effects": [],
                 "is_port": true,
-                "pos": [278.3844189016603, 564],
+                "pos": [689.7444298820445, 148],
                 "state": 0,
                 "value": 0
             },
-            "34": {
+            "33": {
                 "effects": [],
-                "is_port": true,
-                "pos": [35.217113665389526, 571],
+                "is_port": false,
+                "pos": [364.7116644823067, 494],
                 "state": 0,
                 "value": 0
             },
             "35": {
                 "effects": [],
                 "is_port": false,
-                "pos": [675.8301404853129, 579],
+                "pos": [25.0, 543],
                 "state": 0,
                 "value": 0
             },
             "36": {
                 "effects": [],
                 "is_port": true,
-                "pos": [192.56066411238825, 623],
+                "pos": [547.1494102228047, 187],
                 "state": 0,
                 "value": 0
             },
             "37": {
                 "effects": [],
                 "is_port": false,
-                "pos": [155.77905491698596, 383],
+                "pos": [153.9646133682831, 340],
                 "state": 0,
                 "value": 0
             },
             "38": {
                 "effects": [],
                 "is_port": true,
-                "pos": [189.4955300127714, 207],
+                "pos": [203.2437745740498, 328],
                 "state": 0,
                 "value": 0
             },
             "39": {
                 "effects": [],
                 "is_port": false,
-                "pos": [25.0, 353],
-                "state": 0,
-                "value": 0
-            },
-            "40": {
-                "effects": [],
-                "is_port": true,
-                "pos": [770.8492975734355, 541],
+                "pos": [270.3473132372215, 151],
                 "state": 0,
                 "value": 0
             },
             "41": {
                 "effects": [],
                 "is_port": false,
-                "pos": [471.4878671775224, 530],
+                "pos": [341.6448230668414, 356],
                 "state": 0,
                 "value": 0
             },
             "42": {
                 "effects": [],
                 "is_port": true,
-                "pos": [103.67177522349937, 607],
-                "state": 0,
-                "value": 0
-            },
-            "43": {
-                "effects": [],
-                "is_port": false,
-                "pos": [518.4865900383143, 256],
+                "pos": [534.56749672346, 387],
                 "state": 0,
                 "value": 0
             },
             "44": {
                 "effects": [],
                 "is_port": true,
-                "pos": [737.13282247765, 237],
-                "state": 0,
-                "value": 0
-            },
-            "45": {
-                "effects": [],
-                "is_port": false,
-                "pos": [330.4916985951469, 193],
+                "pos": [724.3446920052425, 342],
                 "state": 0,
                 "value": 0
             },
             "46": {
                 "effects": [],
                 "is_port": true,
-                "pos": [673.7867177522351, 496],
+                "pos": [316.480996068152, 472],
                 "state": 0,
                 "value": 0
             },
             "47": {
                 "effects": [],
                 "is_port": false,
-                "pos": [103.67177522349937, 212],
+                "pos": [675.0655307994757, 417],
                 "state": 0,
                 "value": 0
             },
             "48": {
                 "effects": [],
                 "is_port": true,
-                "pos": [579.7892720306513, 140],
+                "pos": [632.0773263433814, 123],
                 "state": 0,
                 "value": 0
             },
             "49": {
                 "effects": [],
                 "is_port": false,
-                "pos": [263.05874840357603, 458],
+                "pos": [92.10353866317169, 422],
                 "state": 0,
                 "value": 0
             },
             "50": {
                 "effects": [],
                 "is_port": true,
-                "pos": [458.205619412516, 273],
+                "pos": [222.11664482306685, 532],
                 "state": 0,
                 "value": 0
             },
             "51": {
                 "effects": [],
                 "is_port": false,
-                "pos": [641.0919540229885, 343],
-                "state": 0,
-                "value": 0
-            },
-            "52": {
-                "effects": [],
-                "is_port": true,
-                "pos": [531.7688378033206, 617],
+                "pos": [614.2529488859764, 443],
                 "state": 0,
                 "value": 0
             },
             "53": {
                 "effects": [],
                 "is_port": false,
-                "pos": [25.0, 196],
+                "pos": [483.1913499344692, 551],
                 "state": 0,
                 "value": 0
             },
             "55": {
                 "effects": [],
                 "is_port": false,
-                "pos": [618.6143039591316, 476],
+                "pos": [717.0052424639581, 292],
+                "state": 0,
+                "value": 0
+            },
+            "56": {
+                "effects": [],
+                "is_port": true,
+                "pos": [232.60157273918742, 82],
                 "state": 0,
                 "value": 0
             },
             "57": {
                 "effects": [],
                 "is_port": false,
-                "pos": [591.0280970625798, 332],
+                "pos": [93.15203145478375, 508],
                 "state": 0,
                 "value": 0
             },
             "58": {
                 "effects": [],
                 "is_port": true,
-                "pos": [113.88888888888889, 268],
-                "state": 0,
-                "value": 0
-            },
-            "59": {
-                "effects": [],
-                "is_port": false,
-                "pos": [558.3333333333334, 534],
+                "pos": [452.78505897771953, 333],
                 "state": 0,
                 "value": 0
             },
             "60": {
                 "effects": [],
                 "is_port": true,
-                "pos": [580.8109833971903, 403],
+                "pos": [663.5321100917431, 603],
                 "state": 0,
                 "value": 0
             },
             "61": {
                 "effects": [],
                 "is_port": false,
-                "pos": [173.14814814814815, 480],
+                "pos": [452.78505897771953, 143],
                 "state": 0,
                 "value": 0
             },
             "62": {
                 "effects": [],
                 "is_port": true,
-                "pos": [773.9144316730524, 294],
+                "pos": [244.13499344692005, 256],
                 "state": 0,
                 "value": 0
             },
             "63": {
                 "effects": [],
                 "is_port": false,
-                "pos": [435.72796934865903, 85],
+                "pos": [772.5753604193972, 386],
                 "state": 0,
                 "value": 0
             },
             "64": {
                 "effects": [],
                 "is_port": true,
-                "pos": [825.0, 353],
+                "pos": [272.4442988204456, 300],
                 "state": 0,
                 "value": 0
             }
         }
     },
-    "player_count": 2,
-    "player_id": 1,
+    "player_count": 1,
+    "player_id": 0,
     "abilities": {
         "values": {
             "97": { "credits": 2, "reload": 2 },

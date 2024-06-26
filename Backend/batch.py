@@ -1,4 +1,4 @@
-from constants import ALL_ABILITIES, EVENTS, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
+from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
 from playerStateEnums import PlayerStateEnum as PS
@@ -18,13 +18,16 @@ class Batch:
         self.tick_dict = dict()
 
     def add_player(self, conn, ability_data):
-        print("adding player")
         player = len(self.connections)
         if self.ability_process(player, ability_data):
-            self.connections.append(conn)
+            self.connections.insert(0, conn)
             return False
         else:
             return "CHEATING: INVALID ABILITY SELECTION"
+        
+    def start(self):
+        self.gs.next()
+        self.game.all_player_next()
 
     def is_ready(self):
         return len(self.connections) == self.player_count
@@ -34,14 +37,16 @@ class Batch:
         start_dict["player_count"] = self.player_count
         start_dict["player_id"] = player
         start_dict["abilities"] = json_abilities.start_json()
+        start_dict['isFirst'] = True
         start_json = plain_json(start_dict)
         return start_json
     
     def send_ready(self, player):
-        return self.game.player_dict[player].ps.value >= PS.ABILITY_WAITING.value
+        return self.game.player_dict[player].ps.value >= PS.WAITING.value
     
     def tick_repr_json(self, player):
         self.tick_dict["player"] = self.player_tick_repr(player)
+        self.tick_dict["isFirst"] = False 
         tick_json = plain_json(self.tick_dict)
         return tick_json
 
@@ -52,6 +57,8 @@ class Batch:
         return self.game.player_dict[player].tick_json
     
     def tick(self):
+        # print(self.game.gs.value, GS.START_SELECTION.value)
+
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
         self.set_group_tick_repr()
@@ -71,12 +78,15 @@ class Batch:
             
         if key == RESTART_GAME_VAL:
             self.game.restart()
-        elif key == ELIMINATE_VAL:
+        elif key in (ELIMINATE_VAL, FORFEIT_CODE):
             self.game.eliminate(player)
         elif key in ALL_ABILITIES:
+            print("ABILITY")
             self.game.effect(key, player, data['items'])
         elif key in EVENTS:
+            print("EVENT")
             self.game.event(key, player, data['items'])
         else:
             print("NOT ALLOWED")
+        print("Done processing")
         
