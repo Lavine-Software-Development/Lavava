@@ -209,6 +209,9 @@ export class MainScene extends Scene {
         this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
             this.checkHighlight();
         });
+
+        this.scale.on('resize', this.handleResize, this);
+
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
         this.network.connectWebSocket();
@@ -228,6 +231,10 @@ export class MainScene extends Scene {
         } else {
             console.log("Not playing");
         }
+    }
+
+    handleResize(gameSize) {
+        console.log("Resizing");
     }
 
     abilitySelection(key: number): void {
