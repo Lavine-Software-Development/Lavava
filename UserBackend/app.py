@@ -1,12 +1,49 @@
+from email.policy import default
 import jwt
 import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from functools import wraps
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+
+# User table
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    display_name = db.Column(db.String(80), nullable=False, default="haha") # todo: remove default, fix frontend
+    password = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    elo = db.Column(db.Integer, default=1100)
+    deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), default=None)
+
+# Deck table
+class Deck(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    ability = db.Column(db.String(50), primary_key=True, autoincrement=False)
+    count = db.Column(db.Integer, nullable=False)
+    # db.CheckConstraint('json_array_length(items) <= 4', name='max_4_items')
+
+# Game table
+class Game(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    user_ids = db.Column(db.JSON, nullable=False)  # Example: [1, 2, 3, 4]
+    user_ranks = db.Column(db.JSON, nullable=False)  # Example: {"1": "1st", "2": "2nd", "3": "3rd", "4": "4th"}
+
+with app.app_context():
+# def create_tables():
+    # Deck.__table__.drop(db.engine)
+    db.create_all()
 
 def token_required(f):
     @wraps(f)
@@ -31,10 +68,36 @@ def token_required(f):
 def login():
     data = request.json
     username = data.get('username')
+    password = data.get('password')
+    user = User.query.filter_by(username=username).first()
+
+    # todo: remove default
+
     if username.lower() == 'default':
         # Create a token
         token = jwt.encode({
             'user': username,
+            # 'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=72)  # Token expires in 24 hours?
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)  # Token expires in 24 hours
+        }, app.config['SECRET_KEY'], algorithm="HS256")
+        return jsonify({"token": token}), 200
+
+    if user and check_password_hash(user.password, password):
+        token = jwt.encode({
+            'user_id': user.id,
+            'user': username,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
+        }, app.config['SECRET_KEY'], algorithm="HS256")
+        return jsonify({"token": token}), 200
+    else:
+        return jsonify({"message": "Invalid credentials"}), 401
+
+
+    if username.lower() == 'default':
+        # Create a token
+        token = jwt.encode({
+            'user': username,
+            # 'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=72)  # Token expires in 24 hours?
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)  # Token expires in 24 hours
         }, app.config['SECRET_KEY'], algorithm="HS256")
         return jsonify({"token": token}), 200
@@ -45,17 +108,38 @@ def login():
 def register():
     data = request.json
     username = data.get('username')
+    display_name = data.get('display_name')
     email = data.get('email')  # Email is received but not used in logic for simplicity
     password = data.get('password')  # Password is received but not used in logic
     
-    if username.lower() == 'default':
-        return jsonify({"success": True, "message": "Registration successful"}), 200
-    else:
-        return jsonify({"success": False, "message": "Registration failed, username must be 'default'"}), 400
+    # if username.lower() == 'default':
+    #     return jsonify({"success": True, "message": "Registration successful"}), 200
+    # else:
+    #     return jsonify({"success": False, "message": "Registration failed, username must be 'default'"}), 400
+    
+    if User.query.filter_by(username=username).first():
+        return jsonify({"success": False, "message": "Username already exists"}), 400
+    
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    new_user = User(username=username, display_name=display_name, email=email, password=hashed_password) # type: ignore
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Registration successful"}), 200
     
 @app.route('/user_abilities', methods=['GET'])
 @token_required
 def get_home(current_user):
+
+    user = User.query.filter_by(username=current_user).first()
+    if user and user.deck_id:
+        deck = Deck.query.filter_by(id=user.deck_id).first()
+        return jsonify({
+            "abilities": user_decks(current_user)
+        })
+    else:
+        return jsonify({"error": "User not found or no deck assigned"}), 404
+    
     if current_user == "default":
         return jsonify({
             "abilities": user_decks(current_user),
@@ -84,6 +168,53 @@ def user_decks(current_user):
         return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 1}, {"name": "Rage", "count": 2}, {"name": "Poison", "count": 1}]
     else:
         return []
+    
+@app.route('/save_deck', methods=['POST'])
+@token_required
+def save_deck(current_user):
+    data = request.json
+    abilities = data.get('abilities')
+
+    if not abilities:
+        return jsonify({"success": False, "message": "Missing abilities"}), 400
+
+    user = User.query.filter_by(username=current_user).first()
+    if not user:
+        return jsonify({"success": False, "message": "User not found"}), 404
+    
+    # Ensure items count is valid
+    # assert len(abilities) < 4 and all(item['count'] > 0 for item in abilities)
+
+    if user.deck_id is None:
+        # Find the maximum deck_id and increment it
+        max_deck_id = db.session.query(db.func.max(Deck.id)).scalar()
+        new_deck_id = (max_deck_id or 0) + 1
+        user.deck_id = new_deck_id
+        db.session.commit()
+
+    # Delete old deck entries for the user
+    Deck.query.filter_by(id=user.deck_id).delete()
+    db.session.commit()
+
+    # Save new deck entries
+    # deck_id=user.deck_id, 
+    for item in abilities:
+        new_deck_entry = Deck(id=user.deck_id, ability=item['name'], count=item['count'])
+        db.session.add(new_deck_entry)
+    
+    db.session.commit()
+
+    # # Convert abilities list to a dictionary
+    # items = {item['name']: item['count'] for item in abilities}
+    # new_deck = Deck(items=items, count=count)
+    # db.session.add(new_deck)
+    # db.session.commit()
+
+    # Update user's deck_id
+    # user.deck_id = new_deck.id
+    # db.session.commit()
+
+    return jsonify({"success": True, "message": "Deck saved successfully"}), 200
     
 @app.route('/abilities', methods=['GET'])
 def get_abilities():
