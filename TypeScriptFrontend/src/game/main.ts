@@ -17,8 +17,8 @@ const StartGame = (parent: string, props: any, network: Network, navigate: Funct
     console.log(network);
     const config: Phaser.Types.Core.GameConfig = {
         type: AUTO,
-        width: 1424,
-        height: 768,
+        width: window.innerWidth,
+        height: window.innerHeight,
         parent: "game-container",
         backgroundColor: "#ffffff",
         scene: [
@@ -32,7 +32,10 @@ const StartGame = (parent: string, props: any, network: Network, navigate: Funct
             gamepad: false,
         },
     };
-    return new Game({ ...config, parent });
+    const game = new Game({ ...config, parent });
+
+    return game;
+
 };
 
 export default StartGame;

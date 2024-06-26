@@ -137,6 +137,10 @@ export class MainScene extends Scene {
             // node.owner = this.mainPlayer;
             this.nodes[i] = node;
         }
+        console.log(window.innerWidth)
+        // this.nodes.forEach(node => {
+        //     node.resize(newWidth, newHeight);
+        // });
         for (let i in main.edges) {
             let edge = main.edges[i] as Edge;
             edge.scene = this;
@@ -205,6 +209,9 @@ export class MainScene extends Scene {
         this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
             this.checkHighlight();
         });
+
+        this.scale.on('resize', this.handleResize, this);
+
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
         this.network.connectWebSocket();
@@ -224,6 +231,10 @@ export class MainScene extends Scene {
         } else {
             console.log("Not playing");
         }
+    }
+
+    handleResize(gameSize) {
+        console.log("Resizing");
     }
 
     abilitySelection(key: number): void {

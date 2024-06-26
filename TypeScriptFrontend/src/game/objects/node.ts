@@ -8,6 +8,7 @@ import { CannonState } from "./States";
 
 export class Node extends IDItem {
     pos: Phaser.Math.Vector2;
+    percents: [number, number];
     is_port: boolean;
     portPercent: number;
     ports: Array<number>;
@@ -32,6 +33,7 @@ export class Node extends IDItem {
         _scene?: Phaser.Scene
     ) {
         super(id, ClickType.NODE);
+        this.percents = [pos[0] / 1000, pos[1] / 700];
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
         this.is_port = is_port;
         this.portPercent = portPercent;
@@ -99,6 +101,7 @@ export class Node extends IDItem {
     }
     set scene(scene: Phaser.Scene) {
         this._scene = scene;
+        this.resize();
         this.graphics = this._scene.add.graphics();
         this.cannonGraphics = this._scene.add.graphics();
     }
@@ -255,5 +258,13 @@ export class Node extends IDItem {
         graphics.closePath();
         graphics.fillPath();
     }
+
+    resize(): void {
+        // Adjust the position of the node based on newWidth and newHeight
+        this.pos.x = this.percents[0] * Number(this._scene.game.config.width);
+        this.pos.y = this.percents[1] * Number(this._scene.game.config.height);
+        // Optionally, adjust the size or other properties here as needed
+    }
+
 }
 
