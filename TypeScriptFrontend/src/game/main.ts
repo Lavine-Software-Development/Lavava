@@ -34,12 +34,6 @@ const StartGame = (parent: string, props: any, network: Network, navigate: Funct
     };
     const game = new Game({ ...config, parent });
 
-    const resize = () => {
-        game.scale.resize(window.innerWidth, window.innerHeight);
-    };
-    
-    window.addEventListener('resize', resize);
-
     return game;
 
 };

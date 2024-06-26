@@ -99,6 +99,7 @@ export class Node extends IDItem {
     }
     set scene(scene: Phaser.Scene) {
         this._scene = scene;
+        this.resize();
         this.graphics = this._scene.add.graphics();
         this.cannonGraphics = this._scene.add.graphics();
     }
@@ -256,10 +257,10 @@ export class Node extends IDItem {
         graphics.fillPath();
     }
 
-    resize(newWidth: number, newHeight: number): void {
+    resize(): void {
         // Adjust the position of the node based on newWidth and newHeight
-        this.pos.x = (this.pos.x / Number(this._scene.game.config.width)) * newWidth;
-        this.pos.y = (this.pos.y / Number(this._scene.game.config.height)) * newHeight;
+        this.pos.x = (this.pos.x / 1000 * Number(this._scene.game.config.width));
+        this.pos.y = (this.pos.y / 700 * Number(this._scene.game.config.height));
         // Optionally, adjust the size or other properties here as needed
     }
 
