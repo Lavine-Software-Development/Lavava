@@ -99,6 +99,10 @@ export class MainScene extends Scene {
             node.scene = this;
             this.nodes.push(node);
         }
+        console.log(window.innerWidth)
+        // this.nodes.forEach(node => {
+        //     node.resize(newWidth, newHeight);
+        // });
         for (let i in main.edges) {
             let edge = main.edges[i];
             edge.scene = this;

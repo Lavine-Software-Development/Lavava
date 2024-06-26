@@ -32,7 +32,12 @@ export class Node extends IDItem {
         _scene?: Phaser.Scene
     ) {
         super(id, ClickType.NODE);
-        this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
+        console.log(_scene);
+        let alter_x_pos = pos[0] * 2;
+        let alter_y_pos = pos[1] * 1.5;
+        this.pos = new Phaser.Math.Vector2(alter_x_pos, alter_y_pos);
+        // this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
+
         this.isPort = isPort;
         this.portPercent = portPercent;
         this.ports = ports;
@@ -207,6 +212,13 @@ export class Node extends IDItem {
         });
         graphics.closePath();
         graphics.fillPath();
+    }
+
+    resize(newWidth: number, newHeight: number): void {
+        // Adjust the position of the node based on newWidth and newHeight
+        this.pos.x = (this.pos.x / this._scene.game.config.width) * newWidth;
+        this.pos.y = (this.pos.y / this._scene.game.config.height) * newHeight;
+        // Optionally, adjust the size or other properties here as needed
     }
 
 }

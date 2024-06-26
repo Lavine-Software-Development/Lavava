@@ -11,8 +11,8 @@ import { Preloader } from "./scenes/Preloader";
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
-    width: 1424,
-    height: 768,
+    width: window.innerWidth,
+    height: window.innerHeight,
     parent: "game-container",
     backgroundColor: "#ffffff",
     scene: [Preloader, MainScene],
@@ -24,8 +24,18 @@ const config: Phaser.Types.Core.GameConfig = {
     },
 };
 
+
 const StartGame = (parent: string) => {
-    return new Game({ ...config, parent });
+
+    const game = new Game({ ...config, parent });
+
+    const resize = () => {
+        game.scale.resize(window.innerWidth, window.innerHeight);
+    };
+    
+    window.addEventListener('resize', resize);
+
+    return game
 };
 
 export default StartGame;

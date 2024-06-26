@@ -47,7 +47,7 @@ def get_adjusted_type_hints(obj):
 class Main:
 
     def __init__(self):
-        py.init() 
+        py.init()
 
         self.ps = PSE.ABILITY_SELECTION.value
         self.timer = 60
