@@ -13,7 +13,7 @@
     "bugs": {
         "url": "https://github.com/phaserjs/template-react-ts/issues"
     },
-    "homepage": "https://github.com/phaserjs/template-react-ts#readme",
+    "homepage": "https://akashilangovan.github.io/lavava",
     "keywords": [
         "phaser",
         "phaser3",
@@ -25,7 +25,9 @@
         "dev": "vite --config vite/config.dev.mjs",
         "build": "vite build --config vite/config.prod.mjs",
         "ts-build": "tsc",
-        "start": "node ./dist/app.js"
+        "start": "node ./dist/app.js",
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d build --branch deploy"
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^6.5.2",
@@ -54,3 +56,4 @@
         "vite": "^5.1.4"
     }
 }
+
