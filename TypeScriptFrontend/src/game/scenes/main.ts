@@ -145,6 +145,7 @@ export class MainScene extends Scene {
             let edge = main.edges[i] as Edge;
             edge.scene = this;
             this.edges[i] = edge;
+            edge.relocate_lines();
         }
         this.otherPlayers = Object.values(main.players);
         this.mainPlayer = main.myPlayer;
@@ -463,10 +464,9 @@ export class MainScene extends Scene {
                 }
 
                 this.timer = new_data["countdown_timer"];
-                this.parse(this.nodes, new_data["board"]["nodes"]);
+                this.parse(this.nodes, new_data["board"]["nodes"], true);
                 this.parse(this.edges, new_data["board"]["edges"]);
                 this.parse(this.abilityManager.abilities, new_data["player"]["abilities"]);
-                Object.values(this.nodes).forEach((node) => node.draw());
                 Object.values(this.edges).forEach((edge) => edge.draw());
             } else {
                 // console.log(new_data);
@@ -481,7 +481,7 @@ export class MainScene extends Scene {
         }).join('');
     }
 
-    parse(this, items, updates, print = false) {
+    parse(this, items, updates, redraw=false) {
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {
 
@@ -503,9 +503,6 @@ export class MainScene extends Scene {
             }
 
             for (const [key, val] of Object.entries(updates[u])) {
-                if (print) {
-                    console.log("key: ", key, " val: ", val);
-                }
                 if (typeof obj[key] === "undefined") {
                     continue;
                 }
@@ -520,6 +517,9 @@ export class MainScene extends Scene {
                 }
 
                 obj[key] = updateVal;
+            }
+            if (redraw) {
+                obj.draw();
             }
         }
     }

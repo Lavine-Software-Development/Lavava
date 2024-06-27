@@ -38,21 +38,24 @@ export class Edge extends IDItem {
             this.my_scene = _scene;
             this.graphics = _scene.add.graphics();
         }
-        this.line = new Phaser.Geom.Line(
-            fromNode.pos.x,
-            fromNode.pos.y,
-            toNode.pos.x,
-            toNode.pos.y
-        );
         this.hover_line = new Phaser.Geom.Line(
-            fromNode.pos.x,
-            fromNode.pos.y,
-            toNode.pos.x,
-            toNode.pos.y
+            this._fromNode.pos.x,
+            this._fromNode.pos.y,
+            this._toNode.pos.x,
+            this._toNode.pos.y
         );
 
         this.sprites = [];
         this.spacing = 0;
+    }
+
+    relocate_lines(): void {
+        this.line = new Phaser.Geom.Line(
+            this._fromNode.pos.x,
+            this._fromNode.pos.y,
+            this._toNode.pos.x,
+            this._toNode.pos.y
+        );
     }
 
     delete(): void {
@@ -80,6 +83,7 @@ export class Edge extends IDItem {
     set from_node(value: Node) {
         if (this._fromNode !== value) {
             this._fromNode = value;
+            this.redraw = true;
         }
     }
 
@@ -91,7 +95,6 @@ export class Edge extends IDItem {
     set to_node(value: Node) {
         if (this._toNode !== value) {
             this._toNode = value;
-            this.redraw = true;
         }
     }
 
@@ -255,7 +258,9 @@ export class Edge extends IDItem {
                 // Remove excess sprites
                 while (this.sprites.length > numTriangles) {
                     let sprite = this.sprites.pop();
-                    sprite.destroy();
+                    if (sprite) {
+                        sprite.destroy();
+                    }
                 }
             }
         }
@@ -264,18 +269,22 @@ export class Edge extends IDItem {
         let bias = 0.4;
         for (let i = 0; i < numTriangles; i++) {
             let triangleSprite = this.sprites[i];
-            if (spacing != this.spacing) {
+            if (Math.abs(spacing - this.spacing) > 0.2) {
                 let x = startX + (i - bias) * spacing * normX + triangleSize * normX;
                 let y = startY + (i - bias) * spacing * normY + triangleSize * normY;
         
-                triangleSprite.x = x;
-                triangleSprite.y = y;
+                if (triangleSprite) {
+                    triangleSprite.x = x;
+                    triangleSprite.y = y;
+                }
             }
             // Adjust properties only if needed
             triangleSprite.setTint(color);
         }
+        if (Math.abs(spacing - this.spacing) > 0.2) {
+            this.spacing = spacing;
+        }
 
-        this.spacing = spacing;
     }
 
     drawCircle(
@@ -323,7 +332,9 @@ export class Edge extends IDItem {
             // Adjust sprite array if necessary
             while (this.sprites.length > numCircles) {
                 let spriteToRemove = this.sprites.pop();
-                spriteToRemove.destroy();
+                if (spriteToRemove) {
+                    spriteToRemove.destroy();
+                }
             }
             while (this.sprites.length < numCircles) {
                 let circleSprite = this.my_scene.add.sprite(0, 0, this.flowing ? 'filledCircle' : 'outlinedCircle');
@@ -335,7 +346,7 @@ export class Edge extends IDItem {
         // Update positions of existing circle sprites
         for (let i = 1; i < numCircles; i++) {
             let circleSprite = this.sprites[i];
-            if (spacing != this.spacing) {
+            if (Math.abs(spacing - this.spacing) > 0.2) {
                 let x = startX + (i + 1) * spacing * normX;
                 let y = startY + (i + 1) * spacing * normY;
 
@@ -347,12 +358,11 @@ export class Edge extends IDItem {
 
         // Always update the position and properties of the terminal triangle sprite
         let triangleSprite = this.sprites[0];
-        if (spacing != this.spacing) {
+        if (Math.abs(spacing - this.spacing) > 0.2) {
             triangleSprite.x = startX + spacing * normX;
             triangleSprite.y = startY + spacing * normY;
+            this.spacing = spacing;
         }
-
-        this.spacing = spacing;
     }
 
     isNear(position: Phaser.Math.Vector2): boolean {
