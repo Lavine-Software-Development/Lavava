@@ -5,8 +5,9 @@ import { IDItem } from "./idItem";
 import { ClickType } from "./enums";
 import { phaserColor } from "./utilities";
 import { CannonState } from "./States";
+import { INode, IEdge } from "./graphTypeInterfaces";
 
-export class Node extends IDItem {
+export class Node extends IDItem implements INode {
     pos: Phaser.Math.Vector2;
     percents: [number, number];
     is_port: boolean;
@@ -14,11 +15,12 @@ export class Node extends IDItem {
     ports: Array<number>;
     state: State;
     value: number;
-    effects: Set<string>;
-    owner: OtherPlayer | null;
+    private _effects: Set<string>;
+    private _owner: OtherPlayer | null;
     private _scene: Phaser.Scene;
     private graphics: Phaser.GameObjects.Graphics;
     private cannonGraphics: Phaser.GameObjects.Graphics;
+    edges: IEdge[];
 
     constructor(
         id: number,
@@ -33,6 +35,7 @@ export class Node extends IDItem {
         _scene?: Phaser.Scene
     ) {
         super(id, ClickType.NODE);
+        this.edges = [];
         this.percents = [pos[0] / 1000, pos[1] / 700];
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
         this.is_port = is_port;
@@ -66,8 +69,26 @@ export class Node extends IDItem {
             this.state.select(on);
     }
 
+    get owner(): OtherPlayer | null {
+        return this._owner;
+    }
+
+    set owner(owner: OtherPlayer | null) {
+        this._owner = owner;
+        this.influencedEdges.forEach((edge) => (edge.recolor = true));
+    }
+
+    get effects(): Set<string> {
+        return this._effects;
+    }
+
+    set effects(effects: Set<string>) {
+        this._effects = effects;
+        this.outwardEdges.forEach((edge) => (edge.recolor = true));
+    }
+
     get color(): readonly [number, number, number] {
-        if (!this.owner ) {
+        if (!this.owner) {
             return this.is_port ? Colors.BROWN : Colors.BLACK;
         }
         return this.owner.color;
@@ -75,6 +96,14 @@ export class Node extends IDItem {
 
     get phaserColor(): number {
         return phaserColor(this.color);
+    }
+
+    get influencedEdges(): IEdge[] {
+        return this.outwardEdges.filter((edge) => edge.on);
+    }
+
+    get outwardEdges(): IEdge[] {
+        return this.edges.filter((edge) => edge.from_node === this);
     }
 
     get size(): number {
