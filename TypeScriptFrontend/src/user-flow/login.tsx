@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import "../../styles/style.css"; // Adjust the path as necessary
 
 interface LoginProps {
@@ -88,7 +88,7 @@ const Login: React.FC<LoginProps> = () => {
                     onClick={() => navigate('/home')}
                 />
             </form>
-            <p>Don't have an account? <a href="register"> Register here!</a></p>
+            <p>Don't have an account? <NavLink to="/register">Register here!</NavLink></p>
         </div>
     );
 };

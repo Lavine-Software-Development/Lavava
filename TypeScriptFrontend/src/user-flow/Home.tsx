@@ -7,10 +7,12 @@ const Home: React.FC = () => {
     const [tab, setTab] = useState("HOST"); // State to manage tabs
     const [playerCount, setPlayerCount] = useState(2); // Default to 2 players
     const [keyCode, setKeyCode] = useState("");
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
 
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const token = localStorage.getItem("userToken");
+        setIsLoggedIn(!!token); // Update login status
         if (storedAbilities) {
             setSelectedAbilities(JSON.parse(storedAbilities));
         } else if (token) {
@@ -135,22 +137,42 @@ const Home: React.FC = () => {
                     value="How To Play"
                     onClick={() => navigate("/how-to-play")}
                 />
-                <input
+                {isLoggedIn ? (
+                    <input
+                        type="submit"
+                        className="btn"
+                        value="Log Out"
+                        onClick={handleLogout}
+                    />
+                ) : (
+                    <input
                     type="submit"
                     className="btn"
-                    value="Log Out"
-                    onClick={handleLogout}
+                    value="Login"
+                    onClick={() => navigate("/login")}
                 />
+                )}
             </div>
             {selectedAbilities.length > 0 && (
                 <div className="profile-card">
-                    <ul>
-                        {selectedAbilities.map((ability, index) => (
-                            <li key={index}>
-                                {ability.name} - Count: {ability.count}
-                            </li>
-                        ))}
-                    </ul>
+                    <h3 style={{ textAlign: "center" }}>Ability : Count</h3>
+                    {selectedAbilities.map((ability, index) => (
+                        <p style={{ textAlign: "center" }} key={index}>
+                            {ability.name}
+                            <img
+                                src={`./public/assets/abilityIcons/${ability.name}.png`}
+                                alt={ability.name}
+                                style={{
+                                    width: "30px",
+                                    height: "30px",
+                                    objectFit: "contain",
+                                    marginLeft: "10px",
+                                    marginRight: "10px",
+                                }}
+                            />
+                            : {ability.count}
+                        </p>
+                    ))}
                     {tab === "HOST" ? (
                         <div>
                             <label>Player Count:</label>
@@ -172,8 +194,6 @@ const Home: React.FC = () => {
                                                     hostTab(count, "")
                                                 }
                                             >
-                                                {" "}
-                                                {/* removed 1234 from here so that when changing to join tab keycode input is empty*/}
                                                 {count}
                                             </li>
                                         ))}
