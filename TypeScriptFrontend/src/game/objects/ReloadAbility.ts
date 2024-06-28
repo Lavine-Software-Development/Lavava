@@ -12,7 +12,7 @@ export class ReloadAbility extends IDItem {
     credits: number;
     reload: number;
     private _remaining: number;
-    percentage: number;
+    private _percentage: number;
     graphics: Phaser.GameObjects.Graphics;
     nameText: Phaser.GameObjects.Text;
     letterText: Phaser.GameObjects.Text;
@@ -23,7 +23,10 @@ export class ReloadAbility extends IDItem {
     pointerTriangleText: Phaser.GameObjects.Text;
     x: number;
     y: number;
-    redraw: boolean;
+    recolor: boolean;
+    retext: boolean;
+    squareSize: number;
+    imageSize: number;
 
     constructor(
         visual: AbilityVisual,
@@ -35,7 +38,9 @@ export class ReloadAbility extends IDItem {
         id: number,
         remaining: number = 0,
         percentage: number = 1.0,
-        scene: Phaser.Scene
+        x: number,
+        y: number,
+        scene: Phaser.Scene,
     ) {
         super(id, ClickType.ABILITY);
         this.visual = visual;
@@ -47,9 +52,15 @@ export class ReloadAbility extends IDItem {
         this._remaining = remaining;
         this.percentage = percentage;
         this.graphics = scene.add.graphics();
-        this.x = 0;
-        this.y = 0;
-        this.redraw = false;
+        this.x = x;
+        this.y = y;
+        this.recolor = true;
+        this.retext = true;
+
+        this.squareSize = 150;
+        this.imageSize = 90;
+        this.addImageToScene(scene);
+        this.addTextToScene(scene);
     }
 
     get gameDisplayNum(): number {
@@ -66,7 +77,16 @@ export class ReloadAbility extends IDItem {
 
     set remaining(value: number) {
         this._remaining = value;
-        this.redraw = true;
+        this.retext = true;
+    }
+
+    get percentage(): number {
+        return this._percentage;
+    }
+
+    set percentage(value: number) {
+        this._percentage = value;
+        this.recolor = true;
     }
 
     delete(): void {
@@ -90,7 +110,6 @@ export class ReloadAbility extends IDItem {
         // Reset other properties
         this.x = 0;
         this.y = 0;
-        this.redraw = false;
     }
 
     overlapsWithPosition(position: Phaser.Math.Vector2): boolean {
@@ -113,92 +132,48 @@ export class ReloadAbility extends IDItem {
         }
     }
 
-    setPos(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+    get phaserColor(): number {
+        return phaserColor(this.visual.color);
     }
 
-    draw(scene, isSelected, clickable) {
+    get darkerColor(): number {
+        return Phaser.Display.Color.ValueToColor(this.phaserColor).darken(35).color;
+    }
+
+    draw(scene, isSelected: boolean, clickable: boolean) {
         this.graphics.clear();
-        const squareSize = 150;  // Size of the square
-          // Thickness of the border
-    
-        // Calculate colors
-        const colorValue = phaserColor(this.visual.color);
-        const darkColor =
-            Phaser.Display.Color.ValueToColor(colorValue).darken(35).color; // Darker shade of the ability color
-        const borderColor = isSelected ? 0x990000 : 0x000000; // Dark red if selected, black otherwise
-        const borderThickness = isSelected ? 7 : 3;
     
         // Draw the background square with darker color
-        this.graphics.fillStyle (darkColor, 1);
-        this.graphics.fillRect(this.x, this.y, squareSize, squareSize);
+        if (this.recolor) {
+            this.graphics.fillStyle (this.darkerColor, 1);
+            this.graphics.fillRect(this.x, this.y, this.squareSize, this.squareSize);
+    
+            // Draw the filled part based on the percentage
+            this.graphics.fillStyle(this.phaserColor, 1);
+            this.graphics.fillRect(this.x, this.y + (this.squareSize * (1 - this.percentage)), this.squareSize, this.squareSize * this.percentage);
+            this.updateImage();
+        }
 
-        const imageKey = this.visual.name;
-        this.addImageToScene(scene, this.x, this.y, imageKey, squareSize, this.percentage);
+        if (this.retext) {
+            this.numberText.setText(`${this.remaining}`);
+        }
 
-        // Draw the filled part based on the percentage
-        this.graphics.fillStyle(colorValue, 1);
-        this.graphics.fillRect(this.x, this.y + (squareSize * (1 - this.percentage)), squareSize, squareSize * this.percentage);
-
-        // Draw the border around the square
+        const borderColor = isSelected ? 0x990000 : 0x000000; // Dark red if selected, black otherwise
+        const borderThickness = isSelected ? 7 : 3;
         this.graphics.lineStyle(borderThickness, borderColor, 1); // Use conditional border color
-        this.graphics.strokeRect(this.x, this.y, squareSize, squareSize);
+        this.graphics.strokeRect(this.x, this.y, this.squareSize, this.squareSize);
     
         // Draw the name at the bottom of the square
-        if (!this.nameText) {
-            this.nameText = scene.add.text(this.x + squareSize / 2, this.y + squareSize - 5, this.visual.name, {
-                font: '24px Arial',
-                fill: '#ffffff',
-                stroke: '#000000',
-                strokeThickness: 3
-            });
-            this.nameText.setOrigin(0.5, 1);
-        }
-
-        if (!this.numberText || this.redraw) {
-            this.numberText?.destroy();
-            this.redraw = false;
-            this.numberText = scene.add.text(this.x + 5, this.y + 5, `${this.remaining}`, {
-                font: '18px Arial',
-                fill: '#ffffff',
-                stroke: '#000000',
-                strokeThickness: 3
-            });
-        }
-
-        if (!this.letterText) {
-            this.letterText = scene.add.text(this.x + squareSize - 5, this.y + 5, this.visual.letter, {
-                font: '24px Arial',
-                fill: '#ffffff',
-                stroke: '#000000',
-                strokeThickness: 3
-            });
-            this.letterText.setOrigin(1, 0);
-        }
 
         if (clickable) {
             if (!this.pointerTriangle) {
                 // If clickable is true and the pointerTriangle doesn't exist, create it
-                this.pointerTriangle = scene.add.sprite(this.x - 30, this.y + squareSize / 2, 'filledTriangle');
-                this.pointerTriangle.setTint(Phaser.Display.Color.GetColor(255, 102, 102)); // Light red color
-                this.pointerTriangle.setOrigin(0.5, 0.5);
-                this.pointerTriangle.setScale(4); // Scale up the triangle to make it bigger
-                this.pointerTriangle.angle = 90; // Pointing to the right
-        
-                // Create the text associated with the pointerTriangle
-                let z = 3 - this.credits;  // Calculate the value of z
-                this.pointerTriangleText = scene.add.text(this.x - 45, this.y + squareSize / 2, `+${z}`, {
-                    font: 'bold 24px Arial',
-                    fill: '#000000'
-                });
-                this.pointerTriangleText.setOrigin(1, 0.5); // Align right to the triangle, centered vertically
+                this.createPointer(scene); // Align right to the triangle, centered vertically
             }
         } else {
             if (this.pointerTriangle) {
                 // If clickable is false and the pointerTriangle exists, destroy both it and the text
                 this.pointerTriangle.destroy();
-        
                 // Destroy the text as well
                 this.pointerTriangleText.destroy();
             }
@@ -206,39 +181,81 @@ export class ReloadAbility extends IDItem {
         
     }
 
-    addImageToScene(scene, x, y, imageKey, squareSize, percentage) {
-        const imageSize = 90;
+    private createPointer(scene: any) {
+        this.pointerTriangle = scene.add.sprite(this.x - 30, this.y + this.squareSize / 2, 'filledTriangle');
+        this.pointerTriangle.setTint(Phaser.Display.Color.GetColor(255, 102, 102)); // Light red color
+        this.pointerTriangle.setOrigin(0.5, 0.5);
+        this.pointerTriangle.setScale(4); // Scale up the triangle to make it bigger
+        this.pointerTriangle.angle = 90; // Pointing to the right
+
+
+        // Create the text associated with the pointerTriangle
+        let z = 3 - this.credits; // Calculate the value of z
+        this.pointerTriangleText = scene.add.text(this.x - 45, this.y + this.squareSize / 2, `+${z}`, {
+            font: 'bold 24px Arial',
+            fill: '#000000'
+        });
+        this.pointerTriangleText.setOrigin(1, 0.5);
+    }
+
+    addTextToScene(scene) {
+        this.nameText = scene.add.text(this.x + this.squareSize / 2, this.y + this.squareSize - 5, this.visual.name, {
+            font: '24px Arial',
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 3
+        });
+        this.nameText.setOrigin(0.5, 1);
+
+        this.numberText = scene.add.text(this.x + 5, this.y + 5, `${this.remaining}`, {
+            font: '18px Arial',
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 3
+        });
+
+        this.letterText = scene.add.text(this.x + this.squareSize - 5, this.y + 5, this.visual.letter, {
+            font: '24px Arial',
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 3
+        });
+        this.letterText.setOrigin(1, 0);
+    }
+
+    addImageToScene(scene) {
+        
         // Check and initialize greyed-out image
-        if (!this.imageGreyed) {
-            this.imageGreyed = scene.add.image(
-                x + squareSize / 2,
-                y + squareSize / 2 - 10,
-                imageKey
-            );
-            this.imageGreyed.setOrigin(0.5, 0.5);
-            this.imageGreyed.setDisplaySize(imageSize, imageSize);
-            this.imageGreyed.setAlpha(0.3); // Set low transparency for greyed-out effect
-        }
+        this.imageGreyed = scene.add.image(
+            this.x + this.squareSize / 2,
+            this.y + this.squareSize / 2 - 10,
+            this.visual.name
+        );
+        this.imageGreyed.setOrigin(0.5, 0.5);
+        this.imageGreyed.setDisplaySize(this.imageSize, this.imageSize);
+        this.imageGreyed.setAlpha(0.3); // Set low transparency for greyed-out effect
 
-        // Check and initialize fully visible image
-        if (!this.imageVisible) {
-            this.imageVisible = scene.add.image(
-                x + squareSize / 2,
-                y + squareSize / 2 - 10,
-                imageKey
-            );
-            this.imageVisible.setOrigin(0.5, 0.5);
-            this.imageVisible.setDisplaySize(imageSize, imageSize);
-        }
+    // Check and initialize fully visible image
+        this.imageVisible = scene.add.image(
+            this.x + this.squareSize / 2,
+            this.y + this.squareSize / 2 - 10,
+            this.visual.name
+        );
+        this.imageVisible.setOrigin(0.5, 0.5);
+        this.imageVisible.setDisplaySize(this.imageSize, this.imageSize);
 
-        // Apply cropping to show progression
-        const offset = squareSize / 2 - imageSize / 2 - 10;
+    }
+
+    updateImage() {
+        // Update the imageVisible alpha value based on the percentage
+        const offset = this.squareSize / 2 - this.imageSize / 2 - 10;
         this.imageVisible.setCrop(
             0,
-            squareSize - offset * (percentage - 0.1) * 10 + 2.5,
-            squareSize,
-            squareSize
+            this.squareSize - offset * (this.percentage - 0.1) * 10 + 2.5,
+            this.squareSize,
+            this.squareSize
         );
     }
+
 }
 

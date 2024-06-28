@@ -151,48 +151,10 @@ export class MainScene extends Scene {
         this.mainPlayer = main.myPlayer;
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.START_SELECTION;
-        const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
-        const ab = makeAbilityValidators(
-            this.mainPlayer,
-            Object.values(this.nodes),
-            Object.values(this.edges)
-        );
-        const events: { [key: number]: Event } = {};
-        const abilities: { [key: number]: ReloadAbility } = {};
-        Object.values(EventCodes).forEach((eb: number) => {
-            events[eb] = new Event(
-                VISUALS[eb],
-                EVENTS[eb][0],
-                EVENTS[eb][1],
-                ev[eb]
-            );
-        });
-
-        Object.entries(this.abilityCounts).forEach(([abk, count]) => {
-            // abk here is the ability code (converted from the name via NameToCode)
-            const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
-
-            abilities[abilityCode] = new ReloadAbility(
-                VISUALS[abilityCode] as AbilityVisual,
-                CLICKS[abilityCode][0],
-                CLICKS[abilityCode][1],
-                ab[abilityCode],
-                AbilityCredits[abilityCode],
-                AbilityReloadTimes[abilityCode],
-                abilityCode,
-                count,  // Use the count from abilityCounts
-                1,
-                this
-            );
-        });
+        
+        this.createAbilityManager();
 
         this.createLeaveMatchButton();
-
-        this.abilityManager = new AbstractAbilityManager(
-            this,
-            abilities,
-            events
-        );
 
         this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
             if (pointer.leftButtonDown()) {
@@ -217,6 +179,58 @@ export class MainScene extends Scene {
         Object.values(this.edges).forEach((edge) => edge.draw());
         this.network.connectWebSocket();
         // this.network.setupUser(this.abilityCounts);
+    }
+
+    private createAbilityManager() {
+        const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
+        const ab = makeAbilityValidators(
+            this.mainPlayer,
+            Object.values(this.nodes),
+            Object.values(this.edges)
+        );
+        const events: { [key: number]: Event; } = {};
+        const abilities: { [key: number]: ReloadAbility; } = {};
+        Object.values(EventCodes).forEach((eb: number) => {
+            events[eb] = new Event(
+                VISUALS[eb],
+                EVENTS[eb][0],
+                EVENTS[eb][1],
+                ev[eb]
+            );
+        });
+
+        let y_position = 20;
+        const squareSize = 150; // Size of each square
+        const spacing = 15; // Spacing between squares
+        const x_position = this.scale.width - squareSize - 10;
+
+        Object.entries(this.abilityCounts).forEach(([abk, count]) => {
+            // abk here is the ability code (converted from the name via NameToCode)
+            const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
+
+            abilities[abilityCode] = new ReloadAbility(
+                VISUALS[abilityCode] as AbilityVisual,
+                CLICKS[abilityCode][0],
+                CLICKS[abilityCode][1],
+                ab[abilityCode],
+                AbilityCredits[abilityCode],
+                AbilityReloadTimes[abilityCode],
+                abilityCode,
+                count, // Use the count from abilityCounts
+                1,
+                x_position,
+                y_position,
+                this
+            );
+
+            y_position += squareSize + spacing;
+        });
+
+        this.abilityManager = new AbstractAbilityManager(
+            this,
+            abilities,
+            events
+        );
     }
 
     keydown(key: number): void {

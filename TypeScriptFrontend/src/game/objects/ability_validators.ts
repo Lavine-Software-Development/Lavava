@@ -33,7 +33,7 @@ const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     const node = data as Node;
     return (
         node.owner !== player &&
-        node.owner !== undefined &&
+        node.owner !== null &&
         node.stateName !== "capital" &&
         node.stateName !== "mine"
     );

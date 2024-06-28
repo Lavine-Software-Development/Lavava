@@ -68,7 +68,7 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.ZOMBIE_CODE]: [1, ClickType.NODE],
     [KeyCodes.BURN_CODE]: [1, ClickType.NODE],
     [KeyCodes.RAGE_CODE]: [0, ClickType.BLANK],
-    [KeyCodes.CANNON_CODE]: [2, ClickType.NODE],
+    [KeyCodes.CANNON_CODE]: [1, ClickType.NODE],
     [KeyCodes.PUMP_CODE]: [1, ClickType.NODE],
 };
 

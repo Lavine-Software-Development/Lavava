@@ -13,7 +13,7 @@ export class AbstractAbilityManager {
     private mode: number | null = null;
     private backupMode: number | null = null;
     private clicks: IDItem[] = [];
-    abilityText: Phaser.GameObjects.Text | null = null;
+    abilityText: Phaser.GameObjects.Text;
     BridgeGraphics: Phaser.GameObjects.Graphics;
 
     constructor(
@@ -24,6 +24,18 @@ export class AbstractAbilityManager {
         this.abilities = abilities;
         this.events = events;
         this.BridgeGraphics = scene.add.graphics();
+
+        const x = scene.sys.canvas.width - 10; // 10 pixels from the right edge
+        const y = scene.sys.canvas.height - 30;
+
+        this.abilityText = scene.add.text(x, y, "", {
+            fontSize: "36px",
+            align: "right",
+            color: "#000000",
+        });
+
+        // Set origin to (1, 1) to align text to the bottom right
+        this.abilityText.setOrigin(1, 1);
     }
 
     delete(): void {
@@ -34,7 +46,6 @@ export class AbstractAbilityManager {
         // Remove the ability text if it exists
         if (this.abilityText) {
             this.abilityText.destroy();
-            this.abilityText = null;
         }
     
         // Call delete on each ability
@@ -216,74 +227,44 @@ export class AbstractAbilityManager {
 
     draw(scene: Phaser.Scene): void {
         if (this.ability) {
-            // Assuming `this.ability.visual.name` contains the text you want to display
-            const name = this.ability.visual.name;
-
-            // Determine the position for the text. Adjust 'x' and 'y' to position it at the bottom right
-            const x = scene.sys.canvas.width - 10; // 10 pixels from the right edge
-            const y = scene.sys.canvas.height - 30; // 30 pixels from the bottom
-
-            // Create or update the text object
-            if (!this.abilityText) {
-                // If the text object doesn't exist, create it
-                this.abilityText = scene.add.text(x, y, name, {
-                    fontSize: "36px",
-                    align: "right",
-                    color: "#000000",
-                });
-
-                // Set origin to (1, 1) to align text to the bottom right
-                this.abilityText.setOrigin(1, 1);
-            } else {
-                // If it already exists, just update the content and position (if needed)
-                this.abilityText.setText(name);
-                this.abilityText.setPosition(x, y);
-            }
+            this.abilityText.setText( this.ability.visual.name);
             if (
                 (this.ability?.visual.name == "Bridge" || this.ability?.visual.name == "D-Bridge") &&
                 this.clicks.length > 0
             ) {
-                this.BridgeGraphics.clear();
-                const fromNode = this.clicks[0] as Node;
-                let mousePos = scene.input.activePointer.position;
-                const startX = fromNode.pos.x;
-                const startY = fromNode.pos.y;
-                const endX = mousePos.x;
-                const endY = mousePos.y;
-
-                const dx = endX - startX;
-                const dy = endY - startY;
-                const magnitude = Math.sqrt(dx * dx + dy * dy);
-
-                const normX = dx / magnitude;
-                const normY = dy / magnitude;
-                if (this.ability?.visual.name == "D-Bridge") {
-                    this.drawArrowWithCircles(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
-                }
-                else {
-                    this.drawArrow(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
-                }
-                
+                this.drawBridge(scene);   
             }
         } else {
-            if (this.abilityText) {
-                this.abilityText.setText("");
-            }
+            this.abilityText.setText("");
         }
-
-        let y_position = 20;
-        const squareSize = 150;  // Size of each square
-        const spacing = 15;  // Spacing between squares
-        const x_position = scene.scale.width - squareSize - 10;  // Position on the right side of the screen
     
         for (let key in this.abilities) {
-            if (this.abilities[key].x == 0) {
-                this.abilities[key].setPos(x_position, y_position);
-            }
             const isSelected = this.mode === parseInt(key);
             let clickable = this.event?.visual.name == "Pump Drain" && this.abilities[key].credits < 3;
             this.abilities[key].draw(scene, isSelected, clickable);
-            y_position += squareSize + spacing;  // Move down for the next square
+        }
+    }
+
+    private drawBridge(scene: Phaser.Scene) {
+        this.BridgeGraphics.clear();
+        const fromNode = this.clicks[0] as Node;
+        let mousePos = scene.input.activePointer.position;
+        const startX = fromNode.pos.x;
+        const startY = fromNode.pos.y;
+        const endX = mousePos.x;
+        const endY = mousePos.y;
+
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const magnitude = Math.sqrt(dx * dx + dy * dy);
+
+        const normX = dx / magnitude;
+        const normY = dy / magnitude;
+        if (this.ability?.visual.name == "D-Bridge") {
+            this.drawArrowWithCircles(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
+        }
+        else {
+            this.drawArrow(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
         }
     }
 
