@@ -14,9 +14,7 @@ interface NodeData {
     state: number;
     value: number;
 }
-interface Indexnode {
-    [key: string]: NodeData;
-}
+
 // Define the Edge interface
 interface EdgeData {
     dynamic: boolean;
@@ -24,9 +22,6 @@ interface EdgeData {
     to_node: number;
 }
 
-interface Indexedge {
-    [key: string]: EdgeData;
-}
 
 // Define the Abilities interface for individual ability
 interface Ability {
@@ -72,11 +67,8 @@ export class Main {
         // Placeholder: replace with actual settings retrieval logic
         return [{}, 8080];
     }
-    test(node: NodeData) {
-        return node;
-    }
+
     setup(startData: BoardJSON): void {
-        this.test(nodeData["0"] as NodeData);
         console.log(startData);
         if (
             startData &&

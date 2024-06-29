@@ -1,11 +1,13 @@
 import { State } from "./States";
-import { Colors, GROWTH_STOP } from "./constants";
+import { Colors, GROWTH_STOP, PORT_COUNT } from "./constants";
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
 import { ClickType } from "./enums";
 import { phaserColor } from "./utilities";
 import { CannonState } from "./States";
 import { INode, IEdge } from "./graphTypeInterfaces";
+import { random_equal_distributed_angles } from "./utilities";
+
 
 export class Node extends IDItem implements INode {
     pos: Phaser.Math.Vector2;
@@ -26,30 +28,24 @@ export class Node extends IDItem implements INode {
         id: number,
         pos: [number, number],
         is_port: boolean,
-        portPercent: number,
-        ports: Array<any>,
         state: State,
         value: number,
-        owner: OtherPlayer | null = null,
-        effects = new Set<string>(),
-        _scene?: Phaser.Scene
+        _scene: Phaser.Scene
     ) {
         super(id, ClickType.NODE);
-        this.edges = [];
         this.percents = [pos[0] / 1000, pos[1] / 700];
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
         this.is_port = is_port;
-        this.portPercent = portPercent;
-        this.ports = ports;
+        this.portPercent = 1;
+        this.ports = this.is_port ? random_equal_distributed_angles(PORT_COUNT) : [];
         this.state = state;
         this.value = value;
-        this.effects = effects;
-        this.owner = owner;
+        this.effects = new Set();
+        this.owner = null;
         this._scene = _scene;
-        if (this._scene) {
-            this.graphics = _scene.add.graphics();
-            this.cannonGraphics = _scene.add.graphics();
-        }
+        this.edges = [];
+        this.graphics = _scene.add.graphics();
+        this.cannonGraphics = _scene.add.graphics();
     }
 
     public delete(): void {

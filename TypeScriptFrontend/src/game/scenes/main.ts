@@ -27,6 +27,7 @@ import { IDItem } from "../objects/idItem";
 import { CLICKS, EVENTS, VISUALS } from "../objects/default_abilities";
 import { Network } from "../objects/network";
 import {
+    abilityCountsConversion,
     phaserColor,
     random_equal_distributed_angles,
 } from "../objects/utilities";
@@ -50,9 +51,7 @@ export class MainScene extends Scene {
     private network: Network;
     private burning: Node[] = [];
     private abilityCounts: { [key: string]: number };
-    private timer: number;
-    private playerCount: number;
-    private gameType: string;
+
     private graphics: Phaser.GameObjects.Graphics;
     private board: BoardJSON;
     private countdown: number;
@@ -68,7 +67,6 @@ export class MainScene extends Scene {
         // console.log("config: ", config);
         // console.log("props yeaaa: ", props);
         // console.log(network);
-        // console.log("network: ", network.test());
         this.board = props;
         // this.network = new Network(
         //     "ws://localhost:5553",
@@ -76,29 +74,16 @@ export class MainScene extends Scene {
         // );
         this.network = network;
         this.navigate = navigate;
-        this.network.updateCallback = this.update_board.bind(this);
+        this.network.updateCallback = this.update_data.bind(this);
         this.burning = [];
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
-        this.gameType = String(sessionStorage.getItem("type"));
-        this.playerCount = Number(sessionStorage.getItem("player_count")) || 0;
+
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
             : [];
 
         // Create a map from ability code to count using the NameToCode mapping
-        this.abilityCounts = abilitiesFromStorage.reduce(
-            (
-                acc: { [x: string]: any },
-                ability: { name: string; count: number }
-            ) => {
-                const code = NameToCode[ability.name];
-                if (code) {
-                    acc[code] = ability.count;
-                }
-                return acc;
-            },
-            {}
-        );
+        this.abilityCounts = abilityCountsConversion(abilitiesFromStorage);
 
         this.countdown = 0;
         this.full_capitals = [0, 0];
@@ -121,6 +106,7 @@ export class MainScene extends Scene {
         this.load.image("Zombie", "Zombie.png");
         this.load.image('Pump', 'Pump.png');
     }
+    
     create(): void {
         this.graphics = this.add.graphics();
         const main = new Main();
@@ -413,7 +399,11 @@ export class MainScene extends Scene {
         this.navigate("/home");
     }
 
-    delete_board(): void {
+    initialize_data(): void {
+
+    }
+
+    delete_data(): void {
         Object.values(this.nodes).forEach((node) => node.delete());
         Object.values(this.edges).forEach((edge) => edge.delete());
         this.abilityManager.delete();
@@ -421,7 +411,7 @@ export class MainScene extends Scene {
         this.edges = {};
     }
  
-    update_board(new_data) {
+    update_data(new_data) {
         if (new_data != "Players may join") {
             if (!("abilities" in new_data)) {
 
@@ -432,7 +422,7 @@ export class MainScene extends Scene {
                         this.leaveMatchButton.setText('Leave Match');
                     } 
                     if (this.ps > PSE.ELIMINATED) {
-                        this.delete_board();
+                        this.delete_data();
                         this.statusText = this.add.text(
                             this.sys.game.config.width as number - 100, 
                             0, 
@@ -477,7 +467,6 @@ export class MainScene extends Scene {
                     }
                 }
 
-                this.timer = new_data["countdown_timer"];
                 this.parse(this.nodes, new_data["board"]["nodes"], true);
                 this.parse(this.edges, new_data["board"]["edges"]);
                 this.parse(this.abilityManager.abilities, new_data["player"]["abilities"]);

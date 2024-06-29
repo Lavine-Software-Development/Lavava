@@ -26,16 +26,14 @@ export class Edge extends IDItem implements IEdge {
         fromNode: Node,
         toNode: Node,
         dynamic: boolean,
-        on = false,
-        flowing = false,
         _scene?: Phaser.Scene
     ) {
         super(id, ClickType.EDGE); // Example ID logic
         this._fromNode = fromNode;
         this.to_node = toNode;
         this._dynamic = dynamic;
-        this._on = on;
-        this._flowing = flowing;
+        this._on = false;
+        this._flowing = false;
         if (_scene) {
             this.my_scene = _scene;
             this.graphics = _scene.add.graphics();
