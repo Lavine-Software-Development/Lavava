@@ -6,9 +6,9 @@ interface MyServiceProviderProps {
 }
 
 const NetworkContext = createContext<Network | null>(null);
-const serverURL = "wss://3.142.142.56:5553";
+
 const NetworkProvider: FC<MyServiceProviderProps> = ({ children }) => {
-    const networkInstance = new Network("wss://3.142.142.56:5553", () => {
+    const networkInstance = new Network("http://3.142.142.56:5553", () => {
         console.log("Callback function not yet configured");
     });
     networkInstance.connectWebSocket();
