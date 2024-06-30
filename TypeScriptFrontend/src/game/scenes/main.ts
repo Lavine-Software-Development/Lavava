@@ -141,9 +141,7 @@ export class MainScene extends Scene {
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
-        this.network.connectWebSocket();
-        
-        // this.network.setupUser(this.abilityCounts);
+
     }
 
     private createAbilityManager() {

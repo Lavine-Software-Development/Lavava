@@ -1,4 +1,5 @@
 from constants import (
+    BREAKDOWNS,
     BRIDGE_CODE,
     CANNON_CODE,
     CANNON_SHOT_CODE,
@@ -61,7 +62,7 @@ def make_pump_drain(id_dict):
     def pump_drain(player, data):
         pump_node = id_dict[data[0]]
         ability_code = data[1]
-        player.abilities[ability_code].credits += 1
+        player.abilities[ability_code].remaining += 3 - BREAKDOWNS[ability_code].credits
         pump_node.state.draining = True
         
     return pump_drain

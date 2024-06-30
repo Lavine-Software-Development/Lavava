@@ -1,4 +1,4 @@
-from constants import CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
+from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
 
 
 def no_click(data):
@@ -98,7 +98,7 @@ def make_pump_drain_check(id_dict):
         return node.state_name == "pump" and node.owner == player and node.full()
     
     def valid_ability(ability_code, player):
-        return ability_code in player.abilities and player.abilities[ability_code].credits < 3
+        return ability_code in player.abilities and BREAKDOWNS[ability_code].credits < 3
 
     def pump_drain_check(player, data):
         pump = id_dict[data[0]]

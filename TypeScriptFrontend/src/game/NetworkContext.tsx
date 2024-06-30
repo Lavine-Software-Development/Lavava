@@ -11,7 +11,7 @@ const NetworkProvider: FC<MyServiceProviderProps> = ({ children }) => {
     const networkInstance = new Network("ws://localhost:5553", () => {
         console.log("Callback function not yet configured");
     });
-    networkInstance.connectWebSocket();
+    // networkInstance.connectWebSocket();
 
     return (
         <NetworkContext.Provider value={networkInstance}>

@@ -6,8 +6,8 @@ class AbilityBreakdown:
     letter: str
     name: str
     cost: int
-    reload: Optional[int] = None
-    credits: Optional[int] = None
+    reload: int = 0
+    credits: int = 0
     tick: Optional[int] = None
     eliminate_val: Optional[int] = None
 
