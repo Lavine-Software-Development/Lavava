@@ -11,6 +11,7 @@ import {
     AbilityCredits,
     AbilityReloadTimes,
     NUKE_RANGE,
+    PlayerColors, 
 } from "../objects/constants";
 import { PlayerStateEnum as PSE} from "../objects/enums";
 import { ReloadAbility } from "../objects/ReloadAbility";
@@ -35,9 +36,7 @@ import { AbilityVisual } from "../objects/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
 import { Edge } from "../objects/edge";
-import { Main } from "../objects/parse";
 import board_data from "../data/board_data.json";
-import { BoardJSON } from "../objects/parse";
 // import { NetworkContext } from "../NetworkContext";
 export class MainScene extends Scene {
     
@@ -53,7 +52,7 @@ export class MainScene extends Scene {
     private abilityCounts: { [key: string]: number };
 
     private graphics: Phaser.GameObjects.Graphics;
-    private board: BoardJSON;
+    private board: any;
     private countdown: number;
     private full_capitals: number[];
     private timerText: Phaser.GameObjects.Text;
@@ -87,6 +86,7 @@ export class MainScene extends Scene {
 
         this.countdown = 0;
         this.full_capitals = [0, 0];
+        console.log("MainScene constructor finished");
     }
 
     preload() {
@@ -108,33 +108,11 @@ export class MainScene extends Scene {
     }
     
     create(): void {
+        console.log("CREATE called");
         this.graphics = this.add.graphics();
-        const main = new Main();
-        main.setup(this.board);
-        for (let i in main.nodes) {
-            // console.log(main.nodes[i].pos);
-            let node = main.nodes[i];
-            // randomly select an owner from the other players
-            // node.owner =
-            //     this.otherPlayers[
-            //         Math.floor(Math.random() * this.otherPlayers.length)
-            //     ];
-            node.scene = this;
-            // node.owner = this.mainPlayer;
-            this.nodes[i] = node;
-        }
-        console.log(window.innerWidth)
-        // this.nodes.forEach(node => {
-        //     node.resize(newWidth, newHeight);
-        // });
-        for (let i in main.edges) {
-            let edge = main.edges[i] as Edge;
-            edge.scene = this;
-            this.edges[i] = edge;
-            edge.relocate_lines();
-        }
-        this.otherPlayers = Object.values(main.players);
-        this.mainPlayer = main.myPlayer;
+        
+        this.initialize_data();
+
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.START_SELECTION;
         
@@ -164,6 +142,7 @@ export class MainScene extends Scene {
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
         this.network.connectWebSocket();
+        
         // this.network.setupUser(this.abilityCounts);
     }
 
@@ -400,8 +379,37 @@ export class MainScene extends Scene {
     }
 
     initialize_data(): void {
+        let startData = this.board;
+        const pi = Number(startData.player_id.toString());
+        const pc = startData.player_count;
+        const n = startData.board.nodes;
+        const e = startData.board.edges;
+        // const abi = startData.abilities.values;
+        // const credits = startData.abilities.credits;
 
-    }
+        this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
+        this.otherPlayers = Array.from({ length: pc }, (_, index) => {
+            const id = index.toString();
+            return id !== pi.toString() ? new OtherPlayer(id, PlayerColors[index]) : this.mainPlayer;
+        })
+
+        this.nodes = Object.fromEntries(
+            Object.keys(n).map((id) => [
+                id,
+                new Node(
+                    Number(id),
+                    n[id]["pos"] as [number, number],
+                    n[id]["is_port"],
+                    stateDict[n[id]["state"]](),
+                    n[id]["value"],
+                    this
+                ),
+            ])
+        );
+
+
+        this.parse(this.edges, e);
+}
 
     delete_data(): void {
         Object.values(this.nodes).forEach((node) => node.delete());
@@ -488,9 +496,8 @@ export class MainScene extends Scene {
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {
 
-                let new_edge = new Edge(Number(u) , this.nodes[updates[u]["from_node"]], this.nodes[updates[u]["to_node"]], updates[u]["dynamic"], true, true, this)
+                let new_edge = new Edge(Number(u) , this.nodes[updates[u]["from_node"]], this.nodes[updates[u]["to_node"]], updates[u]["dynamic"], this)
                 this.edges[Number(u)] = new_edge;
-                continue;
             }
 
             if (updates[u] === "Deleted") {

@@ -40,10 +40,10 @@ export class Node extends IDItem implements INode {
         this.ports = this.is_port ? random_equal_distributed_angles(PORT_COUNT) : [];
         this.state = state;
         this.value = value;
+        this.edges = [];
         this.effects = new Set();
         this.owner = null;
-        this._scene = _scene;
-        this.edges = [];
+        this.scene = _scene;
         this.graphics = _scene.add.graphics();
         this.cannonGraphics = _scene.add.graphics();
     }

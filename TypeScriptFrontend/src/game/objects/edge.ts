@@ -44,6 +44,12 @@ export class Edge extends IDItem implements IEdge {
             this.to_node.pos.x,
             this.to_node.pos.y
         );
+        this.line = new Phaser.Geom.Line(
+            this._fromNode.pos.x,
+            this._fromNode.pos.y,
+            this.to_node.pos.x,
+            this.to_node.pos.y
+        );
 
         this.sprites = [];
         this.last_spacing = 0;
@@ -53,12 +59,7 @@ export class Edge extends IDItem implements IEdge {
     }
 
     relocate_lines(): void {
-        this.line = new Phaser.Geom.Line(
-            this._fromNode.pos.x,
-            this._fromNode.pos.y,
-            this.to_node.pos.x,
-            this.to_node.pos.y
-        );
+
     }
 
     delete(): void {
