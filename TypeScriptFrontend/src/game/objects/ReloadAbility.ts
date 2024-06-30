@@ -3,6 +3,7 @@ import { ClickType } from "./enums"; // Assuming this is defined
 import { ValidationFunction } from "./types"; // Assuming this is defined
 import { phaserColor } from "./utilities";
 import { IDItem } from "./idItem";
+import * as Phaser from 'phaser';
 
 export class ReloadAbility extends IDItem {
     visual: AbilityVisual;

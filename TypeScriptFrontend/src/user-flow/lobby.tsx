@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { NetworkContext } from "../game/NetworkContext";
-import { Network } from "../game/objects/network";
-import { NameToCode } from "../game/objects/constants";
+import { abilityCountsConversion } from "../game/objects/utilities";
 const serverURL = "ws://localhost:5553";
 const updateCallback = () => {
     console.log("Update received");
@@ -14,26 +13,12 @@ const Lobby: React.FC = () => {
     const network = useContext(NetworkContext);
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
-        const gameType = String(sessionStorage.getItem("type"));
-        const playerCount = Number(sessionStorage.getItem("player_count")) || 0;
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
             : [];
 
         // Create a map from ability code to count using the NameToCode mapping
-        const abilityCounts = abilitiesFromStorage.reduce(
-            (
-                acc: { [x: string]: any },
-                ability: { name: string; count: number }
-            ) => {
-                const code = NameToCode[ability.name];
-                if (code) {
-                    acc[code] = ability.count;
-                }
-                return acc;
-            },
-            {}
-        );
+        const abilityCounts = abilityCountsConversion(abilitiesFromStorage);
         // const network = new Network(serverURL, updateCallback);
         console.log("Got network from context");
         // const network = new Network(serverURL, updateCallback);

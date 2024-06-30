@@ -1,3 +1,5 @@
+import { NameToCode } from "./constants";
+
 export function random_equal_distributed_angles(count: number): number[] {
     const ports: number[] = [Math.random() * 360];
     for (let i = 1; i < count; i++) {
@@ -9,3 +11,20 @@ export function random_equal_distributed_angles(count: number): number[] {
 export function phaserColor(color: readonly [number, number, number]): number {
     return Phaser.Display.Color.GetColor(color[0], color[1], color[2]);
 }
+
+export function abilityCountsConversion(abilitiesFromStorage: any): { [x: string]: number } {
+    return abilitiesFromStorage.reduce(
+        (
+            acc: { [x: string]: any },
+            ability: { name: string; count: number }
+        ) => {
+            const code = NameToCode[ability.name];
+            if (code) {
+                acc[code] = ability.count;
+            }
+            return acc;
+        },
+        {}
+    );
+}
+

@@ -11,6 +11,7 @@ import {
     AbilityCredits,
     AbilityReloadTimes,
     NUKE_RANGE,
+    PlayerColors, 
 } from "../objects/constants";
 import { PlayerStateEnum as PSE} from "../objects/enums";
 import { ReloadAbility } from "../objects/ReloadAbility";
@@ -27,6 +28,7 @@ import { IDItem } from "../objects/idItem";
 import { CLICKS, EVENTS, VISUALS } from "../objects/default_abilities";
 import { Network } from "../objects/network";
 import {
+    abilityCountsConversion,
     phaserColor,
     random_equal_distributed_angles,
 } from "../objects/utilities";
@@ -34,9 +36,7 @@ import { AbilityVisual } from "../objects/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
 import { Edge } from "../objects/edge";
-import { Main } from "../objects/parse";
 import board_data from "../data/board_data.json";
-import { BoardJSON } from "../objects/parse";
 // import { NetworkContext } from "../NetworkContext";
 export class MainScene extends Scene {
     
@@ -50,11 +50,9 @@ export class MainScene extends Scene {
     private network: Network;
     private burning: Node[] = [];
     private abilityCounts: { [key: string]: number };
-    private timer: number;
-    private playerCount: number;
-    private gameType: string;
+
     private graphics: Phaser.GameObjects.Graphics;
-    private board: BoardJSON;
+    private board: any;
     private countdown: number;
     private full_capitals: number[];
     private timerText: Phaser.GameObjects.Text;
@@ -68,7 +66,6 @@ export class MainScene extends Scene {
         // console.log("config: ", config);
         // console.log("props yeaaa: ", props);
         // console.log(network);
-        // console.log("network: ", network.test());
         this.board = props;
         // this.network = new Network(
         //     "ws://localhost:5553",
@@ -76,32 +73,20 @@ export class MainScene extends Scene {
         // );
         this.network = network;
         this.navigate = navigate;
-        this.network.updateCallback = this.update_board.bind(this);
+        this.network.updateCallback = this.update_data.bind(this);
         this.burning = [];
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
-        this.gameType = String(sessionStorage.getItem("type"));
-        this.playerCount = Number(sessionStorage.getItem("player_count")) || 0;
+
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
             : [];
 
         // Create a map from ability code to count using the NameToCode mapping
-        this.abilityCounts = abilitiesFromStorage.reduce(
-            (
-                acc: { [x: string]: any },
-                ability: { name: string; count: number }
-            ) => {
-                const code = NameToCode[ability.name];
-                if (code) {
-                    acc[code] = ability.count;
-                }
-                return acc;
-            },
-            {}
-        );
+        this.abilityCounts = abilityCountsConversion(abilitiesFromStorage);
 
         this.countdown = 0;
         this.full_capitals = [0, 0];
+        console.log("MainScene constructor finished");
     }
 
     preload() {
@@ -121,34 +106,13 @@ export class MainScene extends Scene {
         this.load.image("Zombie", "Zombie.png");
         this.load.image('Pump', 'Pump.png');
     }
+    
     create(): void {
+        console.log("CREATE called");
         this.graphics = this.add.graphics();
-        const main = new Main();
-        main.setup(this.board);
-        for (let i in main.nodes) {
-            // console.log(main.nodes[i].pos);
-            let node = main.nodes[i];
-            // randomly select an owner from the other players
-            // node.owner =
-            //     this.otherPlayers[
-            //         Math.floor(Math.random() * this.otherPlayers.length)
-            //     ];
-            node.scene = this;
-            // node.owner = this.mainPlayer;
-            this.nodes[i] = node;
-        }
-        console.log(window.innerWidth)
-        // this.nodes.forEach(node => {
-        //     node.resize(newWidth, newHeight);
-        // });
-        for (let i in main.edges) {
-            let edge = main.edges[i] as Edge;
-            edge.scene = this;
-            this.edges[i] = edge;
-            edge.relocate_lines();
-        }
-        this.otherPlayers = Object.values(main.players);
-        this.mainPlayer = main.myPlayer;
+        
+        this.initialize_data();
+
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.START_SELECTION;
         
@@ -178,6 +142,7 @@ export class MainScene extends Scene {
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
         this.network.connectWebSocket();
+        
         // this.network.setupUser(this.abilityCounts);
     }
 
@@ -413,7 +378,40 @@ export class MainScene extends Scene {
         this.navigate("/home");
     }
 
-    delete_board(): void {
+    initialize_data(): void {
+        let startData = this.board;
+        const pi = Number(startData.player_id.toString());
+        const pc = startData.player_count;
+        const n = startData.board.nodes;
+        const e = startData.board.edges;
+        // const abi = startData.abilities.values;
+        // const credits = startData.abilities.credits;
+
+        this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
+        this.otherPlayers = Array.from({ length: pc }, (_, index) => {
+            const id = index.toString();
+            return id !== pi.toString() ? new OtherPlayer(id, PlayerColors[index]) : this.mainPlayer;
+        })
+
+        this.nodes = Object.fromEntries(
+            Object.keys(n).map((id) => [
+                id,
+                new Node(
+                    Number(id),
+                    n[id]["pos"] as [number, number],
+                    n[id]["is_port"],
+                    stateDict[n[id]["state"]](),
+                    n[id]["value"],
+                    this
+                ),
+            ])
+        );
+
+
+        this.parse(this.edges, e);
+}
+
+    delete_data(): void {
         Object.values(this.nodes).forEach((node) => node.delete());
         Object.values(this.edges).forEach((edge) => edge.delete());
         this.abilityManager.delete();
@@ -421,7 +419,7 @@ export class MainScene extends Scene {
         this.edges = {};
     }
  
-    update_board(new_data) {
+    update_data(new_data) {
         if (new_data != "Players may join") {
             if (!("abilities" in new_data)) {
 
@@ -432,7 +430,7 @@ export class MainScene extends Scene {
                         this.leaveMatchButton.setText('Leave Match');
                     } 
                     if (this.ps > PSE.ELIMINATED) {
-                        this.delete_board();
+                        this.delete_data();
                         this.statusText = this.add.text(
                             this.sys.game.config.width as number - 100, 
                             0, 
@@ -477,7 +475,6 @@ export class MainScene extends Scene {
                     }
                 }
 
-                this.timer = new_data["countdown_timer"];
                 this.parse(this.nodes, new_data["board"]["nodes"], true);
                 this.parse(this.edges, new_data["board"]["edges"]);
                 this.parse(this.abilityManager.abilities, new_data["player"]["abilities"]);
@@ -499,9 +496,8 @@ export class MainScene extends Scene {
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {
 
-                let new_edge = new Edge(Number(u) , this.nodes[updates[u]["from_node"]], this.nodes[updates[u]["to_node"]], updates[u]["dynamic"], true, true, this)
+                let new_edge = new Edge(Number(u) , this.nodes[updates[u]["from_node"]], this.nodes[updates[u]["to_node"]], updates[u]["dynamic"], this)
                 this.edges[Number(u)] = new_edge;
-                continue;
             }
 
             if (updates[u] === "Deleted") {

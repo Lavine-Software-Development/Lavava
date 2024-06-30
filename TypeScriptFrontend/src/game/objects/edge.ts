@@ -26,21 +26,25 @@ export class Edge extends IDItem implements IEdge {
         fromNode: Node,
         toNode: Node,
         dynamic: boolean,
-        on = false,
-        flowing = false,
         _scene?: Phaser.Scene
     ) {
         super(id, ClickType.EDGE); // Example ID logic
         this._fromNode = fromNode;
         this.to_node = toNode;
         this._dynamic = dynamic;
-        this._on = on;
-        this._flowing = flowing;
+        this._on = false;
+        this._flowing = false;
         if (_scene) {
             this.my_scene = _scene;
             this.graphics = _scene.add.graphics();
         }
         this.hover_line = new Phaser.Geom.Line(
+            this._fromNode.pos.x,
+            this._fromNode.pos.y,
+            this.to_node.pos.x,
+            this.to_node.pos.y
+        );
+        this.line = new Phaser.Geom.Line(
             this._fromNode.pos.x,
             this._fromNode.pos.y,
             this.to_node.pos.x,
@@ -55,12 +59,7 @@ export class Edge extends IDItem implements IEdge {
     }
 
     relocate_lines(): void {
-        this.line = new Phaser.Geom.Line(
-            this._fromNode.pos.x,
-            this._fromNode.pos.y,
-            this.to_node.pos.x,
-            this.to_node.pos.y
-        );
+
     }
 
     delete(): void {
