@@ -23,7 +23,8 @@ const Lobby: React.FC = () => {
         console.log("Got network from context");
         // const network = new Network(serverURL, updateCallback);
         // network?.connectWebSocket();
-        network?.setupUser(abilityCounts);
+        network?.connectWebSocket();
+        network?.setupUser(abilityCounts)
         // Wait for the board data
         network?.getBoardData().then((data) => {
             console.log("Board data received in component:", data);

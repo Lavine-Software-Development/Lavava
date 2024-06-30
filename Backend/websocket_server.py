@@ -19,10 +19,13 @@ class WebSocketServer():
         # print("handler called for socket", websocket)
         if len(self.players) >= 2: 
             self.players = {}
+            print("Resetting players")
         curr_players = len(self.players)
         self.players[websocket] = curr_players
+        print("current players", self.players)
         # try:
         async for message in websocket:
+            print("message", message)
             # print(f"message {message} from {websocket}")
             # async with self.locks[websocket]:
             data = json.loads(message)
