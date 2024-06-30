@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { NetworkContext } from "../game/NetworkContext";
 import { Network } from "../game/objects/network";
 import { NameToCode } from "../game/objects/constants";
-const serverURL = "ws://localhost:5553";
 const updateCallback = () => {
     console.log("Update received");
 };
