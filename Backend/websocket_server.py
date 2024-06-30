@@ -1,10 +1,8 @@
 import websockets
 import asyncio
+import ssl
 from batch import Batch
-import sys
-import time
 import json
-import signal
 
 class WebSocketServer():
     def __init__(self, port):
@@ -98,17 +96,23 @@ class WebSocketServer():
     def run(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
-        # Starting the server
-        start_server = websockets.serve(self.handler, self.server, self.port)
+
+        # Create an SSL context
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ssl_context.load_cert_chain(certfile="/home/ec2-user/Lavava/server.crt", keyfile="/home/ec2-user/Lavava/private.key")
+
+        # Starting the server with SSL
+        start_server = websockets.serve(self.handler, self.server, self.port, ssl=ssl_context)
         server = loop.run_until_complete(start_server)
 
         # Print server running
-        print("WebSocket server running on {}:{}".format(self.server, self.port))
+        print("WebSocket server running on {}:{} with SSL".format(self.server, self.port))
 
         try:
             loop.run_forever()
         finally:
             loop.close()
+
+# Instantiate and run the server
 server = WebSocketServer(5553)
 server.run()
