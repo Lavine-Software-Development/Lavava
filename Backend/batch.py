@@ -18,9 +18,9 @@ class Batch:
         self.tick_dict = dict()
 
     def add_player(self, conn, ability_data):
-        player = self.player_count - len(self.connections) - 1
+        player = len(self.connections)
         if self.ability_process(player, ability_data):
-            self.connections.insert(0, conn)
+            self.connections.append(conn)
             return False
         else:
             return "CHEATING: INVALID ABILITY SELECTION"
