@@ -13,9 +13,7 @@ import {
 } from "react-router-dom";
 import WebSocketTest from "./websocketClient"; // Import your WebSocketTest component if not already done
 import Login from "./user-flow/login";
-import { Main } from "./game/objects/parse";
 import board_data from "./game/data/board_data.json";
-import { BoardJSON } from "./game/objects/parse";
 import Register from "./user-flow/Register";
 import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";

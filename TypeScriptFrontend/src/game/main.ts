@@ -1,7 +1,3 @@
-import { Boot } from "./scenes/Boot";
-import { GameOver } from "./scenes/GameOver";
-import { Game as MainGame } from "./scenes/Game";
-import { MainMenu } from "./scenes/MainMenu";
 import { MainScene } from "./scenes/main";
 // import { SpriteCreatorScene } from "./scenes/creator";
 import { AUTO, Game } from "phaser";
@@ -31,6 +27,7 @@ const StartGame = (parent: string, props: any, network: Network, navigate: Funct
             touch: true,
             gamepad: false,
         },
+        disableContextMenu: true,
     };
     const game = new Game({ ...config, parent });
 
