@@ -123,7 +123,10 @@ class Board(JsonableTracked):
         if updated_nodes:
             self.track_state_changes(updated_nodes)
 
-        self.full_player_capitals = [len([n for n in self.player_capitals[player] if n.full()]) for player in self.player_capitals]
+        self.full_player_capitals = [0] * 4 ## Should not be hard coded. This stores extra 0's
+        for player in self.player_capitals:
+            for node in self.player_capitals[player]:
+                self.full_player_capitals[player.id] += int(node.full())
 
     def check_new_edge(self, node_from, node_to):
         if node_to == node_from:

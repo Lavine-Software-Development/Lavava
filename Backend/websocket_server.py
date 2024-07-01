@@ -1,25 +1,23 @@
 import websockets
 import asyncio
 from batch import Batch
-import sys
-import time
 import json
 import signal
+
 class WebSocketServer():
     def __init__(self, port):
         self.server = "0.0.0.0"
         self.port = port
         self.waiting_players = None
         self.games = {}  # Stores the active games with the game code as the key
-        self.locks = {}
         self.players = {}
 
     async def handler(self, websocket, path):
         # self.locks[websocket] = asyncio.Lock()
         # print("handler called for socket", websocket)
-        if len(self.players) >= 2: 
-            self.players = {}
-            print("Resetting players")
+        # if len(self.players) >= 2: 
+        #     self.players = {}
+        #     print("Resetting players")
         curr_players = len(self.players)
         self.players[websocket] = curr_players
         print("current players", self.players)
@@ -54,7 +52,7 @@ class WebSocketServer():
                     message = json.dumps({"msg": "JOINED"})
                     await websocket.send(message)
                     if message := self.waiting_players.add_player(websocket, abilities):
-                        await self.problem(websocket, message)
+                        await self.problem(message)
                 else:
                     await websocket.send("FAILED")
                     return
@@ -73,6 +71,7 @@ class WebSocketServer():
                 batch_json = batch.tick_repr_json(i)
                 await websocket.send(batch_json)
             await asyncio.sleep(0.1)
+
     async def send_test_ticks(self, batch):
         json_list = []
         file_path = "/Users/akashilangovan/ian_game/Lavava/Backend/server_json.txt"
@@ -134,8 +133,9 @@ class WebSocketServer():
         # print("Lost connection")
         # await websocket.close()
 
-    async def problem(self, player, conn, batch:Batch):
-        await websocket.send(json.dumps({"COB": message}))
+    async def problem(self, message):
+        pass
+
     def run(self):
         loop = asyncio.get_event_loop()
 
