@@ -44,6 +44,8 @@ class DefaultPlayer(Jsonable):
     def eliminate(self):
         self.ps.eliminate()
         self.color = GREY
+        for ability in self.abilities.values():
+            ability.load_amount = 0
 
     def update(self):
         for ability in self.abilities.values():

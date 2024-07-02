@@ -84,7 +84,6 @@ class Board(JsonableTracked):
                 edge.switch(False)
         for node in self.nodes:
             if node.owner == player:
-                node.owner = None
                 node.set_state("default")
 
     def expand_nodes(self):

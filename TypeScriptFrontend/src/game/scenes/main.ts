@@ -196,6 +196,11 @@ export class MainScene extends Scene {
         );
     }
 
+    forfeit(): void {
+        this.simple_send(stateCodes.FORFEIT_CODE);
+        this.abilityManager.forfeit(this);
+    }
+
     keydown(key: number): void {
         if (key === stateCodes.OVERRIDE_RESTART_CODE) {
             this.simple_send(stateCodes.RESTART_CODE);
@@ -296,9 +301,11 @@ export class MainScene extends Scene {
             }
         }
 
-        let ability = this.abilityManager.triangle_validate(position);
-        if (ability) {
-            return ability;
+        if (this.ps === PSE.PLAY) {
+            let ability = this.abilityManager.triangle_validate(position);
+            if (ability) {
+                return ability;
+            }
         }
 
         return false;
@@ -337,7 +344,7 @@ export class MainScene extends Scene {
             }
         }
         let key = this.abilityManager.clickSelect(this.input.activePointer.position);
-        if (key) {
+        if (key && this.ps === PSE.PLAY) {
             this.abilitySelection(key);
         }
     }
@@ -373,7 +380,9 @@ export class MainScene extends Scene {
         if (this.ps < PSE.ELIMINATED) {
             this.simple_send(stateCodes.FORFEIT_CODE);
         }
-        this.navigate("/home");
+        else {
+            this.navigate("/home");
+        }
     }
 
     initialize_data(): void {
