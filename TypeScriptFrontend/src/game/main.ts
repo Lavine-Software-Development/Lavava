@@ -27,7 +27,7 @@ const StartGame = (parent: string, props: any, network: Network, navigate: Funct
             touch: true,
             gamepad: false,
         },
-        disableContextMenu: true,
+        disableContextMenu: false,
     };
     const game = new Game({ ...config, parent });
 

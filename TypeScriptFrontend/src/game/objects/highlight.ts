@@ -53,7 +53,7 @@ export class Highlight {
     sendFormat(items?: number[], code?: number): object {
         const code_usage = code ?? this.usage;
         items = items || (this.item ? [this.item.id] : []);
-        return { "code": code_usage, "items": items };
+        return { "code": code_usage, "items": items, "game_id": sessionStorage.getItem("key_code") };
     }
 
     draw(): void {

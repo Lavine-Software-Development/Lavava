@@ -9,10 +9,14 @@ const updateCallback = () => {
 
 const Lobby: React.FC = () => {
     const [boardData, setBoardData] = useState(null);
+    const [gameID, setGameID] = useState("");
+    const [gameType, setGameType] = useState("");
     const navigate = useNavigate();
     const network = useContext(NetworkContext);
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        setGameID(sessionStorage.getItem("key_code") || "");
+        setGameType(sessionStorage.getItem("type") || "");
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
             : [];
@@ -44,7 +48,7 @@ const Lobby: React.FC = () => {
         return (
             <div>
                 <h1>Waiting...</h1>
-                {/* Add your waiting symbol here */}
+                { gameType != "LADDER" && <h2>Game Code: { gameID }</h2> }
             </div>
         );
     }
