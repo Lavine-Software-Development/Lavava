@@ -34,7 +34,7 @@ const Home: React.FC = () => {
                     console.error("Failed to fetch abilities:", error);
                 });
         }
-        toTab("HOST");
+        toTab("LADDER");
     }, []);
 
     const toTab = (tab: string) => {

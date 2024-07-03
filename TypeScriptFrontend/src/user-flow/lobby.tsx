@@ -15,7 +15,6 @@ const Lobby: React.FC = () => {
     const network = useContext(NetworkContext);
 
     const gameCode = (code: string) => {
-        console.log("Game ID BIPPPPO: ", code);
         setGameID(code);
         sessionStorage.setItem("key_code", code);
     }

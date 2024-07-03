@@ -5,6 +5,8 @@ from playerStateEnums import PlayerStateEnum as PS
 from game import ServerGame
 import json_abilities
 from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, json_cost, plain_json
+import requests
+import json
 
 
 class Batch:
@@ -12,10 +14,22 @@ class Batch:
         self.connections = {}
         self.player_count = count
         self.mode = mode
-        self.gs = GameState()
+        if mode == "LADDER":
+            print("LADDER GAME STARTEDDDDDDDD")
+            self.gs = GameState(self.update_elo)
+        else:
+            self.gs = GameState()
         self.game = ServerGame(self.player_count, self.gs)
         self.add_player(conn, ability_data)
         self.tick_dict = dict()
+
+    def update_elo(self):
+        # make a dictionary from str(connection.keys()) to the rank of the players in the game
+        print("ELO UPDATE")
+        connection_ranks = {str(conn): self.game.player_dict[self.connections[conn]].rank for conn in self.connections}
+        url = 'http://localhost:5001/elo'
+        response = requests.post(url, json=connection_ranks)
+        print("heres the response", response)
 
     def add_player(self, conn, ability_data):
         player_id = len(self.connections)

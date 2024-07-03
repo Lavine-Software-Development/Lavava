@@ -104,5 +104,11 @@ def get_abilities():
     return jsonify({"abilities": abilities, "salary": 15})
 
 
+@app.route('/elo', methods=['POST'])
+def update_elo(player_ranks):
+    # bunch of stuff
+    return jsonify({"success": True, "message": "Elo updated successfully"}), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)

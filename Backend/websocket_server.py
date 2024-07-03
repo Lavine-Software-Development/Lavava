@@ -45,11 +45,9 @@ class WebSocketServer():
 
             player_code = data["code"]
             if player_type == "LADDER":
-                player_code = player_count
+                player_code = str(player_count)
             elif player_type == "HOST":
                 player_code = str(random.randint(1000, 9999))
-                message = json.dumps({"game_id": player_code})
-                await websocket.send(message)
                 
             if player_type in ("HOST", "LADDER") and player_code not in self.waiting_players:
                 self.waiting_players[player_code] = Batch(int(player_count), player_type, websocket, abilities)
@@ -59,10 +57,13 @@ class WebSocketServer():
             else:
                 await websocket.send("FAILED")
                 return
+            message = json.dumps({"game_id": player_code})
+            await websocket.send(message)
             
             if self.waiting_players[player_code].is_ready():
                 print("Game is ready to start")
                 self.running_games[player_code] = self.waiting_players.pop(player_code)
+                print("created game with code ----------------------", player_code)
                 await self.start_game(self.running_games[player_code])
             else:
                 print("Game is not ready to start")
