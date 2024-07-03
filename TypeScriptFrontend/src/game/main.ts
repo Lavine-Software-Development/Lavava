@@ -23,11 +23,14 @@ const StartGame = (parent: string, props: any, network: Network, navigate: Funct
         ],
         input: {
             keyboard: true,
-            mouse: true,
+            mouse: {
+                target: window,
+                preventDefaultMove: false // This allows right clicks to be detected
+            },
             touch: true,
             gamepad: false,
         },
-        disableContextMenu: true,
+        disableContextMenu: false,
     };
     const game = new Game({ ...config, parent });
 

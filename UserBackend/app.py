@@ -3,10 +3,20 @@ import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from functools import wraps
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = 'your_secret_key'
+
+# for the email register
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'lavavaacc@gmail.com'
+app.config['MAIL_PASSWORD'] = 'enwueidxiwivjvxn'  # Use the app password you generated
+mail = Mail(app)
 
 def token_required(f):
     @wraps(f)
@@ -45,14 +55,15 @@ def login():
 def register():
     data = request.json
     username = data.get('username')
-    email = data.get('email')  # Email is received but not used in logic for simplicity
+    email = data.get('email')  # Email is received and will be used to send welcome email
     password = data.get('password')  # Password is received but not used in logic
     
     if username.lower() == 'default':
-        return jsonify({"success": True, "message": "Registration successful"}), 200
+        send_confirmation_email(email)  # Send welcome email
+        return jsonify({"success": True, "message": "Registration successful. Please check your email."}), 200
     else:
         return jsonify({"success": False, "message": "Registration failed, username must be 'default'"}), 400
-    
+  
 @app.route('/user_abilities', methods=['GET'])
 @token_required
 def get_home(current_user):
@@ -102,6 +113,20 @@ def get_abilities():
         {"name": "Pump", "cost": 3},
     ]
     return jsonify({"abilities": abilities, "salary": 15})
+
+#  sending email for registration
+
+def send_confirmation_email(user_email):
+    msg = Message("Welcome!",
+                  sender='lavavaacc@gmail.com',
+                  recipients=[user_email])
+    msg.body = 'Hi, welcome to our service! You are all set.'
+    try:
+        mail.send(msg)
+        return "Email sent successfully!"
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        return "Error sending email."
 
 
 if __name__ == '__main__':

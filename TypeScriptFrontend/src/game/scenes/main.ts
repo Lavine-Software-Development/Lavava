@@ -137,7 +137,13 @@ export class MainScene extends Scene {
             this.checkHighlight();
         });
 
+
         this.scale.on('resize', this.handleResize, this);
+
+        this.input.on('pointerdown', () => {
+            this.checkResize();
+        });
+    
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -214,6 +220,14 @@ export class MainScene extends Scene {
     handleResize(gameSize) {
         console.log("Resizing");
     }
+
+    checkResize() {
+        const currentWidth = this.scale.gameSize.width;
+        const currentHeight = this.scale.gameSize.height;
+        console.log("Current game size:", currentWidth, "x", currentHeight);
+        // You can add any logic here to adjust game elements based on new size
+    }
+    
 
     abilitySelection(key: number): void {
         if (this.abilityManager.inAbilities(key)) {

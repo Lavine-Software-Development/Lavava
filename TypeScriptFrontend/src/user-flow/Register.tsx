@@ -30,8 +30,7 @@ const Register: React.FC = () => {
             });
             const data = await response.json();
             if (response.ok) {
-                setMessage(data.message);
-                navigate('/home');  // Navigate to home if registration is successful
+                setMessage("Registration successful! Please check your email to confirm your account.");
             } else {
                 setMessage(data.message);
             }
@@ -51,7 +50,7 @@ const Register: React.FC = () => {
                 </div>
                 <div className="input-group">
                     <label htmlFor="email">Email</label>
-                    <input type="text" name="email" id="email" placeholder="Email" required
+                    <input type="email" name="email" id="email" placeholder="Email" required
                         value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="input-group">
