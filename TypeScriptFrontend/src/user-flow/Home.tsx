@@ -1,18 +1,78 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+interface Ability {
+    name: string;
+    cost: number;
+}
+
 const Home: React.FC = () => {
     const navigate = useNavigate();
     const [selectedAbilities, setSelectedAbilities] = useState<any[]>([]);
-    const [tab, setTab] = useState("HOST"); // State to manage tabs
-    const [playerCount, setPlayerCount] = useState(2); // Default to 2 players
+    const [tab, setTab] = useState("HOST");
+    const [playerCount, setPlayerCount] = useState(2);
     const [keyCode, setKeyCode] = useState("");
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [showSalaryPopup, setShowSalaryPopup] = useState(false);
+    const [showLoginPopup, setShowLoginPopup] = useState(false);
+    const [salary, setSalary] = useState(0);
+    const [initialSalary, setInitialSalary] = useState(0);
+    const [abilities, setAbilities] = useState<Ability[]>([]);
+    const [selectedCounts, setSelectedCounts] = useState<{
+        [key: string]: number;
+    }>({});
+
+    useEffect(() => {
+        const fetchAbilities = async () => {
+            try {
+                const response = await fetch("http://localhost:5001/abilities");
+                const data = await response.json();
+                if (response.ok) {
+                    setAbilities(data.abilities);
+                    setInitialSalary(data.salary);
+                    const storedAbilities =
+                        sessionStorage.getItem("selectedAbilities");
+                    if (storedAbilities) {
+                        const parsedAbilities = JSON.parse(storedAbilities);
+                        const initialCounts = parsedAbilities.reduce(
+                            (
+                                counts: { [key: string]: number },
+                                ability: { name: string; count: number }
+                            ) => {
+                                counts[ability.name] = ability.count;
+                                return counts;
+                            },
+                            {}
+                        );
+                        setSelectedCounts(initialCounts);
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching abilities:", error);
+            }
+        };
+
+        fetchAbilities();
+    }, []);
+
+    useEffect(() => {
+        const totalCost = Object.entries(selectedCounts).reduce(
+            (total, [name, count]) => {
+                const abilityCost =
+                    abilities.find((a) => a.name === name)?.cost || 0;
+                return total + abilityCost * count;
+            },
+            0
+        );
+        setSalary(initialSalary - totalCost);
+    }, [selectedCounts, abilities, initialSalary]);
 
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const token = localStorage.getItem("userToken");
-        setIsLoggedIn(!!token); // Update login status
+        setIsLoggedIn(!!token);
         if (storedAbilities) {
             setSelectedAbilities(JSON.parse(storedAbilities));
         } else if (token) {
@@ -47,23 +107,30 @@ const Home: React.FC = () => {
     const hostTab = (e: number, code: string) => {
         setPlayerCount(e);
         setKeyCode(code);
-        setPlayerCountDropdownOpen(false); // Close the player count dropdown when selecting count
+        setPlayerCountDropdownOpen(false);
     };
 
     const handleHostGame = () => {
-        sessionStorage.setItem("type", "HOST");
-        sessionStorage.setItem("player_count", playerCount.toString());
-        sessionStorage.setItem("key_code", keyCode);
-        navigate("/play");
+        if (salary > 10) {
+            setShowSalaryPopup(true);
+        } else {
+            sessionStorage.setItem("type", "HOST");
+            sessionStorage.setItem("player_count", playerCount.toString());
+            sessionStorage.setItem("key_code", keyCode);
+            navigate("/play");
+        }
     };
 
     const handleJoinGame = () => {
-        sessionStorage.setItem("type", "JOIN");
-        sessionStorage.setItem("key_code", keyCode);
-        navigate("/play");
+        if (salary > 10) {
+            setShowSalaryPopup(true);
+        } else {
+            sessionStorage.setItem("type", "JOIN");
+            sessionStorage.setItem("key_code", keyCode);
+            navigate("/play");
+        }
     };
 
-    // State and handlers for "Play" button dropdown
     const [playDropdownOpen, setPlayDropdownOpen] = useState<boolean>(false);
     const playDropdownRef = useRef<HTMLDivElement>(null);
     const handlePlayDropdownFocus = () => {
@@ -71,14 +138,14 @@ const Home: React.FC = () => {
     };
 
     const setTabAndCloseDropdown = (tab: string) => {
-        setTab(tab); // update tab state
-        setPlayDropdownOpen(false); // Close the play dropdown
+        setTab(tab);
+        setPlayDropdownOpen(false);
     };
 
-    // State and handlers for player count dropdown
     const [playerCountDropdownOpen, setPlayerCountDropdownOpen] =
         useState<boolean>(false);
     const playerCountDropdownRef = useRef<HTMLDivElement>(null);
+
     const handlePlayerCountDropdownFocus = () => {
         setPlayerCountDropdownOpen(!playerCountDropdownOpen);
     };
@@ -101,12 +168,25 @@ const Home: React.FC = () => {
         }
     };
 
+    const handleLadderClick = () => {
+        if (!isLoggedIn) {
+            setShowLoginPopup(true); // Show login popup if not logged in
+        } else {
+            setTabAndCloseDropdown("LADDER"); // Proceed with setting the tab to LADDER
+        }
+    };
+
     useEffect(() => {
         window.addEventListener("click", handleClickOutsideDropdown);
         return () => {
             window.removeEventListener("click", handleClickOutsideDropdown);
         };
     }, [playDropdownOpen, playerCountDropdownOpen]);
+
+    const handleClosePopups = () => {
+        setShowSalaryPopup(false);
+        setShowLoginPopup(false);
+    };
 
     return (
         <div className="dashboard-container" id="home">
@@ -122,6 +202,7 @@ const Home: React.FC = () => {
                             <li onClick={() => setTabAndCloseDropdown("JOIN")}>
                                 Join
                             </li>
+                            <li onClick={handleLadderClick}>Ladder</li>
                         </ul>
                     )}
                 </div>
@@ -146,35 +227,38 @@ const Home: React.FC = () => {
                     />
                 ) : (
                     <input
-                    type="submit"
-                    className="btn"
-                    value="Login"
-                    onClick={() => navigate("/login")}
-                />
+                        type="submit"
+                        className="btn"
+                        value="Login"
+                        onClick={() => navigate("/login")}
+                    />
                 )}
             </div>
             {selectedAbilities.length > 0 && (
                 <div className="profile-card">
-                    <h3 style={{ textAlign: "center" }}>Ability : Count</h3>
-                    {selectedAbilities.map((ability, index) => (
-                        <p style={{ textAlign: "center" }} key={index}>
-                            {ability.name}
-                            <img
-                                src={`./public/assets/abilityIcons/${ability.name}.png`}
-                                alt={ability.name}
-                                style={{
-                                    width: "30px",
-                                    height: "30px",
-                                    objectFit: "contain",
-                                    marginLeft: "10px",
-                                    marginRight: "10px",
-                                }}
-                            />
-                            : {ability.count}
-                        </p>
-                    ))}
                     {tab === "HOST" ? (
                         <div>
+                            <h1 style={{ textAlign: "center" }}>Host Game</h1>
+                            <h3 style={{ textAlign: "center" }}>
+                                Ability : Count
+                            </h3>
+                            {selectedAbilities.map((ability, index) => (
+                                <p style={{ textAlign: "center" }} key={index}>
+                                    {ability.name}
+                                    <img
+                                        src={`./public/assets/abilityIcons/${ability.name}.png`}
+                                        alt={ability.name}
+                                        style={{
+                                            width: "30px",
+                                            height: "30px",
+                                            objectFit: "contain",
+                                            marginLeft: "10px",
+                                            marginRight: "10px",
+                                        }}
+                                    />
+                                    : {ability.count}
+                                </p>
+                            ))}
                             <label>Player Count:</label>
                             <div
                                 className="player-count-drop-down-container"
@@ -200,31 +284,108 @@ const Home: React.FC = () => {
                                     </ul>
                                 )}
                             </div>
+                            <button className="btn" onClick={handleHostGame}>
+                                Host
+                            </button>
+                            <button className="btn" onClick={handleHostGame}>
+                                Host w/ Key
+                            </button>
                             <input
                                 type="text"
-                                placeholder="Enter Keycode"
-                                onChange={(e) => setKeyCode(e.target.value)}
+                                className="text-box"
+                                placeholder="enter key code"
                                 value={keyCode}
+                                onChange={(e) =>
+                                    setKeyCode(e.target.value.toUpperCase())
+                                }
                             />
-                            <button className="btn" onClick={handleHostGame}>
-                                Host Game
+                        </div>
+                    ) : tab === "JOIN" ? (
+                        <div>
+                            <h1 style={{ textAlign: "center" }}>Join Game</h1>
+                            <h3 style={{ textAlign: "center" }}>
+                                Ability : Count
+                            </h3>
+                            {selectedAbilities.map((ability, index) => (
+                                <p style={{ textAlign: "center" }} key={index}>
+                                    {ability.name}
+                                    <img
+                                        src={`./public/assets/abilityIcons/${ability.name}.png`}
+                                        alt={ability.name}
+                                        style={{
+                                            width: "30px",
+                                            height: "30px",
+                                            objectFit: "contain",
+                                            marginLeft: "10px",
+                                            marginRight: "10px",
+                                        }}
+                                    />
+                                    : {ability.count}
+                                </p>
+                            ))}
+                            <button className="btn" onClick={handleJoinGame}>
+                                Join
                             </button>
+                            <input
+                                type="text"
+                                className="text-box"
+                                placeholder="enter key code"
+                                value={keyCode}
+                                onChange={(e) =>
+                                    setKeyCode(e.target.value.toUpperCase())
+                                }
+                            />
                         </div>
                     ) : (
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="Enter Keycode"
-                                onChange={(e) => setKeyCode(e.target.value)}
-                                value={keyCode}
-                            />
-                            <button className="btn" onClick={handleJoinGame}>
-                                Join Game
-                            </button>
-                        </div>
+                        tab === "LADDER" && (
+                            <div>
+                                <h1>Ladder</h1>
+                                {selectedAbilities.map((ability, index) => (
+                                    <p style={{ textAlign: "center" }} key={index}>
+                                        {ability.name}
+                                        <img
+                                            src={`./public/assets/abilityIcons/${ability.name}.png`}
+                                            alt={ability.name}
+                                            style={{
+                                                width: "30px",
+                                                height: "30px",
+                                                objectFit: "contain",
+                                                marginLeft: "10px",
+                                                marginRight: "10px",
+                                            }}
+                                        />
+                                        : {ability.count}
+                                    </p>
+                                ))}
+                                <button className="btn" onClick={handleHostGame}>
+                                    Join Ladder
+                                </button>
+                            </div>
+                        )
                     )}
                 </div>
             )}
+            <div className="popup-container">
+                {showSalaryPopup && (
+                    <div className="popup salary-popup">
+                        <p>
+                            You cannot host a game with a leftover salary greater than 10.
+                        </p>
+                        <button onClick={handleClosePopups}>OK</button>
+                    </div>
+                )}
+                {showLoginPopup && !isLoggedIn && (
+                    <div className="popup login-popup">
+                        <p>You need to log in to play Ladder.</p>
+                        <button onClick={() => navigate("/login")}>
+                            Log In
+                        </button>
+                        <button onClick={handleClosePopups}>
+                            Cancel
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
