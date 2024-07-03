@@ -42,23 +42,24 @@ class WebSocketServer():
             player_count = data["players"]
             mode = data["mode"]
             abilities = data["abilities"]
-            player_code = data["code"]
 
-            # if player_type == "LADDER":
-        
-            if player_type == "HOST":
-                player_count = int(player_count)
+            player_code = data["code"]
+            if player_type == "LADDER":
+                player_code = player_count
+            elif player_type == "HOST":
                 player_code = str(random.randint(1000, 9999))
-                self.waiting_players[player_code] = Batch(player_count, mode, websocket, abilities)
                 message = json.dumps({"game_id": player_code})
                 await websocket.send(message)
-            elif player_type == "JOIN":
-                if player_code in self.waiting_players:
-                    if message := self.waiting_players[player_code].add_player(websocket, abilities):
-                        await self.problem(message)
-                else:
-                    await websocket.send("FAILED")
-                    return
+                
+            if player_type in ("HOST", "LADDER") and player_code not in self.waiting_players:
+                self.waiting_players[player_code] = Batch(int(player_count), player_type, websocket, abilities)
+            elif player_type in ("JOIN", "LADDER") and player_code in self.waiting_players:
+                if message := self.waiting_players[player_code].add_player(websocket, abilities):
+                    await self.problem(message)
+            else:
+                await websocket.send("FAILED")
+                return
+            
             if self.waiting_players[player_code].is_ready():
                 print("Game is ready to start")
                 self.running_games[player_code] = self.waiting_players.pop(player_code)
