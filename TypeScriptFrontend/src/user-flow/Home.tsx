@@ -34,18 +34,12 @@ const Home: React.FC = () => {
                     console.error("Failed to fetch abilities:", error);
                 });
         }
-        toTab("LADDER");
+        toTab("HOST");
     }, []);
 
     const toTab = (tab: string) => {
         setTab(tab);
         setKeyCode("");
-        if (tab === "HOST") {
-            for (let i = 0; i < 4; i++) {
-                let generated_code = (Math.floor(Math.random() * 9)).toString();
-                setKeyCode((prev) => prev + generated_code);
-            }
-        }
     }
 
     const handleLogout = () => {

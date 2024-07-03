@@ -13,6 +13,13 @@ const Lobby: React.FC = () => {
     const [gameType, setGameType] = useState("");
     const navigate = useNavigate();
     const network = useContext(NetworkContext);
+
+    const gameCode = (code: string) => {
+        console.log("Game ID BIPPPPO: ", code);
+        setGameID(code);
+        sessionStorage.setItem("key_code", code);
+    }
+
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         setGameID(sessionStorage.getItem("key_code") || "");
@@ -27,6 +34,11 @@ const Lobby: React.FC = () => {
         console.log("Got network from context");
         // const network = new Network(serverURL, updateCallback);
         // network?.connectWebSocket();
+        if (network) {
+            network.gameIDCallback = gameCode;
+            console.log("bind happened?");
+        }
+        
         network?.connectWebSocket();
         network?.setupUser(abilityCounts)
         // Wait for the board data

@@ -1,3 +1,4 @@
+import random
 import websockets
 import asyncio
 from batch import Batch
@@ -8,8 +9,8 @@ class WebSocketServer():
     def __init__(self, port):
         self.server = "0.0.0.0"
         self.port = port
-        self.waiting_players: dict[int, Batch] = {}
-        self.running_games: dict[int, Batch] = {}  # Stores the active games with the game code as the key
+        self.waiting_players: dict[str, Batch] = {}
+        self.running_games: dict[str, Batch] = {}  # Stores the active games with the game code as the key
 
     async def handler(self, websocket, path):
         # self.locks[websocket] = asyncio.Lock()
@@ -39,20 +40,20 @@ class WebSocketServer():
         else:
             player_type = data["type"]
             player_count = data["players"]
-            player_code = data["code"]
             mode = data["mode"]
             abilities = data["abilities"]
+            player_code = data["code"]
 
             # if player_type == "LADDER":
         
             if player_type == "HOST":
                 player_count = int(player_count)
+                player_code = str(random.randint(1000, 9999))
                 self.waiting_players[player_code] = Batch(player_count, mode, websocket, abilities)
-                message = json.dumps({"msg": "Players may join"})
+                message = json.dumps({"game_id": player_code})
+                await websocket.send(message)
             elif player_type == "JOIN":
                 if player_code in self.waiting_players:
-                    message = json.dumps({"msg": "JOINED"})
-                    await websocket.send(message)
                     if message := self.waiting_players[player_code].add_player(websocket, abilities):
                         await self.problem(message)
                 else:
