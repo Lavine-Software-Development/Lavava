@@ -102,6 +102,32 @@ def get_abilities():
     ]
     return jsonify({"abilities": abilities, "salary": 15})
 
+@app.route('/leaderboard', methods=['GET'])
+def get_leaderboard():
+    return jsonify({
+        "leaderboard": [
+            {"userName": "Default-User", "elo": 1138},
+            {"userName": "Alice", "elo": 1500},
+            {"userName": "Bob", "elo": 1400},
+            {"userName": "Charlie", "elo": 1300},
+            {"userName": "Alice", "elo": 1500},
+            {"userName": "Bob", "elo": 1400},
+            {"userName": "Charlie", "elo": 1300},
+            {"userName": "Alice", "elo": 1500},
+            {"userName": "Bob", "elo": 1400},
+            {"userName": "Charlie", "elo": 1300},
+            {"userName": "Bob", "elo": 1400},
+            {"userName": "Charlie", "elo": 1300},
+            {"userName": "Alice", "elo": 1500},
+            {"userName": "Bob", "elo": 1400},
+            {"userName": "Charlie", "elo": 1300},
+            {"userName": "Alice", "elo": 1500},
+            {"userName": "Bob", "elo": 1400},
+            {"userName": "Charlie", "elo": 1300},
+            {"userName": "David", "elo": 1200}
+        ]
+    })
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
