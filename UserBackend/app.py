@@ -269,6 +269,18 @@ def delete_rows_with_secondary_id(secondary_id):
     except Exception as e:
         db.session.rollback()
         print(f"An error occurred: {e}")
+
+@app.route('/leaderboard', methods=['GET'])
+def get_leaderboard():
+    # Query the database for all users, ordered by elo descending
+    users = User.query.order_by(User.elo.desc()).all()
+    
+    leaderboard = [{"userName": user.username, "elo": user.elo} for user in users]
+    
+    return jsonify({"leaderboard": leaderboard})
+
+
 if __name__ == '__main__':
     
     app.run(debug=True, host='0.0.0.0', port=5001)
+
