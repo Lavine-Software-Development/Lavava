@@ -4,6 +4,10 @@
     box-sizing: border-box;
     font-family: "JetBrains Mono", monospace;
 }
+#app {
+    margin-top: 158px;  /* Same as the navbar height */
+}
+
 
 .required {
     color: red;
@@ -373,4 +377,72 @@ input::placeholder {
 
 ul {
     list-style-position: inside;
+}
+.leaderboard-container {
+    background: linear-gradient(to bottom right, #2a2a72, #009ffd);
+    border-radius: 10px;
+    padding: 20px;
+    color: white;
+    width: 100%;
+    width: 600px;
+    height: 750px;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.leaderboard-list {
+    list-style: none;
+    padding: 0;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;  /* Vertically centers the items in the line */
+    justify-content: start;  /* Aligns items to the start of the flex container */
+    margin-bottom: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    width: 100%;  /* Ensures the item stretches to the full width of its container */
+}
+
+.rank-icon {
+    margin-right: 10px;  /* Provides spacing between the medal and the username */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rank-icon .rank {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; /* Makes the span circular */
+    color: white; /* White text color */
+    font-weight: bold; /* Bold text */
+    background-color: #ddd; /* Default rank color for others */
+}
+
+.player-name {
+    flex-grow: 1;  /* Allows the username to take up any extra space */
+    margin-right: 20px;  /* Provides spacing between the username and the score */
+}
+
+.player-score {
+    font-weight: bold;
+}
+
+
+.leaderboard-item .rank-icon .rank-1 {
+    background-color: gold;
+}
+
+.leaderboard-item .rank-icon .rank-2 {
+    background-color: silver;
+}
+
+.leaderboard-item .rank-icon .rank-3 {
+    background-color: #cd7f32; /* Bronze color */
 }
