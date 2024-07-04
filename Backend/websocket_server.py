@@ -1,6 +1,7 @@
 import random
 import websockets
 import asyncio
+import ssl
 from batch import Batch
 import json
 import signal
@@ -19,8 +20,6 @@ class WebSocketServer():
             await self.process_message(websocket, data)
 
     async def process_message(self, websocket, data):
-        # print(self.players)
-        # print("Received message in process: ", data)
         if 'game_id' and 'items' in data:
             # print("yoooooo")
             self.running_games[data["game_id"]].process(websocket, data)
@@ -48,6 +47,7 @@ class WebSocketServer():
             await websocket.send(message)
             
             if self.waiting_players[player_code].is_ready():
+
                 print("Game is ready to start")
                 self.running_games[player_code] = self.waiting_players.pop(player_code)
                 print("created game with code ----------------------", player_code)
@@ -55,90 +55,71 @@ class WebSocketServer():
             else:
                 print("Game is not ready to start")
 
+
     async def send_ticks(self, batch_code: str):
         batch = self.running_games[batch_code]
         while not batch.done():
-            # await asyncio.sleep(1)
-            # print("tick")
+
             batch.tick()
             for websocket in batch.connections:
                 batch_json = batch.tick_repr_json(websocket)
                 await websocket.send(batch_json)
             await asyncio.sleep(0.1)
-        
+ 
         # should be its own delete function, but leaving for now due to async complexity
         self.running_games.pop(batch_code)
 
     async def send_test_ticks(self, batch):
         json_list = []
         file_path = "/Users/akashilangovan/ian_game/Lavava/Backend/server_json.txt"
-        # Open the file and read line by line
         with open(file_path, 'r') as file:
             for line in file:
                 json_object = json.loads(line.strip())
                 json_list.append(json_object)
         idx = 0
         while True:
-
-
             await asyncio.sleep(0.1)
-            # batch.tick()
             for i, websocket in enumerate(batch.connections):
                 if True:
                     batch_json = json_list[idx] if idx < len(json_list) else json_list[1]
                     idx += 1
-                    # print(json.dumps(batch_json))
                     await websocket.send(json.dumps(batch_json))
             await asyncio.sleep(0.1)
-        
+
     async def start_game(self, batch_code):
         batch = self.running_games[batch_code]
         tasks = []
         print("start game", len(batch.connections))
         batch.start()
         tasks.append(asyncio.create_task(self.send_ticks(batch_code)))
-
         for websocket in batch.connections:
              await websocket.send(batch.start_repr_json(websocket))
+
         print("Sent start data to player")
-            # tasks.append(asyncio.create_task(self.threaded_client_in_game(i, websocket, batch)))
-        
-        # Wait for all tasks to complete and handle exceptions
-        # for task in tasks:
-        #     try:
-        #         await task
-        #     except Exception as e:
-        #         print(f"An exception occurred: {e}")
 
     async def problem(self, message):
         pass
 
     def run(self):
-        loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
-        # Starting the server
-        start_server = websockets.serve(self.handler, self.server, self.port)
+        # Create an SSL context
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ssl_context.load_cert_chain(certfile="/home/ec2-user/Lavava/server.crt", keyfile="/home/ec2-user/Lavava/private.key")
+
+        # Starting the server with SSL
+        start_server = websockets.serve(self.handler, self.server, self.port, ssl=ssl_context)
         server = loop.run_until_complete(start_server)
 
         # Print server running
-        print("Websocket server running on {}:{}".format(self.server, self.port))
-
-        # Setup graceful shutdown
-        for signame in ('SIGINT', 'SIGTERM'):
-            loop.add_signal_handler(getattr(signal, signame),
-                                    lambda: asyncio.ensure_future(self.shutdown(server, signame)))
+        print("WebSocket server running on {}:{} with SSL".format(self.server, self.port))
 
         try:
             loop.run_forever()
         finally:
             loop.close()
 
-    async def shutdown(self, server, signame):
-        print(f"Received signal {signame}... shutting down")
-        server.close()
-        await server.wait_closed()
-        asyncio.get_event_loop().stop()
-    
-
+# Instantiate and run the server
 server = WebSocketServer(5553)
-server.run() 
+server.run()
