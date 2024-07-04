@@ -13,23 +13,10 @@ class WebSocketServer():
         self.running_games: dict[str, Batch] = {}  # Stores the active games with the game code as the key
 
     async def handler(self, websocket, path):
-        # self.locks[websocket] = asyncio.Lock()
-        # print("handler called for socket", websocket)
-        # if len(self.players) >= 2: 
-        #     self.players = {}
-        #     print("Resetting players")
-        # curr_players = len(self.players) 
-        # self.players[websocket] = curr_players # connects a websocket key to a number id
-        # print("current players", self.players)
-        # try:
         async for message in websocket:
             print("message", message)
-            # print(f"message {message} from {websocket}")
-            # async with self.locks[websocket]:
             data = json.loads(message)
             await self.process_message(websocket, data)
-        # except Exception as e:
-        #     print(f"Error processing message from {websocket}: {e}")
 
     async def process_message(self, websocket, data):
         # print(self.players)
@@ -64,12 +51,13 @@ class WebSocketServer():
                 print("Game is ready to start")
                 self.running_games[player_code] = self.waiting_players.pop(player_code)
                 print("created game with code ----------------------", player_code)
-                await self.start_game(self.running_games[player_code])
+                await self.start_game(player_code)
             else:
                 print("Game is not ready to start")
 
-    async def send_ticks(self, batch:Batch):
-        while True:
+    async def send_ticks(self, batch_code: str):
+        batch = self.running_games[batch_code]
+        while not batch.done():
             # await asyncio.sleep(1)
             # print("tick")
             batch.tick()
@@ -77,6 +65,9 @@ class WebSocketServer():
                 batch_json = batch.tick_repr_json(websocket)
                 await websocket.send(batch_json)
             await asyncio.sleep(0.1)
+        
+        # should be its own delete function, but leaving for now due to async complexity
+        self.running_games.pop(batch_code)
 
     async def send_test_ticks(self, batch):
         json_list = []
@@ -100,11 +91,12 @@ class WebSocketServer():
                     await websocket.send(json.dumps(batch_json))
             await asyncio.sleep(0.1)
         
-    async def start_game(self, batch):
+    async def start_game(self, batch_code):
+        batch = self.running_games[batch_code]
         tasks = []
         print("start game", len(batch.connections))
         batch.start()
-        tasks.append(asyncio.create_task(self.send_ticks(batch)))
+        tasks.append(asyncio.create_task(self.send_ticks(batch_code)))
 
         for websocket in batch.connections:
              await websocket.send(batch.start_repr_json(websocket))

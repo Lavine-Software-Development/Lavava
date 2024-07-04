@@ -48,11 +48,9 @@ const Lobby: React.FC = () => {
         });
 
         // Cleanup function to close the WebSocket when the component unmounts
-        // return () => {
-        //     if (network?.socket) {
-        //         network?.socket.close();
-        //     }
-        // };
+        //return () => {
+
+        //};
     }, []);
 
     if (!boardData) {

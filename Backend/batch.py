@@ -13,6 +13,7 @@ class Batch:
     def __init__(self, count, mode, conn, ability_data):
         self.connections = {}
         self.elo_changes = {}
+        self.ending_count = 0
         self.player_count = count
         self.mode = mode
         self.gs = GameState()
@@ -61,8 +62,11 @@ class Batch:
         start_json = plain_json(start_dict)
         return start_json
     
-    # def send_ready(self, player):
-    #     return self.game.player_dict[player].ps.value >= PS.WAITING.value
+    def done(self):
+        if self.elo_changes != {}:
+            self.ending_count += 1
+            return self.ending_count == 5
+        return False
     
     def tick_repr_json(self, conn):
         player_id = self.connections[conn]
