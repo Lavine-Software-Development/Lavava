@@ -38,6 +38,9 @@ const Home: React.FC = () => {
                     console.error("Failed to fetch abilities:", error);
                 });
         }
+        if (token && selectedAbilities) {
+            setTabAndCloseDropdown("LADDER");
+        }
     }, []);
 
     const handleLogout = () => {
@@ -127,16 +130,26 @@ const Home: React.FC = () => {
             <div className="profile-card">
                 <h1 className="form-title">Home</h1>
                 <div className="app-drop-down-container" ref={playDropdownRef}>
+                {selectedAbilities.length > 0 ? (
                     <button onClick={handlePlayDropdownFocus}>Play</button>
+                    ) : (
+                    <button style={{
+                        backgroundColor: 'grey',
+
+                        cursor: 'not-allowed'
+                    }}>
+                        Build Deck to Play
+                    </button>
+                )} 
                     {playDropdownOpen && (
                         <ul>
+                            <li onClick={handleLadderClick}>Ladder</li>
                             <li onClick={() => setTabAndCloseDropdown("HOST")}>
                                 Host
                             </li>
                             <li onClick={() => setTabAndCloseDropdown("JOIN")}>
                                 Join
                             </li>
-                            <li onClick={handleLadderClick}>Ladder</li>
                         </ul>
                     )}
                 </div>
@@ -172,9 +185,9 @@ const Home: React.FC = () => {
                 <div className="profile-card">
                     {tab === "HOST" ? (
                         <div>
-                            <h1 style={{ textAlign: "center" }}>Host Game</h1>
+                            <h1 style={{ textAlign: "center" }}>Host</h1>
                             <h3 style={{ textAlign: "center" }}>
-                                Ability : Count
+                                (Friendly Match)
                             </h3>
                             {selectedAbilities.map((ability, index) => (
                                 <p style={{ textAlign: "center" }} key={index}>
@@ -218,27 +231,15 @@ const Home: React.FC = () => {
                                     </ul>
                                 )}
                             </div>
-                            <button className="btn" onClick={handleHostGame}>
-                                Host
+                            <button className="btn" style={{ backgroundColor: 'green', }} onClick={handleHostGame}>
+                                Host Match
                             </button>
-                            <button className="btn" onClick={handleHostGame}>
-                                Host w/ Key
-                            </button>
-                            <input
-                                type="text"
-                                className="text-box"
-                                placeholder="enter key code"
-                                value={keyCode}
-                                onChange={(e) =>
-                                    setKeyCode(e.target.value.toUpperCase())
-                                }
-                            />
                         </div>
                     ) : tab === "JOIN" ? (
                         <div>
-                            <h1 style={{ textAlign: "center" }}>Join Game</h1>
+                            <h1 style={{ textAlign: "center" }}>Join</h1>
                             <h3 style={{ textAlign: "center" }}>
-                                Ability : Count
+                                (Friendly Match)
                             </h3>
                             {selectedAbilities.map((ability, index) => (
                                 <p style={{ textAlign: "center" }} key={index}>
@@ -257,8 +258,8 @@ const Home: React.FC = () => {
                                     : {ability.count}
                                 </p>
                             ))}
-                            <button className="btn" onClick={handleJoinGame}>
-                                Join
+                            <button className="btn"  style={{ backgroundColor: 'green', }} onClick={handleJoinGame}>
+                                Join Match
                             </button>
                             <input
                                 type="text"
@@ -273,7 +274,10 @@ const Home: React.FC = () => {
                     ) : (
                         tab === "LADDER" && (
                             <div>
-                                <h1>Ladder</h1>
+                                <h1 style={{ textAlign: "center" }}>Ladder</h1>
+                                <h3 style={{ textAlign: "center" }}>
+                                (For Elo)
+                                </h3>
                                 {selectedAbilities.map((ability, index) => (
                                     <p
                                         style={{ textAlign: "center" }}
@@ -294,11 +298,38 @@ const Home: React.FC = () => {
                                         : {ability.count}
                                     </p>
                                 ))}
+                                <label>Player Count:</label>
+                                <div
+                                    className="player-count-drop-down-container"
+                                    ref={playerCountDropdownRef}
+                                >
+                                    <button
+                                        onClick={handlePlayerCountDropdownFocus}
+                                    >
+                                        {playerCount}
+                                    </button>
+                                    {playerCountDropdownOpen && (
+                                        <ul>
+                                            {[2, 3, 4, 5].map((count) => (
+                                                <li
+                                                    key={count}
+                                                    onClick={() =>
+                                                        hostTab(count, "")
+                                                    }
+                                                >
+                                                    {count}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
                                 <button
                                     className="btn"
+                                    style={{ backgroundColor: 'green', }} 
                                     onClick={handleHostGame}
                                 >
-                                    Join Ladder
+                                    
+                                    Find Match
                                 </button>
                             </div>
                         )

@@ -29,7 +29,7 @@ export function NavBar() {
             </NavLink>
             <NavLink to="/home" className="navLinkContainer">
                 <img
-                    src=""
+                    src="./images/Home_orange.png"
                     width="50"
                     height="50"
                     alt=""
