@@ -15,59 +15,6 @@ const Home: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showSalaryPopup, setShowSalaryPopup] = useState(false);
     const [showLoginPopup, setShowLoginPopup] = useState(false);
-    const [salary, setSalary] = useState(0);
-    const [initialSalary, setInitialSalary] = useState(0);
-    const [abilities, setAbilities] = useState<Ability[]>([]);
-    const [selectedCounts, setSelectedCounts] = useState<{
-        [key: string]: number;
-    }>({});
-
-    useEffect(() => {
-        const fetchAbilities = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/abilities");
-                const data = await response.json();
-                if (response.ok) {
-                    setAbilities(data.abilities);
-                    setInitialSalary(data.salary);
-                    const storedAbilities =
-                        sessionStorage.getItem("selectedAbilities");
-                    if (storedAbilities) {
-                        const parsedAbilities = JSON.parse(storedAbilities);
-                        const initialCounts = parsedAbilities.reduce(
-                            (
-                                counts: { [key: string]: number },
-                                ability: { name: string; count: number }
-                            ) => {
-                                counts[ability.name] = ability.count;
-                                return counts;
-                            },
-                            {}
-                        );
-                        setSelectedCounts(initialCounts);
-                    }
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (error) {
-                console.error("Error fetching abilities:", error);
-            }
-        };
-
-        fetchAbilities();
-    }, []);
-
-    useEffect(() => {
-        const totalCost = Object.entries(selectedCounts).reduce(
-            (total, [name, count]) => {
-                const abilityCost =
-                    abilities.find((a) => a.name === name)?.cost || 0;
-                return total + abilityCost * count;
-            },
-            0
-        );
-        setSalary(initialSalary - totalCost);
-    }, [selectedCounts, abilities, initialSalary]);
 
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
@@ -111,24 +58,16 @@ const Home: React.FC = () => {
     };
 
     const handleHostGame = () => {
-        if (salary > 10) {
-            setShowSalaryPopup(true);
-        } else {
-            sessionStorage.setItem("type", "HOST");
-            sessionStorage.setItem("player_count", playerCount.toString());
-            sessionStorage.setItem("key_code", keyCode);
-            navigate("/play");
-        }
+        sessionStorage.setItem("type", "HOST");
+        sessionStorage.setItem("player_count", playerCount.toString());
+        sessionStorage.setItem("key_code", keyCode);
+        navigate("/play");
     };
 
     const handleJoinGame = () => {
-        if (salary > 10) {
-            setShowSalaryPopup(true);
-        } else {
-            sessionStorage.setItem("type", "JOIN");
-            sessionStorage.setItem("key_code", keyCode);
-            navigate("/play");
-        }
+        sessionStorage.setItem("type", "JOIN");
+        sessionStorage.setItem("key_code", keyCode);
+        navigate("/play");
     };
 
     const [playDropdownOpen, setPlayDropdownOpen] = useState<boolean>(false);
@@ -341,7 +280,10 @@ const Home: React.FC = () => {
                             <div>
                                 <h1>Ladder</h1>
                                 {selectedAbilities.map((ability, index) => (
-                                    <p style={{ textAlign: "center" }} key={index}>
+                                    <p
+                                        style={{ textAlign: "center" }}
+                                        key={index}
+                                    >
                                         {ability.name}
                                         <img
                                             src={`./public/assets/abilityIcons/${ability.name}.png`}
@@ -357,7 +299,10 @@ const Home: React.FC = () => {
                                         : {ability.count}
                                     </p>
                                 ))}
-                                <button className="btn" onClick={handleHostGame}>
+                                <button
+                                    className="btn"
+                                    onClick={handleHostGame}
+                                >
                                     Join Ladder
                                 </button>
                             </div>
@@ -369,7 +314,8 @@ const Home: React.FC = () => {
                 {showSalaryPopup && (
                     <div className="popup salary-popup">
                         <p>
-                            You cannot host a game with a leftover salary greater than 10.
+                            You cannot host a game with a leftover salary
+                            greater than 10.
                         </p>
                         <button onClick={handleClosePopups}>OK</button>
                     </div>
@@ -380,9 +326,7 @@ const Home: React.FC = () => {
                         <button onClick={() => navigate("/login")}>
                             Log In
                         </button>
-                        <button onClick={handleClosePopups}>
-                            Cancel
-                        </button>
+                        <button onClick={handleClosePopups}>Cancel</button>
                     </div>
                 )}
             </div>
