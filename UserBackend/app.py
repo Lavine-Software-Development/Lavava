@@ -96,6 +96,39 @@ def user_decks(current_user):
     else:
         return []
     
+def update_elos(elos, k_factor=32):
+    n = len(elos)
+    new_elos = elos.copy()
+    
+    for i in range(n):
+        for j in range(i+1, n):
+            expected_i = 1 / (1 + 10**((elos[j] - elos[i]) / 400))
+            expected_j = 1 - expected_i
+            
+            score_i = 1  # Player i won against player j
+            score_j = 0  # Player j lost against player i
+            
+            new_elos[i] += k_factor * (score_i - expected_i)
+            new_elos[j] += k_factor * (score_j - expected_j)
+    
+    return [round(elo) for elo in new_elos]
+
+# Test cases
+# test_cases = [
+#     [1000, 500, 1000],
+#     [1000, 1000],
+#     [1200, 1250, 1300]
+# ]
+
+# for case in test_cases:
+#     print(f"Original Elos: {case}")
+#     print(f"Updated Elos:  {update_elos(case)}")
+#     print()
+    
+# to be updated with actual db queries
+def player_to_elo(len: int):
+    return [1138, 1200, 1100, 1121][:len]
+    
 @app.route('/abilities', methods=['GET'])
 def get_abilities():
     abilities = [
@@ -127,6 +160,15 @@ def send_confirmation_email(user_email):
     except Exception as e:
         print(f"Failed to send email: {e}")
         return "Error sending email."
+
+
+@app.route('/elo', methods=['POST'])
+def update_elo():
+    data = request.json
+    elo_list = player_to_elo(len(data))
+    new_elos = update_elos(elo_list)
+    elo_tuples = list(zip(elo_list, new_elos))
+    return jsonify({"new_elos": elo_tuples})
 
 
 if __name__ == '__main__':

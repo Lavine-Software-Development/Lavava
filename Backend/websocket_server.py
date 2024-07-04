@@ -1,28 +1,26 @@
+import random
 import websockets
 import asyncio
 from batch import Batch
-import sys
-import time
 import json
 import signal
+
 class WebSocketServer():
     def __init__(self, port):
         self.server = "0.0.0.0"
         self.port = port
-        self.waiting_players = None
-        self.games = {}  # Stores the active games with the game code as the key
-        self.locks = {}
-        self.players = {}
+        self.waiting_players: dict[str, Batch] = {}
+        self.running_games: dict[str, Batch] = {}  # Stores the active games with the game code as the key
 
     async def handler(self, websocket, path):
         # self.locks[websocket] = asyncio.Lock()
         # print("handler called for socket", websocket)
-        if len(self.players) >= 2: 
-            self.players = {}
-            print("Resetting players")
-        curr_players = len(self.players)
-        self.players[websocket] = curr_players
-        print("current players", self.players)
+        # if len(self.players) >= 2: 
+        #     self.players = {}
+        #     print("Resetting players")
+        # curr_players = len(self.players) 
+        # self.players[websocket] = curr_players # connects a websocket key to a number id
+        # print("current players", self.players)
         # try:
         async for message in websocket:
             print("message", message)
@@ -33,34 +31,40 @@ class WebSocketServer():
         # except Exception as e:
         #     print(f"Error processing message from {websocket}: {e}")
 
-    async def process_message(self, websocket,data):
+    async def process_message(self, websocket, data):
         # print(self.players)
         # print("Received message in process: ", data)
-        if 'code' and 'items' in data:
+        if 'game_id' and 'items' in data:
             # print("yoooooo")
-            self.waiting_players.process(self.players[websocket], data)
+            self.running_games[data["game_id"]].process(websocket, data)
         else:
             player_type = data["type"]
             player_count = data["players"]
             mode = data["mode"]
             abilities = data["abilities"]
-        
-            if player_type == "HOST":
-                player_count = int(player_count)
-                self.waiting_players = Batch(player_count, mode, websocket, abilities)
-                message = json.dumps({"msg": "Players may join"})
-            elif player_type == "JOIN":
-                if self.waiting_players:
-                    message = json.dumps({"msg": "JOINED"})
-                    await websocket.send(message)
-                    if message := self.waiting_players.add_player(websocket, abilities):
-                        await self.problem(websocket, message)
-                else:
-                    await websocket.send("FAILED")
-                    return
-            if self.waiting_players.is_ready():
+
+            player_code = data["code"]
+            if player_type == "LADDER":
+                player_code = str(player_count)
+            elif player_type == "HOST":
+                player_code = str(random.randint(1000, 9999))
+                
+            if player_type in ("HOST", "LADDER") and player_code not in self.waiting_players:
+                self.waiting_players[player_code] = Batch(int(player_count), player_type, websocket, abilities)
+            elif player_type in ("JOIN", "LADDER") and player_code in self.waiting_players:
+                if message := self.waiting_players[player_code].add_player(websocket, abilities):
+                    await self.problem(message)
+            else:
+                await websocket.send("FAILED")
+                return
+            message = json.dumps({"game_id": player_code})
+            await websocket.send(message)
+            
+            if self.waiting_players[player_code].is_ready():
                 print("Game is ready to start")
-                await self.start_game(self.waiting_players)
+                self.running_games[player_code] = self.waiting_players.pop(player_code)
+                print("created game with code ----------------------", player_code)
+                await self.start_game(self.running_games[player_code])
             else:
                 print("Game is not ready to start")
 
@@ -69,10 +73,11 @@ class WebSocketServer():
             # await asyncio.sleep(1)
             # print("tick")
             batch.tick()
-            for i, websocket in enumerate(batch.connections):
-                batch_json = batch.tick_repr_json(i)
+            for websocket in batch.connections:
+                batch_json = batch.tick_repr_json(websocket)
                 await websocket.send(batch_json)
             await asyncio.sleep(0.1)
+
     async def send_test_ticks(self, batch):
         json_list = []
         file_path = "/Users/akashilangovan/ian_game/Lavava/Backend/server_json.txt"
@@ -101,8 +106,8 @@ class WebSocketServer():
         batch.start()
         tasks.append(asyncio.create_task(self.send_ticks(batch)))
 
-        for i, websocket in enumerate(batch.connections):
-             await websocket.send(batch.start_repr_json(i))
+        for websocket in batch.connections:
+             await websocket.send(batch.start_repr_json(websocket))
         print("Sent start data to player")
             # tasks.append(asyncio.create_task(self.threaded_client_in_game(i, websocket, batch)))
         
@@ -113,29 +118,9 @@ class WebSocketServer():
         #     except Exception as e:
         #         print(f"An exception occurred: {e}")
 
-    async def threaded_client_in_game(self, player, websocket, batch: Batch):
-        await websocket.send(batch.start_repr_json(player))
-        print("Sent start data to player")
-        # while True:
-        #     print("hi")
-        #     try:
-        #         data = await websocket.recv()
-        #         if not data:
-        #             print("Disconnected")
-        #             break
-        #         else:
-        #             data = json.loads(data)
-        #             print("Received here: ", data)
-        #             print("player", player)
-        #             batch.process(player, data)  
-        #     except websockets.ConnectionClosed as e:
-        #         print(e)
-        #         break
-        # print("Lost connection")
-        # await websocket.close()
+    async def problem(self, message):
+        pass
 
-    async def problem(self, player, conn, batch:Batch):
-        await websocket.send(json.dumps({"COB": message}))
     def run(self):
         loop = asyncio.get_event_loop()
 

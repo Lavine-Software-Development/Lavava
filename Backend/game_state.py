@@ -11,7 +11,7 @@ class GameState:
     @state.setter
     def state(self, new_state):
         if self._state != new_state:
-            # print(f"{self._state} to {new_state}")
+            print(f"{self._state} to {new_state}")
             self._state = new_state
             
     def next(self):

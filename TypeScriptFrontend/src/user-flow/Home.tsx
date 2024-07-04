@@ -34,7 +34,13 @@ const Home: React.FC = () => {
                     console.error("Failed to fetch abilities:", error);
                 });
         }
+        toTab("LADDER");
     }, []);
+
+    const toTab = (tab: string) => {
+        setTab(tab);
+        setKeyCode("");
+    }
 
     const handleLogout = () => {
         localStorage.removeItem("userToken");
@@ -42,9 +48,8 @@ const Home: React.FC = () => {
         navigate("/login");
     };
 
-    const hostTab = (e: number, code: string) => {
+    const hostTab = (e: number) => {
         setPlayerCount(e);
-        setKeyCode(code);
     };
 
     const handleHostGame = () => {
@@ -54,6 +59,13 @@ const Home: React.FC = () => {
         // navigate('/play');
         navigate("/lobby");
     };
+
+    const handleLadderGame = () => {
+        sessionStorage.setItem("type", "LADDER");
+        sessionStorage.setItem("player_count", playerCount.toString());
+        // navigate('/play');
+        navigate("/lobby");
+    }
 
     const handleJoinGame = () => {
         sessionStorage.setItem("type", "JOIN");
@@ -111,22 +123,23 @@ const Home: React.FC = () => {
             {selectedAbilities.length > 0 && (
                 <div className="profile-card">
                     <div className="tab-header">
-                        <button onClick={() => setTab("HOST")}>HOST</button>
-                        <button onClick={() => setTab("JOIN")}>JOIN</button>
+                        <button onClick={() => toTab("HOST")}>HOST</button>
+                        <button onClick={() => toTab("JOIN")}>JOIN</button>
+                        <button onClick={() => toTab("LADDER")}>LADDER</button>
                     </div>
                     <ul>
                         {selectedAbilities.map((ability, index) => (
                             <li key={index}>
-                                {ability.name} - Count: {ability.count}
+                                {ability.name} - Count  : {ability.count}
                             </li>
                         ))}
                     </ul>
-                    {tab === "HOST" ? (
+                    {tab != "JOIN" ? (
                         <div>
                             <label>Player Count:</label>
                             <select
                                 onChange={(e) =>
-                                    hostTab(Number(e.target.value), "1234")
+                                    hostTab(Number(e.target.value))
                                 }
                                 value={playerCount}
                             >
@@ -136,13 +149,22 @@ const Home: React.FC = () => {
                                     </option>
                                 ))}
                             </select>
-
-                            <button
-                                className="btn"
-                                onClick={() => handleHostGame()}
-                            >
-                                Host Game
-                            </button>
+                            {tab === "HOST" ? (
+                                <button
+                                    className="btn"
+                                    onClick={() => handleHostGame()}
+                                >
+                                    Host Game
+                                </button>
+                            ) : (
+                                <button
+                                    className="btn"
+                                    onClick={() => handleLadderGame()}
+                                >
+                                    FIND GAME
+                                </button>
+                            )}
+  
                         </div>
                     ) : (
                         <div>

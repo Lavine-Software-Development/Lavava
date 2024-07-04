@@ -1,6 +1,6 @@
 export class OtherPlayer {
     name: string;
-    color: readonly [number, number, number];
+    _color: readonly [number, number, number];
     ready: boolean;
     eliminated: boolean;
     victor: boolean;
@@ -11,6 +11,14 @@ export class OtherPlayer {
         this.ready = ready;
         this.eliminated = eliminated;
         this.victor = victor;
+    }
+
+    get color(): readonly [number, number, number] {
+        return this._color;
+    }
+
+    set color(color: readonly [number, number, number]) {
+        this._color = color;
     }
 }
 

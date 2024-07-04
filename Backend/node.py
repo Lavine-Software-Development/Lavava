@@ -16,6 +16,7 @@ from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
 from method_mulitplier import method_multipliers
 from end_game_methods import stall, freeAttack, shrink
+from playerStateEnums import PlayerStateEnum as PSE
 
 
 @track_changes('owner', 'state', 'value', 'effects')
@@ -124,7 +125,7 @@ class Node(JsonableTracked):
         self.pos = (self.pos_x_per * width, self.pos_y_per * height)
         
     def owned_and_alive(self):
-        return self.owner is not None
+        return self.owner is not None and self.owner.ps.value < PSE.ELIMINATED.value
 
     def tick(self):
         self.value += self.grow()

@@ -58,6 +58,8 @@ export class MainScene extends Scene {
     private timerText: Phaser.GameObjects.Text;
     private capitalsText: Phaser.GameObjects.Text;
     private statusText: Phaser.GameObjects.Text;
+    private eloText: Phaser.GameObjects.Text;
+    private eloDifference: Phaser.GameObjects.Text;
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
 
@@ -202,6 +204,11 @@ export class MainScene extends Scene {
         );
     }
 
+    forfeit(): void {
+        this.simple_send(stateCodes.FORFEIT_CODE);
+        this.abilityManager.forfeit(this);
+    }
+
     keydown(key: number): void {
         if (key === stateCodes.OVERRIDE_RESTART_CODE) {
             this.simple_send(stateCodes.RESTART_CODE);
@@ -310,9 +317,11 @@ export class MainScene extends Scene {
             }
         }
 
-        let ability = this.abilityManager.triangle_validate(position);
-        if (ability) {
-            return ability;
+        if (this.ps === PSE.PLAY) {
+            let ability = this.abilityManager.triangle_validate(position);
+            if (ability) {
+                return ability;
+            }
         }
 
         return false;
@@ -351,14 +360,14 @@ export class MainScene extends Scene {
             }
         }
         let key = this.abilityManager.clickSelect(this.input.activePointer.position);
-        if (key) {
+        if (key && this.ps === PSE.PLAY) {
             this.abilitySelection(key);
         }
     }
 
     send(items?: number[], code?: number): void {
         this.network.sendMessage(
-            JSON.stringify(this.highlight.sendFormat(items, code))
+            JSON.stringify(this.highlight. sendFormat(items, code))
         );
     }
     simple_send(code: number): void {
@@ -366,6 +375,7 @@ export class MainScene extends Scene {
             JSON.stringify({
                 code: code,
                 items: {},
+                game_id: sessionStorage.getItem("key_code"),
             })
         );
     }
@@ -387,7 +397,9 @@ export class MainScene extends Scene {
         if (this.ps < PSE.ELIMINATED) {
             this.simple_send(stateCodes.FORFEIT_CODE);
         }
-        this.navigate("/home");
+        else {
+            this.navigate("/home");
+        }
     }
 
     initialize_data(): void {
@@ -451,6 +463,25 @@ export class MainScene extends Scene {
                         );
                         this.statusText.setOrigin(1, 0);
                     }
+                }
+
+                if ((!this.eloText) && new_data.hasOwnProperty("new_elos")) {
+                    let difference = Number(new_data["new_elos"][1]) - Number(new_data["new_elos"][0]);
+                    let color = difference > 0 ? Colors.GREEN : Colors.RED;
+                    let symbol = difference > 0 ? "+" : "";
+                    this.eloText = this.add.text(
+                        300, 
+                        400, 
+                        `Elo: ${new_data["new_elos"][0]} -> ${new_data["new_elos"][1]}`, 
+                        { fontFamily: 'Arial', fontSize: '24px', color: '#000000' }
+                    );
+                    this.eloText.setOrigin(0, 0);
+                    this.eloDifference = this.add.text(
+                        310, 
+                        360, 
+                        `(${symbol}${difference})`, 
+                        { fontFamily: 'Arial', fontSize: '24px', color: this.rgbToHex(color) }
+                    );
                 }
 
                 if (this.countdown != new_data["countdown_timer"].toFixed(0)) {

@@ -55,8 +55,9 @@ class ServerGame(Jsonable):
             print("failed to use event")
     
     def eliminate(self, player, forced=False):
+        rank = len(self.remaining)
         self.remaining.remove(player)
-        self.player_dict[player].eliminate()
+        self.player_dict[player].eliminate(rank)
         # Forced when they already have no nodes
         # Voluntary when they quit, thus the board needs to clean up what they have that still exists
         if not forced:
@@ -142,7 +143,9 @@ class ServerGame(Jsonable):
         sorted_scores = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
         self.player_dict[sorted_scores[0][0]].win()
         for i in range(1, len(sorted_scores)):
-            self.player_dict[sorted_scores[i][0]].lose()
+            self.player_dict[sorted_scores[i][0]].lose(i + 1)
+
+        self.gs.end()
 
     def determine_ranks_from_elimination(self, winner):
         self.player_dict[winner].win()
@@ -150,5 +153,7 @@ class ServerGame(Jsonable):
             # all other players should be eliminated so theoretically this gets the rest
             if player.ps.value == PSE.ELIMINATED.value:
                 player.lose()
+
+        self.gs.end()
 
         

@@ -5,11 +5,14 @@ from playerStateEnums import PlayerStateEnum as PS
 from game import ServerGame
 import json_abilities
 from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, json_cost, plain_json
+import requests
+import json
 
 
 class Batch:
     def __init__(self, count, mode, conn, ability_data):
-        self.connections = []
+        self.connections = {}
+        self.elo_changes = {}
         self.player_count = count
         self.mode = mode
         self.gs = GameState()
@@ -17,10 +20,26 @@ class Batch:
         self.add_player(conn, ability_data)
         self.tick_dict = dict()
 
+    def update_elo(self):
+        # make a dictionary from str(connection.keys()) to the rank of the players in the game
+        connection_ranks = {str(conn): self.game.player_dict[self.connections[conn]].rank for conn in self.connections}
+        url = 'http://localhost:5001/elo'
+        response = requests.post(url, json=connection_ranks)
+        
+        if response.status_code == 200:
+            try:
+                response_data = response.json()
+                elo_list = response_data.get("new_elos")
+                self.elo_changes = elo_list
+            except ValueError:
+                print("Response is not valid JSON:", response.text)
+        else:
+            print(f"Request failed with status code {response.status_code}: {response.text}")
+
     def add_player(self, conn, ability_data):
-        player = len(self.connections)
-        if self.ability_process(player, ability_data):
-            self.connections.append(conn)
+        player_id = len(self.connections)
+        if self.ability_process(player_id, ability_data):
+            self.connections[conn] = player_id
             return False
         else:
             return "CHEATING: INVALID ABILITY SELECTION"
@@ -32,20 +51,24 @@ class Batch:
     def is_ready(self):
         return len(self.connections) == self.player_count
 
-    def start_repr_json(self, player) -> str:
+    def start_repr_json(self, conn) -> str:
+        player_id = self.connections[conn]
         start_dict = self.game.start_json
         start_dict["player_count"] = self.player_count
-        start_dict["player_id"] = player
+        start_dict["player_id"] = player_id
         start_dict["abilities"] = json_abilities.start_json()
         start_dict['isFirst'] = True
         start_json = plain_json(start_dict)
         return start_json
     
-    def send_ready(self, player):
-        return self.game.player_dict[player].ps.value >= PS.WAITING.value
+    # def send_ready(self, player):
+    #     return self.game.player_dict[player].ps.value >= PS.WAITING.value
     
-    def tick_repr_json(self, player):
-        self.tick_dict["player"] = self.player_tick_repr(player)
+    def tick_repr_json(self, conn):
+        player_id = self.connections[conn]
+        self.tick_dict["player"] = self.player_tick_repr(player_id)
+        if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {}:
+            self.tick_dict["new_elos"] = self.elo_changes[player_id]
         self.tick_dict["isFirst"] = False 
         tick_json = plain_json(self.tick_dict)
         return tick_json
@@ -53,8 +76,8 @@ class Batch:
     def set_group_tick_repr(self):
         self.tick_dict = self.game.tick_json
         
-    def player_tick_repr(self, player):
-        return self.game.player_dict[player].tick_json
+    def player_tick_repr(self, player_id):
+        return self.game.player_dict[player_id].tick_json
     
     def tick(self):
         # print(self.game.gs.value, GS.START_SELECTION.value)
@@ -62,6 +85,8 @@ class Batch:
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
         self.set_group_tick_repr()
+        if self.game.gs.value == GS.GAME_OVER.value and self.elo_changes == {}:
+            self.update_elo()
 
     def ability_process(self, player, data):
         data = convert_keys_to_int(data)
@@ -72,20 +97,21 @@ class Batch:
             self.game.set_abilities(player, {})
             return 
 
-    def process(self, player, data):
+    def process(self, conn, data): 
+        player_id = self.connections[conn]
         data = convert_keys_to_int(data)
-        key = data['code']
+        key = data["code"]
             
         if key == RESTART_GAME_VAL:
             self.game.restart()
         elif key in (ELIMINATE_VAL, FORFEIT_CODE):
-            self.game.eliminate(player)
+            self.game.eliminate(player_id)
         elif key in ALL_ABILITIES:
             print("ABILITY")
-            self.game.effect(key, player, data['items'])
+            self.game.effect(key, player_id, data['items'])
         elif key in EVENTS:
             print("EVENT")
-            self.game.event(key, player, data['items'])
+            self.game.event(key, player_id, data['items'])
         else:
             print("NOT ALLOWED")
         print("Done processing")

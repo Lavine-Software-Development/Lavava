@@ -4,6 +4,7 @@ export class Network {
     public socket: WebSocket | null = null;
     serverURL: string;
     updateCallback: (board_data) => void;
+    gameIDCallback: (game_id: string) => void;
     messageQueue: string[] = [];
     private boardDataPromise: Promise<any> | null = null;
     private boardDataResolver: ((data: any) => void) | null = null;
@@ -31,8 +32,9 @@ export class Network {
         this.socket.onmessage = (event) => {
             // console.log("Received message: ", event.data);
             let data = JSON.parse(event.data);
-            if (data.hasOwnProperty("msg")) {
-                // console.log("Message: ", data.msg);
+            if (data.hasOwnProperty("game_id")) {
+                this.gameIDCallback(data.game_id);
+                console.log("Game ID received: ", data.game_id);
             } else {
                 if (data.isFirst === true) {
                     // console.log("Board data received");

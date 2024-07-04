@@ -9,10 +9,20 @@ const updateCallback = () => {
 
 const Lobby: React.FC = () => {
     const [boardData, setBoardData] = useState(null);
+    const [gameID, setGameID] = useState("");
+    const [gameType, setGameType] = useState("");
     const navigate = useNavigate();
     const network = useContext(NetworkContext);
+
+    const gameCode = (code: string) => {
+        setGameID(code);
+        sessionStorage.setItem("key_code", code);
+    }
+
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        setGameID(sessionStorage.getItem("key_code") || "");
+        setGameType(sessionStorage.getItem("type") || "");
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
             : [];
@@ -23,6 +33,11 @@ const Lobby: React.FC = () => {
         console.log("Got network from context");
         // const network = new Network(serverURL, updateCallback);
         // network?.connectWebSocket();
+        if (network) {
+            network.gameIDCallback = gameCode;
+            console.log("bind happened?");
+        }
+        
         network?.connectWebSocket();
         network?.setupUser(abilityCounts)
         // Wait for the board data
@@ -44,7 +59,7 @@ const Lobby: React.FC = () => {
         return (
             <div>
                 <h1>Waiting...</h1>
-                {/* Add your waiting symbol here */}
+                { gameType != "LADDER" && <h2>Game Code: { gameID }</h2> }
             </div>
         );
     }

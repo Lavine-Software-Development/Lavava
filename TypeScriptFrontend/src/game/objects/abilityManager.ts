@@ -38,6 +38,10 @@ export class AbstractAbilityManager {
         this.abilityText.setOrigin(1, 1);
     }
 
+    forfeit(scene): void {
+        this.reset();
+    }
+
     delete(): void {
         // Clear all graphics
         this.BridgeGraphics.clear();

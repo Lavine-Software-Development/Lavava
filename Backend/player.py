@@ -39,20 +39,27 @@ class DefaultPlayer(Jsonable):
         self.count = 0
         self.abilities = dict()
         self.ps = PlayerState()
+        self.rank = 0
         self.full_capital_count = 0
 
-    def eliminate(self):
+    def eliminate(self, rank):
+        self.rank = rank
         self.ps.eliminate()
         self.color = GREY
+        for ability in self.abilities.values():
+            ability.load_amount = 0
 
     def update(self):
         for ability in self.abilities.values():
             ability.update()
 
     def win(self):
+        self.rank = 1
         self.ps.victory()
 
-    def lose(self):
+    def lose(self, rank=None):
+        if rank:
+            self.rank = rank
         self.ps.defeat()
 
     def capital_handover(self, gain):
