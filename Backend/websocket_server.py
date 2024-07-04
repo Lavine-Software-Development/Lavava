@@ -106,8 +106,8 @@ class WebSocketServer():
 
         # Create an SSL context
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        ssl_context.load_cert_chain(certfile="/home/ec2-user/Lavava/server.crt", keyfile="/home/ec2-user/Lavava/private.key")
-
+        ssl_context.load_cert_chain(certfile="/Users/akashilangovan/ian_game/server.crt", keyfile="/Users/akashilangovan/ian_game/private.key")
+        print(ssl_context)
         # Starting the server with SSL
         start_server = websockets.serve(self.handler, self.server, self.port, ssl=ssl_context)
         server = loop.run_until_complete(start_server)

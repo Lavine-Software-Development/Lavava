@@ -3,15 +3,24 @@ import { NameToCode } from "./constants";
 export class Network {
     public socket: WebSocket | null = null;
     serverURL: string;
-    updateCallback: (board_data) => void;
+    updateCallback: (board_data: any) => void;
     gameIDCallback: (game_id: string) => void;
     messageQueue: string[] = [];
     private boardDataPromise: Promise<any> | null = null;
     private boardDataResolver: ((data: any) => void) | null = null;
+    private reconnectInterval: number;
+    private reconnectAttempts: number;
 
-    constructor(serverURL: string, updateCallback: () => void) {
+    constructor(
+        serverURL: string,
+        updateCallback: (board_data: any) => void,
+        reconnectInterval: number = 5000,
+        reconnectAttempts: number = Infinity
+    ) {
         this.serverURL = serverURL;
         this.updateCallback = updateCallback;
+        this.reconnectInterval = reconnectInterval;
+        this.reconnectAttempts = reconnectAttempts;
 
         // Initialize the board data promise
         this.boardDataPromise = new Promise((resolve) => {
@@ -19,7 +28,12 @@ export class Network {
         });
     }
 
-    connectWebSocket(): void {
+    connectWebSocket(attempts = 0): void {
+        if (attempts >= this.reconnectAttempts) {
+            console.error("Max reconnect attempts reached");
+            return;
+        }
+
         console.log("Trying to connect to WebSocket...");
         this.socket = new WebSocket(this.serverURL);
 
@@ -30,32 +44,32 @@ export class Network {
         };
 
         this.socket.onmessage = (event) => {
-            // console.log("Received message: ", event.data);
             let data = JSON.parse(event.data);
             if (data.hasOwnProperty("game_id")) {
                 this.gameIDCallback(data.game_id);
                 console.log("Game ID received: ", data.game_id);
             } else {
                 if (data.isFirst === true) {
-                    // console.log("Board data received");
                     if (this.boardDataResolver) {
                         this.boardDataResolver(data);
                         this.boardDataResolver = null; // Ensure the resolver is called only once
                     }
                 } else {
-                    // console.log("Calling update callback");
                     this.updateCallback(data);
                 }
-                // Call the update callback with the received data
             }
         };
 
         this.socket.onclose = () => {
-            console.log("WebSocket Disconnected");
+            console.log("WebSocket Disconnected. Attempting to reconnect...");
+            setTimeout(() => {
+                this.connectWebSocket(attempts + 1);
+            }, this.reconnectInterval);
         };
 
         this.socket.onerror = (error) => {
             console.error("WebSocket Error:", error);
+            this.socket!.close(); // Close the socket to trigger the onclose event
         };
     }
 
@@ -64,12 +78,12 @@ export class Network {
             this.socket.close();
             this.socket = null;
         }
-        
+
         // Reset the board data promise
         this.boardDataPromise = new Promise((resolve) => {
             this.boardDataResolver = resolve;
         });
-    
+
         // Clear the message queue
         this.messageQueue = [];
     }
@@ -104,7 +118,7 @@ export class Network {
             mode: "default",
             abilities: abilities,
         };
-        console.log("Trying to setp user with: ", send_dict);
+        console.log("Trying to set up user with: ", send_dict);
         this.sendMessage(JSON.stringify(send_dict));
     }
 
