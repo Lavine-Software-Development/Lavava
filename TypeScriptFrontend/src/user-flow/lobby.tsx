@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkContext } from "../game/NetworkContext";
 import { abilityCountsConversion } from "../game/objects/utilities";
-const serverURL = "ws://localhost:5553";
 const updateCallback = () => {
     console.log("Update received");
 };
@@ -17,7 +16,7 @@ const Lobby: React.FC = () => {
     const gameCode = (code: string) => {
         setGameID(code);
         sessionStorage.setItem("key_code", code);
-    }
+    };
 
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
@@ -37,9 +36,9 @@ const Lobby: React.FC = () => {
             network.gameIDCallback = gameCode;
             console.log("bind happened?");
         }
-        
+
         network?.connectWebSocket();
-        network?.setupUser(abilityCounts)
+        network?.setupUser(abilityCounts);
         // Wait for the board data
         network?.getBoardData().then((data) => {
             console.log("Board data received in component:", data);
@@ -57,7 +56,7 @@ const Lobby: React.FC = () => {
         return (
             <div>
                 <h1>Waiting...</h1>
-                { gameType != "LADDER" && <h2>Game Code: { gameID }</h2> }
+                {gameType != "LADDER" && <h2>Game Code: {gameID}</h2>}
             </div>
         );
     }

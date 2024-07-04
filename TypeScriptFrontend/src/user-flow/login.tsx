@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import "../../styles/style.css"; // Adjust the path as necessary
 
 interface LoginProps {
-  // Add any props here if needed, for example, a login function prop
+    // Add any props here if needed, for example, a login function prop
 }
 
 const Login: React.FC<LoginProps> = () => {
@@ -13,9 +13,9 @@ const Login: React.FC<LoginProps> = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('userToken');
+        const token = localStorage.getItem("userToken");
         if (token) {
-            navigate('/home');  // Redirect to home if token exists
+            navigate("/home"); // Redirect to home if token exists
         }
     }, [navigate]);
 
@@ -24,18 +24,18 @@ const Login: React.FC<LoginProps> = () => {
         setError(""); // Clear previous errors
 
         try {
-            const response = await fetch('http://localhost:5001/login', {
-                method: 'POST',
+            const response = await fetch("http://172.31.8.69:5001/login", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
             });
             const data = await response.json();
             if (response.ok) {
-                localStorage.setItem('userToken', data.token);
+                localStorage.setItem("userToken", data.token);
                 sessionStorage.clear();
-                navigate('/home');
+                navigate("/home");
             } else {
                 setError(data.message);
             }
@@ -78,19 +78,29 @@ const Login: React.FC<LoginProps> = () => {
                     <i className="fas fa-lock"></i>
                 </div>
                 {error && <div className="error-message">{error}</div>}
-                <a href="forgot-password" className="forgot-password">Forgot password?</a>
-                <input type="submit" className="btn" value="Sign In" name="Sign In" />
+                <a href="forgot-password" className="forgot-password">
+                    Forgot password?
+                </a>
+                <input
+                    type="submit"
+                    className="btn"
+                    value="Sign In"
+                    name="Sign In"
+                />
                 <input
                     type="button"
                     className="btn"
                     value="Play as Guest"
                     name="Play as Guest"
-                    onClick={() => navigate('/home')}
+                    onClick={() => navigate("/home")}
                 />
             </form>
-            <p>Don't have an account? <a href="register"> Register here!</a></p>
+            <p>
+                Don't have an account? <a href="register"> Register here!</a>
+            </p>
         </div>
     );
 };
 
 export default Login;
+

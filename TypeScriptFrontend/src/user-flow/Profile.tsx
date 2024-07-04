@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import '../../styles/style.css';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import "../../styles/style.css";
+import { Link } from "react-router-dom";
 
 interface ProfileData {
     userName: string;
@@ -13,9 +13,9 @@ interface ProfileData {
 
 const Profile: React.FC = () => {
     const [profileData, setProfileData] = useState<ProfileData>({
-        userName: 'Loading...',
-        displayName: 'Loading...',
-        email: 'Loading...',
+        userName: "Loading...",
+        displayName: "Loading...",
+        email: "Loading...",
         abilities: [], // Default to at least one empty list
         elo: 1000,
         past_games: [],
@@ -23,14 +23,17 @@ const Profile: React.FC = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const token = localStorage.getItem('userToken');
+            const token = localStorage.getItem("userToken");
             try {
-                const response = await fetch(`http://localhost:5001/profile`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+                const response = await fetch(
+                    `http://172.31.8.69:5001/profile`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
                     }
-                });
+                );
                 const data = await response.json();
                 if (response.ok) {
                     setProfileData(data);
@@ -38,16 +41,18 @@ const Profile: React.FC = () => {
                     throw new Error(data.message);
                 }
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error("Error fetching data:", error);
             }
         };
         fetchData();
     }, []);
 
-    if (!localStorage.getItem('userToken')) {
+    if (!localStorage.getItem("userToken")) {
         return (
             <div className="container" id="dashboard-container">
-                <p>Login <Link to="/login">here</Link> to see profile data.</p>
+                <p>
+                    Login <Link to="/login">here</Link> to see profile data.
+                </p>
             </div>
         );
     }
@@ -66,13 +71,17 @@ const Profile: React.FC = () => {
                 <div className="info-card">
                     <h2>My Deck</h2>
                     {profileData.abilities.map((item, index) => (
-                        <p key={index}>{item.count} {item.name}</p>
+                        <p key={index}>
+                            {item.count} {item.name}
+                        </p>
                     ))}
                 </div>
                 <div className="info-card">
                     <h2>My ELO: {profileData.elo}</h2>
                     {profileData.past_games.map((position, index) => (
-                        <p key={index}>Game {index + 1}: {position}</p>
+                        <p key={index}>
+                            Game {index + 1}: {position}
+                        </p>
                     ))}
                 </div>
             </div>
