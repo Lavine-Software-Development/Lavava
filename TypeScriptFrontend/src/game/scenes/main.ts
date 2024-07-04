@@ -398,6 +398,7 @@ export class MainScene extends Scene {
             this.simple_send(stateCodes.FORFEIT_CODE);
         }
         else {
+            this.network.disconnectWebSocket();
             this.navigate("/home");
         }
     }

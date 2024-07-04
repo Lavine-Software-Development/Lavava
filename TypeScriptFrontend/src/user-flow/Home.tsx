@@ -55,7 +55,7 @@ const Home: React.FC = () => {
     const handleHostGame = () => {
         sessionStorage.setItem("type", "HOST");
         sessionStorage.setItem("player_count", playerCount.toString());
-        sessionStorage.setItem("key_code", keyCode);
+        sessionStorage.removeItem("key_code");
         // navigate('/play');
         navigate("/lobby");
     };
@@ -63,6 +63,7 @@ const Home: React.FC = () => {
     const handleLadderGame = () => {
         sessionStorage.setItem("type", "LADDER");
         sessionStorage.setItem("player_count", playerCount.toString());
+        sessionStorage.removeItem("key_code");
         // navigate('/play');
         navigate("/lobby");
     }

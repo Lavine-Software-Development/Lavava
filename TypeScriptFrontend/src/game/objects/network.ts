@@ -59,6 +59,21 @@ export class Network {
         };
     }
 
+    disconnectWebSocket(): void {
+        if (this.socket) {
+            this.socket.close();
+            this.socket = null;
+        }
+        
+        // Reset the board data promise
+        this.boardDataPromise = new Promise((resolve) => {
+            this.boardDataResolver = resolve;
+        });
+    
+        // Clear the message queue
+        this.messageQueue = [];
+    }
+
     sendMessage(message: string): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             console.log("Sending message: ", message);
