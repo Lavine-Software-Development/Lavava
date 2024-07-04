@@ -26,7 +26,7 @@ const Profile: React.FC = () => {
             const token = localStorage.getItem("userToken");
             try {
                 const response = await fetch(
-                    `http://172.31.8.69:5001/profile`,
+                    `https://172.31.8.69:5001/profile`,
                     {
                         method: "GET",
                         headers: {
@@ -90,3 +90,4 @@ const Profile: React.FC = () => {
 };
 
 export default Profile;
+

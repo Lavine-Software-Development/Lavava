@@ -24,7 +24,7 @@ class Batch:
     def update_elo(self):
         # make a dictionary from str(connection.keys()) to the rank of the players in the game
         connection_ranks = {str(conn): self.game.player_dict[self.connections[conn]].rank for conn in self.connections}
-        url = 'http://172.31.8.69:5001/elo'
+        url = 'https://172.31.8.69:5001/elo'
         response = requests.post(url, json=connection_ranks)
         if response.status_code == 200:
             try:

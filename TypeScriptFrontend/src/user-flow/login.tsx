@@ -24,7 +24,7 @@ const Login: React.FC<LoginProps> = () => {
         setError(""); // Clear previous errors
 
         try {
-            const response = await fetch("http://172.31.8.69:5001/login", {
+            const response = await fetch("https://172.31.8.69:5001/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

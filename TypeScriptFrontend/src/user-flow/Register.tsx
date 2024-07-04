@@ -21,7 +21,7 @@ const Register: React.FC = () => {
         setMessage(""); // Clear previous message
 
         try {
-            const response = await fetch("http://172.31.8.69:5001/register", {
+            const response = await fetch("https://172.31.8.69:5001/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

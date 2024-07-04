@@ -14,7 +14,7 @@ const Home: React.FC = () => {
         if (storedAbilities) {
             setSelectedAbilities(JSON.parse(storedAbilities));
         } else if (token) {
-            fetch("http://localhost:5001/user_abilities", {
+            fetch("https://172.31.8.69:5001/user_abilities", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -40,7 +40,7 @@ const Home: React.FC = () => {
     const toTab = (tab: string) => {
         setTab(tab);
         setKeyCode("");
-    }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("userToken");
@@ -66,7 +66,7 @@ const Home: React.FC = () => {
         sessionStorage.removeItem("key_code");
         // navigate('/play');
         navigate("/lobby");
-    }
+    };
 
     const handleJoinGame = () => {
         sessionStorage.setItem("type", "JOIN");
@@ -131,7 +131,7 @@ const Home: React.FC = () => {
                     <ul>
                         {selectedAbilities.map((ability, index) => (
                             <li key={index}>
-                                {ability.name} - Count  : {ability.count}
+                                {ability.name} - Count : {ability.count}
                             </li>
                         ))}
                     </ul>
@@ -165,7 +165,6 @@ const Home: React.FC = () => {
                                     FIND GAME
                                 </button>
                             )}
-  
                         </div>
                     ) : (
                         <div>
