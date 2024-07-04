@@ -1,9 +1,8 @@
 from gameStateEnums import GameStateEnum as GSE
 
 class GameState:
-    def __init__(self, end_game_callback=lambda: None):
+    def __init__(self):
         self._state = GSE.LOBBY
-        self.end_game_callback = end_game_callback
 
     @property
     def state(self):
@@ -14,8 +13,6 @@ class GameState:
         if self._state != new_state:
             print(f"{self._state} to {new_state}")
             self._state = new_state
-        if new_state == GSE.GAME_OVER:
-            self.end_game_callback()
             
     def next(self):
         if self.state == GSE.LOBBY:

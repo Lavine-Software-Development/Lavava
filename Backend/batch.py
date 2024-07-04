@@ -12,24 +12,29 @@ import json
 class Batch:
     def __init__(self, count, mode, conn, ability_data):
         self.connections = {}
+        self.elo_changes = {}
         self.player_count = count
         self.mode = mode
-        if mode == "LADDER":
-            print("LADDER GAME STARTEDDDDDDDD")
-            self.gs = GameState(self.update_elo)
-        else:
-            self.gs = GameState()
+        self.gs = GameState()
         self.game = ServerGame(self.player_count, self.gs)
         self.add_player(conn, ability_data)
         self.tick_dict = dict()
 
     def update_elo(self):
         # make a dictionary from str(connection.keys()) to the rank of the players in the game
-        print("ELO UPDATE")
         connection_ranks = {str(conn): self.game.player_dict[self.connections[conn]].rank for conn in self.connections}
         url = 'http://localhost:5001/elo'
         response = requests.post(url, json=connection_ranks)
-        print("heres the response", response)
+        
+        if response.status_code == 200:
+            try:
+                response_data = response.json()
+                elo_list = response_data.get("new_elos")
+                self.elo_changes = elo_list
+            except ValueError:
+                print("Response is not valid JSON:", response.text)
+        else:
+            print(f"Request failed with status code {response.status_code}: {response.text}")
 
     def add_player(self, conn, ability_data):
         player_id = len(self.connections)
@@ -62,6 +67,8 @@ class Batch:
     def tick_repr_json(self, conn):
         player_id = self.connections[conn]
         self.tick_dict["player"] = self.player_tick_repr(player_id)
+        if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {}:
+            self.tick_dict["new_elos"] = self.elo_changes[player_id]
         self.tick_dict["isFirst"] = False 
         tick_json = plain_json(self.tick_dict)
         return tick_json
@@ -78,6 +85,8 @@ class Batch:
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
         self.set_group_tick_repr()
+        if self.game.gs.value == GS.GAME_OVER.value and self.elo_changes == {}:
+            self.update_elo()
 
     def ability_process(self, player, data):
         data = convert_keys_to_int(data)

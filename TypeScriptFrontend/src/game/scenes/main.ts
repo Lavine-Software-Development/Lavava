@@ -58,6 +58,8 @@ export class MainScene extends Scene {
     private timerText: Phaser.GameObjects.Text;
     private capitalsText: Phaser.GameObjects.Text;
     private statusText: Phaser.GameObjects.Text;
+    private eloText: Phaser.GameObjects.Text;
+    private eloDifference: Phaser.GameObjects.Text;
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
 
@@ -447,6 +449,25 @@ export class MainScene extends Scene {
                         );
                         this.statusText.setOrigin(1, 0);
                     }
+                }
+
+                if ((!this.eloText) && new_data.hasOwnProperty("new_elos")) {
+                    let difference = Number(new_data["new_elos"][1]) - Number(new_data["new_elos"][0]);
+                    let color = difference > 0 ? Colors.GREEN : Colors.RED;
+                    let symbol = difference > 0 ? "+" : "";
+                    this.eloText = this.add.text(
+                        300, 
+                        400, 
+                        `Elo: ${new_data["new_elos"][0]} -> ${new_data["new_elos"][1]}`, 
+                        { fontFamily: 'Arial', fontSize: '24px', color: '#000000' }
+                    );
+                    this.eloText.setOrigin(0, 0);
+                    this.eloDifference = this.add.text(
+                        310, 
+                        360, 
+                        `(${symbol}${difference})`, 
+                        { fontFamily: 'Arial', fontSize: '24px', color: this.rgbToHex(color) }
+                    );
                 }
 
                 if (this.countdown != new_data["countdown_timer"].toFixed(0)) {
