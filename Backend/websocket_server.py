@@ -18,6 +18,14 @@ class WebSocketServer():
             data = json.loads(message)
             await self.process_message(websocket, data)
 
+    def waiting_ladder_count(self, player_count):
+        # return the existence of a ladder code starting with player_count and 5 characters overall
+        # within self.waiting_players, or false if it doesn't exist
+        for code in self.waiting_players:
+            if len(code) == 5 and code.startswith(player_count):
+                return code
+        return False
+
     async def process_message(self, websocket, data):
         # print(self.players)
         # print("Received message in process: ", data)
@@ -32,7 +40,11 @@ class WebSocketServer():
 
             player_code = data["code"]
             if player_type == "LADDER":
-                player_code = str(player_count)
+                # player_count + 4 random letters
+                if ladder_code := self.waiting_ladder_count(str(player_count)):
+                    player_code = ladder_code
+                else:
+                    player_code = str(player_count) + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
             elif player_type == "HOST":
                 player_code = str(random.randint(1000, 9999))
                 
