@@ -39,7 +39,6 @@ const DeckBuilder: React.FC = () => {
         };
 
         fetchAbilities();
-        console.log('troiggerd')
     }, []);
 
     useEffect(() => {
@@ -202,7 +201,6 @@ const DeckBuilder: React.FC = () => {
             <div className="salary-display">
                 <h2>Salary: {salary}</h2>
             </div>
-            <a href="home">Home</a>
         </div>
     );
 };

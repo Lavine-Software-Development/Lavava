@@ -19,6 +19,10 @@ import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
 import Profile from "./user-flow/Profile";
 import DeckBuilder from "./user-flow/deck_builder";
+import { NavBar } from "./NavBar";
+import Leaderboard from "./user-flow/Leaderboard";
+import HowToPlay from "./user-flow/How_to_play";
+
 import Lobby from "./user-flow/lobby";
 import { NetworkContext, NetworkProvider } from "./game/NetworkContext";
 import { use } from "matter";
@@ -31,7 +35,6 @@ function App() {
         <Router>
             <NetworkProvider>
                 <div
-                    id="app"
                     style={{
                         fontFamily: "Arial, sans-serif",
                         lineHeight: "1.6",
@@ -46,29 +49,31 @@ function App() {
                                         ref={phaserRef}
                                         currentActiveScene={currentScene}
                                         props={board_data}
-                                        // network={network}
                                     />
                                 </div>
                             }
                         />
-                        <Route
-                            path="/websocket-test"
-                            element={<WebSocketTest />}
-                        />
-                        <Route
-                            path="/"
-                            element={<Navigate replace to="/login" />}
-                        />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route
-                            path="/forgot-password"
-                            element={<ForgotPassword />}
-                        />
-                        <Route path="/home" element={<Home />} />
-                        <Route path="/builder" element={<DeckBuilder />} />
-                        <Route path="/profile" element={<Profile />} />
                         <Route path="/lobby" element={<Lobby />} />
+                        <Route
+                            path="*"
+                            element={
+                                <div id="app">
+                                    <NavBar />
+                                    <Routes>
+                                        <Route path="/websocket-test" element={<WebSocketTest />} />
+                                        <Route path="/" element={<Navigate replace to="/login" />} />
+                                        <Route path="/login" element={<Login />} />
+                                        <Route path="/register" element={<Register />} />
+                                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                                        <Route path="/home" element={<Home />} />
+                                        <Route path="/builder" element={<DeckBuilder />} />
+                                        <Route path="/profile" element={<Profile />} />
+                                        <Route path="/leaderboard" element={<Leaderboard />} />
+                                        <Route path="/how-to-play" element={<HowToPlay />} />
+                                    </Routes>
+                                </div>
+                            }
+                        />
                     </Routes>
                 </div>
             </NetworkProvider>
