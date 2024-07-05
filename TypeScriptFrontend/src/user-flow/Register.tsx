@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import '../../styles/style.css'; // Adjust path as needed
 
 const Register: React.FC = () => {
@@ -61,7 +61,7 @@ const Register: React.FC = () => {
                 {message && <p className="error-message">{message}</p>}
                 <input type="submit" className="btn" value="Register" />
             </form>
-            <p>Already have an account? <a href="/login">Login here!</a></p>
+            <p>Already have an account? <NavLink to="/login">Login here!</NavLink></p>
         </div>
     );
 };
