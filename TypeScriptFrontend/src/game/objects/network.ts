@@ -4,10 +4,13 @@ export class Network {
     public socket: WebSocket | null = null;
     serverURL: string;
     updateCallback: (board_data) => void;
-    gameIDCallback: (game_id: string) => void;
+    gameIDEtcCallback: (game_id: string, player_count: number) => void;
     messageQueue: string[] = [];
     private boardDataPromise: Promise<any> | null = null;
     private boardDataResolver: ((data: any) => void) | null = null;
+    private reconnectAttempts: number = 0;
+    private maxReconnectAttempts: number = 5;
+    private reconnectInterval: number = 3000; // 3 seconds
 
     constructor(serverURL: string, updateCallback: () => void) {
         this.serverURL = serverURL;
@@ -33,7 +36,7 @@ export class Network {
             // console.log("Received message: ", event.data);
             let data = JSON.parse(event.data);
             if (data.hasOwnProperty("game_id")) {
-                this.gameIDCallback(data.game_id);
+                this.gameIDEtcCallback(data.game_id, data.player_count);
                 console.log("Game ID received: ", data.game_id);
             } else {
                 if (data.isFirst === true) {
@@ -52,11 +55,22 @@ export class Network {
 
         this.socket.onclose = () => {
             console.log("WebSocket Disconnected");
+
         };
 
         this.socket.onerror = (error) => {
             console.error("WebSocket Error:", error);
         };
+    }
+
+    attemptReconnect(): void {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+            setTimeout(() => this.connectWebSocket(), this.reconnectInterval);
+        } else {
+            console.error("Max reconnection attempts reached. Please refresh the page.");
+        }
     }
 
     disconnectWebSocket(): void {
@@ -96,6 +110,7 @@ export class Network {
         const code = sessionStorage.getItem("key_code");
         const type = sessionStorage.getItem("type");
         const playerCount = Number(sessionStorage.getItem("player_count")) || 0;
+        let userToken = localStorage.getItem("userToken") || "";
 
         const send_dict = {
             type: type,
@@ -103,6 +118,7 @@ export class Network {
             code: code,
             mode: "default",
             abilities: abilities,
+            userToken: userToken,
         };
         console.log("Trying to setp user with: ", send_dict);
         this.sendMessage(JSON.stringify(send_dict));

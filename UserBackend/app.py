@@ -41,7 +41,7 @@ def token_required(f):
 def login():
     data = request.json
     username = data.get('username')
-    if username.lower() == 'default':
+    if username.lower() == 'default' or 'other':
         # Create a token
         token = jwt.encode({
             'user': username,
@@ -58,16 +58,16 @@ def register():
     email = data.get('email')  # Email is received and will be used to send welcome email
     password = data.get('password')  # Password is received but not used in logic
     
-    if username.lower() == 'default':
+    if username.lower() == 'default' or 'other':
         send_confirmation_email(email)  # Send welcome email
         return jsonify({"success": True, "message": "Registration successful. Please check your email."}), 200
     else:
-        return jsonify({"success": False, "message": "Registration failed, username must be 'default'"}), 400
+        return jsonify({"success": False, "message": "Registration failed, username must be 'default' or 'other'"}), 400
   
 @app.route('/user_abilities', methods=['GET'])
 @token_required
 def get_home(current_user):
-    if current_user == "default":
+    if current_user == "default" or 'other':
         return jsonify({
             "abilities": user_decks(current_user),
         })
@@ -77,7 +77,7 @@ def get_home(current_user):
 @app.route('/profile', methods=['GET'])
 @token_required
 def get_profile(current_user):
-    if current_user == "default":
+    if current_user == "default" or 'other':
         return jsonify({
             "userName": "Default-User",
             "displayName": "John Doe",
@@ -91,7 +91,7 @@ def get_profile(current_user):
     
 
 def user_decks(current_user):
-    if current_user == "default":
+    if current_user == "default" or 'other':
         return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 1}, {"name": "Rage", "count": 2}, {"name": "Poison", "count": 1}]
     else:
         return []
@@ -126,8 +126,19 @@ def update_elos(elos, k_factor=32):
 #     print()
     
 # to be updated with actual db queries
-def player_to_elo(len: int):
-    return [1138, 1200, 1100, 1121][:len]
+
+
+def token_to_username(token: str):
+        try:
+            return jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])['user']
+        except jwt.ExpiredSignatureError:
+            return 'Expired token'
+        except jwt.InvalidTokenError:
+            return 'Invalid token'
+
+def username_to_elo(name: str):
+    dummy = {"other": 1200, "default": 1300}
+    return dummy[name]
     
 @app.route('/abilities', methods=['GET'])
 def get_abilities():
@@ -164,10 +175,18 @@ def send_confirmation_email(user_email):
 
 @app.route('/elo', methods=['POST'])
 def update_elo():
-    data = request.json
-    elo_list = player_to_elo(len(data))
-    new_elos = update_elos(elo_list)
-    elo_tuples = list(zip(elo_list, new_elos))
+    # important that order is maintained throughout the process, as that preserves ranking in game
+    # hence why lists are used
+    # first two method calls are placeholders for actual db queries
+    ordered_tokens_and_ids = request.json.get("ordered_players")
+    tokens = [item[0] for item in ordered_tokens_and_ids]
+    ids = [item[1] for item in ordered_tokens_and_ids]
+
+    usernames = [token_to_username(token) for token in tokens]
+    old_elos = [username_to_elo(user) for user in usernames]
+    new_elos = update_elos(old_elos)
+
+    elo_tuples = {ids[i]: list(zip(old_elos, new_elos))[i] for i in range(len(ids))}
     return jsonify({"new_elos": elo_tuples})
 
 

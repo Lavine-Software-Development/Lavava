@@ -62,17 +62,11 @@ export class MainScene extends Scene {
     private eloDifference: Phaser.GameObjects.Text;
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
+    private userToken: string;
 
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
-        // console.log("config: ", config);
-        // console.log("props yeaaa: ", props);
-        // console.log(network);
         this.board = props;
-        // this.network = new Network(
-        //     "ws://localhost:5553",
-        //     this.update_board.bind(this)
-        // );
         this.network = network;
         this.navigate = navigate;
         this.network.updateCallback = this.update_data.bind(this);
@@ -395,7 +389,7 @@ export class MainScene extends Scene {
     private leaveMatch(): void {
         console.log('Leaving match...');
         if (this.ps < PSE.ELIMINATED) {
-            this.simple_send(stateCodes.FORFEIT_CODE);
+            this.forfeit();
         }
         else {
             this.network.disconnectWebSocket();

@@ -35,7 +35,7 @@ export function NavBar() {
                     alt=""
                     className="navLinkImage"
                 />
-                <h4 className="navLinkText">Lavava</h4>
+                <h4 className="navLinkText">Durb</h4>
             </NavLink>
             <NavLink to="/profile" className="navLinkContainer">
                 <img
