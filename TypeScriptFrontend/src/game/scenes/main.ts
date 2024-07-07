@@ -361,16 +361,14 @@ export class MainScene extends Scene {
 
     send(items?: number[], code?: number): void {
         this.network.sendMessage(
-            JSON.stringify(this.highlight. sendFormat(items, code))
+            this.highlight.sendFormat(items, code)
         );
     }
     simple_send(code: number): void {
         this.network.sendMessage(
-            JSON.stringify({
-                code: code,
+            {code: code,
                 items: {},
-                game_id: sessionStorage.getItem("key_code"),
-            })
+            }
         );
     }
 

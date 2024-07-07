@@ -26,7 +26,7 @@ const Lobby: React.FC = () => {
     }
 
     const handleCancel = () => {
-        network?.sendMessage(JSON.stringify({ action: "cancel_match", game_id: gameID}));
+        network?.sendMessage({ action: "cancel_match"});
         network?.disconnectWebSocket();
         navigate("/home");
     };

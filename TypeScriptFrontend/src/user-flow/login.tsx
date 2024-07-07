@@ -19,6 +19,17 @@ const Login: React.FC<LoginProps> = () => {
         }
     }, [navigate]);
 
+    const generateGuestToken = () => {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    };
+
+    const handleGuestLogin = () => {
+        const guestToken = generateGuestToken();
+        sessionStorage.setItem('guestToken', guestToken);
+        localStorage.removeItem("userToken");
+        navigate('/home');
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(""); // Clear previous errors
@@ -34,6 +45,7 @@ const Login: React.FC<LoginProps> = () => {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem('userToken', data.token);
+                sessionStorage.removeItem("guestToken");
                 sessionStorage.clear();
                 navigate('/home');
             } else {
@@ -85,7 +97,7 @@ const Login: React.FC<LoginProps> = () => {
                     className="btn"
                     value="Play as Guest"
                     name="Play as Guest"
-                    onClick={() => navigate('/home')}
+                    onClick={handleGuestLogin}
                 />
             </form>
             <p>Don't have an account? <NavLink to="/register">Register here!</NavLink></p>
