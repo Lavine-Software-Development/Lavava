@@ -65,6 +65,7 @@ export class MainScene extends Scene {
     private navigate: Function;
     private userToken: string;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
+    private isLeavingMatch: boolean = false;
 
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
@@ -139,7 +140,7 @@ export class MainScene extends Scene {
         this.scale.on('resize', this.handleResize, this);
 
         this.startReconnectionCheck();
-    
+        this.setupBackButtonHandler();
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -342,6 +343,7 @@ export class MainScene extends Scene {
             this.reconnectionEvent.remove();
             this.reconnectionEvent = null;
         }
+        window.removeEventListener('popstate', this.handleHistoryChange);
     }
 
     mouseButtonDownEvent(button: number): void {
@@ -395,6 +397,20 @@ export class MainScene extends Scene {
         );
     }
 
+    private setupBackButtonHandler(): void {
+        history.pushState({ page: "game" }, "Game Page");
+        window.addEventListener('popstate', this.handleHistoryChange.bind(this));
+    }
+
+    private handleHistoryChange(event: PopStateEvent): void {
+        // Check if we're going back from the game page
+        if (!this.isLeavingMatch && (!event.state || event.state.page !== "game")) {
+            event.preventDefault();
+            history.pushState({ page: "game" }, "Game Page");
+            this.leaveMatchDirect();
+        }
+    }
+
     private createLeaveMatchButton(): void {
         this.leaveMatchButton = this.add.text(10, 10, 'Forfeit', {
             fontFamily: 'Arial',
@@ -416,6 +432,15 @@ export class MainScene extends Scene {
             this.network.disconnectWebSocket();
             this.navigate("/home");
         }
+    }
+
+    private leaveMatchDirect(): void {
+        window.removeEventListener('popstate', this.handleHistoryChange);
+        if (this.ps < PSE.ELIMINATED) {
+            this.forfeit();
+        }
+        this.network.disconnectWebSocket();
+        this.navigate("/home");
     }
 
     initialize_data(): void {
