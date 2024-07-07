@@ -1,3 +1,4 @@
+import imp
 from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
@@ -6,10 +7,12 @@ from game import ServerGame
 import json_abilities
 from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, json_cost, plain_json
 import requests
-
+from pympler import asizeof
+import json
 
 class Batch:
     def __init__(self, count, mode, token, websocket, ability_data):
+        self.full_tick_count = 0
         self.token_ids = {}
         self.id_sockets = {}
         self.elo_changes = {}
@@ -61,6 +64,10 @@ class Batch:
     def reconnect_player(self, token, websocket):
         player_id = self.token_ids[token]
         self.id_sockets[player_id] = websocket
+        game_dict = self.game.full_tick_json
+        game_dict["player"] = self.player_tick_repr(player_id)
+        game_dict["isFirst"] = False
+        return plain_json(game_dict)
         
     def start(self):
         self.gs.next()
@@ -88,7 +95,7 @@ class Batch:
         self.tick_dict["player"] = self.player_tick_repr(player_id)
         if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {} and self.mode == "LADDER":
             self.tick_dict["new_elos"] = self.elo_changes[player_id]
-        self.tick_dict["isFirst"] = False 
+        self.tick_dict["isFirst"] = False
         tick_json = plain_json(self.tick_dict)
         return tick_json
 

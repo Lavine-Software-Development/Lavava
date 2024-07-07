@@ -9,9 +9,6 @@ export class Network {
     messageQueue: Record<any, any> = [];
     private boardDataPromise: Promise<any> | null = null;
     private boardDataResolver: ((data: any) => void) | null = null;
-    private reconnectAttempts: number = 0;
-    private maxReconnectAttempts: number = 5;
-    private reconnectInterval: number = 3000; // 3 seconds
     private token: string | null = "";
 
     constructor(serverURL: string, updateCallback: () => void) {
@@ -58,7 +55,6 @@ export class Network {
 
         this.socket.onclose = () => {
             console.log("WebSocket Disconnected");
-
         };
 
         this.socket.onerror = (error) => {
@@ -67,13 +63,8 @@ export class Network {
     }
 
     attemptReconnect(): void {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.reconnectAttempts++;
-            console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-            setTimeout(() => this.connectWebSocket(), this.reconnectInterval);
-        } else {
-            console.error("Max reconnection attempts reached. Please refresh the page.");
-        }
+        this.connectWebSocket();
+        this.sendMessage({ action: "reconnect" });
     }
 
     disconnectWebSocket(): void {
@@ -118,9 +109,9 @@ export class Network {
         const send_dict = {
             type: type,
             players: playerCount,
-            mode: "default",
             abilities: abilities,
         };
+
         console.log("Trying to setp user with: ", send_dict);
         this.sendMessage(send_dict);
     }

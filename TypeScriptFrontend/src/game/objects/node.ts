@@ -62,7 +62,7 @@ export class Node extends IDItem implements INode {
     }
 
     select(on: boolean): void {
-            this.state.select(on);
+        this.state.select(on);
     }
 
     get owner(): OtherPlayer | null {

@@ -29,13 +29,18 @@ class WebSocketServer():
     async def process_message(self, websocket, data):
 
         token = data["token"]
+        game_code = data["game_id"]
 
         if 'items' in data:
             # print("yoooooo")
-            self.running_games[data["game_id"]].process(token, data)
+            self.running_games[game_code].process(token, data)
         elif 'action' in data:
             if data['action'] == 'cancel_match':
-                await self.handle_cancel_match(token, data['game_id'])
+                await self.handle_cancel_match(token, game_code)
+            elif data['action'] == 'reconnect':
+                batch = self.running_games[game_code]
+                catch_me_up_json = batch.reconnect_player(token, websocket)
+                await websocket.send(catch_me_up_json)
         else:
             player_type = data["type"]
             player_count = data["players"]
@@ -90,7 +95,8 @@ class WebSocketServer():
                     batch_json = batch.tick_repr_json(id)
                     await websocket.send(batch_json)
                 except websockets.exceptions.ConnectionClosed:
-                    print(f"Error sending tick to websocket")
+                    # print(f"Error sending tick to websocket")
+                    pass
             await asyncio.sleep(0.1)
         
         # should be its own delete function, but leaving for now due to async complexity
