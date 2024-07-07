@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkContext } from "../game/NetworkContext";
 import { abilityCountsConversion } from "../game/objects/utilities";
-const serverURL = "ws://localhost:5553";
+const serverURL = "ws://localhost:5553"; 
 const updateCallback = () => {
     console.log("Update received");
 };
@@ -10,14 +10,26 @@ const updateCallback = () => {
 const Lobby: React.FC = () => {
     const [boardData, setBoardData] = useState(null);
     const [gameID, setGameID] = useState("");
+    const [playerCount, setPlayerCount] = useState(0);
     const [gameType, setGameType] = useState("");
     const navigate = useNavigate();
     const network = useContext(NetworkContext);
 
-    const gameCode = (code: string) => {
+    const lobbyData = (code: string, count: number) => {
+        if (code === "INVALID") {
+            network?.disconnectWebSocket();
+            navigate("/home");
+        }
         setGameID(code);
+        setPlayerCount(count);
         sessionStorage.setItem("key_code", code);
     }
+
+    const handleCancel = () => {
+        network?.sendMessage(JSON.stringify({ action: "cancel_match", game_id: gameID}));
+        network?.disconnectWebSocket();
+        navigate("/home");
+    };
 
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
@@ -29,12 +41,9 @@ const Lobby: React.FC = () => {
 
         // Create a map from ability code to count using the NameToCode mapping
         const abilityCounts = abilityCountsConversion(abilitiesFromStorage);
-        // const network = new Network(serverURL, updateCallback);
         console.log("Got network from context");
-        // const network = new Network(serverURL, updateCallback);
-        // network?.connectWebSocket();
         if (network) {
-            network.gameIDCallback = gameCode;
+            network.gameIDEtcCallback = lobbyData;
             console.log("bind happened?");
         }
         
@@ -56,8 +65,31 @@ const Lobby: React.FC = () => {
     if (!boardData) {
         return (
             <div>
+            {gameID && 
+                <button 
+                    style={{
+                        position: 'absolute',
+                        top: '10px',
+                        left: '10px',
+                        padding: '10px 20px',
+                        fontSize: '16px',
+                        cursor: 'pointer'
+                    }}
+                    onClick={handleCancel}
+                >
+                    Cancel
+                </button>
+            }
                 <h1>Waiting...</h1>
-                { gameType != "LADDER" && <h2>Game Code: { gameID }</h2> }
+                { gameType != "LADDER" ? ( 
+                    <div>
+                        <h2>Game Code: { gameID }</h2>
+                        <h2>{ playerCount } Player Friendly Match</h2>
+                    </div> 
+                ) : (
+                    <h2>{ playerCount } Player Ladder Match</h2>
+                )
+                }
             </div>
         );
     }

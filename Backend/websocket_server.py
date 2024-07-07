@@ -18,33 +18,50 @@ class WebSocketServer():
             data = json.loads(message)
             await self.process_message(websocket, data)
 
+    def waiting_ladder_count(self, player_count):
+        # return the existence of a ladder code starting with player_count and 5 characters overall
+        # within self.waiting_players, or false if it doesn't exist
+        for code in self.waiting_players:
+            if len(code) == 5 and code.startswith(player_count):
+                return code
+        return False
+
     async def process_message(self, websocket, data):
         # print(self.players)
         # print("Received message in process: ", data)
         if 'game_id' and 'items' in data:
             # print("yoooooo")
             self.running_games[data["game_id"]].process(websocket, data)
+        elif 'action' in data:
+            if data['action'] == 'cancel_match':
+                await self.handle_cancel_match(websocket, data['game_id'])
         else:
             player_type = data["type"]
             player_count = data["players"]
             mode = data["mode"]
             abilities = data["abilities"]
+            userToken = data["userToken"]
 
             player_code = data["code"]
             if player_type == "LADDER":
-                player_code = str(player_count)
+                # player_count + 4 random letters
+                if ladder_code := self.waiting_ladder_count(str(player_count)):
+                    player_code = ladder_code
+                else:
+                    player_code = str(player_count) + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
             elif player_type == "HOST":
                 player_code = str(random.randint(1000, 9999))
                 
             if player_type in ("HOST", "LADDER") and player_code not in self.waiting_players:
-                self.waiting_players[player_code] = Batch(int(player_count), player_type, websocket, abilities)
+                self.waiting_players[player_code] = Batch(int(player_count), player_type, websocket, abilities, userToken)
             elif player_type in ("JOIN", "LADDER") and player_code in self.waiting_players:
-                if message := self.waiting_players[player_code].add_player(websocket, abilities):
+                if message := self.waiting_players[player_code].add_player(websocket, abilities, userToken):
                     await self.problem(message)
             else:
-                await websocket.send("FAILED")
+                message = json.dumps({"game_id": "INVALID", "player_count": 0})
+                await websocket.send(message)
                 return
-            message = json.dumps({"game_id": player_code})
+            message = json.dumps({"game_id": player_code, "player_count": self.waiting_players[player_code].player_count})
             await websocket.send(message)
             
             if self.waiting_players[player_code].is_ready():
@@ -55,6 +72,16 @@ class WebSocketServer():
             else:
                 print("Game is not ready to start")
 
+    async def handle_cancel_match(self, websocket, game_id):
+        if game_id in self.waiting_players:
+            batch = self.waiting_players[game_id]
+            if len(batch.connections) == 1:
+                self.waiting_players.pop(game_id)
+            else:
+                batch.remove_player(websocket)
+        else:
+            await websocket.send(json.dumps({"action": "match_cancel_failed", "reason": "Game not found"}))
+
     async def send_ticks(self, batch_code: str):
         batch = self.running_games[batch_code]
         while not batch.done():
@@ -62,8 +89,14 @@ class WebSocketServer():
             # print("tick")
             batch.tick()
             for websocket in batch.connections:
-                batch_json = batch.tick_repr_json(websocket)
-                await websocket.send(batch_json)
+                try:
+                    batch_json = batch.tick_repr_json(websocket)
+                    await websocket.send(batch_json)
+                except websockets.exceptions.ConnectionClosed:
+                    print(f"Error sending tick to websocket")
+                except Exception as e:
+                    # Handle other potential exceptions
+                    print(f"Error sending tick to websocket: {e}")
             await asyncio.sleep(0.1)
         
         # should be its own delete function, but leaving for now due to async complexity

@@ -10,40 +10,54 @@ import json
 
 
 class Batch:
-    def __init__(self, count, mode, conn, ability_data):
+    def __init__(self, count, mode, conn, ability_data, userToken):
         self.connections = {}
         self.elo_changes = {}
+        self.tokens = {}
         self.ending_count = 0
         self.player_count = count
         self.mode = mode
         self.gs = GameState()
         self.game = ServerGame(self.player_count, self.gs)
-        self.add_player(conn, ability_data)
+        self.add_player(conn, ability_data, userToken)
         self.tick_dict = dict()
 
     def update_elo(self):
-        # make a dictionary from str(connection.keys()) to the rank of the players in the game
-        connection_ranks = {str(conn): self.game.player_dict[self.connections[conn]].rank for conn in self.connections}
+        
+        connection_ranks = [(self.tokens[conn], self.connections[conn], self.game.player_dict[self.connections[conn]].rank) for conn in self.connections]
+        connection_ranks = [(item[0], item[1]) for item in sorted(connection_ranks, key=lambda x: x[2])]
+        # this ends up as player token, player id, in order of rank
+
         url = 'http://localhost:5001/elo'
-        response = requests.post(url, json=connection_ranks)
+        data = {"ordered_players": connection_ranks}
+        response = requests.post(url, json=data)
         
         if response.status_code == 200:
             try:
                 response_data = response.json()
-                elo_list = response_data.get("new_elos")
-                self.elo_changes = elo_list
+                self.elo_changes = response_data.get("new_elos")
             except ValueError:
                 print("Response is not valid JSON:", response.text)
         else:
             print(f"Request failed with status code {response.status_code}: {response.text}")
 
-    def add_player(self, conn, ability_data):
+    def add_player(self, conn, ability_data, userToken):
         player_id = len(self.connections)
         if self.ability_process(player_id, ability_data):
             self.connections[conn] = player_id
+            if userToken:
+                self.tokens[conn] = userToken
             return False
         else:
             return "CHEATING: INVALID ABILITY SELECTION"
+        
+    def remove_player(self, conn):
+        removed_id = self.connections.pop(conn)
+        if conn in self.tokens:
+            self.tokens.pop(conn)
+        for conn in self.connections:
+            if self.connections[conn] > removed_id:
+                self.connections[conn] = self.connections[conn] - 1
         
     def start(self):
         self.gs.next()
@@ -72,7 +86,7 @@ class Batch:
         player_id = self.connections[conn]
         self.tick_dict["player"] = self.player_tick_repr(player_id)
         if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {}:
-            self.tick_dict["new_elos"] = self.elo_changes[player_id]
+            self.tick_dict["new_elos"] = self.elo_changes[str(player_id)]
         self.tick_dict["isFirst"] = False 
         tick_json = plain_json(self.tick_dict)
         return tick_json
