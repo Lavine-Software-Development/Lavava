@@ -117,6 +117,4 @@ class JsonableTracked(JsonableBasic):
     
     @property
     def full_tick_json(self):
-        full_tick_json = self.to_json('full_tick_json', self.full_values)
-        self.clear()
-        return full_tick_json
+        return self.to_json('full_tick_json', self.full_values)

@@ -606,7 +606,7 @@ export class MainScene extends Scene {
             return this.edges[value];
             
         } else if (attribute === "owner") {
-            return this.otherPlayers[value];
+            return this.otherPlayers[value] || null;
         }
         else if (attribute === "state") {
             return stateDict[value]();
