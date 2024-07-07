@@ -1,6 +1,6 @@
 import jwt
 import datetime
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, url_for
 from flask_cors import CORS
 from functools import wraps
 from flask_mail import Mail, Message
@@ -17,6 +17,8 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'lavavaacc@gmail.com'
 app.config['MAIL_PASSWORD'] = 'enwueidxiwivjvxn'  # Use the app password you generated
 mail = Mail(app)
+
+s = URLSafeTimedSerializer(app.config['SECRET_KEY']) # serializer
 
 def token_required(f):
     @wraps(f)
@@ -53,17 +55,55 @@ def login():
     
 @app.route('/register', methods=['POST'])
 def register():
+    SpecialSym = ["!","%","#","@","$","^","&","*","+","_","-","="]
     data = request.json
     username = data.get('username')
     email = data.get('email')  # Email is received and will be used to send welcome email
-    password = data.get('password')  # Password is received but not used in logic
-    
-    if username.lower() == 'default' or 'other':
-        send_confirmation_email(email)  # Send welcome email
-        return jsonify({"success": True, "message": "Registration successful. Please check your email."}), 200
+    password = data.get('password') # password received and used to check requirements before sending email
+
+    token = s.dumps(email, salt='email-confirm')
+    link = url_for('confirm_email', token=token, _external=True)
+
+    if len(password) < 8: # checks for password requirements
+        return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
+    if not any(char.islower() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
+    if not any(char.isupper() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
+    if not any(char.isdigit() for char in password):
+        return jsonify({"success": False, "message": "Password must contain a number"}), 400
+    if not any(char in SpecialSym for char in password):
+        return jsonify({"success": False, "message": "Password must contain a special character"}), 400
+    if username.lower() == 'default':
+        send_confirmation_email(email, link)  # Send confirm email
+        return jsonify({"success": True, "message": "Registration successful. Please follow the confirmation email sent to: {}".format(email)}), 200
     else:
-        return jsonify({"success": False, "message": "Registration failed, username must be 'default' or 'other'"}), 400
-  
+        return jsonify({"success": False, "message": "Registration failed, username must be 'default'"}), 400
+
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    try:
+        email = s.loads(token, salt='email-confirm', max_age=3600) # token expires after 1 hour
+    except SignatureExpired:
+        return '<h1>Email confirmation link expired!</h1>' # token expired
+    except:
+        return '<h1>Error!</h1>' # other error like incorrect token
+    return '<h1>Email Confirmed!</h1>' # set here that email was confirmed in database 
+
+#  sending email for registration
+def send_confirmation_email(user_email, link):
+    msg = Message("Email Confirmation!",
+                  sender='lavavaacc@gmail.com',
+                  recipients=[user_email])
+    msg.body = 'Follow the link to confirm your account: {}'.format(link)
+    try:
+        mail.send(msg)
+        return "Email sent successfully!"
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        return "Error sending email."
+
+
 @app.route('/user_abilities', methods=['GET'])
 @token_required
 def get_home(current_user):
@@ -157,21 +197,6 @@ def get_abilities():
         {"name": "Pump", "cost": 3},
     ]
     return jsonify({"abilities": abilities, "salary": 15})
-
-#  sending email for registration
-
-def send_confirmation_email(user_email):
-    msg = Message("Welcome!",
-                  sender='lavavaacc@gmail.com',
-                  recipients=[user_email])
-    msg.body = 'Hi, welcome to our service! You are all set.'
-    try:
-        mail.send(msg)
-        return "Email sent successfully!"
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return "Error sending email."
-
 
 @app.route('/elo', methods=['POST'])
 def update_elo():

@@ -7,6 +7,7 @@ const Register: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const [isRegistered, setIsRegistered] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,7 +31,8 @@ const Register: React.FC = () => {
             });
             const data = await response.json();
             if (response.ok) {
-                setMessage("Registration successful! Please check your email to confirm your account.");
+                setMessage(data.message);
+                setIsRegistered(true);
             } else {
                 setMessage(data.message);
             }
@@ -38,6 +40,16 @@ const Register: React.FC = () => {
             setMessage("Failed to connect to the server.");
         }
     };
+
+    useEffect(() => {
+        if (isRegistered) {
+            const registerBtn = document.getElementById('registerBtn');
+            if (registerBtn) {
+                registerBtn.value = 'Login';
+                registerBtn.onclick = () => navigate('/login');
+            }
+        }
+    }, [isRegistered, navigate]);
 
     return (
         <div className="container" id="register">
@@ -47,21 +59,34 @@ const Register: React.FC = () => {
                     <label htmlFor="username">Username</label>
                     <input type="text" name="username" id="username" placeholder="Username" required
                         value={username} onChange={(e) => setUsername(e.target.value)} />
+                    <i className="fas fa-user"></i>
                 </div>
                 <div className="input-group">
                     <label htmlFor="email">Email</label>
-                    <input type="email" name="email" id="email" placeholder="Email" required
+                    <input type="text" name="email" id="email" placeholder="Email" required
                         value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <i className="fas fa-envelope"></i>
                 </div>
                 <div className="input-group">
                     <label htmlFor="password">Password</label>
                     <input type="password" name="password" id="password" placeholder="Password" required
                         value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <i className="fas fa-lock"></i>
                 </div>
+                {!isRegistered && (
+                    <ul className="password-requirements">
+                    <li><i className="fas fa-info-circle"></i> Must be at least 8 characters long</li>
+                    <li><i className="fas fa-info-circle"></i> Must contain an uppercase and a lowercase letter</li>
+                    <li><i className="fas fa-info-circle"></i> Must contain a number</li>
+                    <li><i className="fas fa-info-circle"></i> Must contain a special character (!, %, @, #, etc.)</li>
+                </ul>
+                )}
                 {message && <p className="error-message">{message}</p>}
-                <input type="submit" className="btn" value="Register" />
+                <input type="submit" className="btn" value="Register" id="registerBtn"/>
             </form>
-            <p>Already have an account? <NavLink to="/login">Login here!</NavLink></p>
+            {!isRegistered && (
+                <p>Already have an account? <NavLink to="/login">Login here!</NavLink></p>
+            )}
         </div>
     );
 };
