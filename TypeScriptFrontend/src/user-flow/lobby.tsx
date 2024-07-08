@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkContext } from "../game/NetworkContext";
 import { abilityCountsConversion } from "../game/objects/utilities";
+
 const updateCallback = () => {
     console.log("Update received");
 };
@@ -25,7 +26,7 @@ const Lobby: React.FC = () => {
     }
 
     const handleCancel = () => {
-        network?.sendMessage(JSON.stringify({ action: "cancel_match", game_id: gameID}));
+        network?.sendMessage({ action: "cancel_match"});
         network?.disconnectWebSocket();
         navigate("/home");
     };
@@ -38,47 +39,53 @@ const Lobby: React.FC = () => {
             ? JSON.parse(storedAbilities)
             : [];
 
-        // Create a map from ability code to count using the NameToCode mapping
         const abilityCounts = abilityCountsConversion(abilitiesFromStorage);
-        console.log("Got network from context");
         if (network) {
             network.gameIDEtcCallback = lobbyData;
-            console.log("bind happened?");
         }
         
         network?.connectWebSocket();
         network?.setupUser(abilityCounts)
-        // Wait for the board data
         network?.getBoardData().then((data) => {
-            console.log("Board data received in component:", data);
             navigate("/play", { state: { boardData: data } });
-            // setBoardData(data);
         });
 
-        // Cleanup function to close the WebSocket when the component unmounts
-        //return () => {
+        // Handle back button
+        const handleBackButton = (event: PopStateEvent) => {
+            event.preventDefault();
+            handleCancel();
+        };
 
-        //};
+        // Push a new state to the history when entering the lobby
+        history.pushState({ page: "lobby" }, "Lobby Page");
+
+        // Add event listener for the popstate event
+        window.addEventListener('popstate', handleBackButton);
+
+        // Cleanup function
+        return () => {
+            window.removeEventListener('popstate', handleBackButton);
+        };
     }, []);
 
     if (!boardData) {
         return (
             <div>
-            {gameID && 
-                <button 
-                    style={{
-                        position: 'absolute',
-                        top: '10px',
-                        left: '10px',
-                        padding: '10px 20px',
-                        fontSize: '16px',
-                        cursor: 'pointer'
-                    }}
-                    onClick={handleCancel}
-                >
-                    Cancel
-                </button>
-            }
+                {gameID && 
+                    <button 
+                        style={{
+                            position: 'absolute',
+                            top: '10px',
+                            left: '10px',
+                            padding: '10px 20px',
+                            fontSize: '16px',
+                            cursor: 'pointer'
+                        }}
+                        onClick={handleCancel}
+                    >
+                        Cancel
+                    </button>
+                }
                 <h1>Waiting...</h1>
                 { gameType != "LADDER" ? ( 
                     <div>
@@ -96,11 +103,9 @@ const Lobby: React.FC = () => {
     return (
         <div>
             <h1>Board Data Received</h1>
-            {/* Render the board data here */}
             <pre>{JSON.stringify(boardData, null, 2)}</pre>
         </div>
     );
 };
 
 export default Lobby;
-

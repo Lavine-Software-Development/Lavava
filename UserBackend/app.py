@@ -361,17 +361,15 @@ def update_elo():
     # important that order is maintained throughout the process, as that preserves ranking in game
     # hence why lists are used
     # first two method calls are placeholders for actual db queries
-    ordered_tokens_and_ids = request.json.get("ordered_players")
-    tokens = [item[0] for item in ordered_tokens_and_ids]
-    ids = [item[1] for item in ordered_tokens_and_ids]
+    ordered_tokens = request.json.get("ordered_players")
 
-    usernames = [token_to_username(token) for token in tokens]
+    usernames = [token_to_username(token) for token in ordered_tokens]
     old_elos = [username_to_elo(user) for user in usernames]
     new_elos = calculate_elos(old_elos)
 
     update_elos(new_elos, usernames)
 
-    elo_tuples = {ids[i]: list(zip(old_elos, new_elos))[i] for i in range(len(ids))}
+    elo_tuples = {ordered_tokens[i]: list(zip(old_elos, new_elos))[i] for i in range(len(ordered_tokens))}
     return jsonify({"new_elos": elo_tuples})
 
 

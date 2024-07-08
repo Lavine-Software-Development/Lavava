@@ -35,6 +35,7 @@ import {
 import { AbilityVisual } from "../objects/immutable_visuals";
 
 import { NONE, Scene } from "phaser";
+
 import { Edge } from "../objects/edge";
 import board_data from "../data/board_data.json";
 // import { NetworkContext } from "../NetworkContext";
@@ -63,6 +64,8 @@ export class MainScene extends Scene {
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
     private userToken: string;
+    private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
+    private isLeavingMatch: boolean = false;
 
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
@@ -136,10 +139,8 @@ export class MainScene extends Scene {
 
         this.scale.on('resize', this.handleResize, this);
 
-        this.input.on('pointerdown', () => {
-            this.checkResize();
-        });
-    
+        this.startReconnectionCheck();
+        this.setupBackButtonHandler();
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -198,6 +199,28 @@ export class MainScene extends Scene {
         );
     }
 
+    startReconnectionCheck(): void {
+        // Clear any existing event first
+        if (this.reconnectionEvent) {
+            this.reconnectionEvent.remove();
+        }
+
+        // Use Phaser's time events instead of setInterval
+        this.reconnectionEvent = this.time.addEvent({
+            delay: 5000, // Check every 5 seconds
+            callback: this.checkConnection,
+            callbackScope: this,
+            loop: true
+        });
+    }
+
+    checkConnection(): void {
+        if (!this.network.socket || this.network.socket.readyState === WebSocket.CLOSED) {
+            console.log("Detected disconnection, attempting to reconnect...");
+            this.network.attemptReconnect();
+        }
+    }
+
     forfeit(): void {
         this.simple_send(stateCodes.FORFEIT_CODE);
         this.abilityManager.forfeit(this);
@@ -220,13 +243,6 @@ export class MainScene extends Scene {
 
     handleResize(gameSize) {
         console.log("Resizing");
-    }
-
-    checkResize() {
-        const currentWidth = this.scale.gameSize.width;
-        const currentHeight = this.scale.gameSize.height;
-        console.log("Current game size:", currentWidth, "x", currentHeight);
-        // You can add any logic here to adjust game elements based on new size
     }
     
 
@@ -321,6 +337,15 @@ export class MainScene extends Scene {
         return false;
     }
 
+    shutdown(): void {
+        // Clear the reconnection event when the scene is shut down
+        if (this.reconnectionEvent) {
+            this.reconnectionEvent.remove();
+            this.reconnectionEvent = null;
+        }
+        window.removeEventListener('popstate', this.handleHistoryChange);
+    }
+
     mouseButtonDownEvent(button: number): void {
         if (this.highlight.highlighted) {
             if (this.ps === PSE.START_SELECTION) {
@@ -361,17 +386,29 @@ export class MainScene extends Scene {
 
     send(items?: number[], code?: number): void {
         this.network.sendMessage(
-            JSON.stringify(this.highlight. sendFormat(items, code))
+            this.highlight.sendFormat(items, code)
         );
     }
     simple_send(code: number): void {
         this.network.sendMessage(
-            JSON.stringify({
-                code: code,
+            {code: code,
                 items: {},
-                game_id: sessionStorage.getItem("key_code"),
-            })
+            }
         );
+    }
+
+    private setupBackButtonHandler(): void {
+        history.pushState({ page: "game" }, "Game Page");
+        window.addEventListener('popstate', this.handleHistoryChange.bind(this));
+    }
+
+    private handleHistoryChange(event: PopStateEvent): void {
+        // Check if we're going back from the game page
+        if (!this.isLeavingMatch && (!event.state || event.state.page !== "game")) {
+            event.preventDefault();
+            history.pushState({ page: "game" }, "Game Page");
+            this.leaveMatchDirect();
+        }
     }
 
     private createLeaveMatchButton(): void {
@@ -395,6 +432,15 @@ export class MainScene extends Scene {
             this.network.disconnectWebSocket();
             this.navigate("/home");
         }
+    }
+
+    private leaveMatchDirect(): void {
+        window.removeEventListener('popstate', this.handleHistoryChange);
+        if (this.ps < PSE.ELIMINATED) {
+            this.forfeit();
+        }
+        this.network.disconnectWebSocket();
+        this.navigate("/home");
     }
 
     initialize_data(): void {
@@ -518,7 +564,7 @@ export class MainScene extends Scene {
                 this.parse(this.abilityManager.abilities, new_data["player"]["abilities"]);
                 Object.values(this.edges).forEach((edge) => edge.draw());
             } else {
-                // console.log(new_data);
+                
             }
         }
     }
@@ -531,6 +577,12 @@ export class MainScene extends Scene {
     }
 
     parse(this, items, updates, redraw=false) {
+
+        // if redraw is true and the length of updates is larger than 20, print the length of updates
+        if (redraw && Object.keys(updates).length > 20) {
+            console.log(Object.keys(updates).length);
+        }
+
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {
 
@@ -563,8 +615,8 @@ export class MainScene extends Scene {
                     );
                     continue;
                 }
-
-                obj[key] = updateVal;
+                    obj[key] = updateVal;
+                
             }
             if (redraw) {
                 obj.draw();
@@ -579,7 +631,7 @@ export class MainScene extends Scene {
             return this.edges[value];
             
         } else if (attribute === "owner") {
-            return this.otherPlayers[value];
+            return this.otherPlayers[value] || null;
         }
         else if (attribute === "state") {
             return stateDict[value]();

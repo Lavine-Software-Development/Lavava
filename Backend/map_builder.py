@@ -141,7 +141,7 @@ class MapBuilder:
             if dynamic:
                 edges.append(DynamicEdge(nodes[id1], nodes[id2], id3))
             else:
-                edges.append(Edge(nodes[id1], nodes[id2], id3, True))
+                edges.append(Edge(nodes[id1], nodes[id2], id3))
 
         nodes = self.starter_states(nodes)
 

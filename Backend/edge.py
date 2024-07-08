@@ -13,7 +13,7 @@ class Edge(JsonableTracked):
     to_node: Node
     from_node: Node
 
-    def __init__(self, to_node, from_node, id, given_track_values=set()):
+    def __init__(self, to_node, from_node, id):
         self.item_type = EDGE
         self.to_node = to_node
         self.from_node = from_node
@@ -24,8 +24,9 @@ class Edge(JsonableTracked):
         self.dynamic = False
         self.type = EDGE
 
-        start_values = {'to_node', 'from_node', 'dynamic'}
-        super().__init__(id, start_values, set())
+        start_values = {'to_node', 'from_node', 'dynamic', 'on', 'flowing'}
+        full_values = start_values
+        super().__init__(id, start_values, set(), full_values)
 
     def __str__(self):
         return str(self.id)

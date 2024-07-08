@@ -1,11 +1,11 @@
-import { IDItem } from "./Objects/idItem"; // Assume these are defined in the conversation// Assumed imports based on prior context
-import { Node } from "./Objects/node"; // Assume this is defined
-import { Edge } from "./Objects/edge"; // Assume this is defined
+import { IDItem } from "./idItem"; // Assume these are defined in the conversation// Assumed imports based on prior context
+import { Node } from "./node"; // Assume this is defined
+import { Edge } from "./edge"; // Assume this is defined
 import { ClickType } from "./enums"; // Assume this is defined
 import { AbilityVisual } from "./immutable_visuals"; // Assume this is defined
 import { VISUALS } from "./default_abilities"; // Assume this is defined
 import { KeyCodes, EventCodes } from "./constants";
-import { ReloadAbility } from "./Objects/ReloadAbility";
+import { ReloadAbility } from "./ReloadAbility";
 
 export class Highlight {
     private graphics: Phaser.GameObjects.Graphics;
@@ -53,7 +53,7 @@ export class Highlight {
     sendFormat(items?: number[], code?: number): object {
         const code_usage = code ?? this.usage;
         items = items || (this.item ? [this.item.id] : []);
-        return { "code": code_usage, "items": items, "game_id": sessionStorage.getItem("key_code")};
+        return { "code": code_usage, "items": items };
     }
 
     draw(): void {
