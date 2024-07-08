@@ -12,14 +12,18 @@ from sqlalchemy.exc import IntegrityError
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 
+from dotenv import load_dotenv
+load_dotenv()
+
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 if config.DB_CONNECTED:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
     db = SQLAlchemy(app)
     with app.app_context():
         db.create_all()
@@ -226,50 +230,52 @@ def user_decks(current_user):
 @app.route('/save_deck', methods=['POST'])
 @token_required
 def save_deck(current_user):
-    data = request.json
-    abilities = data.get('abilities')
-    user = User.query.filter_by(username=current_user).first()
+    if config.DB_CONNECTED:
+        data = request.json
+        abilities = data.get('abilities')
+        user = User.query.filter_by(username=current_user).first()
 
-    if not abilities:
-        delete_rows_with_secondary_id(user.id)
-        return jsonify({"success": False, "message": "Missing abilities"}), 400
+        if not abilities:
+            delete_rows_with_secondary_id(user.id)
+            return jsonify({"success": False, "message": "Missing abilities"}), 400
 
-    if not user:
-        return jsonify({"success": False, "message": "User not found"}), 404
-    
-    # Ensure items count is valid
-    # assert len(abilities) < 4 and all(item['count'] > 0 for item in abilities)
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Ensure items count is valid
+        # assert len(abilities) < 4 and all(item['count'] > 0 for item in abilities)
 
-    if user.deck_id is None:
-        # Find the maximum deck_id and increment it
-        max_deck_id = db.session.query(db.func.max(Deck.id)).scalar()
-        new_deck_id = (max_deck_id or 0) + 1
-        user.deck_id = new_deck_id
+        if user.deck_id is None:
+            # Find the maximum deck_id and increment it
+            max_deck_id = db.session.query(db.func.max(Deck.id)).scalar()
+            new_deck_id = (max_deck_id or 0) + 1
+            user.deck_id = new_deck_id
+            db.session.commit()
+
+        # Delete old deck entries for the user
+        Deck.query.filter_by(id=user.deck_id).delete()
         db.session.commit()
 
-    # Delete old deck entries for the user
-    Deck.query.filter_by(id=user.deck_id).delete()
-    db.session.commit()
+        # Save new deck entries
+        # deck_id=user.deck_id, 
+        for item in abilities:
+            new_deck_entry = Deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
+            add_or_replace_deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
+        
+        db.session.commit()
 
-    # Save new deck entries
-    # deck_id=user.deck_id, 
-    for item in abilities:
-        new_deck_entry = Deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
-        add_or_replace_deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
-    
-    db.session.commit()
+        # # Convert abilities list to a dictionary
+        # items = {item['name']: item['count'] for item in abilities}
+        # new_deck = Deck(items=items, count=count)
+        # db.session.add(new_deck)
+        # db.session.commit()
 
-    # # Convert abilities list to a dictionary
-    # items = {item['name']: item['count'] for item in abilities}
-    # new_deck = Deck(items=items, count=count)
-    # db.session.add(new_deck)
-    # db.session.commit()
+        # Update user's deck_id
+        # user.deck_id = new_deck.id
+        # db.session.commit()
 
-    # Update user's deck_id
-    # user.deck_id = new_deck.id
-    # db.session.commit()
-
-    return jsonify({"success": True, "message": "Deck saved successfully"}), 200
+        return jsonify({"success": True, "message": "Deck saved successfully"}), 200
+    return jsonify({"success": False, "message": "Database not connected"}), 500
 
 def add_or_replace_deck(secondary_id, ability, count):
     try:
