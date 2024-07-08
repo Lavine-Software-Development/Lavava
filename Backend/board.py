@@ -1,4 +1,5 @@
 from collections import defaultdict
+from reprlib import recursive_repr
 
 from node import Node
 from ae_effects import make_event_effects
@@ -37,7 +38,7 @@ class Board(JsonableTracked):
         self.full_player_capitals = []
 
         recurse_values = {"nodes", "edges"}
-        super().__init__("board", recurse_values, recurse_values)
+        super().__init__("board", recurse_values, recurse_values, recurse_values)
 
 
     def board_wide_effect(self, effect, player):

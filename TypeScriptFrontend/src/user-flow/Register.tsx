@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import '../../styles/style.css'; // Adjust path as needed
+import config from '../env-config';
 
 const Register: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -22,7 +23,7 @@ const Register: React.FC = () => {
         setMessage(''); // Clear previous message
 
         try {
-            const response = await fetch('http://localhost:5001/register', {
+            const response = await fetch(`${config.userBackend}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

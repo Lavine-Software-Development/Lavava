@@ -37,7 +37,8 @@ class Node(JsonableTracked):
         self.grow_multiplier = 1
 
         start_values = {'pos', 'state', 'value'}
-        super().__init__(id, start_values, set())
+        full_values = {'state', 'value', 'effects', 'owner'}
+        super().__init__(id, start_values, set(), full_values)
 
         self.set_default_state()
         self.updated = False

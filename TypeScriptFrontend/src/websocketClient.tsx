@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ENV_CONFIG from './env-config';
 const WebSocketTest: React.FC = () => {
     const [ws, setWs] = useState<WebSocket | null>(null);
     const [messages, setMessages] = useState<string[]>([]);
@@ -6,7 +7,7 @@ const WebSocketTest: React.FC = () => {
     const [connectionStatus, setConnectionStatus] = useState("Disconnected"); // State to track connection status
 
     // URL of your WebSocket server
-    const serverUrl = "ws://localhost:5553";
+    const serverUrl = ENV_CONFIG.gameBackend;
 
     useEffect(() => {
         // Clean up on unmount

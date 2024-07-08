@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
 import { Link } from 'react-router-dom';
+import config from '../env-config';
 
 interface ProfileData {
     userName: string;
@@ -25,7 +26,7 @@ const Profile: React.FC = () => {
         const fetchData = async () => {
             const token = localStorage.getItem('userToken');
             try {
-                const response = await fetch(`http://localhost:5001/profile`, {
+                const response = await fetch(`${config.userBackend}/profile`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`

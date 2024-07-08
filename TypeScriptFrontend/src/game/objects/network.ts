@@ -1,3 +1,4 @@
+import { json } from "react-router-dom";
 import { NameToCode } from "./constants";
 
 export class Network {
@@ -5,12 +6,10 @@ export class Network {
     serverURL: string;
     updateCallback: (board_data) => void;
     gameIDEtcCallback: (game_id: string, player_count: number) => void;
-    messageQueue: string[] = [];
+    messageQueue: Record<any, any> = [];
     private boardDataPromise: Promise<any> | null = null;
     private boardDataResolver: ((data: any) => void) | null = null;
-    private reconnectAttempts: number = 0;
-    private maxReconnectAttempts: number = 5;
-    private reconnectInterval: number = 3000; // 3 seconds
+    private token: string | null = "";
 
     constructor(serverURL: string, updateCallback: () => void) {
         this.serverURL = serverURL;
@@ -25,6 +24,7 @@ export class Network {
     connectWebSocket(): void {
         console.log("Trying to connect to WebSocket...");
         this.socket = new WebSocket(this.serverURL);
+        this.token = localStorage.getItem("userToken") || sessionStorage.getItem("guestToken");
 
         this.socket.onopen = () => {
             console.log("WebSocket Connected");
@@ -55,7 +55,6 @@ export class Network {
 
         this.socket.onclose = () => {
             console.log("WebSocket Disconnected");
-
         };
 
         this.socket.onerror = (error) => {
@@ -64,13 +63,8 @@ export class Network {
     }
 
     attemptReconnect(): void {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.reconnectAttempts++;
-            console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-            setTimeout(() => this.connectWebSocket(), this.reconnectInterval);
-        } else {
-            console.error("Max reconnection attempts reached. Please refresh the page.");
-        }
+        this.connectWebSocket();
+        this.sendMessage({ action: "reconnect" });
     }
 
     disconnectWebSocket(): void {
@@ -88,11 +82,13 @@ export class Network {
         this.messageQueue = [];
     }
 
-    sendMessage(message: string): void {
+    sendMessage(message: Record<any, any>): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             console.log("Sending message: ", message);
             console.log("Socket: ", this.socket);
-            const result = this.socket.send(message);
+            message.token = this.token;
+            message.game_id = sessionStorage.getItem("key_code");
+            const result = this.socket.send(JSON.stringify(message));
             console.log("Result: ", result);
         } else if (
             this.socket &&
@@ -107,21 +103,17 @@ export class Network {
 
     setupUser(abilities: { [x: string]: any }) {
         console.log("setup called");
-        const code = sessionStorage.getItem("key_code");
         const type = sessionStorage.getItem("type");
         const playerCount = Number(sessionStorage.getItem("player_count")) || 0;
-        let userToken = localStorage.getItem("userToken") || "";
 
         const send_dict = {
             type: type,
             players: playerCount,
-            code: code,
-            mode: "default",
             abilities: abilities,
-            userToken: userToken,
         };
+
         console.log("Trying to setp user with: ", send_dict);
-        this.sendMessage(JSON.stringify(send_dict));
+        this.sendMessage(send_dict);
     }
 
     // Method to get the board data promise

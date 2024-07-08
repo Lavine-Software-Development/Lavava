@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from 'react-router-dom';
 import "../../styles/style.css"; // Adjust the path as necessary
+import config from '../env-config';
 
 interface LoginProps {
   // Add any props here if needed, for example, a login function prop
@@ -19,12 +20,23 @@ const Login: React.FC<LoginProps> = () => {
         }
     }, [navigate]);
 
+    const generateGuestToken = () => {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    };
+
+    const handleGuestLogin = () => {
+        const guestToken = generateGuestToken();
+        sessionStorage.setItem('guestToken', guestToken);
+        localStorage.removeItem("userToken");
+        navigate('/home');
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(""); // Clear previous errors
 
         try {
-            const response = await fetch('http://localhost:5001/login', {
+            const response = await fetch(`${config.userBackend}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -34,6 +46,7 @@ const Login: React.FC<LoginProps> = () => {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem('userToken', data.token);
+                sessionStorage.removeItem("guestToken");
                 sessionStorage.clear();
                 navigate('/home');
             } else {
@@ -85,7 +98,7 @@ const Login: React.FC<LoginProps> = () => {
                     className="btn"
                     value="Play as Guest"
                     name="Play as Guest"
-                    onClick={() => navigate('/home')}
+                    onClick={handleGuestLogin}
                 />
             </form>
             <p>Don't have an account? <NavLink to="/register">Register here!</NavLink></p>

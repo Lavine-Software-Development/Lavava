@@ -6,7 +6,7 @@ from tracking_decorator.track_changes import track_changes
 class DynamicEdge(Edge):
     def __init__(self, node1, node2, id):
 
-        super().__init__(node1, node2, id, set())
+        super().__init__(node1, node2, id)
 
         self.dynamic = True
         self.item_type = DYNAMIC_EDGE
