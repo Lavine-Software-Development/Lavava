@@ -1,5 +1,6 @@
 import React, { createContext, ReactNode, FC } from "react";
 import { Network } from "./objects/network";
+import config from "../env-config";
 
 interface MyServiceProviderProps {
     children: ReactNode;
@@ -8,7 +9,7 @@ interface MyServiceProviderProps {
 const NetworkContext = createContext<Network | null>(null);
 
 const NetworkProvider: FC<MyServiceProviderProps> = ({ children }) => {
-    const networkInstance = new Network("ws://localhost:5553", () => {
+    const networkInstance = new Network(config.gameBackend, () => {
         console.log("Callback function not yet configured");
     });
     // networkInstance.connectWebSocket();

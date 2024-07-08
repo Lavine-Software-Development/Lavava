@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import '../../styles/style.css';
+import config from '../env-config';
 
 const Leaderboard: React.FC = () => {
     // State to store the leaderboard data
@@ -7,7 +8,7 @@ const Leaderboard: React.FC = () => {
 
     // Fetch the leaderboard data from the server when the component mounts
     useEffect(() => {
-        fetch('http://127.0.0.1:5001/leaderboard')
+        fetch(`${config.userBackend}/leaderboard`)
             .then(response => response.json())
             .then(data => {
                 setLeaderboard(data.leaderboard);

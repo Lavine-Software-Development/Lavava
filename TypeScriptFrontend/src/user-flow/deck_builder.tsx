@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
+import config from '../env-config';
 
 interface Ability {
     name: string;
@@ -16,7 +17,7 @@ const DeckBuilder: React.FC = () => {
     useEffect(() => {
         const fetchAbilities = async () => {
             try {
-                const response = await fetch('http://localhost:5001/abilities');
+                const response = await fetch(`${config.userBackend}/abilities`);
                 const data = await response.json();
                 if (response.ok) {
                     setAbilities(data.abilities);
@@ -68,7 +69,7 @@ const DeckBuilder: React.FC = () => {
 
             try {
                 // Make a dummy backend call to save the user's deck
-                await fetch('http://localhost:5001/save_deck', {
+                await fetch(`${config.userBackend}/save_deck`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -86,7 +87,7 @@ const DeckBuilder: React.FC = () => {
         const token = localStorage.getItem('userToken');
         if (token) {
             try {
-                const response = await fetch('http://localhost:5001/user_abilities', {
+                const response = await fetch(`${config.userBackend}/user_abilities`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

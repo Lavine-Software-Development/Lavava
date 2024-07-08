@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkContext } from "../game/NetworkContext";
 import { abilityCountsConversion } from "../game/objects/utilities";
-const serverURL = "ws://localhost:5553"; 
 const updateCallback = () => {
     console.log("Update received");
 };

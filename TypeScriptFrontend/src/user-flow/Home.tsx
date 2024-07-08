@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import config from "../env-config";
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const Home: React.FC = () => {
         if (storedAbilities) {
             setSelectedAbilities(JSON.parse(storedAbilities));
         } else if (token) {
-            fetch("http://localhost:5001/user_abilities", {
+            fetch(`${config.userBackend}/user_abilities`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
