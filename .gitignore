@@ -6,3 +6,4 @@ new_env/
 ian_game/
 node_modules/
 TypeScriptFrontend/src/env-config.js
+UserBackend/.env
