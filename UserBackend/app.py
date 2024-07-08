@@ -18,40 +18,41 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
 if config.DB_CONNECTED:
     db = SQLAlchemy(app)
     with app.app_context():
         db.create_all()
 
-# User table
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    display_name = db.Column(db.String(80), nullable=False, default="haha") # todo: remove default, fix frontend
-    password = db.Column(db.String(200), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    elo = db.Column(db.Integer, default=1100)
-    deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), default=None)
+    # User table
+    class User(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        username = db.Column(db.String(80), unique=True, nullable=False)
+        display_name = db.Column(db.String(80), nullable=False, default="haha") # todo: remove default, fix frontend
+        password = db.Column(db.String(200), nullable=False)
+        email = db.Column(db.String(120), unique=True, nullable=False)
+        elo = db.Column(db.Integer, default=1100)
+        deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), default=None)
 
-# Deck table
-class Deck(db.Model):
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    ability = db.Column(db.String(50), nullable=False)
-    count = db.Column(db.Integer, nullable=False)
-    secondary_id = db.Column(db.Integer, nullable=False)
-    
-    __table_args__ = (
-        db.UniqueConstraint('secondary_id', 'ability', name='_deck_secondary_id_ability_uc'),
-    )
+    # Deck table
+    class Deck(db.Model):
+        id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+        ability = db.Column(db.String(50), nullable=False)
+        count = db.Column(db.Integer, nullable=False)
+        secondary_id = db.Column(db.Integer, nullable=False)
+        
+        __table_args__ = (
+            db.UniqueConstraint('secondary_id', 'ability', name='_deck_secondary_id_ability_uc'),
+        )
 
-# Game table
-class Game(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    user_ids = db.Column(db.JSON, nullable=False)  # Example: [1, 2, 3, 4]
-    user_ranks = db.Column(db.JSON, nullable=False)  # Example: {"1": "1st", "2": "2nd", "3": "3rd", "4": "4th"}
+    # Game table
+    class Game(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+        user_ids = db.Column(db.JSON, nullable=False)  # Example: [1, 2, 3, 4]
+        user_ranks = db.Column(db.JSON, nullable=False)  # Example: {"1": "1st", "2": "2nd", "3": "3rd", "4": "4th"}
 
-if config.DB_CONNECTED:
+
     with app.app_context():
     # def create_tables():
         # Deck.__table__.drop(db.engine)
@@ -102,7 +103,7 @@ def login():
             }, app.config['SECRET_KEY'], algorithm="HS256")
             return jsonify({"token": token}), 200
 
-    elif username.lower() in ('default' or 'other'):
+    elif username.lower() in ('default', 'other'):
         token = jwt.encode({
             'user': username,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)  # Token expires in 24 hours
