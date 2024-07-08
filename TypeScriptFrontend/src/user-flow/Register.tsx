@@ -77,8 +77,6 @@ const Register: React.FC = () => {
                     <ul className="password-requirements">
                     <li><i className="fas fa-info-circle"></i> Must be at least 8 characters long</li>
                     <li><i className="fas fa-info-circle"></i> Must contain an uppercase and a lowercase letter</li>
-                    <li><i className="fas fa-info-circle"></i> Must contain a number</li>
-                    <li><i className="fas fa-info-circle"></i> Must contain a special character (!, %, @, #, etc.)</li>
                 </ul>
                 )}
                 {message && <p className="error-message">{message}</p>}
