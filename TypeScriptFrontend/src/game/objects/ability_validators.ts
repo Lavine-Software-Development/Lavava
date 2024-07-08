@@ -89,7 +89,7 @@ function capitalValidator(edges: Edge[], player: OtherPlayer): ValidatorFunc {
         const node = data[0] as Node; // Assuming data[0] is always a Node
         if (
             node.owner === player &&
-            node.stateName !== "capital" &&
+            node.stateName == "default" &&
             node.full
         ) {
             let neighborCapital = false;
@@ -121,6 +121,11 @@ function playerValidators(player: OtherPlayer): {
         return node.owner === player;
     };
 
+    const myDefaultNode = (data: IDItem[]): boolean => {
+        const node = data[0] as Node;
+        return node.stateName === "default" && myNode(data);
+    }
+
     // Validator that checks if either node of a dynamic edge belongs to the player
     const dynamicEdgeOwnEither = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge; // Type casting to Edge for TypeScript
@@ -140,8 +145,8 @@ function playerValidators(player: OtherPlayer): {
         [KeyCodes.POISON_CODE]: attackingEdge,
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEither,
         [KeyCodes.ZOMBIE_CODE]: myNode,
-        [KeyCodes.CANNON_CODE]: myNode,
-        [KeyCodes.PUMP_CODE]: myNode,
+        [KeyCodes.CANNON_CODE]: myDefaultNode,
+        [KeyCodes.PUMP_CODE]: myDefaultNode,
     };
 }
 

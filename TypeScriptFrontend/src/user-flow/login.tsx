@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from 'react-router-dom';
 import "../../styles/style.css"; // Adjust the path as necessary
+import config from '../env-config';
 
 interface LoginProps {
   // Add any props here if needed, for example, a login function prop
@@ -35,7 +36,7 @@ const Login: React.FC<LoginProps> = () => {
         setError(""); // Clear previous errors
 
         try {
-            const response = await fetch('http://localhost:5001/login', {
+            const response = await fetch(`${config.userBackend}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

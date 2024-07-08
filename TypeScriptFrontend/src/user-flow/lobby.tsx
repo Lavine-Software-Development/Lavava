@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { NetworkContext } from "../game/NetworkContext";
 import { abilityCountsConversion } from "../game/objects/utilities";
 
+const updateCallback = () => {
+    console.log("Update received");
+};
+
 const Lobby: React.FC = () => {
     const [boardData, setBoardData] = useState(null);
     const [gameID, setGameID] = useState("");
