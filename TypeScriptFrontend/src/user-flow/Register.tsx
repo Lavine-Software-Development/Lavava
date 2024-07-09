@@ -9,6 +9,7 @@ const Register: React.FC = () => {
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const [isRegistered, setIsRegistered] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,6 +22,7 @@ const Register: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setMessage(''); // Clear previous message
+        setIsLoading(true);
 
         try {
             const response = await fetch(`${config.userBackend}/register`, {
@@ -39,6 +41,8 @@ const Register: React.FC = () => {
             }
         } catch (error) {
             setMessage("Failed to connect to the server.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -76,12 +80,13 @@ const Register: React.FC = () => {
                 </div>
                 {!isRegistered && (
                     <ul className="password-requirements">
-                    <li><i className="fas fa-info-circle"></i> Must be at least 8 characters long</li>
-                    <li><i className="fas fa-info-circle"></i> Must contain an uppercase and a lowercase letter</li>
-                </ul>
+                        <li><i className="fas fa-info-circle"></i> Must be at least 8 characters long</li>
+                        <li><i className="fas fa-info-circle"></i> Must contain an uppercase and a lowercase letter</li>
+                    </ul>
                 )}
                 {message && <p className="error-message">{message}</p>}
-                <input type="submit" className="btn" value="Register" id="registerBtn"/>
+                {isLoading && <p className="loading-message">Please wait...</p>}
+                <input type="submit" className="btn" value="Register" id="registerBtn" disabled={isLoading}/>
             </form>
             {!isRegistered && (
                 <p>Already have an account? <NavLink to="/login">Login here!</NavLink></p>
