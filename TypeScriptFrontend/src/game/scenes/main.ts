@@ -227,6 +227,7 @@ export class MainScene extends Scene {
     }
 
     forfeit(): void {
+        console.log("Forfeiting")
         this.simple_send(stateCodes.FORFEIT_CODE);
         this.abilityManager.forfeit(this);
     }
@@ -403,17 +404,11 @@ export class MainScene extends Scene {
     }
 
     private setupBackButtonHandler(): void {
-        history.pushState({ page: "game" }, "Game Page");
         window.addEventListener('popstate', this.handleHistoryChange.bind(this));
     }
 
     private handleHistoryChange(event: PopStateEvent): void {
-        // Check if we're going back from the game page
-        if (!this.isLeavingMatch && (!event.state || event.state.page !== "game")) {
-            event.preventDefault();
-            history.pushState({ page: "game" }, "Game Page");
-            this.leaveMatchDirect();
-        }
+        this.leaveMatchDirect();
     }
 
     private createLeaveMatchButton(): void {
@@ -429,23 +424,26 @@ export class MainScene extends Scene {
     }
 
     private leaveMatch(): void {
-        console.log('Leaving match...');
         if (this.ps < PSE.ELIMINATED) {
             this.forfeit();
         }
         else {
+            console.log('Leaving match...');
             this.network.disconnectWebSocket();
             this.navigate("/home");
         }
     }
 
     private leaveMatchDirect(): void {
-        window.removeEventListener('popstate', this.handleHistoryChange);
         if (this.ps < PSE.ELIMINATED) {
             this.forfeit();
         }
-        this.network.disconnectWebSocket();
-        this.navigate("/home");
+        // wait 0.2 seconds
+        setTimeout(() => {
+            console.log('Leaving match...');
+            this.network.disconnectWebSocket();
+            this.navigate("/home");
+        }, 200);
     }
 
     initialize_data(): void {

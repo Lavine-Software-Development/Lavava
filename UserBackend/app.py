@@ -1,3 +1,4 @@
+from email.policy import default
 import jwt
 import datetime
 from flask import Flask, jsonify, request, url_for
@@ -28,34 +29,31 @@ if config.DB_CONNECTED:
     with app.app_context():
         db.create_all()
 
-    # User table
     class User(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         username = db.Column(db.String(80), unique=True, nullable=False)
-        display_name = db.Column(db.String(80), nullable=False, default="haha") # todo: remove default, fix frontend
+        display_name = db.Column(db.String(80), nullable=False, default="Not Yet Specified")
         password = db.Column(db.String(200), nullable=False)
         email = db.Column(db.String(120), unique=True, nullable=False)
         elo = db.Column(db.Integer, default=1100)
-        deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), default=None)
         email_confirm = db.Column(db.Boolean, nullable=False, default=False)
 
-    # Deck table
     class Deck(db.Model):
-        id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+        id = db.Column(db.Integer, primary_key=True)
+        name = db.Column(db.String(50), nullable=False)
+        user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    class DeckCard(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=False)
         ability = db.Column(db.String(50), nullable=False)
         count = db.Column(db.Integer, nullable=False)
-        secondary_id = db.Column(db.Integer, nullable=False)
-        
-        __table_args__ = (
-            db.UniqueConstraint('secondary_id', 'ability', name='_deck_secondary_id_ability_uc'),
-        )
 
-    # Game table
     class Game(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-        user_ids = db.Column(db.JSON, nullable=False)  # Example: [1, 2, 3, 4]
-        user_ranks = db.Column(db.JSON, nullable=False)  # Example: {"1": "1st", "2": "2nd", "3": "3rd", "4": "4th"}
+        user_ids = db.Column(db.JSON, nullable=False)
+        user_ranks = db.Column(db.JSON, nullable=False)
 
 
     with app.app_context():
@@ -100,13 +98,21 @@ def login():
 
     if config.DB_CONNECTED: 
         user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password) and user.email_confirm:
-            token = jwt.encode({
-                'user_id': user.id,
-                'user': username,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
-            }, app.config['SECRET_KEY'], algorithm="HS256")
-            return jsonify({"token": token}), 200
+        if user:
+            if check_password_hash(user.password, password):
+                if user.email_confirm:
+                    token = jwt.encode({
+                        'user_id': user.id,
+                        'user': username,
+                        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
+                    }, app.config['SECRET_KEY'], algorithm="HS256")
+                    return jsonify({"token": token}), 200
+                else:
+                    return jsonify({"message": "Email not confirmed"}), 401
+            else:
+                return jsonify({"message": "Incorrect Password"}), 401
+        else:
+            return jsonify({"message": "User not Found"}), 401
 
     elif username.lower() in ('default', 'other'):
         token = jwt.encode({
@@ -115,8 +121,6 @@ def login():
         }, app.config['SECRET_KEY'], algorithm="HS256")
         return jsonify({"token": token}), 200
     
-    if user.email_confirm == False:
-        return jsonify({"message": "Email not confirmed"}), 401
     return jsonify({"message": "Invalid credentials"}), 401
     
 @app.route('/register', methods=['POST'])
@@ -125,44 +129,34 @@ def register():
     username = data.get('username')
     email = data.get('email')  # Email is received and will be used to send welcome email
     password = data.get('password') # password received and used to check requirements before sending email
-    display_name = ""
+    display_name = "NOT A THING YET"
 
     if config.DB_CONNECTED:
         if User.query.filter_by(username=username).first():
             return jsonify({"success": False, "message": "Username already exists"}), 400
         if User.query.filter_by(email=email).first():
             return jsonify({"success": False, "message": "Account with this email already exists"}), 400
-        if len(password) < 8: # checks for password requirements
-            return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
-        if not any(char.islower() for char in password):
-            return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
-        if not any(char.isupper() for char in password):
-            return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
-        token = s.dumps(email, salt='email-confirm')
-        link = url_for('confirm_email', token=token, _external=True)
-        send_confirmation_email(email, link)  # Send confirm email
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, display_name="haha", email=email, password=hashed_password) # type: ignore
+    elif username.lower() not in ('default', 'other'):
+        return jsonify({"success": False, "message": "Registration failed, username must be 'default or other'"}), 400
+        
+    if len(password) < 8: # checks for password requirements
+        return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
+    if not any(char.islower() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
+    if not any(char.isupper() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
+    
+    token = s.dumps(email, salt='email-confirm')
+    link = url_for('confirm_email', token=token, _external=True)
+    send_confirmation_email(email, link)  # Send confirm email
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
+    if config.DB_CONNECTED:
+        new_user = User(username=username, display_name=display_name, email=email, password=hashed_password) # type: ignore
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({"success": True, "message": "Registration successful"}), 200
-
-    else:
-        token = s.dumps(email, salt='email-confirm')
-        link = url_for('confirm_email', token=token, _external=True)
-
-        if len(password) < 8: # checks for password requirements
-            return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
-        if not any(char.islower() for char in password):
-            return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
-        if not any(char.isupper() for char in password):
-            return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
-        if username.lower() in ('default', 'other'):
-            send_confirmation_email(email, link)  # Send confirm email
-            return jsonify({"success": True, "message": "Registration successful. Please follow the confirmation email sent to: {}".format(email)}), 200
-        else:
-            return jsonify({"success": False, "message": "Registration failed, username must be 'default or other'"}), 400
+    return jsonify({"success": True, "message": "Registration successful. Please follow the confirmation email sent to: {}".format(email)}), 200
 
 
 @app.route('/confirm_email/<token>')
@@ -175,6 +169,8 @@ def confirm_email(token):
         return '<h1>Error!</h1>' # other error like incorrect token
     if config.DB_CONNECTED:
         user = User.query.filter_by(email=email).first()
+        if not user:
+            return '<h1>Error!</h1>'
         user.email_confirm = True
         db.session.commit()
     return '<h1>Email Confirmed!</h1><p>Proceed to login page to login.</p>' 
@@ -246,13 +242,20 @@ def get_profile(current_user):
 
 def user_decks(current_user):
     if config.DB_CONNECTED:
-        user = User.query.filter_by(username=current_user).first()
-        if user:
-            decks = Deck.query.filter_by(secondary_id=user.id).all()
-            abilities = [{"name": deck.ability, "count": deck.count} for deck in decks]
-            return abilities
-        return []
+        try:
+            user = User.query.filter_by(username=current_user).one()
+            deck = Deck.query.filter_by(user_id=user.id).first()
+            
+            if deck:
+                cards = DeckCard.query.filter_by(deck_id=deck.id).all()
+                abilities = [{"name": card.ability, "count": card.count} for card in cards]
+                return abilities
+            else:
+                return []  # User has no deck yet
+        except NoResultFound:
+            return []  # User not found
     else:
+        # Fallback for when DB is not connected
         return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 1}, {"name": "Rage", "count": 2}, {"name": "Poison", "count": 1}]
     
 
