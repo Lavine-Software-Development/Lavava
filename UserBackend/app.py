@@ -1,4 +1,3 @@
-from email.policy import default
 import jwt
 import datetime
 from flask import Flask, jsonify, request, url_for
@@ -10,8 +9,8 @@ from itsdangerous import SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
 from sqlalchemy.exc import IntegrityError
-import uuid
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import or_, desc
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -38,16 +37,30 @@ if config.DB_CONNECTED:
         elo = db.Column(db.Integer, default=1100)
         email_confirm = db.Column(db.Boolean, nullable=False, default=False)
 
+        def __init__(self, username, password, email):
+            self.username = username
+            self.password = password
+            self.email = email
+
     class Deck(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         name = db.Column(db.String(50), nullable=False)
         user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+        def __init__(self, name, user_id):
+            self.name = name
+            self.user_id = user_id
 
     class DeckCard(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=False)
         ability = db.Column(db.String(50), nullable=False)
         count = db.Column(db.Integer, nullable=False)
+
+        def __init__(self, deck_id, ability, count):
+            self.deck_id = deck_id
+            self.ability = ability
+            self.count = count
 
     class Game(db.Model):
         id = db.Column(db.Integer, primary_key=True)
@@ -76,15 +89,24 @@ def token_required(f):
     def decorated(*args, **kwargs):
         token = None
         if 'Authorization' in request.headers:
-            token = request.headers['Authorization'].split(" ")[1]  # Assuming bearer token is used
+            auth_header = request.headers['Authorization']
+            try:
+                token = auth_header.split(" ")[1]  # Assuming bearer token is used
+            except IndexError:
+                return jsonify({'message': 'Invalid Authorization header format!'}), 401
+        
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
         
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = data['user']
-        except:
-            return jsonify({'message': 'Token is invalid!'}), 401
+        except ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired!'}), 401
+        except InvalidTokenError:
+            return jsonify({'message': 'Invalid token!'}), 401
+        except Exception as e:
+            return jsonify({'message': f'An unexpected error occurred: {str(e)}'}), 500
         
         return f(current_user, *args, **kwargs)
     
@@ -93,35 +115,42 @@ def token_required(f):
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
-    username = data.get('username')
+    login_identifier = data.get('username')  # This could be either username or email
     password = data.get('password')
 
-    if config.DB_CONNECTED: 
-        user = User.query.filter_by(username=username).first()
-        if user:
-            if check_password_hash(user.password, password):
-                if user.email_confirm:
-                    token = jwt.encode({
-                        'user_id': user.id,
-                        'user': username,
-                        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
-                    }, app.config['SECRET_KEY'], algorithm="HS256")
-                    return jsonify({"token": token}), 200
-                else:
-                    return jsonify({"message": "Email not confirmed"}), 401
-            else:
-                return jsonify({"message": "Incorrect Password"}), 401
-        else:
-            return jsonify({"message": "User not Found"}), 401
+    if not login_identifier or not password:
+        return jsonify({"message": "Missing login identifier or password"}), 400
 
-    elif username.lower() in ('default', 'other'):
-        token = jwt.encode({
-            'user': username,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)  # Token expires in 24 hours
-        }, app.config['SECRET_KEY'], algorithm="HS256")
-        return jsonify({"token": token}), 200
+    if not config.DB_CONNECTED:
+        if login_identifier.lower() in ('default', 'other'):
+            token = jwt.encode({
+                'user': login_identifier,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)  # Token expires in 24 hours
+            }, app.config['SECRET_KEY'], algorithm="HS256")
+            return jsonify({"token": token}), 200
     
-    return jsonify({"message": "Invalid credentials"}), 401
+        return jsonify({"message": "Invalid credentials"}), 401
+
+    user = User.query.filter(
+        or_(User.username == login_identifier, User.email == login_identifier)).first()
+
+    if not user:
+        return jsonify({"message": "User not found"}), 401
+
+    if not check_password_hash(user.password, password):
+        return jsonify({"message": "Incorrect password"}), 401
+
+    if not user.email_confirm:
+        return jsonify({"message": "Email not confirmed"}), 401
+
+    token = jwt.encode({
+        'user_id': user.id,
+        'user': user.username,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
+    }, app.config['SECRET_KEY'], algorithm="HS256")
+
+    return jsonify({"token": token}), 200
+
     
 @app.route('/register', methods=['POST'])
 def register():
@@ -129,7 +158,6 @@ def register():
     username = data.get('username')
     email = data.get('email')  # Email is received and will be used to send welcome email
     password = data.get('password') # password received and used to check requirements before sending email
-    display_name = "NOT A THING YET"
 
     if config.DB_CONNECTED:
         if User.query.filter_by(username=username).first():
@@ -152,7 +180,7 @@ def register():
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
     if config.DB_CONNECTED:
-        new_user = User(username=username, display_name=display_name, email=email, password=hashed_password) # type: ignore
+        new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -192,11 +220,9 @@ def send_confirmation_email(user_email, link):
 @app.route('/user_abilities', methods=['GET'])
 @token_required
 def get_home(current_user):
-    # NEEDS ACTUAL DB QUERIES
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
-        if user and user.deck_id:
-            deck = Deck.query.filter_by(id=user.deck_id).first()
+        if user:
             return jsonify({
                 "abilities": user_decks(current_user)
             })
@@ -242,96 +268,65 @@ def get_profile(current_user):
 
 def user_decks(current_user):
     if config.DB_CONNECTED:
-        try:
-            user = User.query.filter_by(username=current_user).one()
+        user = User.query.filter_by(username=current_user).first()
+        if user:
             deck = Deck.query.filter_by(user_id=user.id).first()
-            
             if deck:
                 cards = DeckCard.query.filter_by(deck_id=deck.id).all()
-                abilities = [{"name": card.ability, "count": card.count} for card in cards]
-                return abilities
-            else:
-                return []  # User has no deck yet
-        except NoResultFound:
-            return []  # User not found
+                return [{"name": card.ability, "count": card.count} for card in cards]
+        return []  # Return empty list if no user or no deck
     else:
-        # Fallback for when DB is not connected
         return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 1}, {"name": "Rage", "count": 2}, {"name": "Poison", "count": 1}]
     
 
 @app.route('/save_deck', methods=['POST'])
 @token_required
 def save_deck(current_user):
-    if config.DB_CONNECTED:
-        data = request.json
-        abilities = data.get('abilities')
-        user = User.query.filter_by(username=current_user).first()
+    if not config.DB_CONNECTED:
+        return jsonify({"success": False, "message": "Database not connected"}), 500
 
-        if not abilities:
-            delete_rows_with_secondary_id(user.id)
-            return jsonify({"success": False, "message": "Missing abilities"}), 400
+    data = request.json
+    abilities = data.get('abilities')
 
-        if not user:
-            return jsonify({"success": False, "message": "User not found"}), 404
-        
-        if user.deck_id is None:
-            # Generate a new UUID for the deck.
-            new_deck_id = uuid.uuid4() 
-            # max_deck_id = db.session.query(db.func.max(Deck.id)).scalar()
-            # new_deck_id = (max_deck_id or 0) + 1
-            user.deck_id = new_deck_id
-            db.session.commit()
+    if not abilities:
+        return jsonify({"success": False, "message": "Missing abilities"}), 400
 
-        # Delete old deck entries for the user
-        Deck.query.filter_by(id=user.deck_id).delete()
-        db.session.commit()
+    user = User.query.filter_by(username=current_user).first()
+    if not user:
+        return jsonify({"success": False, "message": "User not found"}), 404
 
-        # deck_id=user.deck_id,
-        for item in abilities:
-            new_deck_entry = Deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
-            add_or_replace_deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
-        
-        db.session.commit()
-
-        # # Convert abilities list to a dictionary
-        # items = {item['name']: item['count'] for item in abilities}
-        # new_deck = Deck(items=items, count=count)
-        # db.session.add(new_deck)
-        # db.session.commit()
-
-        # Update user's deck_id
-        # user.deck_id = new_deck.id
-        # db.session.commit()
-
-        return jsonify({"success": True, "message": "Deck saved successfully"}), 200
-    return jsonify({"success": False, "message": "Database not connected"}), 500
-
-def add_or_replace_deck(secondary_id, ability, count):
     try:
-        new_deck_entry = Deck(
-            secondary_id=secondary_id,
-            ability=ability,
-            count=count
-        )
-        db.session.add(new_deck_entry)
+        # Get or create the user's deck
+        deck = Deck.query.filter_by(user_id=user.id).first()
+        if not deck:
+            deck = Deck(user_id=user.id, name="Default Deck")
+            db.session.add(deck)
+            db.session.flush()  # This assigns an ID to the deck if it's new
+
+        # Get current deck cards
+        current_cards = {card.ability: card for card in DeckCard.query.filter_by(deck_id=deck.id)}
+
+        # Update deck
+        for ability in abilities:
+            if ability['name'] in current_cards:
+                # Update existing card
+                current_cards[ability['name']].count = ability['count']
+                current_cards.pop(ability['name'])
+            else:
+                # Add new card
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'])
+                db.session.add(new_card)
+
+        # Remove cards not in the new deck
+        for card in current_cards.values():
+            db.session.delete(card)
+
         db.session.commit()
+        return jsonify({"success": True, "message": "Deck saved successfully"}), 200
+
     except IntegrityError:
         db.session.rollback()
-        existing_deck_entry = db.session.query(Deck).filter_by(
-            secondary_id=secondary_id,
-            ability=ability
-        ).one()
-        existing_deck_entry.count = count
-        db.session.commit()
-
-def delete_rows_with_secondary_id(secondary_id):
-    try:
-        db.session.query(Deck).filter_by(secondary_id=secondary_id).delete()
-        db.session.commit()
-        print(f"All rows with secondary_id = {secondary_id} have been deleted.")
-    except Exception as e:
-        db.session.rollback()
-        print(f"An error occurred: {e}")
+        return jsonify({"success": False, "message": "Error saving deck"}), 500
 
 def update_elos(new_elos, usernames):
     if config.DB_CONNECTED:
@@ -414,9 +409,12 @@ def update_elo():
 @app.route('/leaderboard', methods=['GET'])
 def get_leaderboard():
     if config.DB_CONNECTED:
-        # Query the database for all users, ordered by elo descending
-        users = User.query.order_by(User.elo.desc()).all()
-        leaderboard = [{"userName": user.username, "elo": user.elo} for user in users]
+        # Query the database for all confirmed users, ordered by elo descending
+        confirmed_users = User.query.filter_by(email_confirm=True).order_by(desc(User.elo)).all()
+        leaderboard = [
+            {"userName": user.username, "elo": user.elo} 
+            for user in confirmed_users
+        ]
         return jsonify({"leaderboard": leaderboard})
     
     return jsonify({
