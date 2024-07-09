@@ -95,6 +95,7 @@ export class Network {
             this.socket.readyState === WebSocket.CONNECTING
         ) {
             console.log("Queuing message due to WebSocket connecting");
+            console.log("Message: ", message);
             this.messageQueue.push(message);
         } else {
             console.error("WebSocket is not connected or has failed.");
