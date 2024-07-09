@@ -179,6 +179,11 @@ export class MainScene extends Scene {
             // abk here is the ability code (converted from the name via NameToCode)
             const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
 
+            let visual = VISUALS[abilityCode] as AbilityVisual
+            if (visual.color[0] === 555) {
+                visual.color = this.mainPlayer.color;
+            }
+
             abilities[abilityCode] = new ReloadAbility(
                 VISUALS[abilityCode] as AbilityVisual,
                 CLICKS[abilityCode][0],
@@ -212,7 +217,7 @@ export class MainScene extends Scene {
 
         // Use Phaser's time events instead of setInterval
         this.reconnectionEvent = this.time.addEvent({
-            delay: 5000, // Check every 5 seconds
+            delay: 1000, // Check every 5 seconds
             callback: this.checkConnection,
             callbackScope: this,
             loop: true
@@ -345,6 +350,7 @@ export class MainScene extends Scene {
 
     shutdown(): void {
         // Clear the reconnection event when the scene is shut down
+        this.network.disconnectWebSocket()
         if (this.reconnectionEvent) {
             this.reconnectionEvent.remove();
             this.reconnectionEvent = null;
@@ -439,11 +445,11 @@ export class MainScene extends Scene {
             this.forfeit();
         }
         // wait 0.2 seconds
-        setTimeout(() => {
+        // setTimeout(() => {
             console.log('Leaving match...');
-            this.network.disconnectWebSocket();
+            // this.network.disconnectWebSocket();
             this.navigate("/home");
-        }, 200);
+        // }, 200);
     }
 
     initialize_data(): void {

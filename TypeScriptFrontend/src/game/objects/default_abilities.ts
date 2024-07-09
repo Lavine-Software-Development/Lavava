@@ -8,7 +8,7 @@ import { Colors, KeyCodes, EventCodes } from "./constants";
 import { ClickType } from "./enums";
 
 // Create instances of AbilityVisual using the factory function
-const SPAWN_V = createAbilityVisual("Spawn", "circle", Colors.GREEN);
+const SPAWN_V = createAbilityVisual("Spawn", "circle");
 const BRIDGE_V = createAbilityVisual("Bridge", "triangle", Colors.YELLOW, "A");
 const D_BRIDGE_V = createAbilityVisual("D-Bridge", "circle", Colors.YELLOW);
 const NUKE_V = createAbilityVisual("Nuke", "x", Colors.BLACK);
@@ -17,7 +17,7 @@ const FREEZE_V = createAbilityVisual("Freeze", "triangle", Colors.LIGHT_BLUE);
 const CAPITAL_V = createAbilityVisual("Capital", "star", Colors.PINK);
 const ZOMBIE_V = createAbilityVisual("Zombie", "square", Colors.BLACK);
 const BURN_V = createAbilityVisual("Burn", "square", Colors.DARK_ORANGE);
-const RAGE_V = createAbilityVisual("Rage", "cross", Colors.GREEN);
+const RAGE_V = createAbilityVisual("Rage", "cross", Colors.LIGHT_GREEN);
 const CANNON_V = createAbilityVisual("Cannon", "cannon", Colors.GREY, "E");
 const PUMP_V = createAbilityVisual("Pump", "circle", Colors.DARK_PURPLE, "U");
 

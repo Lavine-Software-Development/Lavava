@@ -99,8 +99,9 @@ class WebSocketServer():
                     batch_json = batch.tick_repr_json(id)
                     await websocket.send(batch_json)
                 except websockets.exceptions.ConnectionClosed:
-                    # print(f"Error sending tick to websocket")
                     pass
+                    # print(f"Error sending tick to websocket")
+                    # if batch.40 connections not connected still then 
             await asyncio.sleep(0.1)
         
         # should be its own delete function, but leaving for now due to async complexity

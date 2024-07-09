@@ -36,7 +36,7 @@ export class Highlight {
     }
 
     get color(): readonly [number, number, number] {
-        if (this.usage && this.usage !== KeyCodes.SPAWN_CODE) {
+        if (this.usage) {
             const visual = VISUALS[this.usage] as AbilityVisual; // Assuming AbilityVisual has a color property
             return visual.color;
         }

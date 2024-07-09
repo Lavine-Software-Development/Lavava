@@ -59,6 +59,7 @@ export const stateCodes = {
     OVERRIDE_RESTART_CODE: 121,
     RESTART_CODE: 32,
     FORFEIT_CODE: 120,
+    FORFEIT_AND_LEAVE_CODE: 140,
 };
 
 export const MineVisuals = {
