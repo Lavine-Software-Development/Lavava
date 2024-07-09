@@ -184,7 +184,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({"success": True, "message": "Registration successful. Please follow the confirmation email sent to: {}".format(email)}), 200
+    return jsonify({"success": True, "message": "Registration successful. Please follow the confirmation email sent to: {} (check junk mail)".format(email)}), 200
 
 
 @app.route('/confirm_email/<token>')
