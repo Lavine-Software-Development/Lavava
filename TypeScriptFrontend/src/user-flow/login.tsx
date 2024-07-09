@@ -11,6 +11,7 @@ const Login: React.FC<LoginProps> = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false); // New state for loading
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -34,6 +35,7 @@ const Login: React.FC<LoginProps> = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(""); // Clear previous errors
+        setIsLoading(true); // Start loading
 
         try {
             const response = await fetch(`${config.userBackend}/login`, {
@@ -54,6 +56,8 @@ const Login: React.FC<LoginProps> = () => {
             }
         } catch (err) {
             setError("Failed to connect to the server.");
+        } finally {
+            setIsLoading(false); // Stop loading
         }
     };
 
@@ -91,14 +95,16 @@ const Login: React.FC<LoginProps> = () => {
                     <i className="fas fa-lock"></i>
                 </div>
                 {error && <div className="error-message">{error}</div>}
+                {isLoading && <p className="loading-message">Please wait...</p>} {/* Loading message */}
                 <a href="forgot-password" className="forgot-password">Forgot password?</a>
-                <input type="submit" className="btn" value="Sign In" name="Sign In" />
+                <input type="submit" className="btn" value="Sign In" name="Sign In" disabled={isLoading} />
                 <input
                     type="button"
                     className="btn"
                     value="Play as Guest"
                     name="Play as Guest"
                     onClick={handleGuestLogin}
+                    disabled={isLoading}
                 />
             </form>
             <p>Don't have an account? <NavLink to="/register">Register here!</NavLink></p>
