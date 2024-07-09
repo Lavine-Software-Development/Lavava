@@ -19,7 +19,7 @@ const Home: React.FC = () => {
         const isGuest = sessionStorage.getItem("guestToken");
         setIsLoggedIn(!!token);
 
-        if (!isGuest && !isLoggedIn) {
+        if (!isGuest && !token) {
             navigate("/login");
         }
 
