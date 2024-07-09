@@ -70,6 +70,11 @@ export class MainScene extends Scene {
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
         this.board = props;
+        console.log("just set board");
+        console.log(config)
+        console.log(this.board);
+        console.log(network);
+        console.log(navigate);
         this.network = network;
         this.navigate = navigate;
         this.network.updateCallback = this.update_data.bind(this);

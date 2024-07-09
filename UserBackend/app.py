@@ -272,10 +272,10 @@ def save_deck(current_user):
             return jsonify({"success": False, "message": "User not found"}), 404
         
         if user.deck_id is None:
-            # Generate a new UUID for the deck
-            # new_deck_id = uuid.uuid4() Maybe try this?
-            max_deck_id = db.session.query(db.func.max(Deck.id)).scalar()
-            new_deck_id = (max_deck_id or 0) + 1
+            # Generate a new UUID for the deck.
+            new_deck_id = uuid.uuid4() 
+            # max_deck_id = db.session.query(db.func.max(Deck.id)).scalar()
+            # new_deck_id = (max_deck_id or 0) + 1
             user.deck_id = new_deck_id
             db.session.commit()
 
