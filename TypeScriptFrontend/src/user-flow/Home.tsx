@@ -12,7 +12,9 @@ const Home: React.FC = () => {
     const [showSalaryPopup, setShowSalaryPopup] = useState(false);
     const [showLoginPopup, setShowLoginPopup] = useState(false);
     const [showNoAbilityPopup, setShowNoAbilityPopup] = useState(false);
-    const [friendlyMode, setFriendlyMode] = useState<string>("host"); // Friendly mode state
+    const [friendlyMode, setFriendlyMode] = useState<string>(
+        sessionStorage.getItem("friendlyMode") || "join"
+    );
 
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
@@ -50,6 +52,10 @@ const Home: React.FC = () => {
         const gameStyle = sessionStorage.getItem("gameStyle");
         if (gameStyle) {
             setTabAndCloseDropdown(gameStyle);
+        }
+        const storedFriendlyMode = sessionStorage.getItem("friendlyMode");
+        if (storedFriendlyMode) {
+            setFriendlyMode(storedFriendlyMode);
         }
     }, []);
 
@@ -136,11 +142,7 @@ const Home: React.FC = () => {
     };
 
     const handleFriendlyClick = () => {
-        if (!isLoggedIn) {
-            setShowLoginPopup(true); // Show login popup if not logged in
-        } else {
-            setTabAndCloseDropdown("FRIENDLY"); // Proceed with setting the tab to FRIENDLY
-        }
+        setTabAndCloseDropdown("FRIENDLY"); // Proceed with setting the tab to FRIENDLY
     };
 
     useEffect(() => {
@@ -158,10 +160,12 @@ const Home: React.FC = () => {
 
     const switchToHost = () => {
         setFriendlyMode("host");
+        sessionStorage.setItem("friendlyMode", "host");
     };
 
     const switchToJoin = () => {
         setFriendlyMode("join");
+        sessionStorage.setItem("friendlyMode", "join");
     };
 
     return (
@@ -224,8 +228,8 @@ const Home: React.FC = () => {
                                     style={{
                                         backgroundColor:
                                             friendlyMode === "host"
-                                                ? "blue"
-                                                : "lightgrey",
+                                                ? "green"
+                                                : "lightgreen",
                                         marginRight: "10px", // Adjust margin as needed
                                     }}
                                     onClick={switchToHost}
@@ -237,8 +241,8 @@ const Home: React.FC = () => {
                                     style={{
                                         backgroundColor:
                                             friendlyMode === "join"
-                                                ? "blue"
-                                                : "lightgrey",
+                                                ? "green"
+                                                : "lightgreen",
                                     }}
                                     onClick={switchToJoin}
                                 >
