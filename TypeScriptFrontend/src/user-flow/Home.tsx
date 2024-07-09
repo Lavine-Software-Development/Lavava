@@ -12,6 +12,7 @@ const Home: React.FC = () => {
     const [showSalaryPopup, setShowSalaryPopup] = useState(false);
     const [showLoginPopup, setShowLoginPopup] = useState(false);
     const [showNoAbilityPopup, setShowNoAbilityPopup] = useState(false);
+    const [friendlyMode, setFriendlyMode] = useState<string>("host"); // Friendly mode state
 
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
@@ -67,7 +68,6 @@ const Home: React.FC = () => {
         sessionStorage.setItem("type", "HOST");
         sessionStorage.setItem("player_count", playerCount.toString());
         sessionStorage.removeItem("key_code");
-        // navigate('/play');
         navigate("/lobby");
     };
 
@@ -75,14 +75,12 @@ const Home: React.FC = () => {
         sessionStorage.setItem("type", "LADDER");
         sessionStorage.setItem("player_count", playerCount.toString());
         sessionStorage.removeItem("key_code");
-        // navigate('/play');
         navigate("/lobby");
-    }
+    };
 
     const handleJoinGame = () => {
         sessionStorage.setItem("type", "JOIN");
         sessionStorage.setItem("key_code", keyCode);
-        // navigate('/play');
         navigate("/lobby");
     };
 
@@ -91,15 +89,14 @@ const Home: React.FC = () => {
     const handlePlayDropdownFocus = () => {
         if (selectedAbilities.length > 0) {
             setPlayDropdownOpen(!playDropdownOpen);
-        }
-        else {
+        } else {
             setShowNoAbilityPopup(true);
         }
     };
 
     const setTabAndCloseDropdown = (tab: string) => {
         setTab(tab);
-        sessionStorage.setItem("gameStyle", tab)
+        sessionStorage.setItem("gameStyle", tab);
         setKeyCode("");
         setPlayDropdownOpen(false);
     };
@@ -138,6 +135,14 @@ const Home: React.FC = () => {
         }
     };
 
+    const handleFriendlyClick = () => {
+        if (!isLoggedIn) {
+            setShowLoginPopup(true); // Show login popup if not logged in
+        } else {
+            setTabAndCloseDropdown("FRIENDLY"); // Proceed with setting the tab to FRIENDLY
+        }
+    };
+
     useEffect(() => {
         window.addEventListener("click", handleClickOutsideDropdown);
         return () => {
@@ -151,25 +156,33 @@ const Home: React.FC = () => {
         setShowNoAbilityPopup(false);
     };
 
+    const switchToHost = () => {
+        setFriendlyMode("host");
+    };
+
+    const switchToJoin = () => {
+        setFriendlyMode("join");
+    };
+
     return (
         <div className="dashboard-container" id="home">
             <div className="profile-card">
                 <h1 className="form-title">Home</h1>
                 <div className="app-drop-down-container" ref={playDropdownRef}>
-                {selectedAbilities.length > 0 ? (
-                    <button onClick={handlePlayDropdownFocus}>Play</button>
+                    {selectedAbilities.length > 0 ? (
+                        <button onClick={handlePlayDropdownFocus}>Play</button>
                     ) : (
-                    <button style={{ backgroundColor: 'grey', }} onClick={handlePlayDropdownFocus}>Play</button>
-                )} 
+                        <button
+                            style={{ backgroundColor: "grey" }}
+                            onClick={handlePlayDropdownFocus}
+                        >
+                            Play
+                        </button>
+                    )}
                     {playDropdownOpen && (
                         <ul>
                             <li onClick={handleLadderClick}>Ladder</li>
-                            <li onClick={() => setTabAndCloseDropdown("HOST")}>
-                                Host
-                            </li>
-                            <li onClick={() => setTabAndCloseDropdown("JOIN")}>
-                                Join
-                            </li>
+                            <li onClick={handleFriendlyClick}>Friendly</li>
                         </ul>
                     )}
                 </div>
@@ -201,14 +214,122 @@ const Home: React.FC = () => {
                     />
                 )}
             </div>
-            {(selectedAbilities.length > 0 && tab != "") && (
+            {selectedAbilities.length > 0 && tab !== "" && (
                 <div className="profile-card">
-                    {tab === "HOST" ? (
+                    {tab === "FRIENDLY" ? (
                         <div>
-                            <h1 style={{ textAlign: "center" }}>Host</h1>
-                            <h3 style={{ textAlign: "center" }}>
-                                (Friendly Match)
-                            </h3>
+                            <div className="switch-buttons">
+                                <button
+                                    className="btn"
+                                    style={{
+                                        backgroundColor:
+                                            friendlyMode === "host"
+                                                ? "blue"
+                                                : "lightgrey",
+                                        marginRight: "10px", // Adjust margin as needed
+                                    }}
+                                    onClick={switchToHost}
+                                >
+                                    Host Game
+                                </button>
+                                <button
+                                    className="btn"
+                                    style={{
+                                        backgroundColor:
+                                            friendlyMode === "join"
+                                                ? "blue"
+                                                : "lightgrey",
+                                    }}
+                                    onClick={switchToJoin}
+                                >
+                                    Join Game
+                                </button>
+                            </div>
+                            <h1 style={{ textAlign: "center" }}>
+                                Friendly Match
+                            </h1>
+                            <h3 style={{ textAlign: "center" }}>(No elo)</h3>
+                            {selectedAbilities.map((ability, index) => (
+                                <p style={{ textAlign: "center" }} key={index}>
+                                    {ability.name}
+                                    <img
+                                        src={`./public/assets/abilityIcons/${ability.name}.png`}
+                                        alt={ability.name}
+                                        style={{
+                                            width: "30px",
+                                            height: "30px",
+                                            objectFit: "contain",
+                                            marginLeft: "10px",
+                                            marginRight: "10px",
+                                        }}
+                                    />
+                                    : {ability.count}
+                                </p>
+                            ))}
+                            {friendlyMode === "host" ? (
+                                <>
+                                    <label>Player Count:</label>
+                                    <div
+                                        className="player-count-drop-down-container"
+                                        ref={playerCountDropdownRef}
+                                    >
+                                        <button
+                                            onClick={
+                                                handlePlayerCountDropdownFocus
+                                            }
+                                        >
+                                            {playerCount}
+                                        </button>
+                                        {playerCountDropdownOpen && (
+                                            <ul>
+                                                {[2, 3, 4, 5].map((count) => (
+                                                    <li
+                                                        key={count}
+                                                        onClick={() =>
+                                                            hostTab(count)
+                                                        }
+                                                    >
+                                                        {count}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    <button
+                                        className="btn"
+                                        style={{ backgroundColor: "green" }}
+                                        onClick={handleHostGame}
+                                    >
+                                        Host Match
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <input
+                                        type="text"
+                                        className="text-box"
+                                        placeholder="enter key code"
+                                        value={keyCode}
+                                        onChange={(e) =>
+                                            setKeyCode(
+                                                e.target.value.toUpperCase()
+                                            )
+                                        }
+                                    />
+                                    <button
+                                        className="btn"
+                                        style={{ backgroundColor: "green" }}
+                                        onClick={handleJoinGame}
+                                    >
+                                        Join Match
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    ) : tab === "LADDER" ? (
+                        <div>
+                            <h1 style={{ textAlign: "center" }}>Ladder</h1>
+                            <h3 style={{ textAlign: "center" }}>(For Elo)</h3>
                             {selectedAbilities.map((ability, index) => (
                                 <p style={{ textAlign: "center" }} key={index}>
                                     {ability.name}
@@ -241,9 +362,7 @@ const Home: React.FC = () => {
                                         {[2, 3, 4, 5].map((count) => (
                                             <li
                                                 key={count}
-                                                onClick={() =>
-                                                    hostTab(count)
-                                                }
+                                                onClick={() => hostTab(count)}
                                             >
                                                 {count}
                                             </li>
@@ -251,109 +370,15 @@ const Home: React.FC = () => {
                                     </ul>
                                 )}
                             </div>
-                            <button className="btn" style={{ backgroundColor: 'green', }} onClick={handleHostGame}>
-                                Host Match
+                            <button
+                                className="btn"
+                                style={{ backgroundColor: "green" }}
+                                onClick={handleLadderGame}
+                            >
+                                Find Match
                             </button>
                         </div>
-                    ) : tab === "JOIN" ? (
-                        <div>
-                            <h1 style={{ textAlign: "center" }}>Join</h1>
-                            <h3 style={{ textAlign: "center" }}>
-                                (Friendly Match)
-                            </h3>
-                            {selectedAbilities.map((ability, index) => (
-                                <p style={{ textAlign: "center" }} key={index}>
-                                    {ability.name}
-                                    <img
-                                        src={`./public/assets/abilityIcons/${ability.name}.png`}
-                                        alt={ability.name}
-                                        style={{
-                                            width: "30px",
-                                            height: "30px",
-                                            objectFit: "contain",
-                                            marginLeft: "10px",
-                                            marginRight: "10px",
-                                        }}
-                                    />
-                                    : {ability.count}
-                                </p>
-                            ))}
-                            <button className="btn"  style={{ backgroundColor: 'green', }} onClick={handleJoinGame}>
-                                Join Match
-                            </button>
-                            <input
-                                type="text"
-                                className="text-box"
-                                placeholder="enter key code"
-                                value={keyCode}
-                                onChange={(e) =>
-                                    setKeyCode(e.target.value.toUpperCase())
-                                }
-                            />
-                        </div>
-                    ) : (
-                        tab === "LADDER" && (
-                            <div>
-                                <h1 style={{ textAlign: "center" }}>Ladder</h1>
-                                <h3 style={{ textAlign: "center" }}>
-                                (For Elo)
-                                </h3>
-                                {selectedAbilities.map((ability, index) => (
-                                    <p
-                                        style={{ textAlign: "center" }}
-                                        key={index}
-                                    >
-                                        {ability.name}
-                                        <img
-                                            src={`./public/assets/abilityIcons/${ability.name}.png`}
-                                            alt={ability.name}
-                                            style={{
-                                                width: "30px",
-                                                height: "30px",
-                                                objectFit: "contain",
-                                                marginLeft: "10px",
-                                                marginRight: "10px",
-                                            }}
-                                        />
-                                        : {ability.count}
-                                    </p>
-                                ))}
-                                <label>Player Count:</label>
-                                <div
-                                    className="player-count-drop-down-container"
-                                    ref={playerCountDropdownRef}
-                                >
-                                    <button
-                                        onClick={handlePlayerCountDropdownFocus}
-                                    >
-                                        {playerCount}
-                                    </button>
-                                    {playerCountDropdownOpen && (
-                                        <ul>
-                                            {[2, 3, 4, 5].map((count) => (
-                                                <li
-                                                    key={count}
-                                                    onClick={() =>
-                                                        hostTab(count)
-                                                    }
-                                                >
-                                                    {count}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                                <button
-                                    className="btn"
-                                    style={{ backgroundColor: 'green', }} 
-                                    onClick={handleLadderGame}
-                                >
-                                    
-                                    Find Match
-                                </button>
-                            </div>
-                        )
-                    )}
+                    ) : null}
                 </div>
             )}
             <div className="popup-container">
@@ -390,4 +415,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-

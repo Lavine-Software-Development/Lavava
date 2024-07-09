@@ -86,14 +86,14 @@ const Lobby: React.FC = () => {
                         Cancel
                     </button>
                 }
-                <h1>Waiting...</h1>
+                <h1 className="whiteText">Waiting...</h1>
                 { gameType != "LADDER" ? ( 
                     <div>
-                        <h2>Game Code: { gameID }</h2>
-                        <h2>{ playerCount } Player Friendly Match</h2>
+                        <h2 className="whiteText">Game Code: { gameID }</h2>
+                        <h2 className="whiteText">{ playerCount } Player Friendly Match</h2>
                     </div> 
                 ) : (
-                    <h2>{ playerCount } Player Ladder Match</h2>
+                    <h2 className="whiteText">{ playerCount } Player Ladder Match</h2>
                 )
                 }
             </div>
