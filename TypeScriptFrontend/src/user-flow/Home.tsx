@@ -16,7 +16,13 @@ const Home: React.FC = () => {
     useEffect(() => {
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const token = localStorage.getItem("userToken");
+        const isGuest = sessionStorage.getItem("guestToken");
         setIsLoggedIn(!!token);
+
+        if (!isGuest && !isLoggedIn) {
+            navigate("/login");
+        }
+
         if (storedAbilities) {
             setSelectedAbilities(JSON.parse(storedAbilities));
         } else if (token) {
