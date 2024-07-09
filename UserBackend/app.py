@@ -142,7 +142,7 @@ def register():
         link = url_for('confirm_email', token=token, _external=True)
         send_confirmation_email(email, link)  # Send confirm email
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, display_name=display_name, email=email, password=hashed_password) # type: ignore
+        new_user = User(username=username, display_name="haha", email=email, password=hashed_password) # type: ignore
         db.session.add(new_user)
         db.session.commit()
 
@@ -218,8 +218,22 @@ def get_home(current_user):
 @app.route('/profile', methods=['GET'])
 @token_required
 def get_profile(current_user):
-    # NEEDS ACTUAL DB QUERIES
-    if current_user in {"default", "other"}:
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            games = Game.query.filter(Game.user_ids.contains(str(user.id))).order_by(Game.game_date.desc()).limit(3).all()
+            past_games = [game.user_ranks.get(str(user.id), "N/A") for game in games]
+            return jsonify({
+                "userName": user.username,
+                "displayName": user.display_name,
+                "email": user.email,
+                "abilities": user_decks(current_user),
+                "elo": user.elo,
+                "past_games": past_games
+            })
+        else:
+            return jsonify({"error": "User not found"}), 404
+    else:
         return jsonify({
             "userName": "Default-User",
             "displayName": "John Doe",
@@ -228,18 +242,16 @@ def get_profile(current_user):
             "elo": 1138,
             "past_games": ["1st", "4th", "2nd"]
         })
-    else:
-        return jsonify({"error": "User not found"}), 404
     
 
 def user_decks(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
-        decks = Deck.query.filter_by(secondary_id=user.id).all()
-        abilites = []
-        for deck in decks: 
-            abilites.append({"name": deck.ability, "count": deck.count})
-        return abilites  
+        if user:
+            decks = Deck.query.filter_by(secondary_id=user.id).all()
+            abilities = [{"name": deck.ability, "count": deck.count} for deck in decks]
+            return abilities
+        return []
     else:
         return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 1}, {"name": "Rage", "count": 2}, {"name": "Poison", "count": 1}]
     
@@ -259,11 +271,9 @@ def save_deck(current_user):
         if not user:
             return jsonify({"success": False, "message": "User not found"}), 404
         
-        # Ensure items count is valid
-        # assert len(abilities) < 4 and all(item['count'] > 0 for item in abilities)
-
         if user.deck_id is None:
-            # Find the maximum deck_id and increment it
+            # Generate a new UUID for the deck
+            # new_deck_id = uuid.uuid4() Maybe try this?
             max_deck_id = db.session.query(db.func.max(Deck.id)).scalar()
             new_deck_id = (max_deck_id or 0) + 1
             user.deck_id = new_deck_id
@@ -273,8 +283,7 @@ def save_deck(current_user):
         Deck.query.filter_by(id=user.deck_id).delete()
         db.session.commit()
 
-        # Save new deck entries
-        # deck_id=user.deck_id, 
+        # deck_id=user.deck_id,
         for item in abilities:
             new_deck_entry = Deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
             add_or_replace_deck(secondary_id=user.deck_id, ability=item['name'], count=item['count'])
@@ -322,8 +331,14 @@ def delete_rows_with_secondary_id(secondary_id):
         print(f"An error occurred: {e}")
 
 def update_elos(new_elos, usernames):
-    # NEEDS ACTUAL DB QUERIES
-    pass  
+    if config.DB_CONNECTED:
+        for username, new_elo in zip(usernames, new_elos):
+            user = User.query.filter_by(username=username).first()
+            if user:
+                user.elo = new_elo
+        db.session.commit()
+    else:
+        print("Database not connected. Elo updates not saved.")
 
 def calculate_elos(elos, k_factor=32):
     n = len(elos)
@@ -351,9 +366,12 @@ def token_to_username(token: str):
         return 'Invalid token'
 
 def username_to_elo(name: str):
-    # NEEDS ACTUAL DB QUERIES
-    dummy = {"other": 1200, "default": 1300}
-    return dummy[name]
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=name).first()
+        return user.elo if user else 1100  # Default ELO if user not found
+    else:
+        dummy = {"other": 1200, "default": 1300}
+        return dummy.get(name, 1100)  # Def
     
 @app.route('/abilities', methods=['GET'])
 def get_abilities():
