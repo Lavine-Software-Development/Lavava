@@ -496,3 +496,61 @@ ul {
 .popup button:hover {
     background-color: #ea3535;
 }
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 2px;
+    margin-bottom: 2px; /* Space between rows */
+    width: 100%;
+}
+
+.custom-button {
+    margin: 10px; /* Add spacing between buttons */
+    padding: 10px 20px; /* Add padding inside buttons */
+    border-radius: 8px; /* Make corners rounded */
+    background-color: #007BFF; /* Change background color */
+    color: white; /* Change text color */
+    border: none; /* Remove default border */
+    cursor: pointer; /* Change cursor on hover */
+}
+
+.start-fresh-button {
+    background-color: #dc3545; /* Red color for 'Start Fresh' button */
+}
+
+.start-fresh-button:hover {
+    background-color: #bd2130; /* Darker shade on hover */
+}
+
+.save-button {
+    background-color: #007BFF; /* Blue color for 'Save' button */
+}
+
+.save-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+.my-deck-button {
+    background-color: #17a2b8; /* Teal color for 'My Deck' button */
+}
+
+.my-deck-button:hover {
+    background-color: #138496; /* Darker shade on hover */
+}
+
+.ready-button {
+    background-color: #28a745; /* Green color for 'Ready' button */
+    width: 85%; /* Make 'Ready' button wider */
+    margin-top: 0;
+}
+
+.ready-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}

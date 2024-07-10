@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
 import config from '../env-config';
+import { useNavigate } from 'react-router-dom';
 
 interface Ability {
     name: string;
@@ -13,6 +14,7 @@ const DeckBuilder: React.FC = () => {
     const [initialSalary, setInitialSalary] = useState(0); // Store the initial salary
     const [salary, setSalary] = useState(0); 
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchAbilities = async () => {
@@ -110,6 +112,10 @@ const DeckBuilder: React.FC = () => {
         }
     };
 
+    const goHome = () => {
+        navigate('/home');
+    };
+
     const handleButtonClick = (abilityName: string, increment: boolean) => {
         setError(""); // Clear previous errors
         setSelectedCounts(prevCounts => {
@@ -190,17 +196,22 @@ const DeckBuilder: React.FC = () => {
                 ))}
             </div>
             <div className="button-container">
-                <button onClick={handleStartFresh}>Start Fresh</button>
+                <div className="button-row">
+                    <button className="custom-button start-fresh-button" onClick={handleStartFresh}>Start Fresh</button>
+                    {localStorage.getItem('userToken') && (
+                        <>
+                            <button className="custom-button save-button" onClick={handleSaveDeck}>Save</button>
+                            <button className="custom-button my-deck-button" onClick={handleResetDeck}>My Deck</button>
+                        </>
+                    )}
+                </div>
                 {localStorage.getItem('userToken') && (
-                    <>
-                        <button onClick={handleSaveDeck}>Save</button>
-                        <button onClick={handleResetDeck}>My Deck</button>
-                    </>
+                <button className="custom-button ready-button" onClick={goHome}>Ready</button>
                 )}
-            </div>
-            {error && <p className="error-message">{error}</p>}
-            <div className="salary-display">
-                <h2>Salary: {salary}</h2>
+                {error && <p className="error-message">{error}</p>}
+                <div className="salary-display">
+                    <h2>Salary: {salary}</h2>
+                </div>
             </div>
         </div>
     );
