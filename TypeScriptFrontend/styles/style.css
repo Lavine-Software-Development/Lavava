@@ -519,6 +519,28 @@ ul {
     color: white; /* Change text color */
     border: none; /* Remove default border */
     cursor: pointer; /* Change cursor on hover */
+    position: relative; /* Position tooltip relative to the button */
+}
+
+.custom-button::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 5px); /* Adjust spacing from button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0; 
+    visibility: hidden; /* Initially hide the tooltip */
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.custom-button:hover::after {
+    opacity: 1;
+    visibility: visible; /* Show the tooltip on hover */
 }
 
 .start-fresh-button {

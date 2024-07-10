@@ -197,16 +197,16 @@ const DeckBuilder: React.FC = () => {
             </div>
             <div className="button-container">
                 <div className="button-row">
-                    <button className="custom-button start-fresh-button" onClick={handleStartFresh}>Start Fresh</button>
+                    <button className="custom-button start-fresh-button" data-tooltip="Start a new session" onClick={handleStartFresh}>Start Fresh</button>
                     {localStorage.getItem('userToken') && (
                         <>
-                            <button className="custom-button save-button" onClick={handleSaveDeck}>Save</button>
-                            <button className="custom-button my-deck-button" onClick={handleResetDeck}>My Deck</button>
+                            <button className="custom-button save-button" data-tooltip="Save your current deck" onClick={handleSaveDeck}>Save</button>
+                            <button className="custom-button my-deck-button" data-tooltip="View your deck" onClick={handleResetDeck}>My Deck</button>
                         </>
                     )}
                 </div>
                 {localStorage.getItem('userToken') && (
-                <button className="custom-button ready-button" onClick={goHome}>Ready</button>
+                <button className="custom-button ready-button" data-tooltip="Go to the home page" onClick={goHome}>Ready</button>
                 )}
                 {error && <p className="error-message">{error}</p>}
                 <div className="salary-display">
