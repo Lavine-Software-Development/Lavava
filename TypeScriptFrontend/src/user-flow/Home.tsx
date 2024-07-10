@@ -217,6 +217,7 @@ const Home: React.FC = () => {
                         onClick={() => navigate("/login")}
                     />
                 )}
+                <div style={{ height: '10px' }}></div> 
             </div>
             {selectedAbilities.length > 0 && tab !== "" && (
                 <div className="profile-card">
@@ -272,7 +273,7 @@ const Home: React.FC = () => {
                             ))}
                             {friendlyMode === "host" ? (
                                 <>
-                                    <label>Player Count:</label>
+                                    {/* <label>Player Count:</label> */}
                                     <div
                                         className="player-count-drop-down-container"
                                         ref={playerCountDropdownRef}
@@ -282,7 +283,7 @@ const Home: React.FC = () => {
                                                 handlePlayerCountDropdownFocus
                                             }
                                         >
-                                            {playerCount}
+                                            {playerCount} Players
                                         </button>
                                         {playerCountDropdownOpen && (
                                             <ul>
@@ -309,17 +310,21 @@ const Home: React.FC = () => {
                                 </>
                             ) : (
                                 <>
-                                    <input
-                                        type="text"
-                                        className="text-box"
-                                        placeholder="enter key code"
-                                        value={keyCode}
-                                        onChange={(e) =>
-                                            setKeyCode(
-                                                e.target.value.toUpperCase()
-                                            )
-                                        }
-                                    />
+                                    <div
+                                        className="key-code-container"
+                                    >
+                                        <input
+                                            type="text"
+                                            className="text-box"
+                                            placeholder="enter key code"
+                                            value={keyCode}
+                                            onChange={(e) =>
+                                                setKeyCode(
+                                                    e.target.value.toUpperCase()
+                                                )
+                                            }
+                                        />
+                                    </div>
                                     <button
                                         className="btn"
                                         style={{ backgroundColor: "green" }}
@@ -351,7 +356,8 @@ const Home: React.FC = () => {
                                     : {ability.count}
                                 </p>
                             ))}
-                            <label>Player Count:</label>
+                            {/* <label>Player Count:</label> */}
+                            <div style={{ height: '65px' }}></div> 
                             <div
                                 className="player-count-drop-down-container"
                                 ref={playerCountDropdownRef}
@@ -359,7 +365,7 @@ const Home: React.FC = () => {
                                 <button
                                     onClick={handlePlayerCountDropdownFocus}
                                 >
-                                    {playerCount}
+                                    {playerCount} Players
                                 </button>
                                 {playerCountDropdownOpen && (
                                     <ul>
@@ -374,6 +380,7 @@ const Home: React.FC = () => {
                                     </ul>
                                 )}
                             </div>
+                            {/* <div style={{ height: '5px' }}></div>  */}
                             <button
                                 className="btn"
                                 style={{ backgroundColor: "green" }}

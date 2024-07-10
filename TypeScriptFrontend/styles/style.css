@@ -362,6 +362,10 @@ input::placeholder {
     color: #fcfcfc;
 }
 
+.key-code-container {
+    padding: 15px 0;
+}
+
 .navLinkContainer {
     display: flex;
     align-items: center;

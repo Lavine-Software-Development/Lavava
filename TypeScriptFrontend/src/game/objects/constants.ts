@@ -22,6 +22,7 @@ export const Colors = {
     LIGHT_BLUE: [173, 216, 230] as const,
     BROWN: [150, 75, 0] as const,
     DARK_GRAY: [64, 64, 64] as const,
+    DARK_RED: [139, 0, 0] as const,
 };
 
 export const PlayerColors: {
