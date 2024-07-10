@@ -22,6 +22,18 @@ const Profile: React.FC = () => {
         past_games: [],
     });
 
+    const [isEditing, setIsEditing] = useState(false);
+    const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
+
+    const handleEditClick = () => {
+        setIsEditing(true);
+    }
+
+    const handleUpdateClick = () => {
+        profileData.displayName = newDisplayName;
+        setIsEditing(false);
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem('userToken');
@@ -58,9 +70,27 @@ const Profile: React.FC = () => {
             <div className="profile-card">
                 <h2>My Profile</h2>
                 <p>User Name: {profileData.userName}</p>
-                <p>Display Name: {profileData.displayName}</p>
+                <div className="display-name-container">
+                    <p>Display Name: </p>
+                    {isEditing ? (
+                        <>
+                        <input 
+                            type="text" 
+                            value={newDisplayName} 
+                            onChange={(e) => setNewDisplayName(e.target.value)} 
+                            placeholder={profileData.displayName}
+                            className="edit-input"
+                        />
+                        <button className="save-btn" onClick={handleUpdateClick}>Update</button>
+                        </>
+                    ) : (
+                        <p>{profileData.displayName}</p>
+                    )}
+                    {!isEditing && (
+                        <button className="edit-btn" onClick={handleEditClick}>Edit</button>
+                    )}
+                </div>
                 <p>Email: {profileData.email}</p>
-                <button className="save-btn">Update</button>
             </div>
             <div className="info-cards">
                 <div className="info-card">

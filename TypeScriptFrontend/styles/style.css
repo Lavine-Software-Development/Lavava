@@ -576,3 +576,24 @@ ul {
 .ready-button:hover {
     background-color: #218838; /* Darker green on hover */
 }
+
+.display-name-container {
+    display: flex;
+    align-items: center;
+}
+
+.display-name-container p {
+    margin-right: 10px;
+}
+
+.edit-btn {
+    margin-left: 10px;
+}
+
+.edit-input {
+    width: 45%;
+    margin-right: 10px;
+    height: 2em;
+    padding: 5px;
+    box-sizing: border-box;
+}
