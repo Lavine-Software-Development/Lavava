@@ -37,7 +37,6 @@ import { AbilityVisual } from "../objects/immutable_visuals";
 import { NONE, Scene } from "phaser";
 
 import { Edge } from "../objects/edge";
-import board_data from "../data/board_data.json";
 // import { NetworkContext } from "../NetworkContext";
 export class MainScene extends Scene {
     
@@ -178,11 +177,6 @@ export class MainScene extends Scene {
         Object.entries(this.abilityCounts).forEach(([abk, count]) => {
             // abk here is the ability code (converted from the name via NameToCode)
             const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
-
-            let visual = VISUALS[abilityCode] as AbilityVisual
-            if (visual.color[0] === 555) {
-                visual.color = this.mainPlayer.color;
-            }
 
             abilities[abilityCode] = new ReloadAbility(
                 VISUALS[abilityCode] as AbilityVisual,
@@ -483,6 +477,15 @@ export class MainScene extends Scene {
 
 
         this.parse(this.edges, e);
+
+        // 555 is default value for suggesting this abilities color should be determined by players color
+        // currently only needed for spawn ability
+        for (const [key, visual] of Object.entries(VISUALS)) {
+            if (visual.color[0] === 555) {
+                visual.color = this.mainPlayer.color;
+            }
+        }
+
 }
 
     delete_data(): void {
