@@ -119,7 +119,7 @@ class PumpState(DefaultState):
 
     def grow(self):
         if self.draining:
-            self.drain()
+            return self.drain()
         return 0
     
     def drain(self):
