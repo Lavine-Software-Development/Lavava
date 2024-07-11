@@ -384,7 +384,7 @@ export class MainScene extends Scene {
                 }
             }
         }
-        else {
+        else { // added this else
             let key = this.abilityManager.clickSelect(this.input.activePointer.position);
             if (key && this.ps === PSE.PLAY) {
                 this.abilitySelection(key);
