@@ -96,7 +96,7 @@ const Login: React.FC<LoginProps> = () => {
                 </div>
                 {error && <div className="error-message">{error}</div>}
                 {isLoading && <p className="loading-message">Please wait...</p>} {/* Loading message */}
-                <a href="forgot-password" className="forgot-password">Forgot password?</a>
+                <NavLink to="/forgot-password" className="forgot-password">Forgot password?</NavLink>
                 <input type="submit" className="btn" value="Sign In" name="Sign In" disabled={isLoading} />
                 <input
                     type="button"
