@@ -84,12 +84,9 @@ export class Network {
 
     sendMessage(message: Record<any, any>): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            console.log("Sending message: ", message);
-            console.log("Socket: ", this.socket);
             message.token = this.token;
             message.game_id = sessionStorage.getItem("key_code");
             const result = this.socket.send(JSON.stringify(message));
-            console.log("Result: ", result);
         } else if (
             this.socket &&
             this.socket.readyState === WebSocket.CONNECTING

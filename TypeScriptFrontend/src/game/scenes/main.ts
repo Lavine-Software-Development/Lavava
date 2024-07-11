@@ -37,7 +37,6 @@ import { AbilityVisual } from "../objects/immutable_visuals";
 import { NONE, Scene } from "phaser";
 
 import { Edge } from "../objects/edge";
-// import { NetworkContext } from "../NetworkContext";
 export class MainScene extends Scene {
     
     private nodes: { [key: string]: Node } = {};
@@ -69,11 +68,6 @@ export class MainScene extends Scene {
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
         this.board = props;
-        console.log("just set board");
-        console.log(config)
-        console.log(this.board);
-        console.log(network);
-        console.log(navigate);
         this.network = network;
         this.navigate = navigate;
         this.network.updateCallback = this.update_data.bind(this);
@@ -89,7 +83,6 @@ export class MainScene extends Scene {
 
         this.countdown = 0;
         this.full_capitals = [0, 0];
-        console.log("MainScene constructor finished");
     }
 
     preload() {
@@ -111,7 +104,6 @@ export class MainScene extends Scene {
     }
     
     create(): void {
-        console.log("CREATE called");
         this.graphics = this.add.graphics();
         
         this.initialize_data();
