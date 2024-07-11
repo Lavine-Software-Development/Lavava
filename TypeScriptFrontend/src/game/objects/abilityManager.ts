@@ -62,6 +62,7 @@ export class AbstractAbilityManager {
         if (this.clicks.length > 0 && this.clicks[this.clicks.length - 1].type === ClickType.NODE) {
             let node = this.clicks[this.clicks.length - 1] as Node;
             node.select(true);
+            console.log("Node selected huhhhhhhhh?");
         }
     }
 
@@ -74,6 +75,7 @@ export class AbstractAbilityManager {
             this.backupReset();
         }
         this.mode = highlight.usage;
+        console.log("set from event highlight: " + this.mode);
         this.clicks.push(highlight.item!); // Assuming item is always present
         this.updateSelection();
         if (this.completeCheck(highlight.usage)) {
@@ -111,6 +113,7 @@ export class AbstractAbilityManager {
         for (const key in this.abilities) {
             const ability = this.abilities[key];
             if (ability.overlapsWithPosition(position)) {
+                console.log("CLICK SELECTED IT WAS:", ability.id);
                 return ability.id;
             }
         }
@@ -119,11 +122,15 @@ export class AbstractAbilityManager {
 
     backupReset(): void {
         if (this.backupMode) {
+            console.log("Backup Reset");
             this.mode = this.backupMode;
+            console.log("set Mode from backup: " + this.mode);
             this.backupMode = null;
             this.wipe();
         } else {
+            console.log("Normal Reset");
             if (this.ability) {
+                console.log("there was an ability!!");
                 this.backupMode = this.mode;
             }
             this.reset();
@@ -148,6 +155,7 @@ export class AbstractAbilityManager {
 
     switchTo(key: number): boolean {
         this.mode = key;
+        console.log("Switching to from switchTo: " + key);
         if (this.completeCheck()) {
             this.reset();
             return true;

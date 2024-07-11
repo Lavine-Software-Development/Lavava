@@ -384,9 +384,11 @@ export class MainScene extends Scene {
                 }
             }
         }
-        let key = this.abilityManager.clickSelect(this.input.activePointer.position);
-        if (key && this.ps === PSE.PLAY) {
-            this.abilitySelection(key);
+        else {
+            let key = this.abilityManager.clickSelect(this.input.activePointer.position);
+            if (key && this.ps === PSE.PLAY) {
+                this.abilitySelection(key);
+            }
         }
     }
 
@@ -591,9 +593,6 @@ export class MainScene extends Scene {
     parse(this, items, updates, redraw=false) {
 
         // if redraw is true and the length of updates is larger than 20, print the length of updates
-        if (redraw && Object.keys(updates).length > 20) {
-            console.log(Object.keys(updates).length);
-        }
 
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {
