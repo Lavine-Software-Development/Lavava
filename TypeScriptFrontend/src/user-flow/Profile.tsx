@@ -30,7 +30,31 @@ const Profile: React.FC = () => {
     }
 
     const handleUpdateClick = () => {
-        profileData.displayName = newDisplayName;
+        // profileData.displayName = ;
+        fetch(`${config.userBackend}/update_display_name`, {
+            method: 'POST', // use POST to send the data
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+            },
+            body: JSON.stringify({
+                newDisplayName: newDisplayName,
+            }),
+        })
+            .then((response) => response.ok)
+            .then((ok) => {
+                if (ok) {
+                    // Update the displayName in the profileData state
+                    setProfileData(prevData => ({
+                        ...prevData,
+                        displayName: newDisplayName,
+                    }));
+                    setIsEditing(false);
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to update the user display name", error);
+            });
         setIsEditing(false);
     }
 

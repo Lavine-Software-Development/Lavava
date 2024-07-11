@@ -266,6 +266,23 @@ def get_profile(current_user):
         })
     
 
+@app.route('/update_display_name', methods=['POST'])
+@token_required
+def update_display_name(current_user):
+    if config.DB_CONNECTED:
+        data = request.json
+        display_name = data.get('newDisplayName')
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            user.display_name = display_name
+            db.session.commit()
+            return jsonify({"success": True, "message": "Display name updated successfully"}), 200
+        else:
+            return jsonify({"success": False, "message": "User not found"}), 404
+    else:
+        return jsonify({"success": False, "message": "Database not connected"}), 500
+
+
 def user_decks(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
