@@ -11,12 +11,12 @@ from config import config
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, desc
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-
 from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+CORS(app, origins=["*"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
 
@@ -111,9 +111,16 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     
     return decorated
-
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'https://localhost:8080')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
+    return response
 @app.route('/login', methods=['POST'])
 def login():
+    if request.method == 'OPTIONS':
+        return '', 200  # CORS preflight request
     data = request.json
     login_identifier = data.get('username')  # This could be either username or email
     password = data.get('password')
@@ -443,4 +450,5 @@ def get_leaderboard():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run( debug=True, host='0.0.0.0', port=5001, ssl_context=('cert.pem', 'key.pem'),)
+    
