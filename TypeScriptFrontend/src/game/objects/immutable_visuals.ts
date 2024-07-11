@@ -14,6 +14,6 @@ export function createEventVisual(name: string, color: readonly [number, number,
     return Object({ name, color });
 }
 
-export function createAbilityVisual(name: string, shape: string, color: readonly [number, number, number] = [555, 0, 0], letter: string = ''): AbilityVisual {
+export function createAbilityVisual(name: string, shape: string, color: readonly [number, number, number] = [0, 0, 0], letter: string = ''): AbilityVisual {
     return Object({ name, shape, color, letter });
 }

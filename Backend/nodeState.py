@@ -128,9 +128,7 @@ class PumpState(DefaultState):
             return 0
         self.shrink_count -= 1
         return STANDARD_SHRINK_SPEED
-    
-    def intake(self, amount, incoming_player):
-        return super().intake(amount, incoming_player) / 2
+
 
 class CapitalState(DefaultState):
     def __init__(self, node, reset=True, update_on_new_owner=False):
