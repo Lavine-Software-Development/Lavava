@@ -76,7 +76,7 @@ class WebSocketServer():
                 print("Game is ready to start")
                 self.running_games[game_code] = self.waiting_players.pop(game_code)
                 print("created game with code ----------------------", game_code)
-                await self.start_game(game_code, token)
+                await self.start_game(game_code)
             else:
                 print("Game is not ready to start")
 
@@ -90,7 +90,7 @@ class WebSocketServer():
         else:
             print("Game not found. Can't be cancelled")
 
-    async def send_ticks(self, batch_code: str, token):
+    async def send_ticks(self, batch_code: str):
         batch = self.running_games[batch_code]
         to_remove = []
         while not batch.done():
@@ -140,10 +140,10 @@ class WebSocketServer():
                     await websocket.send(json.dumps(batch_json))
             await asyncio.sleep(0.1)
         
-    async def start_game(self, batch_code, token):
+    async def start_game(self, batch_code):
         batch = self.running_games[batch_code]
         batch.start()
-        asyncio.create_task(self.send_ticks(batch_code, token))
+        asyncio.create_task(self.send_ticks(batch_code))
 
         for id, websocket in batch.id_sockets.items():
              await websocket.send(batch.start_repr_json(id))
