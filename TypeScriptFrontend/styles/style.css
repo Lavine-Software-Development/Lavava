@@ -179,6 +179,14 @@ input::placeholder {
     width: 400px;
 }
 
+.profile-card h2, .info-card h2 {
+    color: black;
+}
+
+.linear-gradient {
+    background: linear-gradient(to bottom right, #2a2a72, #009ffd);
+}
+
 .profile-card i {
     position: absolute;
     right: 15px;
@@ -186,6 +194,19 @@ input::placeholder {
     /*transform: translateY(-50%);*/
     color: #757575;
     pointer-events: none;
+}
+
+.profile-card h2,
+.info-card h2 {
+    color: white;
+}
+
+.text-shadow {
+    text-shadow: 
+        -1px -1px 0 black,  
+         1px -1px 0 black,
+        -1px  1px 0 black,
+         1px  1px 0 black; /* White outline */
 }
 
 .info-cards {
@@ -196,6 +217,9 @@ input::placeholder {
 
 .info-card {
     width: 300px;
+}
+.info-card h2 .elo-value {
+    color: white;
 }
 
 .ability-grid {
@@ -214,6 +238,7 @@ input::placeholder {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    position: relative;
 }
 
 .ability-button.selected {
@@ -465,41 +490,285 @@ ul {
     background-color: #cd7f32; /* Bronze color */
 }
 
-.popup-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    gap: 20px; /* Adjust the gap between popups */
-}
-
 .popup {
+    position: absolute; /* Position the popup absolutely within its parent */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for the element's own size */
     background: white;
     border: 1px solid #ccc;
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    min-width: 200px;
+    min-width: 300px; /* Ensure a minimum width */
+    max-width: 90%; /* Ensure it doesn't exceed a certain width */
+    width: auto; /* Let the content dictate the width */
     text-align: center;
+    display: inline-block; /* Make the width dynamic based on content */
+    word-wrap: break-word; /* Ensure long words break to the next line */
+    white-space: normal; /* Allow wrapping of text */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+.popup span {
+    display: block; /* Ensure the span takes up the full width */
+    margin-bottom: 5px; /* Add space between the message and the button */
 }
 
 .popup button {
-    width: 30%; 
+    width: auto; /* Adjust width to fit content */
     margin-top: 20px;
     padding: 12px 20px; 
     background-color: #e81e1e;
-    color: #ffe100;
+    color: white;
     border: none;
-    border-radius: 4px; 
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease; 
 }
 
 .popup button:hover {
-    background-color: #ea3535;
+    background-color: #d11a1a; /* Slightly darker red on hover */
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 2px;
+    margin-bottom: 2px; /* Space between rows */
+    width: 100%;
+}
+
+.custom-button {
+    margin: 10px; /* Add spacing between buttons */
+    padding: 10px 20px; /* Add padding inside buttons */
+    border-radius: 8px; /* Make corners rounded */
+    background-color: #007BFF; /* Change background color */
+    color: white; /* Change text color */
+    border: none; /* Remove default border */
+    cursor: pointer; /* Change cursor on hover */
+    position: relative; /* Position tooltip relative to the button */
+}
+
+.custom-button::after, .ability-button::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 5px); /* Adjust spacing from button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0; 
+    visibility: hidden; /* Initially hide the tooltip */
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.custom-button:hover::after, .ability-button:hover::after {
+    opacity: 1;
+    visibility: visible; /* Show the tooltip on hover */
+}
+
+.start-fresh-button {
+    background-color: #dc3545; /* Red color for 'Start Fresh' button */
+}
+
+.start-fresh-button:hover {
+    background-color: #bd2130; /* Darker shade on hover */
+}
+
+.save-button {
+    background-color: #007BFF; /* Blue color for 'Save' button */
+}
+
+.save-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+.my-deck-button {
+    background-color: #17a2b8; /* Teal color for 'My Deck' button */
+}
+
+.my-deck-button:hover {
+    background-color: #138496; /* Darker shade on hover */
+}
+
+.ready-button {
+    background-color: #28a745; /* Green color for 'Ready' button */
+    width: 85%; /* Make 'Ready' button wider */
+    margin-top: 0;
+}
+
+.ready-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+.display-name-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap; /* Prevent wrapping */
+}
+
+.display-name-container p {
+    margin-right: 10px;
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+    max-width: 200px; /* Set a maximum width */
+}
+
+.edit-btn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    background-color: #007BFF; /* Blue color for 'Edit' button */
+    color: white; /* White text color */
+    border: none; /* Remove default border */
+}
+
+.edit-btn:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+.update-btn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    background-color: #28a745; /* Blue color for 'Update' button */
+    color: white; /* White text color */
+    border: none; /* Remove default border */
+}
+
+.update-btn:hover {
+    background-color: #218838; /* Darker shade on hover */
+}
+
+.save-btn:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+.edit-input {
+    width: 45%;
+    margin-right: 10px;
+    height: 2em;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.logout-btn {
+    padding: 12px 20px;
+    background-color: #ff9800; /* Orange color for Log Out button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20%;
+    width: 50%;
+    display: block; /* Ensure the button is a block element */
+    margin-left: auto; /* Center horizontally */
+    margin-right: auto; /* Center horizontally */
+    font: inherit; /* Use the default font */
+    color: white;
+    text-shadow: 1px 1px 2px black; /* Add a text shadow */
+}
+
+.logout-btn:hover {
+    background-color: #e68900; /* Darker orange on hover */
+}
+
+.team-section {
+    margin-top: 20%;
+}
+
+.team-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.team-member {
+    border: 1px solid #ccc;
+    padding: 20px;
+    width: 200px;
+    text-align: center;
+    background-color: white;
+}
+
+.team-member img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.team-member h3, .team-member p {
+    color: black;
+}
+
+.team-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    margin-top: 1.5em;
+    text-shadow: 1px 1px 2px black;
+}
+
+.contact-form form {
+    display: inline-block;
+    text-align: left;
+}
+
+.contact-form textarea {
+    width: 100%;
+    height: 150px; /* Increase the height of the textarea */
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #ccc; /* Add a border for better visibility */
+    color: white; /* Set the text color */
+    padding: 10px; 
+    text-shadow: 1px 1px 2px black;
+}
+
+.contact-form .custom-button {
+    display: block;
+    margin: 0 auto;
+    margin: 5% auto;
+}
+
+.contact-form button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+.contact-form input[type="text"], .contact-form input[type="email"] {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.popup button {
+    margin-top: 10px;
 }
 
 .error-message {

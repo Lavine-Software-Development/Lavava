@@ -16,6 +16,7 @@ import Register from "./user-flow/Register";
 import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
 import Profile from "./user-flow/Profile";
+import Team from './user-flow/team';
 import DeckBuilder from "./user-flow/deck_builder";
 import { NavBar } from "./NavBar";
 import Leaderboard from "./user-flow/Leaderboard";
@@ -67,6 +68,7 @@ function App() {
                                         <Route path="/profile" element={<Profile />} />
                                         <Route path="/leaderboard" element={<Leaderboard />} />
                                         <Route path="/how-to-play" element={<HowToPlay />} />
+                                        <Route path="/team" element={<Team />} />
                                     </Routes>
                                 </div>
                             }

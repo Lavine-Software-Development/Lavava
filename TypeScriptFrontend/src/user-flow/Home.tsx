@@ -52,12 +52,6 @@ const Home: React.FC = () => {
     }, []);
 
 
-    const handleLogout = () => {
-        localStorage.removeItem("userToken");
-        sessionStorage.clear();
-        navigate("/login");
-    };
-
     const hostTab = (e: number) => {
         setPlayerCount(e);
         setPlayerCountDropdownOpen(false);
@@ -195,7 +189,7 @@ const Home: React.FC = () => {
                     value="How To Play"
                     onClick={() => navigate("/how-to-play")}
                 />
-                {isLoggedIn ? (
+                {/* {isLoggedIn ? (
                     <input
                         type="submit"
                         className="btn"
@@ -209,7 +203,13 @@ const Home: React.FC = () => {
                         value="Login"
                         onClick={() => navigate("/login")}
                     />
-                )}
+                )} */}
+                 <input
+                    type="submit"
+                    className="btn"
+                    value="The Team"
+                    onClick={() => navigate("/team")}
+                />
                 <div style={{ height: '10px' }}></div> 
             </div>
             {selectedAbilities.length > 0 && tab !== "" && (
