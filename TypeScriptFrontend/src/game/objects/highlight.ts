@@ -4,7 +4,7 @@ import { Edge } from "./edge"; // Assume this is defined
 import { ClickType } from "./enums"; // Assume this is defined
 import { AbilityVisual } from "./immutable_visuals"; // Assume this is defined
 import { VISUALS } from "./default_abilities"; // Assume this is defined
-import { KeyCodes, EventCodes } from "./constants";
+import { KeyCodes, EventCodes, Colors } from "./constants";
 import { ReloadAbility } from "./ReloadAbility";
 
 export class Highlight {
@@ -40,7 +40,7 @@ export class Highlight {
             const visual = VISUALS[this.usage] as AbilityVisual; // Assuming AbilityVisual has a color property
             return visual.color;
         }
-        return this.playerColor;
+        return Colors.GREY;
     }
 
     get type(): ClickType {

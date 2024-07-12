@@ -32,8 +32,6 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
         console.log("location: ", boardData);
         useLayoutEffect(() => {
             if (game.current === null) {
-                console.log("FROM THE TOPPPPPPPP");
-                console.log(boardData);
                 game.current = StartGame(
                     "game-container",
                     boardData,

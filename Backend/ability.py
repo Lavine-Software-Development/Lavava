@@ -45,7 +45,8 @@ class ReloadAbility(AbstractAbility):
         return self.load_amount
     
     def update(self):
-        self.load_amount += TIME_AMOUNT
+        if self.remaining > 0:
+            self.load_amount += TIME_AMOUNT
 
     def use(self, data):
         super().use(data)

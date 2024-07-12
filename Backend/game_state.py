@@ -1,6 +1,7 @@
 from gameStateEnums import GameStateEnum as GSE
+from jsonable import JsonableSkeleton
 
-class GameState:
+class GameState(JsonableSkeleton):
     def __init__(self):
         self._state = GSE.LOBBY
 
@@ -23,6 +24,10 @@ class GameState:
             self.state = GSE.END_GAME
         elif self.state == GSE.END_GAME:
             self.state = GSE.GAME_OVER
+
+    @property
+    def json_repr(self):
+        return self.value
 
     @property
     def value(self):

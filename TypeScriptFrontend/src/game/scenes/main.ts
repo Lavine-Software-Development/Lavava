@@ -13,7 +13,7 @@ import {
     NUKE_RANGE,
     PlayerColors, 
 } from "../objects/constants";
-import { PlayerStateEnum as PSE} from "../objects/enums";
+import { PlayerStateEnum as PSE, GameStateEnum as GSE} from "../objects/enums";
 import { ReloadAbility } from "../objects/ReloadAbility";
 import { Event } from "../objects/event";
 import { AbstractAbilityManager } from "../objects/abilityManager";
@@ -37,14 +37,13 @@ import { AbilityVisual } from "../objects/immutable_visuals";
 import { NONE, Scene } from "phaser";
 
 import { Edge } from "../objects/edge";
-import board_data from "../data/board_data.json";
-// import { NetworkContext } from "../NetworkContext";
 export class MainScene extends Scene {
     
     private nodes: { [key: string]: Node } = {};
     private edges: { [key: string]: Edge } = {};
     private highlight: Highlight;
     private ps: PSE;
+    private gs: GSE;
     private abilityManager: AbstractAbilityManager;
     private mainPlayer: MyPlayer;
     private otherPlayers: OtherPlayer[] = [];
@@ -63,18 +62,20 @@ export class MainScene extends Scene {
     private eloDifference: Phaser.GameObjects.Text;
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
-    private userToken: string;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
-    private isLeavingMatch: boolean = false;
+
+    private rainbowColors: string[] = [
+        '#B8860B',  // Dark Goldenrod
+        '#8B4513',  // Saddle Brown
+        '#006400',  // Dark Green
+        '#800000',  // Maroon
+        '#4B0082'   // Indigo
+    ];
+    private rainbowIndex: number = 0;
 
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
         this.board = props;
-        console.log("just set board");
-        console.log(config)
-        console.log(this.board);
-        console.log(network);
-        console.log(navigate);
         this.network = network;
         this.navigate = navigate;
         this.network.updateCallback = this.update_data.bind(this);
@@ -90,7 +91,6 @@ export class MainScene extends Scene {
 
         this.countdown = 0;
         this.full_capitals = [0, 0];
-        console.log("MainScene constructor finished");
     }
 
     preload() {
@@ -112,13 +112,13 @@ export class MainScene extends Scene {
     }
     
     create(): void {
-        console.log("CREATE called");
         this.graphics = this.add.graphics();
         
         this.initialize_data();
 
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.START_SELECTION;
+        this.gs = GSE.START_SELECTION
         
         this.createAbilityManager();
 
@@ -179,11 +179,6 @@ export class MainScene extends Scene {
             // abk here is the ability code (converted from the name via NameToCode)
             const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
 
-            let visual = VISUALS[abilityCode] as AbilityVisual
-            if (visual.color[0] === 555) {
-                visual.color = this.mainPlayer.color;
-            }
-
             abilities[abilityCode] = new ReloadAbility(
                 VISUALS[abilityCode] as AbilityVisual,
                 CLICKS[abilityCode][0],
@@ -207,6 +202,12 @@ export class MainScene extends Scene {
             abilities,
             events
         );
+    }
+
+    private getRainbowColor(): string {
+        const color = this.rainbowColors[this.rainbowIndex];
+        this.rainbowIndex = (this.rainbowIndex + 1) % this.rainbowColors.length;
+        return color;
     }
 
     startReconnectionCheck(): void {
@@ -390,9 +391,11 @@ export class MainScene extends Scene {
                 }
             }
         }
-        let key = this.abilityManager.clickSelect(this.input.activePointer.position);
-        if (key && this.ps === PSE.PLAY) {
-            this.abilitySelection(key);
+        else { // added this else
+            let key = this.abilityManager.clickSelect(this.input.activePointer.position);
+            if (key && this.ps === PSE.PLAY) {
+                this.abilitySelection(key);
+            }
         }
     }
 
@@ -458,8 +461,6 @@ export class MainScene extends Scene {
         const pc = startData.player_count;
         const n = startData.board.nodes;
         const e = startData.board.edges;
-        // const abi = startData.abilities.values;
-        // const credits = startData.abilities.credits;
 
         this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
@@ -483,6 +484,9 @@ export class MainScene extends Scene {
 
 
         this.parse(this.edges, e);
+
+        VISUALS[NameToCode["Spawn"]].color = this.mainPlayer.color;
+
 }
 
     delete_data(): void {
@@ -515,6 +519,10 @@ export class MainScene extends Scene {
                     }
                 }
 
+                if (this.gs != new_data["gs"]) {
+                    this.gs = new_data["gs"] as GSE;
+                }
+
                 if ((!this.eloText) && new_data.hasOwnProperty("new_elos")) {
                     let difference = Number(new_data["new_elos"][1]) - Number(new_data["new_elos"][0]);
                     let color = difference > 0 ? Colors.GREEN : Colors.RED;
@@ -540,13 +548,25 @@ export class MainScene extends Scene {
 
                     if (this.timerText) this.timerText.destroy();
 
-                    let timerColor = this.ps < PSE.PLAY ? this.mainPlayer.color : Colors.BLACK;
-                    let timerWords = this.ps < PSE.PLAY ? `Choose Start: ${this.countdown}` : `Time Remaining: ${this.countdown}`;
+                    let timerColor: string;
+                    let timerWords: string;
+
+                    if (this.ps < PSE.PLAY) {
+                        timerColor = this.rgbToHex(this.mainPlayer.color);
+                        timerWords = `Choose Start: ${this.countdown}`;
+                    } else if (this.gs >= GSE.END_GAME) {
+                        timerColor = this.getRainbowColor();
+                        timerWords = `Overtime - Free Attack: ${this.countdown}`;
+                    } else {
+                        timerColor = this.rgbToHex(Colors.BLACK);
+                        timerWords = `Standard Time: ${this.countdown}`;
+                    }
+
                     this.timerText = this.add.text(
-                        400, 
+                        450, 
                         10, 
                         timerWords, 
-                        { fontFamily: 'Arial', fontSize: '24px', color: this.rgbToHex(timerColor) }
+                        { fontFamily: 'Arial', fontSize: '24px', color: timerColor }
                     );
                     this.timerText.setOrigin(1, 0);
                 }

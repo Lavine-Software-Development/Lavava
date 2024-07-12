@@ -1,5 +1,6 @@
 import { Colors, MineVisuals } from "./constants";
 import { random_equal_distributed_angles } from "./utilities"; // Ensure you import the angles function
+import * as Phaser from "phaser";
 
 export class State {
     name: string;

@@ -20,7 +20,7 @@ class ServerGame(Jsonable):
         }
 
         start_values = {'board'}
-        tick_values = {'countdown_timer'}
+        tick_values = {'countdown_timer', 'gs'}
         recurse_values = {'board'}
         super().__init__('game', start_values, recurse_values, tick_values)
 
@@ -85,7 +85,7 @@ class ServerGame(Jsonable):
     
     @property
     def all_player_starts_selected(self):
-        return all([p.ps.state == PSE.START_WAITING for p in self.player_dict.values()])
+        return all([p.ps.state in (PSE.START_WAITING, PSE.ELIMINATED) for p in self.player_dict.values()])
     
     def update_timer(self):
 
