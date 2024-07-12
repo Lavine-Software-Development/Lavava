@@ -167,14 +167,8 @@ def register():
     elif username.lower() not in ('default', 'other'):
         return jsonify({"success": False, "message": "Registration failed, username must be 'default or other'"}), 400
         
-    if len(password) < 8: # checks for password requirements
-        return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
-    if not any(char.islower() for char in password):
-        return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
-    if not any(char.isupper() for char in password):
-        return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
-    if ' ' in password:
-        return jsonify({"success": False, "message": "Password cannot contain spaces"}), 400
+    if password_requirements(password) is not True:
+         return password_requirements(password)
     token = s.dumps(email, salt='email-confirm')
     link = url_for('confirm_email', token=token, _external=True)
     send_confirmation_email(email, link)  # Send confirm email
@@ -227,15 +221,8 @@ def reset_password():
 
     if password != repeatPassword:
         return jsonify({"success": False, "message": "Password and repeat password must match"}), 400
-    if len(password) < 8: # checks for password requirements
-        return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
-    if not any(char.islower() for char in password):
-        return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
-    if not any(char.isupper() for char in password):
-        return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
-    if ' ' in password:
-        return jsonify({"success": False, "message": "Password cannot contain spaces"}), 400
-    
+    if password_requirements(password) is not True:
+         return password_requirements(password)
     if config.DB_CONNECTED:
         if User.query.filter_by(username=username).first(): # user found with username
             user = User.query.filter_by(username=username).first()
@@ -249,7 +236,7 @@ def reset_password():
         else:
             return jsonify({"success": False, "message": "No account with this username or email exists."}), 404
     else:
-        return jsonify({"success": False, "message": "DB not connected"}), 400
+        return jsonify({"success": False, "message": "Database connection error"}), 500
 
 
 def send_reset_email(user_email, link):
@@ -282,6 +269,42 @@ def confirm_password_reset(token):
         user.password = hashed_password
         db.session.commit()
     return '<h1>Password Reset Successful!</h1>' 
+
+
+@app.route('/change_password', methods=['POST'])
+@token_required
+def change_password(current_user):
+    data = request.json
+    password = data.get('password') 
+    repeatPassword = data.get('repeatPassword')
+
+    if password != repeatPassword:
+        return jsonify({"success": False, "message": "Password and repeat password must match"}), 400
+    if password_requirements(password) is not True:
+         return password_requirements(password)
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            user.password = generate_password_hash(password, method='pbkdf2:sha256')
+            db.session.commit()
+            return jsonify({"success": True, "message": "Password change successful!"}), 200
+        else:
+            return jsonify({"success": False, "message": "User not found"}), 404
+    else:
+        return jsonify({"success": False, "message": "Database connection error"}), 500
+        
+
+def password_requirements(password): # checks for password requirements returns true if passed requirements
+    if len(password) < 8:
+        return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
+    if not any(char.islower() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
+    if not any(char.isupper() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
+    if ' ' in password:
+        return jsonify({"success": False, "message": "Password cannot contain spaces"}), 400
+    else:
+        return True
 
 
 @app.route('/user_abilities', methods=['GET'])

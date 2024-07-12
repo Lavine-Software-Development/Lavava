@@ -509,3 +509,20 @@ ul {
 .loading-message {
     font-size: 18px; 
 }
+
+.btn-cancel {
+    font-size: 1.1rem;
+    padding: 5px 5px;
+    border-radius: 5px;
+    outline: none;
+    border: none;
+    background: rgb(82, 82, 82);
+    color: white;
+    cursor: pointer;
+    transition: 0.9s;
+    font-weight: bold; 
+}
+
+.btn-cancel:hover {
+    background: rgb(32, 32, 32);
+}
