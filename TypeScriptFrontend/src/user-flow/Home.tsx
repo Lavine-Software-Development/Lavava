@@ -257,9 +257,7 @@ const Home: React.FC = () => {
                             {selectedAbilities.map((ability, index) => (
                                 <p style={{ textAlign: "center" }} key={index}>
                                     {ability.name}
-                                    <img
-                                        src={`./public/assets/abilityIcons/${ability.name}.png`}
-                                        alt={ability.name}
+                                    <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name}
                                         style={{
                                             width: "30px",
                                             height: "30px",
