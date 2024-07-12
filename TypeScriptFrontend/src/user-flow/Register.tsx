@@ -61,7 +61,7 @@ const Register: React.FC = () => {
             <h1 className="form-title">Register</h1>
             <form onSubmit={handleSubmit}>
                 <div className="input-group">
-                    <label htmlFor="username">Username</label>
+                    <label htmlFor="username">Username (Case Sensitive)</label>
                     <input type="text" name="username" id="username" placeholder="Username" required
                         value={username} onChange={(e) => setUsername(e.target.value)} />
                     <i className="fas fa-user"></i>

@@ -102,6 +102,7 @@ class WebSocketServer():
                     pass
                     # print(f"Error sending tick to websocket")
                     # if batch.40 connections not connected still then 
+            batch.post_tick()
             await asyncio.sleep(0.1)
         
         # should be its own delete function, but leaving for now due to async complexity

@@ -1,26 +1,28 @@
-from jsonable import Jsonable
-from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, SECTION_LENGTHS, SPAWN_CODE
+from jsonable import JsonableTick
+from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, SECTION_LENGTHS, SPAWN_CODE, EVENT_CODES
 from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GSE
 from board import Board
 from map_builder import MapBuilder
 from ae_effects import make_ability_effects
 from player import DefaultPlayer
-from node import Node
+from ae_effects import make_event_effects
+from ae_validators import make_effect_validators
+from event import Event
 
-class ServerGame(Jsonable):
+class ServerGame(JsonableTick):
     def __init__(self, player_count, gs):
 
         self.running = True
         self.gs = gs
+        self.extra_info = []
         self.board = Board(self.gs)
-        self.ability_effects = make_ability_effects(self.board)
         self.player_dict = {
             i: DefaultPlayer(i) for i in range(player_count)
         }
 
         start_values = {'board'}
-        tick_values = {'countdown_timer', 'gs'}
+        tick_values = {'countdown_timer', 'gs', 'extra_info'}
         recurse_values = {'board'}
         super().__init__('game', start_values, recurse_values, tick_values)
 
@@ -48,7 +50,7 @@ class ServerGame(Jsonable):
         
     def event(self, key, player_id, data):
         player = self.player_dict[player_id]
-        event = self.board.events[key]
+        event = self.events[key]
         if event.can_use(player, data):
             event.use(player, data)
         else:
@@ -63,6 +65,9 @@ class ServerGame(Jsonable):
         if not forced:
             self.board.eliminate(self.player_dict[player])
 
+    def update_extra_info(self, data):
+        self.extra_info.append(data)
+
     def restart(self):
 
         for player in self.player_dict.values():
@@ -76,8 +81,17 @@ class ServerGame(Jsonable):
         map_builder.build()
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
 
+        self.ability_effects = make_ability_effects(self.board)
+        self.events = self.make_events_dict()
+
+        
+    def make_events_dict(self):
+        validators = make_effect_validators(self.board)
+        effects = make_event_effects(self.board, self.update_extra_info)
+        return {code: Event(validators[code], effects[code]) for code in EVENT_CODES}
+
     def set_abilities(self, player, abilities):
-        self.player_dict[player].set_abilities(abilities, self.board)
+        self.player_dict[player].set_abilities(abilities, self.ability_effects, self.board)
 
     def all_player_next(self):
         for player in self.player_dict.values():
@@ -120,6 +134,9 @@ class ServerGame(Jsonable):
             self.determine_ranks_from_capitalize_or_timeout()
         elif len(self.remaining) == 1:
             self.determine_ranks_from_elimination(self.remaining.pop())
+
+    def post_tick(self):
+        self.extra_info.clear()
 
     def player_update(self):
         for player in self.player_dict.values():

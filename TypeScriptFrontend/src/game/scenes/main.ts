@@ -1,6 +1,6 @@
 import { Node } from "../objects/node";
 import { Highlight } from "../objects/highlight";
-import { stateDict } from "../objects/States";
+import { CannonState, stateDict } from "../objects/States";
 import {
     Colors,
     KeyCodes,
@@ -588,6 +588,11 @@ export class MainScene extends Scene {
                     }
                 }
 
+
+                if ('extra_info' in new_data) {
+                    new_data['extra_info'].forEach((tuple) => { this.parse_extra_info(tuple); });
+                }
+
                 this.parse(this.nodes, new_data["board"]["nodes"], true);
                 this.parse(this.edges, new_data["board"]["edges"]);
                 this.parse(this.abilityManager.abilities, new_data["player"]["abilities"]);
@@ -595,6 +600,14 @@ export class MainScene extends Scene {
             } else {
                 
             }
+        }
+    }
+
+    private parse_extra_info(tuple: [string, any]) {
+        
+        if (tuple[0] === "cannon_shot") {
+            let cannon = this.nodes[tuple[1][0]].state as CannonState;
+            cannon.angle = 0;
         }
     }
 
@@ -647,6 +660,7 @@ export class MainScene extends Scene {
             }
         }
     }
+
     getObject(object, attribute, value) {
         if (object[attribute] instanceof Node) {
             return this.nodes[value];
