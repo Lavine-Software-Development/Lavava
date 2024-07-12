@@ -19,7 +19,7 @@ export function NavBar() {
         <nav className="navbar fixed-top">
             <NavLink to="/leaderboard" className="navLinkContainer">
                 <img
-                    src="./public/assets/images/leaderboard logo.png"
+                    src="../public/assets/images/leaderboard_logo.png"
                     width="60"
                     height="50"
                     alt=""
@@ -29,7 +29,7 @@ export function NavBar() {
             </NavLink>
             <NavLink to="/home" className="navLinkContainer">
                 <img
-                    src="./public/assets/images/Home_orange.png"
+                    src="../public/assets/images/Home_orange.png"
                     width="50"
                     height="50"
                     alt=""
@@ -39,7 +39,7 @@ export function NavBar() {
             </NavLink>
             <NavLink to="/profile" className="navLinkContainer">
                 <img
-                    src="./public/assets/images/profile icon.png"
+                    src="../public/assets/images/profile_icon.png"
                     width="50"
                     height="50"
                     alt=""
