@@ -17,6 +17,12 @@ const ForgotPassword: React.FC = () => {
         // Prompt for confirmation
         const confirmed = window.confirm('Are you sure you want to change your password?');
         if (!confirmed) {
+            setIsLoading(false); // Set isLoading to false when canceled
+            // Blur the button to remove focus
+            const resetBtn = document.getElementById('resetBtn');
+            if (resetBtn) {
+                resetBtn.blur();
+            }
             return;
         }
 
