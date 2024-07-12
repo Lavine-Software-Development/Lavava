@@ -25,6 +25,9 @@ const Profile: React.FC = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
+    const [popupMessage, setPopupMessage] = useState('');
+    const [showPopup, setShowPopup] = useState(false);
+
 
     const handleLogout = () => {
         localStorage.removeItem("userToken");
@@ -34,10 +37,18 @@ const Profile: React.FC = () => {
 
     const handleEditClick = () => {
         setIsEditing(true);
+        setNewDisplayName('');
+        setPopupMessage('');
+        setShowPopup(false);
     }
 
     const handleUpdateClick = () => {
-        // profileData.displayName = ;
+        if (newDisplayName.trim() === '' || newDisplayName.length < 5) {
+            setPopupMessage('Display name must be at least 5 characters long');
+            setShowPopup(true);
+            return;
+        }
+
         fetch(`${config.userBackend}/update_display_name`, {
             method: 'POST', // use POST to send the data
             headers: {
@@ -57,6 +68,8 @@ const Profile: React.FC = () => {
                         displayName: newDisplayName,
                     }));
                     setIsEditing(false);
+                    setPopupMessage('');
+                    setShowPopup(false);
                 }
             })
             .catch((error) => {
@@ -102,17 +115,23 @@ const Profile: React.FC = () => {
                 <h2 className="text-shadow">Profile</h2>
                 <p className="whiteText"><span className="text-shadow">User Name:</span> {profileData.userName}</p>
                 <div className="display-name-container">
-                    <p className="whiteText text-shadow">Display Name: </p>
+                    <p className="whiteText text-shadow">{!isEditing ? 'Display Name:' : 'New Name:'}</p>
                     {isEditing ? (
                         <>
-                        <input 
-                            type="text" 
-                            value={newDisplayName} 
-                            onChange={(e) => setNewDisplayName(e.target.value)} 
-                            placeholder={profileData.displayName}
-                            className="edit-input"
-                        />
-                        <button className="save-btn" onClick={handleUpdateClick}>Update</button>
+                            <input 
+                                type="text" 
+                                value={newDisplayName} 
+                                onChange={(e) => setNewDisplayName(e.target.value)} 
+                                placeholder={profileData.displayName}
+                                className="edit-input"
+                            />
+                            <button className="update-btn" onClick={handleUpdateClick}>Update</button>
+                            {showPopup && 
+                            <div className="popup">
+                                <span>{popupMessage}</span>
+                                <button onClick={() => setShowPopup(false)}>Close</button>
+                            </div>
+                            }
                         </>
                     ) : (
                         <p className="whiteText">{profileData.displayName}</p>
@@ -122,7 +141,7 @@ const Profile: React.FC = () => {
                     )}
                 </div>
                 <p className="whiteText"><span className="text-shadow">Email:</span> {profileData.email}</p>
-                <button onClick={handleLogout}>Log Out</button>
+                <button className="logout-btn" onClick={handleLogout}>Log Out</button>
             </div>
             <div className="info-cards">
                 <div className="info-card linear-gradient">

@@ -484,41 +484,43 @@ ul {
     background-color: #cd7f32; /* Bronze color */
 }
 
-.popup-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    gap: 20px; /* Adjust the gap between popups */
-}
-
 .popup {
+    position: absolute; /* Position the popup absolutely within its parent */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for the element's own size */
     background: white;
     border: 1px solid #ccc;
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    min-width: 200px;
+    min-width: 300px; /* Ensure a minimum width */
+    max-width: 90%; /* Ensure it doesn't exceed a certain width */
+    width: auto; /* Let the content dictate the width */
     text-align: center;
+    display: inline-block; /* Make the width dynamic based on content */
+    word-wrap: break-word; /* Ensure long words break to the next line */
+    white-space: normal; /* Allow wrapping of text */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+.popup span {
+    display: block; /* Ensure the span takes up the full width */
+    margin-bottom: 5px; /* Add space between the message and the button */
 }
 
 .popup button {
-    width: 30%; 
+    width: auto; /* Adjust width to fit content */
     margin-top: 20px;
     padding: 12px 20px; 
     background-color: #e81e1e;
-    color: #ffe100;
+    color: white;
     border: none;
-    border-radius: 4px; 
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease; 
 }
 
 .popup button:hover {
-    background-color: #ea3535;
+    background-color: #d11a1a; /* Slightly darker red on hover */
 }
 
 .button-container {
@@ -604,14 +606,45 @@ ul {
 .display-name-container {
     display: flex;
     align-items: center;
+    flex-wrap: nowrap; /* Prevent wrapping */
 }
 
 .display-name-container p {
     margin-right: 10px;
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+    max-width: 200px; /* Set a maximum width */
 }
 
 .edit-btn {
     margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    background-color: #007BFF; /* Blue color for 'Edit' button */
+    color: white; /* White text color */
+    border: none; /* Remove default border */
+}
+
+.edit-btn:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+.update-btn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    background-color: #28a745; /* Blue color for 'Update' button */
+    color: white; /* White text color */
+    border: none; /* Remove default border */
+}
+
+.update-btn:hover {
+    background-color: #218838; /* Darker shade on hover */
+}
+
+.save-btn:hover {
+    background-color: #45a049; /* Darker green on hover */
 }
 
 .edit-input {
@@ -620,6 +653,27 @@ ul {
     height: 2em;
     padding: 5px;
     box-sizing: border-box;
+}
+
+.logout-btn {
+    padding: 12px 20px;
+    background-color: #ff9800; /* Orange color for Log Out button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20%;
+    width: 50%;
+    display: block; /* Ensure the button is a block element */
+    margin-left: auto; /* Center horizontally */
+    margin-right: auto; /* Center horizontally */
+    font: inherit; /* Use the default font */
+    color: white;
+    text-shadow: 1px 1px 2px black; /* Add a text shadow */
+}
+
+.logout-btn:hover {
+    background-color: #e68900; /* Darker orange on hover */
 }
 
 .team-section {
