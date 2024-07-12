@@ -146,8 +146,8 @@ export class MainScene extends Scene {
         this.scale.on('resize', this.handleResize, this);
 
         this.startReconnectionCheck();
-        this.setupBackButtonHandler();
-        this.setupTabCloseHandler();
+        this.setupNavigationHandlers();
+
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -357,8 +357,8 @@ export class MainScene extends Scene {
             this.reconnectionEvent.remove();
             this.reconnectionEvent = null;
         }
-        window.removeEventListener('popstate', this.handleHistoryChange);
-        window.removeEventListener('beforeunload', this.handleTabClose);
+        window.removeEventListener('popstate', this.handleNavigationEvent);
+        window.removeEventListener('beforeunload', this.handleNavigationEvent);
     }
 
     mouseButtonDownEvent(button: number): void {
@@ -412,25 +412,26 @@ export class MainScene extends Scene {
         );
     }
 
-    private setupBackButtonHandler(): void {
-        window.addEventListener('popstate', this.handleHistoryChange.bind(this));
-        
+    private setupNavigationHandlers(): void {
+        // Handles both back navigation and tab close events
+        window.addEventListener('popstate', this.handleNavigationEvent.bind(this));
+        window.addEventListener('beforeunload', this.handleNavigationEvent.bind(this));
     }
-
-    private handleHistoryChange(event: PopStateEvent): void {
-        event.preventDefault();
+    
+    private handleNavigationEvent(event: PopStateEvent | BeforeUnloadEvent): void {
+        // Check the type of event and prevent the default action if necessary
+        if (event.type === 'popstate') {
+            event.preventDefault(); // For popstate, prevent the default browser action
+        }
+        // For 'beforeunload', setting returnValue is used to show a confirmation dialog
+        if (event.type === 'beforeunload') {
+            (event as BeforeUnloadEvent).returnValue = "Are you sure you want to leave this page?";
+        }
+    
+        // Call leaveMatch in both cases
         this.leaveMatch(stateCodes.FORFEIT_AND_LEAVE_CODE);
     }
-
-
-    private setupTabCloseHandler(): void {
-        window.addEventListener('beforeunload', this.handleTabClose.bind(this));
-    }
-
-    private handleTabClose(event: BeforeUnloadEvent): void {
-        event.preventDefault();
-        this.leaveMatch(stateCodes.FORFEIT_AND_LEAVE_CODE);
-    }
+    
 
     private createLeaveMatchButton(): void {
         this.leaveMatchButton = this.add.text(10, 10, 'Forfeit', {
