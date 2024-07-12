@@ -95,17 +95,10 @@ const Login: React.FC<LoginProps> = () => {
                     <i className="fas fa-lock"></i>
                 </div>
                 {error && <div className="error-message">{error}</div>}
-                {isLoading && <p className="loading-message">Please wait...</p>} {/* Loading message */}
+                {isLoading && <p className="loading-message">Please wait...</p>}
                 <NavLink to="/forgot-password" className="forgot-password">Forgot password?</NavLink>
                 <input type="submit" className="btn" value="Sign In" name="Sign In" disabled={isLoading} />
-                <input
-                    type="button"
-                    className="btn"
-                    value="Play as Guest"
-                    name="Play as Guest"
-                    onClick={handleGuestLogin}
-                    disabled={isLoading}
-                />
+                <input type="button" className="btn" value="Play as Guest" name="Play as Guest" onClick={handleGuestLogin} disabled={isLoading} />
             </form>
             <p>Don't have an account? <NavLink to="/register">Register here!</NavLink></p>
         </div>
