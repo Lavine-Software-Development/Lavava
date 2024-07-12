@@ -6,6 +6,7 @@ export class Network {
     serverURL: string;
     updateCallback: (board_data) => void;
     gameIDEtcCallback: (game_id: string, player_count: number) => void;
+    leaveGameCallback: () => void;  
     messageQueue: Record<any, any> = [];
     private boardDataPromise: Promise<any> | null = null;
     private boardDataResolver: ((data: any) => void) | null = null;
@@ -35,9 +36,15 @@ export class Network {
         this.socket.onmessage = (event) => {
             // console.log("Received message: ", event.data);
             let data = JSON.parse(event.data);
-            if (data.hasOwnProperty("game_id")) {
+            
+            if (data.action === "player_left") {
+                this.leaveGameCallback()
+                console.log("Player left the game");
+
+            } else if (data.hasOwnProperty("game_id")) {
                 this.gameIDEtcCallback(data.game_id, data.player_count);
                 console.log("Game ID received: ", data.game_id);
+            
             } else {
                 if (data.isFirst === true) {
                     // console.log("Board data received");
@@ -84,12 +91,9 @@ export class Network {
 
     sendMessage(message: Record<any, any>): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            console.log("Sending message: ", message);
-            console.log("Socket: ", this.socket);
             message.token = this.token;
             message.game_id = sessionStorage.getItem("key_code");
             const result = this.socket.send(JSON.stringify(message));
-            console.log("Result: ", result);
         } else if (
             this.socket &&
             this.socket.readyState === WebSocket.CONNECTING

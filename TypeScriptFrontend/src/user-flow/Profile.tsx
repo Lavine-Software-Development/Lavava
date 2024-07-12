@@ -104,7 +104,7 @@ const Profile: React.FC = () => {
     if (!localStorage.getItem('userToken')) {
         return (
             <div className="container" id="dashboard-container">
-                <p>Login <Link to="/login">here</Link> to see profile data.</p>
+                <p><Link to="/login">Login here</Link> to see profile data.</p>
             </div>
         );
     }

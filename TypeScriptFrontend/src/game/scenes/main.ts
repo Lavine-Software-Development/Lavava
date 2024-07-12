@@ -13,7 +13,7 @@ import {
     NUKE_RANGE,
     PlayerColors, 
 } from "../objects/constants";
-import { PlayerStateEnum as PSE} from "../objects/enums";
+import { PlayerStateEnum as PSE, GameStateEnum as GSE} from "../objects/enums";
 import { ReloadAbility } from "../objects/ReloadAbility";
 import { Event } from "../objects/event";
 import { AbstractAbilityManager } from "../objects/abilityManager";
@@ -37,14 +37,13 @@ import { AbilityVisual } from "../objects/immutable_visuals";
 import { NONE, Scene } from "phaser";
 
 import { Edge } from "../objects/edge";
-import board_data from "../data/board_data.json";
-// import { NetworkContext } from "../NetworkContext";
 export class MainScene extends Scene {
     
     private nodes: { [key: string]: Node } = {};
     private edges: { [key: string]: Edge } = {};
     private highlight: Highlight;
     private ps: PSE;
+    private gs: GSE;
     private abilityManager: AbstractAbilityManager;
     private mainPlayer: MyPlayer;
     private otherPlayers: OtherPlayer[] = [];
@@ -63,21 +62,24 @@ export class MainScene extends Scene {
     private eloDifference: Phaser.GameObjects.Text;
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
-    private userToken: string;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
-    private isLeavingMatch: boolean = false;
+
+    private rainbowColors: string[] = [
+        '#B8860B',  // Dark Goldenrod
+        '#8B4513',  // Saddle Brown
+        '#006400',  // Dark Green
+        '#800000',  // Maroon
+        '#4B0082'   // Indigo
+    ];
+    private rainbowIndex: number = 0;
 
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
         this.board = props;
-        console.log("just set board");
-        console.log(config)
-        console.log(this.board);
-        console.log(network);
-        console.log(navigate);
         this.network = network;
         this.navigate = navigate;
         this.network.updateCallback = this.update_data.bind(this);
+        this.network.leaveGameCallback = this.leaveMatchDirect.bind(this);
         this.burning = [];
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
 
@@ -90,7 +92,6 @@ export class MainScene extends Scene {
 
         this.countdown = 0;
         this.full_capitals = [0, 0];
-        console.log("MainScene constructor finished");
     }
 
     preload() {
@@ -112,13 +113,13 @@ export class MainScene extends Scene {
     }
     
     create(): void {
-        console.log("CREATE called");
         this.graphics = this.add.graphics();
         
         this.initialize_data();
 
         this.highlight = new Highlight(this, this.mainPlayer.color);
         this.ps = PSE.START_SELECTION;
+        this.gs = GSE.START_SELECTION
         
         this.createAbilityManager();
 
@@ -145,7 +146,8 @@ export class MainScene extends Scene {
         this.scale.on('resize', this.handleResize, this);
 
         this.startReconnectionCheck();
-        this.setupBackButtonHandler();
+        this.setupNavigationHandlers();
+
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -179,11 +181,6 @@ export class MainScene extends Scene {
             // abk here is the ability code (converted from the name via NameToCode)
             const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
 
-            let visual = VISUALS[abilityCode] as AbilityVisual
-            if (visual.color[0] === 555) {
-                visual.color = this.mainPlayer.color;
-            }
-
             abilities[abilityCode] = new ReloadAbility(
                 VISUALS[abilityCode] as AbilityVisual,
                 CLICKS[abilityCode][0],
@@ -209,6 +206,12 @@ export class MainScene extends Scene {
         );
     }
 
+    private getRainbowColor(): string {
+        const color = this.rainbowColors[this.rainbowIndex];
+        this.rainbowIndex = (this.rainbowIndex + 1) % this.rainbowColors.length;
+        return color;
+    }
+
     startReconnectionCheck(): void {
         // Clear any existing event first
         if (this.reconnectionEvent) {
@@ -231,9 +234,9 @@ export class MainScene extends Scene {
         }
     }
 
-    forfeit(): void {
+    forfeit(code: number): void {
         console.log("Forfeiting")
-        this.simple_send(stateCodes.FORFEIT_CODE);
+        this.simple_send(code);
         this.abilityManager.forfeit(this);
     }
 
@@ -355,7 +358,8 @@ export class MainScene extends Scene {
             this.reconnectionEvent.remove();
             this.reconnectionEvent = null;
         }
-        window.removeEventListener('popstate', this.handleHistoryChange);
+        window.removeEventListener('popstate', this.handleNavigationEvent);
+        window.removeEventListener('beforeunload', this.handleNavigationEvent);
     }
 
     mouseButtonDownEvent(button: number): void {
@@ -390,9 +394,11 @@ export class MainScene extends Scene {
                 }
             }
         }
-        let key = this.abilityManager.clickSelect(this.input.activePointer.position);
-        if (key && this.ps === PSE.PLAY) {
-            this.abilitySelection(key);
+        else { // added this else
+            let key = this.abilityManager.clickSelect(this.input.activePointer.position);
+            if (key && this.ps === PSE.PLAY) {
+                this.abilitySelection(key);
+            }
         }
     }
 
@@ -409,13 +415,26 @@ export class MainScene extends Scene {
         );
     }
 
-    private setupBackButtonHandler(): void {
-        window.addEventListener('popstate', this.handleHistoryChange.bind(this));
+    private setupNavigationHandlers(): void {
+        // Handles both back navigation and tab close events
+        window.addEventListener('popstate', this.handleNavigationEvent.bind(this));
+        window.addEventListener('beforeunload', this.handleNavigationEvent.bind(this));
     }
-
-    private handleHistoryChange(event: PopStateEvent): void {
-        this.leaveMatchDirect();
+    
+    private handleNavigationEvent(event: PopStateEvent | BeforeUnloadEvent): void {
+        // Check the type of event and prevent the default action if necessary
+        if (event.type === 'popstate') {
+            event.preventDefault(); // For popstate, prevent the default browser action
+        }
+        // For 'beforeunload', setting returnValue is used to show a confirmation dialog
+        if (event.type === 'beforeunload') {
+            (event as BeforeUnloadEvent).returnValue = "Are you sure you want to leave this page?";
+        }
+    
+        // Call leaveMatch in both cases
+        this.leaveMatch(stateCodes.FORFEIT_AND_LEAVE_CODE);
     }
+    
 
     private createLeaveMatchButton(): void {
         this.leaveMatchButton = this.add.text(10, 10, 'Forfeit', {
@@ -429,9 +448,11 @@ export class MainScene extends Scene {
         this.leaveMatchButton.on('pointerdown', this.leaveMatch, this);
     }
 
-    private leaveMatch(): void {
+
+
+    private leaveMatch(code: number = stateCodes.FORFEIT_CODE): void {
         if (this.ps < PSE.ELIMINATED) {
-            this.forfeit();
+            this.forfeit(code);
         }
         else {
             console.log('Leaving match...');
@@ -441,15 +462,9 @@ export class MainScene extends Scene {
     }
 
     private leaveMatchDirect(): void {
-        if (this.ps < PSE.ELIMINATED) {
-            this.forfeit();
-        }
-        // wait 0.2 seconds
-        // setTimeout(() => {
-            console.log('Leaving match...');
-            // this.network.disconnectWebSocket();
+            console.log('Leaving match2...');
+            this.network.disconnectWebSocket();
             this.navigate("/home");
-        // }, 200);
     }
 
     initialize_data(): void {
@@ -458,8 +473,6 @@ export class MainScene extends Scene {
         const pc = startData.player_count;
         const n = startData.board.nodes;
         const e = startData.board.edges;
-        // const abi = startData.abilities.values;
-        // const credits = startData.abilities.credits;
 
         this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
@@ -483,6 +496,9 @@ export class MainScene extends Scene {
 
 
         this.parse(this.edges, e);
+
+        VISUALS[NameToCode["Spawn"]].color = this.mainPlayer.color;
+
 }
 
     delete_data(): void {
@@ -515,6 +531,10 @@ export class MainScene extends Scene {
                     }
                 }
 
+                if (this.gs != new_data["gs"]) {
+                    this.gs = new_data["gs"] as GSE;
+                }
+
                 if ((!this.eloText) && new_data.hasOwnProperty("new_elos")) {
                     let difference = Number(new_data["new_elos"][1]) - Number(new_data["new_elos"][0]);
                     let color = difference > 0 ? Colors.GREEN : Colors.RED;
@@ -540,13 +560,25 @@ export class MainScene extends Scene {
 
                     if (this.timerText) this.timerText.destroy();
 
-                    let timerColor = this.ps < PSE.PLAY ? this.mainPlayer.color : Colors.BLACK;
-                    let timerWords = this.ps < PSE.PLAY ? `Choose Start: ${this.countdown}` : `Time Remaining: ${this.countdown}`;
+                    let timerColor: string;
+                    let timerWords: string;
+
+                    if (this.ps < PSE.PLAY) {
+                        timerColor = this.rgbToHex(this.mainPlayer.color);
+                        timerWords = `Choose Start: ${this.countdown}`;
+                    } else if (this.gs >= GSE.END_GAME) {
+                        timerColor = this.getRainbowColor();
+                        timerWords = `Overtime - Free Attack: ${this.countdown}`;
+                    } else {
+                        timerColor = this.rgbToHex(Colors.BLACK);
+                        timerWords = `Standard Time: ${this.countdown}`;
+                    }
+
                     this.timerText = this.add.text(
-                        400, 
+                        450, 
                         10, 
                         timerWords, 
-                        { fontFamily: 'Arial', fontSize: '24px', color: this.rgbToHex(timerColor) }
+                        { fontFamily: 'Arial', fontSize: '24px', color: timerColor }
                     );
                     this.timerText.setOrigin(1, 0);
                 }
@@ -586,11 +618,6 @@ export class MainScene extends Scene {
     }
 
     parse(this, items, updates, redraw=false) {
-
-        // if redraw is true and the length of updates is larger than 20, print the length of updates
-        if (redraw && Object.keys(updates).length > 20) {
-            console.log(Object.keys(updates).length);
-        }
 
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {

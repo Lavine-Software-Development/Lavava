@@ -1,5 +1,5 @@
-# import imp
-from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED
+
+from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED, FORFEIT_AND_LEAVE_CODE
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
 from playerStateEnums import PlayerStateEnum as PS
@@ -21,8 +21,14 @@ class Batch:
         self.mode = mode
         self.gs = GameState()
         self.game = ServerGame(self.player_count, self.gs)
+        self.has_left = {}
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
+        
+
+    
+    def return_player_has_left(self, player_id):
+        return self.has_left[player_id]
 
     def update_elo(self):
         
@@ -50,6 +56,7 @@ class Batch:
         if self.ability_process(player_id, ability_data):
             self.token_ids[token] = player_id
             self.id_sockets[player_id] = websocket
+            self.has_left[player_id] = False
             return False
         else:
             return "CHEATING: INVALID ABILITY SELECTION"
@@ -132,6 +139,9 @@ class Batch:
             self.game.restart()
         elif key in (ELIMINATE_VAL, FORFEIT_CODE):
             self.game.eliminate(player_id)
+        elif key == (FORFEIT_AND_LEAVE_CODE):
+            self.game.eliminate(player_id)
+            self.has_left[player_id] = True
         elif key in ALL_ABILITIES:
             print("ABILITY")
             self.game.effect(key, player_id, data['items'])

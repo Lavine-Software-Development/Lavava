@@ -152,6 +152,11 @@ input::placeholder {
     background: rgb(151, 163, 214);
 }
 
+.btn:disabled {
+    background-color: grey;
+    cursor: not-allowed;
+}
+
 .switch-buttons {
     display: flex;
     justify-content: space-around;
@@ -766,3 +771,10 @@ ul {
     margin-top: 10px;
 }
 
+.error-message {
+    font-size: 18px; 
+}
+
+.loading-message {
+    font-size: 18px; 
+}

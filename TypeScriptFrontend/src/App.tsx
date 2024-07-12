@@ -2,7 +2,6 @@ import { useRef, useState, useContext } from "react";
 import React from "react";
 
 import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
-import { MainMenu } from "./game/scenes/MainMenu";
 import { useEffect } from "react";
 import {
     BrowserRouter as Router,
@@ -13,7 +12,6 @@ import {
 } from "react-router-dom";
 import WebSocketTest from "./websocketClient"; // Import your WebSocketTest component if not already done
 import Login from "./user-flow/login";
-import board_data from "./game/data/board_data.json";
 import Register from "./user-flow/Register";
 import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
@@ -49,7 +47,6 @@ function App() {
                                     <PhaserGame
                                         ref={phaserRef}
                                         currentActiveScene={currentScene}
-                                        props={board_data}
                                     />
                                 </div>
                             }

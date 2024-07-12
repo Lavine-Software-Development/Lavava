@@ -17,6 +17,8 @@ const Home: React.FC = () => {
     );
 
     useEffect(() => {
+        sessionStorage.removeItem("key_code");
+
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const token = localStorage.getItem("userToken");
         const isGuest = sessionStorage.getItem("guestToken");
@@ -34,36 +36,21 @@ const Home: React.FC = () => {
                     Authorization: `Bearer ${token}`,
                 },
             })
-                .then((response) => response.json())
-                .then((data) => {
+                .then(response => response.json())
+                .then(data => {
                     if (data && data.abilities) {
                         const abilities = data.abilities;
-                        sessionStorage.setItem(
-                            "selectedAbilities",
-                            JSON.stringify(abilities)
-                        );
+                        sessionStorage.setItem("selectedAbilities", JSON.stringify(abilities));
                         setSelectedAbilities(abilities);
                     }
                 })
-                .catch((error) => {
+                .catch(error => {
                     console.error("Failed to fetch abilities:", error);
                 });
         }
-        const gameStyle = sessionStorage.getItem("gameStyle");
-        if (gameStyle) {
-            setTabAndCloseDropdown(gameStyle);
-        }
-        const storedFriendlyMode = sessionStorage.getItem("friendlyMode");
-        if (storedFriendlyMode) {
-            setFriendlyMode(storedFriendlyMode);
-        }
+
     }, []);
 
-    // const handleLogout = () => {
-    //     localStorage.removeItem("userToken");
-    //     sessionStorage.clear();
-    //     navigate("/login");
-    // };
 
     const hostTab = (e: number) => {
         setPlayerCount(e);
@@ -263,9 +250,7 @@ const Home: React.FC = () => {
                             {selectedAbilities.map((ability, index) => (
                                 <p style={{ textAlign: "center" }} key={index}>
                                     {ability.name}
-                                    <img
-                                        src={`./public/assets/abilityIcons/${ability.name}.png`}
-                                        alt={ability.name}
+                                    <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name}
                                         style={{
                                             width: "30px",
                                             height: "30px",

@@ -151,7 +151,7 @@ def login():
 
     return jsonify({"token": token}), 200
 
-    
+
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
@@ -173,7 +173,8 @@ def register():
         return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
     if not any(char.isupper() for char in password):
         return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
-    
+    if ' ' in password:
+        return jsonify({"success": False, "message": "Password cannot contain spaces"}), 400
     token = s.dumps(email, salt='email-confirm')
     link = url_for('confirm_email', token=token, _external=True)
     send_confirmation_email(email, link)  # Send confirm email
@@ -184,7 +185,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check junk mail)".format(email)}), 200
+    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail)".format(email)}), 200
 
 
 @app.route('/confirm_email/<token>')
@@ -215,6 +216,72 @@ def send_confirmation_email(user_email, link):
     except Exception as e:
         print(f"Failed to send email: {e}")
         return "Error sending email."
+
+
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    data = request.json
+    username = data.get('username') # email or username
+    password = data.get('password') 
+    repeatPassword = data.get('repeatPassword')
+
+    if password != repeatPassword:
+        return jsonify({"success": False, "message": "Password and repeat password must match"}), 400
+    if len(password) < 8: # checks for password requirements
+        return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
+    if not any(char.islower() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
+    if not any(char.isupper() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
+    if ' ' in password:
+        return jsonify({"success": False, "message": "Password cannot contain spaces"}), 400
+    
+    if config.DB_CONNECTED:
+        if User.query.filter_by(username=username).first(): # user found with username
+            user = User.query.filter_by(username=username).first()
+            username = user.email # changing variable to email of account with entered username
+        if User.query.filter_by(email=username).first(): # checking if there is an account with the entered email
+            passwordToken = password + " " + username
+            token = s.dumps(passwordToken, salt='reset-password')
+            link = url_for('confirm_password_reset', token=token, _external=True)
+            send_reset_email(username, link)  # Send confirm email
+            return jsonify({"success": True, "message": "Password reset email sent! Click the link sent to confirm password reset. Click below to login"}), 200
+        else:
+            return jsonify({"success": False, "message": "No account with this username or email exists."}), 404
+    else:
+        return jsonify({"success": False, "message": "DB not connected"}), 400
+
+
+def send_reset_email(user_email, link):
+    msg = Message("Reset Password - Ignore if not requested!",
+                  sender='lavavaacc@gmail.com',
+                  recipients=[user_email])
+    msg.body = 'IGNORE AND DO NOT CLICK THE LINK BELOW if you did not request to change your password.\n\nIf you did request a password reset follow the link to confirm your password reset: {} \nThis link will expire in 5 minutes.'.format(link)
+    try:
+        mail.send(msg)
+        return "Email sent successfully!"
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        return "Error sending email."
+    
+
+@app.route('/confirm_password_reset/<token>')
+def confirm_password_reset(token):
+    try:
+        passwordToken = s.loads(token, salt='reset-password', max_age=300) # token expires after 5 minutes
+    except SignatureExpired:
+        return '<h1>Reset password link expired!</h1>' # token expired
+    except:
+        return '<h1>Error!</h1>' # other error like incorrect token
+    password_and_email = passwordToken.split(" ")
+    hashed_password = generate_password_hash(password_and_email[0], method='pbkdf2:sha256')
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(email=password_and_email[1]).first()
+        if not user:
+            return '<h1>Error!</h1>'
+        user.password = hashed_password
+        db.session.commit()
+    return '<h1>Password Reset Successful!</h1>' 
 
 
 @app.route('/user_abilities', methods=['GET'])
