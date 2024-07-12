@@ -207,9 +207,7 @@ const DeckBuilder: React.FC = () => {
                         </>
                     )}
                 </div>
-                {localStorage.getItem('userToken') && (
                 <button className="custom-button ready-button" data-tooltip="Go to the home page" onClick={goHome}>Ready</button>
-                )}
                 {error && <p className="error-message">{error}</p>}
                 <div className="salary-display">
                     <h2>Salary: {salary}</h2>
