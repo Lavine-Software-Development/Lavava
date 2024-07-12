@@ -10,11 +10,10 @@ from constants import (
     BREAKDOWNS,
 )
 from ae_validators import make_ability_validators
-from ae_effects import make_ability_effects
 from player_state import PlayerState
-from jsonable import Jsonable
+from jsonable import JsonableTick
 
-class DefaultPlayer(Jsonable):
+class DefaultPlayer(JsonableTick):
     def __init__(self, id):
 
         recurse_values = {'abilities'}
@@ -24,12 +23,11 @@ class DefaultPlayer(Jsonable):
 
         self.default_values()
 
-    def set_abilities(self, abilities, board):
+    def set_abilities(self, chosen_abilities, ability_effects, board):
         validators = make_ability_validators(board, self)
 
-        effects = make_ability_effects(board)
-        for ab in abilities:
-            self.abilities[ab] = ReloadAbility(ab, validators[ab], effects[ab], BREAKDOWNS[ab].reload, self, abilities[ab])
+        for ab in chosen_abilities:
+            self.abilities[ab] = ReloadAbility(ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].reload, self, chosen_abilities[ab])
 
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
@@ -85,9 +83,9 @@ class MoneyPlayer(DefaultPlayer):
             self.tick_production -= CAPITAL_BONUS
         super().capital_handover(gain)
 
-    def eliminate(self):
-        self.money = 0
-        super().eliminate()
+    # def eliminate(self):
+    #     self.money = 0
+    #     super().eliminate()
 
     def update(self):
         self.money += self.tick_production

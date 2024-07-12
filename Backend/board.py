@@ -1,28 +1,19 @@
 from collections import defaultdict
-from reprlib import recursive_repr
 
 from node import Node
-from ae_effects import make_event_effects
-from event import Event
 from jsonable import JsonableTracked
 from constants import (
-    CANNON_SHOT_CODE,
     DYNAMIC_EDGE,
     SCREEN_WIDTH,
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
     EDGE_COUNT,
-    STANDARD_LEFT_CLICK,
-    STANDARD_RIGHT_CLICK,
-    PUMP_DRAIN_CODE,
-    EVENT_CODES
 )
 from helpers import do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
 from tracker import Tracker
 from tracking_decorator.track_changes import track_changes
-from ae_validators import make_effect_validators
 
 
 @track_changes("nodes_r", "edges_r", 'full_player_capitals')
@@ -73,7 +64,6 @@ class Board(JsonableTracked):
         self.id_dict = {node.id: node for node in self.nodes} | {
             edge.id: edge for edge in self.edges
         }
-        self.events = self.make_events_dict()
         self.extra_edges = 0
         self.tracker.reset()
         self.player_capitals.clear()
@@ -201,12 +191,6 @@ class Board(JsonableTracked):
                 self.edges.remove(edge)
         self.id_dict.pop(node.id)
         self.nodes.remove(node)
-
-    
-    def make_events_dict(self):
-        validators = make_effect_validators(self)
-        effects = make_event_effects(self)
-        return {code: Event(validators[code], effects[code]) for code in EVENT_CODES}
     
     def player_energy_count(self, player_energy):
         for node in self.nodes:

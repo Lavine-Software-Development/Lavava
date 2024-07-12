@@ -108,11 +108,11 @@ class WebSocketServer():
                     print("Player has left")
                     await websocket.send(json.dumps({"action": "player_left"}))
                     to_remove.append(id)
+            batch.post_tick()
             for i in to_remove:
                 batch.id_sockets.pop(i)  # Use pop with default to avoid KeyError
 
             to_remove.clear()  # Clear the list for the next loop iteration
-
             await asyncio.sleep(0.1)
         
         # should be its own delete function, but leaving for now due to async complexity

@@ -120,6 +120,9 @@ class Batch:
         self.set_group_tick_repr()
         if self.game.gs.value == GS.GAME_OVER.value and self.elo_changes == {} and self.mode == "LADDER":
             self.update_elo()
+        
+    def post_tick(self):
+        self.game.post_tick()
 
     def ability_process(self, player, data):
         data = convert_keys_to_int(data)
