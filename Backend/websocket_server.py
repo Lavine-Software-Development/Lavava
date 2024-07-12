@@ -76,7 +76,7 @@ class WebSocketServer():
                 print("Game is ready to start")
                 self.running_games[game_code] = self.waiting_players.pop(game_code)
                 print("created game with code ----------------------", game_code)
-                await self.start_game(game_code)
+                await self.start_game(game_code, token)
             else:
                 print("Game is not ready to start")
 
@@ -90,22 +90,33 @@ class WebSocketServer():
         else:
             print("Game not found. Can't be cancelled")
 
-    async def send_ticks(self, batch_code: str):
+    async def send_ticks(self, batch_code: str, token):
         batch = self.running_games[batch_code]
+        to_remove = []
         while not batch.done():
             batch.tick()
             for id, websocket in batch.id_sockets.items():
-                try:
-                    batch_json = batch.tick_repr_json(id)
-                    await websocket.send(batch_json)
-                except websockets.exceptions.ConnectionClosed:
-                    pass
-                    # print(f"Error sending tick to websocket")
-                    # if batch.40 connections not connected still then 
+                if not batch.return_player_has_left(id):
+                    try:
+                        batch_json = batch.tick_repr_json(id)
+                        await websocket.send(batch_json)
+                    except websockets.exceptions.ConnectionClosed:
+                        pass
+                        # print(f"Error sending tick to websocket")
+                        # if batch.40 connections not connected still then 
+                else:
+                    print("Player has left")
+                    await websocket.send(json.dumps({"action": "player_left"}))
+                    to_remove.append(id)
+            for i in to_remove:
+                batch.id_sockets.pop(i)  # Use pop with default to avoid KeyError
+
+            to_remove.clear()  # Clear the list for the next loop iteration
+
             await asyncio.sleep(0.1)
         
         # should be its own delete function, but leaving for now due to async complexity
-        self.running_games.pop(batch_code)
+        self.running_games.pop(batch_code,None)
 
     async def send_test_ticks(self, batch):
         json_list = []
@@ -129,10 +140,10 @@ class WebSocketServer():
                     await websocket.send(json.dumps(batch_json))
             await asyncio.sleep(0.1)
         
-    async def start_game(self, batch_code):
+    async def start_game(self, batch_code, token):
         batch = self.running_games[batch_code]
         batch.start()
-        asyncio.create_task(self.send_ticks(batch_code))
+        asyncio.create_task(self.send_ticks(batch_code, token))
 
         for id, websocket in batch.id_sockets.items():
              await websocket.send(batch.start_repr_json(id))

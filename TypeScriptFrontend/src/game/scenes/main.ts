@@ -78,6 +78,7 @@ export class MainScene extends Scene {
         this.network = network;
         this.navigate = navigate;
         this.network.updateCallback = this.update_data.bind(this);
+        this.network.leaveGameCallback = this.leaveMatchDirect.bind(this);
         this.burning = [];
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
 
@@ -231,9 +232,9 @@ export class MainScene extends Scene {
         }
     }
 
-    forfeit(): void {
+    forfeit(code: number): void {
         console.log("Forfeiting")
-        this.simple_send(stateCodes.FORFEIT_CODE);
+        this.simple_send(code);
         this.abilityManager.forfeit(this);
     }
 
@@ -411,10 +412,12 @@ export class MainScene extends Scene {
 
     private setupBackButtonHandler(): void {
         window.addEventListener('popstate', this.handleHistoryChange.bind(this));
+        
     }
 
     private handleHistoryChange(event: PopStateEvent): void {
-        this.leaveMatchDirect();
+        event.preventDefault();
+        this.leaveMatch(stateCodes.FORFEIT_AND_LEAVE_CODE);
     }
 
     private createLeaveMatchButton(): void {
@@ -429,9 +432,11 @@ export class MainScene extends Scene {
         this.leaveMatchButton.on('pointerdown', this.leaveMatch, this);
     }
 
-    private leaveMatch(): void {
+
+
+    private leaveMatch(code: number = stateCodes.FORFEIT_CODE): void {
         if (this.ps < PSE.ELIMINATED) {
-            this.forfeit();
+            this.forfeit(code);
         }
         else {
             console.log('Leaving match...');
@@ -441,15 +446,9 @@ export class MainScene extends Scene {
     }
 
     private leaveMatchDirect(): void {
-        if (this.ps < PSE.ELIMINATED) {
-            this.forfeit();
-        }
-        // wait 0.2 seconds
-        // setTimeout(() => {
-            console.log('Leaving match...');
-            // this.network.disconnectWebSocket();
+            console.log('Leaving match2...');
+            this.network.disconnectWebSocket();
             this.navigate("/home");
-        // }, 200);
     }
 
     initialize_data(): void {
