@@ -111,7 +111,7 @@ class ServerGame(Jsonable):
 
     def tick(self):
         self.update_timer()
-        
+        # print("remaining player:", self.remaining)
         if self.gs.value >= GSE.PLAY.value:
             self.board.update()
             self.player_update()
@@ -119,6 +119,7 @@ class ServerGame(Jsonable):
         if self.board.victory_check():
             self.determine_ranks_from_capitalize_or_timeout()
         elif len(self.remaining) == 1:
+
             self.determine_ranks_from_elimination(self.remaining.pop())
 
     def player_update(self):
