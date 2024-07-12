@@ -671,3 +671,18 @@ ul {
 .contact-form input[type="text"], .contact-form input[type="email"] {
     background-color: rgba(0, 0, 0, 0.5);
 }
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.popup button {
+    margin-top: 10px;
+}

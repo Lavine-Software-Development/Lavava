@@ -264,7 +264,29 @@ def get_profile(current_user):
             "elo": 1138,
             "past_games": ["1st", "4th", "2nd"]
         })
-    
+
+@app.route('/send-email', methods=['POST'])
+def send_email():
+    data = request.json
+    user_email = data.get('userEmail')
+    message_body = data.get('message')
+
+    if not user_email or not message_body:
+        return jsonify({"error": "Missing userEmail or message"}), 400
+
+    msg = Message(
+        subject="New Message from Contact Form",
+        sender='lavavaacc@gmail.com',
+        recipients=['lavine.software@gmail.com'],
+        cc=[user_email],
+        body=message_body
+    )
+
+    try:
+        mail.send(msg)
+        return jsonify({"success": "Email sent successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/update_display_name', methods=['POST'])
 @token_required

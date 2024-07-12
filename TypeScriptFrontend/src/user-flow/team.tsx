@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import config from '../env-config';
 
 const teamMembers = [
     { 
         name: 'Ryan', 
-        profilePic: '../images/Team/ian_lavine.jpeg', 
+        profilePic: '../images/Team/ryan.jpg', 
         intro: 'Frontend Developer' 
     },
     { 
@@ -22,11 +23,40 @@ const Team: React.FC = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle form submission logic here
-        console.log('Contact Us form submitted:', { name, email, message });
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`${config.userBackend}/send-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userEmail: email, message })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success) {
+                setName('');
+                setEmail('');
+                setMessage('');
+                setShowPopup(true);
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -67,8 +97,21 @@ const Team: React.FC = () => {
                             onChange={(e) => setMessage(e.target.value)}
                         />
                     </div>
-                    <button className="custom-button" type="submit">Submit</button>
+                    <button 
+                        className="custom-button" 
+                        type="submit"
+                        disabled={isSubmitting}
+                        style={{ backgroundColor: isSubmitting ? 'grey' : '' }}
+                        >
+                            {isSubmitting ? 'Submitting...' : 'Submit'}
+                        </button>
                 </form>
+                {showPopup && (
+                    <div className="popup">
+                        <p>Thank you for your message!</p>
+                        <button onClick={() => setShowPopup(false)}>Close</button>
+                    </div>
+                )}
             </div>
         </div>
     );
