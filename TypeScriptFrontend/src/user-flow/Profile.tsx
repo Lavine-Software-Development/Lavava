@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import config from '../env-config';
 
 interface ProfileData {
@@ -13,6 +13,7 @@ interface ProfileData {
 }
 
 const Profile: React.FC = () => {
+    const navigate = useNavigate();
     const [profileData, setProfileData] = useState<ProfileData>({
         userName: 'Loading...',
         displayName: 'Loading...',
@@ -24,6 +25,12 @@ const Profile: React.FC = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
+
+    const handleLogout = () => {
+        localStorage.removeItem("userToken");
+        sessionStorage.clear();
+        navigate("/login");
+    };
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -115,6 +122,7 @@ const Profile: React.FC = () => {
                     )}
                 </div>
                 <p>Email: {profileData.email}</p>
+                <button onClick={handleLogout}>Log Out</button>
             </div>
             <div className="info-cards">
                 <div className="info-card">
