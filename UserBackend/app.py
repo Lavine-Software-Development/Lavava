@@ -16,7 +16,7 @@ load_dotenv()
 
 app = Flask(__name__)
 # CORS(app)
-CORS(app, origins=["*"])
+CORS(app, origins=["https://www.durb.ca"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
 
@@ -113,7 +113,7 @@ def token_required(f):
     return decorated
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'https://localhost:8080')
+    response.headers.add('Access-Control-Allow-Origin', 'https://www.durb.ca')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
     return response
@@ -450,5 +450,5 @@ def get_leaderboard():
 
 
 if __name__ == '__main__':
-    app.run( debug=True, host='0.0.0.0', port=5001, ssl_context=('cert.pem', 'key.pem'),)
+    app.run( debug=True, host='0.0.0.0', port=5001, ssl_context=('fullchain.pem', 'privkey.pem'),)
     

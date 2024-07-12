@@ -4,7 +4,7 @@ import asyncio
 from batch import Batch
 import json
 import signal
-
+import ssl 
 class WebSocketServer():
     def __init__(self, port):
         self.server = "0.0.0.0"
@@ -152,8 +152,10 @@ class WebSocketServer():
     def run(self):
         loop = asyncio.get_event_loop()
 
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ssl_context.load_cert_chain(certfile="fullchain.pem", keyfile="privkey.pem")
         # Starting the server
-        start_server = websockets.serve(self.handler, self.server, self.port)
+        start_server = websockets.serve(self.handler, self.server, self.port, ssl=ssl_context)
         server = loop.run_until_complete(start_server)
 
         # Print server running
