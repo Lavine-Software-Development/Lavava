@@ -4,6 +4,7 @@ import config from '../env-config';
 import { useNavigate } from 'react-router-dom';
 
 interface Ability {
+    description: string;
     name: string;
     cost: number;
 }
@@ -168,6 +169,7 @@ const DeckBuilder: React.FC = () => {
                         key={index}
                         className={`ability-button ${selectedCounts[ability.name] > 0 ? 'selected' : ''}`}
                         onClick={() => handleButtonClick(ability.name, true)}
+                        data-tooltip = {ability.description}
                         onContextMenu={(e) => {
                             e.preventDefault();
                             handleButtonClick(ability.name, false);

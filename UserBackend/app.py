@@ -347,13 +347,15 @@ def save_deck(current_user):
 
         # Update deck
         for ability in abilities:
+            description = ability.get('description', "")
             if ability['name'] in current_cards:
                 # Update existing card
                 current_cards[ability['name']].count = ability['count']
+                current_cards[ability['name']].description = description
                 current_cards.pop(ability['name'])
             else:
                 # Add new card
-                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'])
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=description)
                 db.session.add(new_card)
 
         # Remove cards not in the new deck
@@ -413,18 +415,66 @@ def username_to_elo(name: str):
 @app.route('/abilities', methods=['GET'])
 def get_abilities():
     abilities = [
-        {"name": "Freeze", "cost": 1},
-        {"name": "Spawn", "cost": 1},
-        {"name": "Zombie", "cost": 1},
-        {"name": "Burn", "cost": 1},
-        {"name": "Poison", "cost": 2},
-        {"name": "Rage", "cost": 2},
-        {"name": "D-Bridge", "cost": 2},
-        {"name": "Bridge", "cost": 2},
-        {"name": "Capital", "cost": 3},
-        {"name": "Nuke", "cost": 3},
-        {"name": "Cannon", "cost": 3},
-        {"name": "Pump", "cost": 3},
+        {
+            "name": "Freeze", 
+            "cost": 1,
+            "description": "Make edge one-way"
+        },
+        {
+            "name": "Spawn", 
+            "cost": 1,
+            "description": "Claim unowned node anywhere"
+        },
+        {
+            "name": "Zombie", 
+            "cost": 1,
+            "description": "Make big defensive node"
+        },
+        {
+            "name": "Burn", 
+            "cost": 1,
+            "description": "Remove ports from node"
+        },
+        {
+            "name": "Poison", 
+            "cost": 2,
+            "description": "Spreading effect to shrink nodes"
+        },
+        {
+            "name": "Rage", 
+            "cost": 2,
+            "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "D-Bridge", 
+            "cost": 2,
+            "description": "Create a two-way bridge"
+        },
+        {
+            "name": "Bridge", 
+            "cost": 2,
+            "description": "Make a one-way bridge"
+        },
+        {
+            "name": "Capital", 
+            "cost": 3,
+            "description": "Make a capital" 
+        },
+        {
+            "name": "Nuke", 
+            "cost": 3,
+            "description": "Destroy node and edges"
+        },
+        {
+            "name": "Cannon", 
+            "cost": 3,
+            "description": "Shoot energy at nodes"
+        },
+        {
+            "name": "Pump", 
+            "cost": 3,
+            "description": "Store energy to replenish abilities"
+        }
     ]
     return jsonify({"abilities": abilities, "salary": 15})
 
