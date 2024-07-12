@@ -79,6 +79,7 @@ export class MainScene extends Scene {
         this.network = network;
         this.navigate = navigate;
         this.network.updateCallback = this.update_data.bind(this);
+        this.network.leaveGameCallback = this.leaveMatchDirect.bind(this);
         this.burning = [];
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
 
@@ -145,7 +146,8 @@ export class MainScene extends Scene {
         this.scale.on('resize', this.handleResize, this);
 
         this.startReconnectionCheck();
-        this.setupBackButtonHandler();
+        this.setupNavigationHandlers();
+
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -232,9 +234,9 @@ export class MainScene extends Scene {
         }
     }
 
-    forfeit(): void {
+    forfeit(code: number): void {
         console.log("Forfeiting")
-        this.simple_send(stateCodes.FORFEIT_CODE);
+        this.simple_send(code);
         this.abilityManager.forfeit(this);
     }
 
@@ -356,7 +358,8 @@ export class MainScene extends Scene {
             this.reconnectionEvent.remove();
             this.reconnectionEvent = null;
         }
-        window.removeEventListener('popstate', this.handleHistoryChange);
+        window.removeEventListener('popstate', this.handleNavigationEvent);
+        window.removeEventListener('beforeunload', this.handleNavigationEvent);
     }
 
     mouseButtonDownEvent(button: number): void {
@@ -412,13 +415,26 @@ export class MainScene extends Scene {
         );
     }
 
-    private setupBackButtonHandler(): void {
-        window.addEventListener('popstate', this.handleHistoryChange.bind(this));
+    private setupNavigationHandlers(): void {
+        // Handles both back navigation and tab close events
+        window.addEventListener('popstate', this.handleNavigationEvent.bind(this));
+        window.addEventListener('beforeunload', this.handleNavigationEvent.bind(this));
     }
-
-    private handleHistoryChange(event: PopStateEvent): void {
-        this.leaveMatchDirect();
+    
+    private handleNavigationEvent(event: PopStateEvent | BeforeUnloadEvent): void {
+        // Check the type of event and prevent the default action if necessary
+        if (event.type === 'popstate') {
+            event.preventDefault(); // For popstate, prevent the default browser action
+        }
+        // For 'beforeunload', setting returnValue is used to show a confirmation dialog
+        if (event.type === 'beforeunload') {
+            (event as BeforeUnloadEvent).returnValue = "Are you sure you want to leave this page?";
+        }
+    
+        // Call leaveMatch in both cases
+        this.leaveMatch(stateCodes.FORFEIT_AND_LEAVE_CODE);
     }
+    
 
     private createLeaveMatchButton(): void {
         this.leaveMatchButton = this.add.text(10, 10, 'Forfeit', {
@@ -432,9 +448,11 @@ export class MainScene extends Scene {
         this.leaveMatchButton.on('pointerdown', this.leaveMatch, this);
     }
 
-    private leaveMatch(): void {
+
+
+    private leaveMatch(code: number = stateCodes.FORFEIT_CODE): void {
         if (this.ps < PSE.ELIMINATED) {
-            this.forfeit();
+            this.forfeit(code);
         }
         else {
             console.log('Leaving match...');
@@ -444,15 +462,9 @@ export class MainScene extends Scene {
     }
 
     private leaveMatchDirect(): void {
-        if (this.ps < PSE.ELIMINATED) {
-            this.forfeit();
-        }
-        // wait 0.2 seconds
-        // setTimeout(() => {
-            console.log('Leaving match...');
-            // this.network.disconnectWebSocket();
+            console.log('Leaving match2...');
+            this.network.disconnectWebSocket();
             this.navigate("/home");
-        // }, 200);
     }
 
     initialize_data(): void {
