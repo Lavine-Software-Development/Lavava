@@ -147,6 +147,7 @@ export class MainScene extends Scene {
 
         this.startReconnectionCheck();
         this.setupBackButtonHandler();
+        this.setupTabCloseHandler();
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -357,6 +358,7 @@ export class MainScene extends Scene {
             this.reconnectionEvent = null;
         }
         window.removeEventListener('popstate', this.handleHistoryChange);
+        window.removeEventListener('beforeunload', this.handleTabClose);
     }
 
     mouseButtonDownEvent(button: number): void {
@@ -416,6 +418,16 @@ export class MainScene extends Scene {
     }
 
     private handleHistoryChange(event: PopStateEvent): void {
+        event.preventDefault();
+        this.leaveMatch(stateCodes.FORFEIT_AND_LEAVE_CODE);
+    }
+
+
+    private setupTabCloseHandler(): void {
+        window.addEventListener('beforeunload', this.handleTabClose.bind(this));
+    }
+
+    private handleTabClose(event: BeforeUnloadEvent): void {
         event.preventDefault();
         this.leaveMatch(stateCodes.FORFEIT_AND_LEAVE_CODE);
     }
