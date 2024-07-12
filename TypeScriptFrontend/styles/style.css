@@ -174,6 +174,14 @@ input::placeholder {
     width: 400px;
 }
 
+.profile-card h2, .info-card h2 {
+    color: black;
+}
+
+.linear-gradient {
+    background: linear-gradient(to bottom right, #2a2a72, #009ffd);
+}
+
 .profile-card i {
     position: absolute;
     right: 15px;
@@ -181,6 +189,19 @@ input::placeholder {
     /*transform: translateY(-50%);*/
     color: #757575;
     pointer-events: none;
+}
+
+.profile-card h2,
+.info-card h2 {
+    color: white;
+}
+
+.text-shadow {
+    text-shadow: 
+        -1px -1px 0 black,  
+         1px -1px 0 black,
+        -1px  1px 0 black,
+         1px  1px 0 black; /* White outline */
 }
 
 .info-cards {
@@ -191,6 +212,9 @@ input::placeholder {
 
 .info-card {
     width: 300px;
+}
+.info-card h2 .elo-value {
+    color: white;
 }
 
 .ability-grid {
@@ -686,3 +710,4 @@ ul {
 .popup button {
     margin-top: 10px;
 }
+

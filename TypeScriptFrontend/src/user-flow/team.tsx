@@ -14,7 +14,7 @@ const teamMembers = [
     },
     { 
         name: 'Akash', 
-        profilePic: '../images/Team/ian_lavine.jpeg', 
+        profilePic: '../images/Team/akash.jpeg', 
         intro: 'Networking Engineer' 
     }
 ];

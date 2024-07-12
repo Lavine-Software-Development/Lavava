@@ -98,11 +98,11 @@ const Profile: React.FC = () => {
 
     return (
         <div className="dashboard-container" id="dashboard-container">
-            <div className="profile-card">
-                <h2>My Profile</h2>
-                <p>User Name: {profileData.userName}</p>
+            <div className="profile-card linear-gradient">
+                <h2 className="text-shadow">Profile</h2>
+                <p className="whiteText"><span className="text-shadow">User Name:</span> {profileData.userName}</p>
                 <div className="display-name-container">
-                    <p>Display Name: </p>
+                    <p className="whiteText text-shadow">Display Name: </p>
                     {isEditing ? (
                         <>
                         <input 
@@ -115,24 +115,24 @@ const Profile: React.FC = () => {
                         <button className="save-btn" onClick={handleUpdateClick}>Update</button>
                         </>
                     ) : (
-                        <p>{profileData.displayName}</p>
+                        <p className="whiteText">{profileData.displayName}</p>
                     )}
                     {!isEditing && (
                         <button className="edit-btn" onClick={handleEditClick}>Edit</button>
                     )}
                 </div>
-                <p>Email: {profileData.email}</p>
+                <p className="whiteText"><span className="text-shadow">Email:</span> {profileData.email}</p>
                 <button onClick={handleLogout}>Log Out</button>
             </div>
             <div className="info-cards">
-                <div className="info-card">
-                    <h2>My Deck</h2>
+                <div className="info-card linear-gradient">
+                    <h2 className="text-shadow">Default Deck</h2>
                     {profileData.abilities.map((item, index) => (
-                        <p key={index}>{item.count} {item.name}</p>
+                        <p className="whiteText" key={index}>{item.count} {item.name}</p>
                     ))}
                 </div>
-                <div className="info-card">
-                    <h2>My ELO: {profileData.elo}</h2>
+                <div className="info-card linear-gradient">
+                    <h2><span className="text-shadow">ELO:</span> <span className="elo-value">{profileData.elo}</span></h2>
                     {profileData.past_games.map((position, index) => (
                         <p key={index}>Game {index + 1}: {position}</p>
                     ))}
