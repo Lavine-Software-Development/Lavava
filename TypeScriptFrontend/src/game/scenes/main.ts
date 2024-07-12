@@ -607,7 +607,7 @@ export class MainScene extends Scene {
         
         if (tuple[0] === "cannon_shot") {
             let cannon = this.nodes[tuple[1][0]].state as CannonState;
-            cannon.angle = 0;
+            // cannon.angle = 0;
         }
     }
 
