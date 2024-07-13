@@ -20,7 +20,7 @@ docker run -p 5001:5001 game-server
 
 # Lightsail
 
-We host our servers on AWS Lighstail which is just a wrapper around ec2. There are two instnaces for each of our servers. The lightsail instances simply pull and run the docker containers you built and ran locally.
+We host our servers on AWS Lighstail which is just a wrapper around ec2. There are two instances for each of our servers. The lightsail instances simply pull and run the docker containers you built and ran locally.
 
 If there are any issues where you need to restart the servers, ssh into the appropriate server and run:
 
