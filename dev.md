@@ -43,3 +43,13 @@ sudo docker ps -a
 ```
 
 to check the current running one and run the previous command accordingly
+
+# Deploying a new version of either backend
+
+Go to the directory of the server you want to deploy and change the names accordingly.
+
+```
+docker build -t userbackend .
+docker tag userbackend akashilangovan/userbackend
+docker tag akashilangovan/userbackend
+```
