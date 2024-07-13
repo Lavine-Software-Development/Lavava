@@ -3,7 +3,7 @@ import { Colors, GROWTH_STOP, PORT_COUNT } from "./constants";
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
 import { ClickType } from "./enums";
-import { phaserColor } from "./utilities";
+import { phaserColor, cannonAngle } from "./utilities";
 import { CannonState } from "./States";
 import { INode, IEdge } from "./graphTypeInterfaces";
 import { random_equal_distributed_angles } from "./utilities";
@@ -16,7 +16,10 @@ export class Node extends IDItem implements INode {
     portPercent: number;
     ports: Array<number>;
     state: State;
-    value: number;
+    private _value: number;
+    delayChange = false;
+    delayedValue = 0;
+    delayedOwner: OtherPlayer | null = null;
     private _effects: Set<string>;
     private _owner: OtherPlayer | null;
     private _scene: Phaser.Scene;
@@ -48,6 +51,18 @@ export class Node extends IDItem implements INode {
         this.cannonGraphics = _scene.add.graphics();
     }
 
+    get value(): number {
+        return this._value;
+    }
+
+    set value(value: number) {
+        if (!this.delayChange) {
+            this._value = value;
+        } else {
+            this.delayedValue = value;
+        }
+    }
+
     public delete(): void {
         // Remove graphics from the scene
         if (this.graphics) {
@@ -70,8 +85,24 @@ export class Node extends IDItem implements INode {
     }
 
     set owner(owner: OtherPlayer | null) {
-        this._owner = owner;
-        this.influencedEdges.forEach((edge) => (edge.recolor = true));
+        if (!this.delayChange) {
+            this._owner = owner;
+            this.influencedEdges.forEach((edge) => (edge.recolor = true));
+        } else {
+            this.delayedOwner = owner;
+        }
+    }
+
+    endDelay(): void {
+        this.delayChange = false;
+        if (this.delayedOwner) {
+            this.owner = this.delayedOwner;
+            this.delayedOwner = null;
+        }
+        if (this.delayedValue) {
+            this.value = this.delayedValue;
+            this.delayedValue = 0;
+        }
     }
 
     get effects(): Set<string> {
@@ -105,6 +136,7 @@ export class Node extends IDItem implements INode {
     get size(): number {
         return 5 + this.sizeFactor * 18;
     }
+
     get sizeFactor(): number {
         if (this.value < 5) return 0;
         return Math.max(
@@ -203,9 +235,9 @@ export class Node extends IDItem implements INode {
                 if (this.state.selected) {
                     let mousePos = this._scene.input.activePointer.position;
                     // Calculate angle between the spot and the mouse cursor
+                    cannonAngle(this, mousePos.x, mousePos.y);
                     let dx = mousePos.x - this.pos.x;
                     let dy = mousePos.y - this.pos.y;
-                    this.state.angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
             
                     // Calculate distance to mouse cursor
                     let distanceToMouse = Math.sqrt(dx * dx + dy * dy) - this.size * 1.2;

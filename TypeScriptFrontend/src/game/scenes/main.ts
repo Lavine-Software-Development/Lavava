@@ -29,6 +29,7 @@ import { CLICKS, EVENTS, VISUALS } from "../objects/default_abilities";
 import { Network } from "../objects/network";
 import {
     abilityCountsConversion,
+    cannonAngle,
     phaserColor,
     random_equal_distributed_angles,
 } from "../objects/utilities";
@@ -616,11 +617,58 @@ export class MainScene extends Scene {
     }
 
     private parse_extra_info(tuple: [string, any]) {
-        
         if (tuple[0] === "cannon_shot") {
-            let cannon = this.nodes[tuple[1][0]].state as CannonState;
-            // cannon.angle = 0;
+            let cannon = this.nodes[tuple[1][0]] as Node;
+            let target = this.nodes[tuple[1][1]] as Node;
+            this.cannonShot(cannon, target, tuple[1][2])
         }
+    }
+
+    private cannonShot(cannon: Node, target: Node, size: number) {
+
+        cannonAngle(cannon, target.pos.x, target.pos.y);
+        target.delayChange = true;
+
+        let ball_size = 5 + Math.max(Math.log10(size / 10) / 2 + size / 1000 + 0.15, 0) * 18;
+        
+        // Create a Graphics object for the projectile
+        const projectile = this.add.graphics();
+        
+        // Calculate the angle between cannon and target
+        const angle = Phaser.Math.Angle.Between(cannon.pos.x, cannon.pos.y, target.pos.x, target.pos.y);
+        
+        // Draw the diamond-shaped projectile
+        projectile.fillStyle(cannon.phaserColor, 1);
+        projectile.beginPath();
+        projectile.moveTo(0, -ball_size); // Top point
+        projectile.lineTo(ball_size * 0.6, 0); // Right point
+        projectile.lineTo(0, ball_size); // Bottom point
+        projectile.lineTo(-ball_size * 0.6, 0); // Left point
+        projectile.closePath();
+        projectile.fillPath();
+        
+        // Rotate the projectile to point in the direction of travel
+        projectile.rotation = angle + Math.PI / 2; // Add PI/2 because the default orientation is upward
+        
+        // Set the initial position to the cannon's position
+        projectile.setPosition(cannon.pos.x, cannon.pos.y);
+        
+        // Calculate the distance between cannon and target
+        const distance = Phaser.Math.Distance.Between(cannon.pos.x, cannon.pos.y, target.pos.x, target.pos.y);
+        
+        // Create a tween to move the projectile
+        this.tweens.add({
+            targets: projectile,
+            x: target.pos.x,
+            y: target.pos.y,
+            duration: distance * 2, // Adjust this multiplier to change the speed
+            ease: 'Linear',
+            onComplete: () => {
+                // Destroy the projectile when it reaches the target
+                projectile.destroy();
+                target.endDelay();
+            }
+        });
     }
 
     private rgbToHex(color: readonly [number, number, number]): string {

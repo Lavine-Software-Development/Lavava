@@ -8,6 +8,12 @@ export function random_equal_distributed_angles(count: number): number[] {
     return ports;
 }
 
+export function cannonAngle(node, x, y) {
+    let dx = x - node.pos.x;
+    let dy = y - node.pos.y;
+    node.state.angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
+}
+
 export function phaserColor(color: readonly [number, number, number]): number {
     return Phaser.Display.Color.GetColor(color[0], color[1], color[2]);
 }
