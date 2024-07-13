@@ -89,7 +89,7 @@ class JsonableBasic(JsonableSkeleton):
     def is_basic_type(self, obj):
         return isinstance(obj, (str, bool, type(None), collections.abc.Sequence, collections.abc.Set))
 
-class Jsonable(JsonableBasic):
+class JsonableTick(JsonableBasic):
     def __init__(self, id, start_values=set(), recurse_values=set(), tick_values=set()):
         super().__init__(id, start_values, recurse_values)
         self.tick_values = tick_values
@@ -118,3 +118,15 @@ class JsonableTracked(JsonableBasic):
     @property
     def full_tick_json(self):
         return self.to_json('full_tick_json', self.full_values)
+    
+
+@track_changes()
+class JsonableTandT(JsonableTick):
+
+    @property
+    def tick_json(self):
+        tick_json = self.to_json('tick_json', self.tracked_attributes | self.tick_values | self.recurse_values)
+        self.clear()
+        return tick_json
+
+    
