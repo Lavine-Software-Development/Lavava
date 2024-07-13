@@ -49,6 +49,15 @@ const Home: React.FC = () => {
                 });
         }
 
+        const gameStyle = sessionStorage.getItem("gameStyle");
+        if (gameStyle) {
+            setTabAndCloseDropdown(gameStyle);
+        }
+        const storedFriendlyMode = sessionStorage.getItem("friendlyMode");
+        if (storedFriendlyMode) {
+            setFriendlyMode(storedFriendlyMode);
+        }
+        
     }, []);
 
 
