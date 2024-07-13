@@ -620,12 +620,15 @@ export class MainScene extends Scene {
         if (tuple[0] === "cannon_shot") {
             let cannon = this.nodes[tuple[1][0]] as Node;
             let target = this.nodes[tuple[1][1]] as Node;
-            cannonAngle(cannon, target.pos.x, target.pos.y);
             this.cannonShot(cannon, target, tuple[1][2])
         }
     }
 
     private cannonShot(cannon: Node, target: Node, size: number) {
+
+        cannonAngle(cannon, target.pos.x, target.pos.y);
+        target.delayChange = true;
+
         let ball_size = 5 + Math.max(Math.log10(size / 10) / 2 + size / 1000 + 0.15, 0) * 18;
         
         // Create a Graphics object for the projectile
@@ -663,6 +666,7 @@ export class MainScene extends Scene {
             onComplete: () => {
                 // Destroy the projectile when it reaches the target
                 projectile.destroy();
+                target.endDelay();
             }
         });
     }
