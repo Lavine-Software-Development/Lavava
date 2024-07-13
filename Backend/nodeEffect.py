@@ -18,7 +18,7 @@ class Poisoned(AbstractSpreadingEffect):
         return amount * -1
     
     def spread(self):
-        return (self.originator, self.length)
+        return (self.originator, self.length - self.counter)
 
 
 class NodeEnraged(AbstractSpreadingEffect):

@@ -46,7 +46,7 @@ def make_rage(board_wide_effect):
         board_wide_effect('rage', player)
     return rage_effect
 
-def make_cannon_shot(id_dict):
+def make_cannon_shot(id_dict, update_method):
     def cannon_shot(player, data):
         cannon, target = id_dict[data[0]], id_dict[data[1]]
         if target.owner == player:
@@ -55,6 +55,7 @@ def make_cannon_shot(id_dict):
             transfer = cannon.value - MINIMUM_TRANSFER_VALUE
         cannon.value -= transfer
         target.delivery(transfer, player)
+        update_method(("cannon_shot", (data[0], data[1], transfer)))
 
     return cannon_shot
 
@@ -118,9 +119,9 @@ def make_ability_effects(board):
     }
 
 
-def make_event_effects(board):
+def make_event_effects(board, update_method):
     return {
-        CANNON_SHOT_CODE: make_cannon_shot(board.id_dict),
+        CANNON_SHOT_CODE: make_cannon_shot(board.id_dict, update_method),
         PUMP_DRAIN_CODE : make_pump_drain(board.id_dict),
         STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].switch(),
         STANDARD_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].click_swap(),

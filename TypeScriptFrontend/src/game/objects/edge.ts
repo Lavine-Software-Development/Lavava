@@ -317,9 +317,11 @@ export class Edge extends IDItem implements IEdge {
                 circleSprite.y = startY + (i + 1) * spacing * normY;
             }
             let triangleSprite = this.sprites[0];
-            triangleSprite.x = startX + spacing * normX;
-            triangleSprite.y = startY + spacing * normY;
-            this.last_spacing = spacing;
+            if (triangleSprite) {
+                triangleSprite.x = startX + spacing * normX;
+                triangleSprite.y = startY + spacing * normY;
+                this.last_spacing = spacing;
+            }
         }
 
     }

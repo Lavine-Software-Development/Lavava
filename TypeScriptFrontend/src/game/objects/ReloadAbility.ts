@@ -115,7 +115,7 @@ export class ReloadAbility extends IDItem {
 
     overlapsWithPosition(position: Phaser.Math.Vector2): boolean {
         // Assuming pointerTriangle has x, y, width, and height properties
-        if (this.pointerTriangle) {
+        if (this.pointerTriangle && this.pointerTriangle.visible) {
             const bounds = new Phaser.Geom.Rectangle(
                 this.pointerTriangle.x - this.pointerTriangle.originX * this.pointerTriangle.width,
                 this.pointerTriangle.y - this.pointerTriangle.originY * this.pointerTriangle.height,
@@ -168,15 +168,18 @@ export class ReloadAbility extends IDItem {
 
         if (clickable) {
             if (!this.pointerTriangle) {
-                // If clickable is true and the pointerTriangle doesn't exist, create it
-                this.createPointer(scene); // Align right to the triangle, centered vertically
+                // Create the pointer only if it doesn't exist yet
+                this.createPointer(scene);
+            } else {
+                // If it exists, just make it visible
+                this.pointerTriangle.setVisible(true);
+                this.pointerTriangleText.setVisible(true);
             }
         } else {
             if (this.pointerTriangle) {
-                // If clickable is false and the pointerTriangle exists, destroy both it and the text
-                this.pointerTriangle.destroy();
-                // Destroy the text as well
-                this.pointerTriangleText.destroy();
+                // Hide the pointer and text instead of destroying them
+                this.pointerTriangle.setVisible(false);
+                this.pointerTriangleText.setVisible(false);
             }
         }
         

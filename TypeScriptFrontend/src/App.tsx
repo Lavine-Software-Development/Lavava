@@ -2,7 +2,6 @@ import { useRef, useState, useContext } from "react";
 import React from "react";
 
 import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
-import { MainMenu } from "./game/scenes/MainMenu";
 import { useEffect } from "react";
 import {
     BrowserRouter as Router,
@@ -13,16 +12,16 @@ import {
 } from "react-router-dom";
 import WebSocketTest from "./websocketClient"; // Import your WebSocketTest component if not already done
 import Login from "./user-flow/login";
-import board_data from "./game/data/board_data.json";
 import Register from "./user-flow/Register";
 import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
 import Profile from "./user-flow/Profile";
+import Team from './user-flow/team';
 import DeckBuilder from "./user-flow/deck_builder";
 import { NavBar } from "./NavBar";
 import Leaderboard from "./user-flow/Leaderboard";
 import HowToPlay from "./user-flow/How_to_play";
-
+import ChangePassword from "./user-flow/change_password";
 import Lobby from "./user-flow/lobby";
 import { NetworkContext, NetworkProvider } from "./game/NetworkContext";
 import { use } from "matter";
@@ -48,7 +47,6 @@ function App() {
                                     <PhaserGame
                                         ref={phaserRef}
                                         currentActiveScene={currentScene}
-                                        props={board_data}
                                     />
                                 </div>
                             }
@@ -70,6 +68,8 @@ function App() {
                                         <Route path="/profile" element={<Profile />} />
                                         <Route path="/leaderboard" element={<Leaderboard />} />
                                         <Route path="/how-to-play" element={<HowToPlay />} />
+                                        <Route path="/team" element={<Team />} />
+                                        <Route path="/change-password" element={<ChangePassword />} />
                                     </Routes>
                                 </div>
                             }

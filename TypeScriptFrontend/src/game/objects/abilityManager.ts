@@ -161,7 +161,6 @@ export class AbstractAbilityManager {
         } else if (event) {
             return this.events[event].clickCount === this.clicks.length;
         }
-        console.error("ERROR, No ability or event");
         return false;
     }
 

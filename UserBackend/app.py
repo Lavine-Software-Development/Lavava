@@ -158,7 +158,7 @@ def login():
 
     return jsonify({"token": token}), 200
 
-    
+
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
@@ -174,13 +174,8 @@ def register():
     elif username.lower() not in ('default', 'other'):
         return jsonify({"success": False, "message": "Registration failed, username must be 'default or other'"}), 400
         
-    if len(password) < 8: # checks for password requirements
-        return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
-    if not any(char.islower() for char in password):
-        return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
-    if not any(char.isupper() for char in password):
-        return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
-    
+    if password_requirements(password) is not True:
+         return password_requirements(password)
     token = s.dumps(email, salt='email-confirm')
     link = url_for('confirm_email', token=token, _external=True)
     send_confirmation_email(email, link)  # Send confirm email
@@ -191,7 +186,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check junk mail)".format(email)}), 200
+    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail)".format(email)}), 200
 
 
 @app.route('/confirm_email/<token>')
@@ -222,6 +217,101 @@ def send_confirmation_email(user_email, link):
     except Exception as e:
         print(f"Failed to send email: {e}")
         return "Error sending email."
+
+
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    data = request.json
+    username = data.get('username') # email or username
+    password = data.get('password') 
+    repeatPassword = data.get('repeatPassword')
+
+    if password != repeatPassword:
+        return jsonify({"success": False, "message": "Password and repeat password must match"}), 400
+    if password_requirements(password) is not True:
+         return password_requirements(password)
+    if config.DB_CONNECTED:
+        if User.query.filter_by(username=username).first(): # user found with username
+            user = User.query.filter_by(username=username).first()
+            username = user.email # changing variable to email of account with entered username
+        if User.query.filter_by(email=username).first(): # checking if there is an account with the entered email
+            passwordToken = password + " " + username
+            token = s.dumps(passwordToken, salt='reset-password')
+            link = url_for('confirm_password_reset', token=token, _external=True)
+            send_reset_email(username, link)  # Send confirm email
+            return jsonify({"success": True, "message": "Password reset email sent! Click the link sent to confirm password reset. Click below to login"}), 200
+        else:
+            return jsonify({"success": False, "message": "No account with this username or email exists."}), 404
+    else:
+        return jsonify({"success": False, "message": "Database connection error"}), 500
+
+
+def send_reset_email(user_email, link):
+    msg = Message("Reset Password - Ignore if not requested!",
+                  sender='lavavaacc@gmail.com',
+                  recipients=[user_email])
+    msg.body = 'IGNORE AND DO NOT CLICK THE LINK BELOW if you did not request to change your password.\n\nIf you did request a password reset follow the link to confirm your password reset: {} \nThis link will expire in 5 minutes.'.format(link)
+    try:
+        mail.send(msg)
+        return "Email sent successfully!"
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        return "Error sending email."
+    
+
+@app.route('/confirm_password_reset/<token>')
+def confirm_password_reset(token):
+    try:
+        passwordToken = s.loads(token, salt='reset-password', max_age=300) # token expires after 5 minutes
+    except SignatureExpired:
+        return '<h1>Reset password link expired!</h1>' # token expired
+    except:
+        return '<h1>Error!</h1>' # other error like incorrect token
+    password_and_email = passwordToken.split(" ")
+    hashed_password = generate_password_hash(password_and_email[0], method='pbkdf2:sha256')
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(email=password_and_email[1]).first()
+        if not user:
+            return '<h1>Error!</h1>'
+        user.password = hashed_password
+        db.session.commit()
+    return '<h1>Password Reset Successful!</h1>' 
+
+
+@app.route('/change_password', methods=['POST'])
+@token_required
+def change_password(current_user):
+    data = request.json
+    password = data.get('password') 
+    repeatPassword = data.get('repeatPassword')
+
+    if password != repeatPassword:
+        return jsonify({"success": False, "message": "Password and repeat password must match"}), 400
+    if password_requirements(password) is not True:
+         return password_requirements(password)
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            user.password = generate_password_hash(password, method='pbkdf2:sha256')
+            db.session.commit()
+            return jsonify({"success": True, "message": "Password change successful!"}), 200
+        else:
+            return jsonify({"success": False, "message": "User not found"}), 404
+    else:
+        return jsonify({"success": False, "message": "Database connection error"}), 500
+        
+
+def password_requirements(password): # checks for password requirements returns true if passed requirements
+    if len(password) < 8:
+        return jsonify({"success": False, "message": "Password must be at least 8 characters long"}), 400
+    if not any(char.islower() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one lowercase letter"}), 400
+    if not any(char.isupper() for char in password):
+        return jsonify({"success": False, "message": "Password must have at least one uppercase letter"}), 400
+    if ' ' in password:
+        return jsonify({"success": False, "message": "Password cannot contain spaces"}), 400
+    else:
+        return True
 
 
 @app.route('/user_abilities', methods=['GET'])
@@ -271,7 +361,46 @@ def get_profile(current_user):
             "elo": 1138,
             "past_games": ["1st", "4th", "2nd"]
         })
-    
+
+@app.route('/send-email', methods=['POST'])
+def send_email():
+    data = request.json
+    user_email = data.get('userEmail')
+    message_body = data.get('message')
+
+    if not user_email or not message_body:
+        return jsonify({"error": "Missing userEmail or message"}), 400
+
+    msg = Message(
+        subject="New Message from Contact Form",
+        sender='lavavaacc@gmail.com',
+        recipients=['lavine.software@gmail.com'],
+        cc=[user_email],
+        body=message_body
+    )
+
+    try:
+        mail.send(msg)
+        return jsonify({"success": "Email sent successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/update_display_name', methods=['POST'])
+@token_required
+def update_display_name(current_user):
+    if config.DB_CONNECTED:
+        data = request.json
+        display_name = data.get('newDisplayName')
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            user.display_name = display_name
+            db.session.commit()
+            return jsonify({"success": True, "message": "Display name updated successfully"}), 200
+        else:
+            return jsonify({"success": False, "message": "User not found"}), 404
+    else:
+        return jsonify({"success": False, "message": "Database not connected"}), 500
+
 
 def user_decks(current_user):
     if config.DB_CONNECTED:
@@ -315,13 +444,15 @@ def save_deck(current_user):
 
         # Update deck
         for ability in abilities:
+            description = ability.get('description', "")
             if ability['name'] in current_cards:
                 # Update existing card
                 current_cards[ability['name']].count = ability['count']
+                current_cards[ability['name']].description = description
                 current_cards.pop(ability['name'])
             else:
                 # Add new card
-                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'])
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=description)
                 db.session.add(new_card)
 
         # Remove cards not in the new deck
@@ -381,18 +512,66 @@ def username_to_elo(name: str):
 @app.route('/abilities', methods=['GET'])
 def get_abilities():
     abilities = [
-        {"name": "Freeze", "cost": 1},
-        {"name": "Spawn", "cost": 1},
-        {"name": "Zombie", "cost": 1},
-        {"name": "Burn", "cost": 1},
-        {"name": "Poison", "cost": 2},
-        {"name": "Rage", "cost": 2},
-        {"name": "D-Bridge", "cost": 2},
-        {"name": "Bridge", "cost": 2},
-        {"name": "Capital", "cost": 3},
-        {"name": "Nuke", "cost": 3},
-        {"name": "Cannon", "cost": 3},
-        {"name": "Pump", "cost": 3},
+        {
+            "name": "Freeze", 
+            "cost": 1,
+            "description": "Make edge one-way"
+        },
+        {
+            "name": "Spawn", 
+            "cost": 1,
+            "description": "Claim unowned node anywhere"
+        },
+        {
+            "name": "Zombie", 
+            "cost": 1,
+            "description": "Make big defensive node"
+        },
+        {
+            "name": "Burn", 
+            "cost": 1,
+            "description": "Remove ports from node"
+        },
+        {
+            "name": "Poison", 
+            "cost": 2,
+            "description": "Spreading effect to shrink nodes"
+        },
+        {
+            "name": "Rage", 
+            "cost": 2,
+            "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "D-Bridge", 
+            "cost": 2,
+            "description": "Create a two-way bridge"
+        },
+        {
+            "name": "Bridge", 
+            "cost": 2,
+            "description": "Make a one-way bridge"
+        },
+        {
+            "name": "Capital", 
+            "cost": 3,
+            "description": "Make a capital" 
+        },
+        {
+            "name": "Nuke", 
+            "cost": 3,
+            "description": "Destroy node and edges"
+        },
+        {
+            "name": "Cannon", 
+            "cost": 3,
+            "description": "Shoot energy at nodes"
+        },
+        {
+            "name": "Pump", 
+            "cost": 3,
+            "description": "Store energy to replenish abilities"
+        }
     ]
     return jsonify({"abilities": abilities, "salary": 15})
 

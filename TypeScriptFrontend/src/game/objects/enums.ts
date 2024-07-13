@@ -15,4 +15,13 @@ enum PlayerStateEnum {
     LOSER
 }
 
-export { ClickType, PlayerStateEnum };
+enum GameStateEnum {
+    LOBBY = 1,
+    BUILDING_GAME,
+    START_SELECTION,
+    PLAY,
+    END_GAME,
+    GAME_OVER
+}
+
+export { ClickType, PlayerStateEnum, GameStateEnum };

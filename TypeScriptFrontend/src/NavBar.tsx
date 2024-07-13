@@ -3,17 +3,6 @@ import "../styles/style.css";
 import React, { useRef, useState } from "react";
 
 export function NavBar() {
-    const [open, setOpen] = useState<boolean>(false);
-    const dropdrownRef = useRef<HTMLDivElement>(null);
-    const handleDropDownFocus = (state: boolean) => {
-        setOpen(!state);
-    };
-    const handleClickOutsideDropdown = (e: any) => {
-        if (open && !dropdrownRef.current?.contains(e.target as Node)) {
-            setOpen(false);
-        }
-    };
-    window.addEventListener("click", handleClickOutsideDropdown);
 
     return (
         <nav className="navbar fixed-top">

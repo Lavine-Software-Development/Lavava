@@ -2,7 +2,7 @@ import sys
 from pympler import asizeof
 import json
 
-def convert_keys_to_int(d):
+def convert_keys_to_int(d) -> dict | list:
     """
     Recursively converts string keys that can be converted into integers
     into integer keys in a dictionary or list of dictionaries.

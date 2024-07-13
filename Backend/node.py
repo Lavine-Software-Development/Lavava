@@ -20,7 +20,7 @@ from playerStateEnums import PlayerStateEnum as PSE
 
 
 @track_changes('owner', 'state', 'value', 'effects')
-@method_multipliers({('grow', stall), ('lost_amount', freeAttack)})
+@method_multipliers({('lost_amount', freeAttack)})
 class Node(JsonableTracked):
 
     def __init__(self, id, pos):
