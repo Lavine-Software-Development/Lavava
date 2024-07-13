@@ -34,8 +34,14 @@ const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     return (
         node.owner !== player &&
         node.owner !== null &&
-        node.stateName !== "capital" &&
         node.stateName !== "mine"
+    );
+};
+
+const defaultNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
+    const node = data as Node;
+    return (
+        node.stateName == "default" && standardNodeAttack(node, player)
     );
 };
 
@@ -67,7 +73,7 @@ function attackValidators(nodes: Node[], player: OtherPlayer) {
         };
 
         return (
-            standardNodeAttack(node, player) &&
+            defaultNodeAttack(node, player) &&
             capitals.some((capital) => inCapitalRange(capital))
         );
     };
@@ -113,8 +119,6 @@ export function unownedNode(data: IDItem[]): boolean {
 function playerValidators(player: OtherPlayer): {
     [key: string]: ValidatorFunc;
 } {
-    // Validator that checks if a node is attackable
-
     // Validator that checks if a node belongs to the player
     const myNode = (data: IDItem[]): boolean => {
         const node = data[0] as Node; // Type casting to Node for TypeScript
@@ -126,10 +130,27 @@ function playerValidators(player: OtherPlayer): {
         return node.stateName === "default" && myNode(data);
     }
 
-    // Validator that checks if either node of a dynamic edge belongs to the player
-    const dynamicEdgeOwnEither = (data: IDItem[]): boolean => {
+    const myPortNode = (data: IDItem[]): boolean => {
+        const node = data[0] as Node;
+        return node.is_port && myDefaultNode(data);
+    }
+
+    // Weakest Freeze.
+    const dynamicEdgeOwnFromNode = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge; // Type casting to Edge for TypeScript
         return edge.dynamic && edge.from_node.owner === player;
+    };
+
+    // Middle Tier Freeze. If player is only the owner of to_node, then edge must not be flowing to swap
+    const dynamicEdgeOwnEitherButNotFlowing = (data: IDItem[]): boolean => {
+        const edge = data[0] as Edge; // Type casting to Edge for TypeScript
+        return edge.dynamic && (edge.from_node.owner === player || (edge.to_node.owner == player && !edge.flowing));
+    };
+
+    // Strongest Freeze. Can swap an incoming flowing edge, hard countering an attack
+    const dynamicEdgeOwnEither = (data: IDItem[]): boolean => {
+        const edge = data[0] as Edge; // Type casting to Edge for TypeScript
+        return edge.dynamic && (edge.from_node.owner === player || (edge.to_node.owner == player && !edge.on));
     };
 
     const attackingEdge = (data: IDItem[]): boolean => {
@@ -143,9 +164,9 @@ function playerValidators(player: OtherPlayer): {
     // Return an object mapping codes to their respective validator functions
     return {
         [KeyCodes.POISON_CODE]: attackingEdge,
-        [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEither,
+        [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEitherButNotFlowing,
         [KeyCodes.ZOMBIE_CODE]: myNode,
-        [KeyCodes.CANNON_CODE]: myDefaultNode,
+        [KeyCodes.CANNON_CODE]: myPortNode,
         [KeyCodes.PUMP_CODE]: myDefaultNode,
     };
 }
