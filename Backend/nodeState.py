@@ -9,6 +9,7 @@ from constants import (
     TRANSFER_RATE,
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
+    ZOMBIE_FULL_SIZE
 )
 from abc import abstractmethod
 import math
@@ -88,7 +89,9 @@ class DefaultState(AbstractState):
 class ZombieState(DefaultState):
 
     def __init__(self, node):
+        node.capture(None)
         AbstractState.__init__(self, node, True, False, False, 1) # default on capture
+        self.node.value = ZOMBIE_FULL_SIZE
 
     def grow(self):
         return 0
@@ -167,6 +170,7 @@ class StartingCapitalState(CapitalState): # stays on capture
 
 class MineState(AbstractState): # default on capture
     def __init__(self, node, absorbing_func, island):
+        node.port_count = 3
         self.bonus, self.bubble, self.ring_color, visual_id = MINE_DICT[island]
         super().__init__(node, True, True, False, visual_id)
         self.absorbing_func = absorbing_func

@@ -24,26 +24,38 @@ function noClick(data: IDItem[]): boolean {
     return false;
 }
 
-function standardPortNode(data: IDItem[]): boolean {
+function ownedBurnableNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
-    return node.owner !== undefined && node.is_port && node.stateName !== "mine";
+    return node.owner != null && burnableNode(data);
+}
+
+// Option for improved Burn, allowing preemptive burns before a node is owned
+function burnableNode(data: IDItem[]): boolean {
+    const node = data[0] as Node;
+    return node.is_port && node.edges.length != 0;
 }
 
 const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     const node = data as Node;
     return (
         node.owner !== player &&
-        node.owner !== null &&
-        node.stateName !== "mine"
+        node.owner != null
     );
 };
 
+// Option for worse Nuke, requiring a node to be owned before attacking
 const defaultNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     const node = data as Node;
     return (
         node.stateName == "default" && standardNodeAttack(node, player)
     );
 };
+
+// Option for improved Nuke, allowing attacks on unowned nodes (and theoretically one's own)
+const defaultNode = (data: IDItem): boolean => {
+    const node = data as Node;
+    return node.stateName == "default";
+}
 
 const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
 
@@ -73,7 +85,7 @@ function attackValidators(nodes: Node[], player: OtherPlayer) {
         };
 
         return (
-            defaultNodeAttack(node, player) &&
+            defaultNode(node) &&
             capitals.some((capital) => inCapitalRange(capital))
         );
     };
@@ -119,18 +131,19 @@ export function unownedNode(data: IDItem[]): boolean {
 function playerValidators(player: OtherPlayer): {
     [key: string]: ValidatorFunc;
 } {
-    // Validator that checks if a node belongs to the player
     const myNode = (data: IDItem[]): boolean => {
         const node = data[0] as Node; // Type casting to Node for TypeScript
         return node.owner === player;
     };
 
+    // Option for improved cannon, not requiring ports. Harder for bridge players to counter
+    // Option for worsened Zombie, not allowing cannon/pump deletion before opponent takeover
     const myDefaultNode = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
         return node.stateName === "default" && myNode(data);
     }
 
-    const myPortNode = (data: IDItem[]): boolean => {
+    const myDefaultPortNode = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
         return node.is_port && myDefaultNode(data);
     }
@@ -165,8 +178,8 @@ function playerValidators(player: OtherPlayer): {
     return {
         [KeyCodes.POISON_CODE]: attackingEdge,
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEitherButNotFlowing,
-        [KeyCodes.ZOMBIE_CODE]: myNode,
-        [KeyCodes.CANNON_CODE]: myPortNode,
+        [KeyCodes.ZOMBIE_CODE]: myDefaultNode,
+        [KeyCodes.CANNON_CODE]: myDefaultPortNode,
         [KeyCodes.PUMP_CODE]: myDefaultNode,
     };
 }
@@ -208,7 +221,7 @@ export function makeAbilityValidators(
         [KeyCodes.SPAWN_CODE]: unownedNode,
         [KeyCodes.BRIDGE_CODE]: newEdgeValidator(edges, player),
         [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(edges, player),
-        [KeyCodes.BURN_CODE]: standardPortNode,
+        [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
         [KeyCodes.NUKE_CODE]: attackValidators(nodes, player),

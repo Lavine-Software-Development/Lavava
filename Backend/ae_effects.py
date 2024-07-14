@@ -69,7 +69,9 @@ def make_pump_drain(id_dict):
     return pump_drain
 
 def freeze_effect(data, player):
-    edge = data[0]
+    edge = data[0] 
+    if edge.from_node.owner != player:
+        edge.natural_swap()
     edge.dynamic = False
 
 def spawn_effect(data, player):
@@ -78,9 +80,7 @@ def spawn_effect(data, player):
 
 def zombie_effect(data, player):
     node = data[0]
-    node.capture(None)
     node.set_state("zombie")
-    node.value = ZOMBIE_FULL_SIZE
 
 def poison_effect(data, player):
     edge = data[0]
