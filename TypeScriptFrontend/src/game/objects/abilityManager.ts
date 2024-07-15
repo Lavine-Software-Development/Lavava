@@ -42,6 +42,10 @@ export class AbstractAbilityManager {
         this.reset();
     }
 
+    getMode(): number | null {
+        return this.mode;
+    }
+
     delete(): void {
         // Clear all graphics
         this.BridgeGraphics.clear();

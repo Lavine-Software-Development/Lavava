@@ -271,22 +271,28 @@ export class MainScene extends Scene {
     update(): void {
         this.graphics.clear();
         this.abilityManager.draw(this);
-
+    
         // Iterate over the values of the dictionary to draw each node
-
-        if (this.abilityManager.ability?.visual.name == "Nuke") {
+    
+        if (this.abilityManager.getMode() == KeyCodes.NUKE_CODE) {
             // Filter the dictionary values to find the capitals
             const capitals = Object.values(this.nodes).filter(
                 (node) =>
                     node.stateName === "capital" &&
                     node.owner === this.mainPlayer
             );
-
+    
             // For each node in capitals, draw a pink hollow circle on the node of the size of its this.value
             capitals.forEach((node) => {
                 this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
                 this.graphics.strokeCircle(node.pos.x, node.pos.y, (node.value * NUKE_RANGE));
             });
+
+        } else if (this.highlight.usage == KeyCodes.CAPITAL_CODE) {
+            // Draw a pink hollow circle around the highlighted node
+            const highlightedNode = this.highlight.item as Node;
+            this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
+            this.graphics.strokeCircle(highlightedNode.pos.x, highlightedNode.pos.y, (highlightedNode.value * NUKE_RANGE));
         }
     }
 
