@@ -34,6 +34,7 @@ class DefaultPlayer(JsonableTick):
             self.abilities[key].use(data)
 
     def default_values(self):
+        self.killer = None
         self.count = 0
         self.abilities = dict()
         self.ps = PlayerState()
