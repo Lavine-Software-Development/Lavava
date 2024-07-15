@@ -12,7 +12,8 @@ from constants import (
 from helpers import do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
-from tracker import Tracker
+# from tracker import Tracker
+from capital_tracker import CapitalTracker
 from tracking_decorator.track_changes import track_changes
 
 
@@ -24,7 +25,8 @@ class Board(JsonableTracked):
         self.edges = []
         self.edge_dict = defaultdict(set)
         self.extra_edges = 0
-        self.tracker = Tracker()
+        # self.tracker = Tracker()
+        self.tracker = CapitalTracker()
         self.player_capitals = defaultdict(set)
         self.full_player_capitals = []
 
@@ -39,7 +41,9 @@ class Board(JsonableTracked):
 
     def track_starting_states(self):
         for node in self.nodes:
-            if node.state_name != "default":
+            # if node.state_name != "default":
+            #     self.tracker.node(node)
+            if node.state_name == "capital" and node.owner:
                 self.tracker.node(node)
 
     def track_state_changes(self, nodes):
