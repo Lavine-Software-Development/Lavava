@@ -509,6 +509,7 @@ def get_abilities():
             "name": "Freeze", 
             "cost": 1,
             "description": "Convert edge to one-way"
+            
         },
         {
             "name": "Spawn", 
