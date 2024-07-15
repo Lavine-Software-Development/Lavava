@@ -63,7 +63,6 @@ class Node(JsonableTracked):
             return DefaultState(self)
         elif state_name == "mine":
             # if data is True and mode.MODE == 3:
-            self.port_count = 3
             return MineState(self, self.absorbing, data)
         elif state_name == "zombie":
             return ZombieState(self)

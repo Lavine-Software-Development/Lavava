@@ -508,7 +508,7 @@ def get_abilities():
         {
             "name": "Freeze", 
             "cost": 1,
-            "description": "Make edge one-way"
+            "description": "Convert edge to one-way"
         },
         {
             "name": "Spawn", 
@@ -518,7 +518,7 @@ def get_abilities():
         {
             "name": "Zombie", 
             "cost": 1,
-            "description": "Make big defensive node"
+            "description": "Big defensive Structure on node"
         },
         {
             "name": "Burn", 
@@ -528,7 +528,7 @@ def get_abilities():
         {
             "name": "Poison", 
             "cost": 2,
-            "description": "Spreading effect to shrink nodes"
+            "description": "Spreadable effect to shrink nodes"
         },
         {
             "name": "Rage", 
@@ -543,17 +543,17 @@ def get_abilities():
         {
             "name": "Bridge", 
             "cost": 2,
-            "description": "Make a one-way bridge"
+            "description": "Create a one-way bridge"
         },
         {
             "name": "Capital", 
             "cost": 3,
-            "description": "Make a capital" 
+            "description": "Create a capital" 
         },
         {
             "name": "Nuke", 
             "cost": 3,
-            "description": "Destroy node and edges"
+            "description": "Destroy node and edges (capital needed)"
         },
         {
             "name": "Cannon", 
@@ -566,7 +566,7 @@ def get_abilities():
             "description": "Store energy to replenish abilities"
         }
     ]
-    return jsonify({"abilities": abilities, "salary": 15})
+    return jsonify({"abilities": abilities, "salary": 20})
 
 @app.route('/elo', methods=['POST'])
 def update_elo():

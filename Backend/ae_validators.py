@@ -4,20 +4,30 @@ from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, PUMP
 def no_click(data):
     return True
 
-def standard_port_node(data):
+def owned_burnable_node(data):
     node = data[0]
-    return node.owner is not None and node.is_port and node.state_name not in ["mine"]
+    return node.owner is not None and burnable_node(data)
+
+# option for slightly improved burn, allowing preemptive burns before ownership
+def burnable_node(data):
+    node = data[0]
+    return node.is_port and len(node.edges) 
 
 def unowned_node(data):
     node = data[0]
     return node.owner is None and node.state_name == "default"
 
+# option for improved nuke, nuking something unowned (or theoreitcally ones own)
+def default_node(data):
+    node = data[0]
+    return node.state_name == "default"
+
+# option for worse nuke, requiring node to be owned
 def standard_node_attack(data, player):
     node = data[0]
     return (
         node.owner != player
         and node.owner is not None
-        and node.state_name not in ["capital", "mine"]
     )
 
 
@@ -34,7 +44,7 @@ def attack_validators(capital_func, player):
             capital_nuke_range = (NUKE_RANGE * capital.value) ** 2
             return distance <= capital_nuke_range
 
-        return standard_node_attack([node], player) and any(in_capital_range(capital) for capital in capitals)
+        return default_node([node]) and any(in_capital_range(capital) for capital in capitals)
 
     return capital_ranged_node_attack
 
@@ -45,7 +55,7 @@ def validators_needing_player(player):
         node = data[0]
         if (
             node.owner == player
-            and node.state_name != "capital"
+            and node.state_name == "default"
             and node.full()
         ):
             neighbor_capital = False
@@ -57,13 +67,23 @@ def validators_needing_player(player):
                 return True
         return False
     
+    # can be used for buffed zombie, allowing it to delete about to capture cannons/pumps
     def my_node(data):
         node = data[0]
         return node.owner == player
     
+    def my_default_port_node(data):
+        node = data[0]
+        return my_default_node(data) and node.is_port
+    
+    # Can be used for buffed cannon, not requiring port placement. Harder to attack for bridge players
+    def my_default_node(data):
+        node = data[0]
+        return my_node(data) and node.state_name == "default"
+    
     def attacking_edge(data):
         edge = data[0]
-        return edge.from_node.owner == player and standard_node_attack([edge.to_node], player)
+        return my_node([edge.from_node]) and standard_node_attack([edge.to_node], player)
 
     def dynamic_edge_own_either(data):
         edge = data[0]
@@ -73,9 +93,9 @@ def validators_needing_player(player):
         CAPITAL_CODE: capital_logic,
         POISON_CODE: attacking_edge,
         FREEZE_CODE: dynamic_edge_own_either,
-        ZOMBIE_CODE: my_node,
-        CANNON_CODE: my_node,
-        PUMP_CODE: my_node,
+        ZOMBIE_CODE: my_default_node,
+        CANNON_CODE: my_default_port_node,
+        PUMP_CODE: my_default_node,
     }
 
 def no_crossovers(check_new_edge, data, player):
@@ -119,7 +139,7 @@ def make_ability_validators(board, player):
         SPAWN_CODE: unowned_node,
         BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
         D_BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
-        BURN_CODE: standard_port_node,
+        BURN_CODE: owned_burnable_node,
         RAGE_CODE: no_click,
         NUKE_CODE: attack_validators(board.player_capitals, player),
     } | validators_needing_player(player)

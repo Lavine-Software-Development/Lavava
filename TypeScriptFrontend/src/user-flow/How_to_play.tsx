@@ -37,7 +37,7 @@ const HowToPlay: React.FC = () => {
                 nodes of their color remains.
             </div>
             <div className="space">
-                The main other twist is abilities! Each player is given 15
+                The main other twist is abilities! Each player is given 20
                 credits at the beginning of the game to select a set of
                 abilities from the ability menu. Each ability has a cost (in
                 credits) as well as a reload time to limit immediate repeated
