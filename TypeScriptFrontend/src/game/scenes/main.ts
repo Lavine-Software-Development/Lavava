@@ -358,18 +358,6 @@ export class MainScene extends Scene {
         return false;
     }
 
-    // I don't actually know whether this is doing anything
-    shutdown(): void {
-        // Clear the reconnection event when the scene is shut down
-        this.network.disconnectWebSocket()
-        if (this.reconnectionEvent) {
-            this.reconnectionEvent.remove();
-            this.reconnectionEvent = null;
-        }
-        // window.removeEventListener('popstate', this.handleNavigationEvent);
-        // window.removeEventListener('beforeunload', this.handleNavigationEvent);
-    }
-
     mouseButtonDownEvent(button: number): void {
         if (this.highlight.highlighted) {
             if (this.ps === PSE.START_SELECTION) {
@@ -431,17 +419,7 @@ export class MainScene extends Scene {
     
     // private handleNavigationEvent(event: PopStateEvent | BeforeUnloadEvent): void {
     //     event.preventDefault();
-        // Check the type of event and prevent the default action if necessary
-        // if (event.type === 'popstate') {
-        //     event.preventDefault(); // For popstate, prevent the default browser action
-        // }
-        // // For 'beforeunload', setting returnValue is used to show a confirmation dialog
-        // if (event.type === 'beforeunload') {
-        //     (event as BeforeUnloadEvent).returnValue = "Are you sure you want to leave this page?";
-        // }
-    
-        // // Call leaveMatch in both cases
-        // this.leaveMatch(stateCodes.FORFEIT_AND_LEAVE_CODE);
+    //     this.leaveMatchDirect();
     // }
     
 

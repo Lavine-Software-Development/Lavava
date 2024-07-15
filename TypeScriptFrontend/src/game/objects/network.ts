@@ -37,9 +37,9 @@ export class Network {
             // console.log("Received message: ", event.data);
             let data = JSON.parse(event.data);
             
-            if (data.action === "player_left") {
+            if (data.action === "leave_game") {
                 this.leaveGameCallback()
-                console.log("Player left the game");
+                console.log("Player was kicked out, game is over");
 
             } else if (data.hasOwnProperty("game_id")) {
                 this.gameIDEtcCallback(data.game_id, data.player_count);
@@ -84,9 +84,12 @@ export class Network {
         this.boardDataPromise = new Promise((resolve) => {
             this.boardDataResolver = resolve;
         });
+
+        this.updateCallback = () => {};
     
         // Clear the message queue
         this.messageQueue = [];
+        console.log("WebSocket Disconnected The Long Way");
     }
 
     sendMessage(message: Record<any, any>): void {
