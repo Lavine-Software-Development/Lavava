@@ -21,14 +21,18 @@ class Batch:
         self.mode = mode
         self.gs = GameState()
         self.game = ServerGame(self.player_count, self.gs)
-        self.has_left = {}
+        self.not_responsive_count = {}
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
-        
 
+    def did_not_respond(self, player_id):
+        self.not_responsive_count[player_id] += 1
+        print(f"Player {player_id} did not respond {self.not_responsive_count[player_id]} times")
     
-    def return_player_has_left(self, player_id):
-        return self.has_left[player_id]
+    def still_send(self, player_id):
+        return self.not_responsive_count[player_id] < 30
+        # the frontend sends a message every 1 second to ensure connectivity, and reconnects if lost
+        # There are 10 ticks a second, meaning if it hasn't tried to reconnect after 15 ticks (1.5 seconds), it's gone
 
     def update_elo(self):
         
@@ -56,20 +60,26 @@ class Batch:
         if self.ability_process(player_id, ability_data):
             self.token_ids[token] = player_id
             self.id_sockets[player_id] = websocket
-            self.has_left[player_id] = False
+            self.not_responsive_count[player_id] = 0
             return False
         else:
             return "CHEATING: INVALID ABILITY SELECTION"
         
-    def remove_player(self, token):
+    def remove_player_from_lobby(self, token):
         removed_id = self.token_ids.pop(token)
         for othertoken in self.token_ids:
             if self.token_ids[othertoken] > removed_id:
                 self.token_ids[othertoken] = self.token_ids[othertoken] - 1
         self.id_sockets.pop(removed_id)
 
+    def remove_player_from_game(self, id):
+        self.id_sockets.pop(id)
+        self.game.eliminate(id)
+        print("Player has left")
+
     def reconnect_player(self, token, websocket):
         player_id = self.token_ids[token]
+        self.not_responsive_count[player_id] = 0
         self.id_sockets[player_id] = websocket
         game_dict = self.game.full_tick_json
         game_dict["player"] = self.player_tick_repr(player_id)
@@ -142,9 +152,9 @@ class Batch:
             self.game.restart()
         elif key in (ELIMINATE_VAL, FORFEIT_CODE):
             self.game.eliminate(player_id)
-        elif key == (FORFEIT_AND_LEAVE_CODE):
-            self.game.eliminate(player_id)
-            self.has_left[player_id] = True
+        # elif key == (FORFEIT_AND_LEAVE_CODE):
+        #     self.game.eliminate(player_id)
+        #     self.has_left[player_id] = True
         elif key in ALL_ABILITIES:
             print("ABILITY")
             self.game.effect(key, player_id, data['items'])
