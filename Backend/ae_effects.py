@@ -23,6 +23,7 @@ from constants import (
     MINIMUM_TRANSFER_VALUE,
     GROWTH_STOP,
     NODE_MINIMUM_VALUE,
+    MINI_BRIDGE_CODE,
 )
 
 def make_bridge(buy_new_edge, bridge_type):
@@ -106,6 +107,7 @@ def make_ability_effects(board):
     return {
         BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE),
         D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
+        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),

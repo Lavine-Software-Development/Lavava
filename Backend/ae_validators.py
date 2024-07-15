@@ -1,4 +1,5 @@
-from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
+from math import dist
+from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
 
 
 def no_click(data):
@@ -132,17 +133,30 @@ def make_new_edge_ports(check_new_edge, player):
         if all([node.is_port for node in data]):
             return no_crossovers(check_new_edge, data, player)
         return False
-    return new_edge_ports
+    
+    # Check if the nodes are within the range of a mini bridge
+    def check_mini_bridge_range(data):
+        first_node, second_node = data
+        distance = dist(first_node.pos, second_node.pos)
+        return distance <= 100  # Adjust the range as needed
+
+    def mini_bridge_validator(data):
+        return check_mini_bridge_range(data) and new_edge_ports(data)
+
+    return {
+        BRIDGE_CODE: new_edge_ports,
+        D_BRIDGE_CODE: new_edge_ports,
+        MINI_BRIDGE_CODE: mini_bridge_validator,  # Add mini bridge validator
+    }
+
 
 def make_ability_validators(board, player):
     return {
         SPAWN_CODE: unowned_node,
-        BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
-        D_BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
         BURN_CODE: owned_burnable_node,
         RAGE_CODE: no_click,
         NUKE_CODE: attack_validators(board.player_capitals, player),
-    } | validators_needing_player(player)
+    } | validators_needing_player(player) | make_new_edge_ports(board.check_new_edge, player)
 
 
 def make_effect_validators(board):

@@ -47,6 +47,7 @@ export const KeyCodes = {
     CAPITAL_CODE: 99,
     CANNON_CODE: 101,
     PUMP_CODE: 117,
+    MINI_BRIDGE_CODE: 109,
 };
 
 export const EventCodes = {

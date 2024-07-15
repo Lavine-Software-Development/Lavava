@@ -187,9 +187,9 @@ function playerValidators(player: OtherPlayer): {
 function newEdgeValidator(
     edges: Edge[],
     player: OtherPlayer
-): ValidatorFunc {
+): { [key: string]: ValidatorFunc } {
 
-    const newEdgeStandard = (data: Node[]): boolean => {
+    const newEdgeStandard = (data: Node[], ): boolean => {
         if (data.length === 1) {
             const firstNode = data[0];
             return firstNode.owner === player && firstNode.is_port;
@@ -204,11 +204,37 @@ function newEdgeValidator(
         }
     };
 
-    return (data: IDItem[]): boolean => {
+    const fullSizeEdgeValidator = (data: IDItem[]): boolean => {
         const nodes = data as Node[]; // Assert all data items are Nodes
         return (
             nodes.every((node) => node.portCount > 0) && newEdgeStandard(nodes)
         );
+    };
+
+    // Check if the nodes are within the range of a mini bridge
+    const checkMiniBridgeRange = (nodes: Node[]): boolean => {
+        const [node1, node2] = nodes;
+        const distance = Phaser.Math.Distance.Between(
+            node1.pos.x,
+            node1.pos.y,
+            node2.pos.x,
+            node2.pos.y
+        );
+        return distance <= 100;
+    };
+    
+    const miniBridgeValidator = (data: IDItem[]): boolean => {
+        const nodes = data as Node[];
+        return (
+            checkMiniBridgeRange(nodes) &&
+            fullSizeEdgeValidator(nodes)
+        );
+    };
+
+    return {
+        [KeyCodes.BRIDGE_CODE]: fullSizeEdgeValidator,
+        [KeyCodes.D_BRIDGE_CODE]: fullSizeEdgeValidator,
+        [KeyCodes.MINI_BRIDGE_CODE]: miniBridgeValidator,
     };
 }
 
@@ -219,8 +245,6 @@ export function makeAbilityValidators(
 ): { [key: string]: ValidatorFunc } {
     const abilityValidators: { [key: string]: ValidatorFunc } = {
         [KeyCodes.SPAWN_CODE]: unownedNode,
-        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(edges, player),
-        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(edges, player),
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
@@ -229,7 +253,8 @@ export function makeAbilityValidators(
 
     // Merge the validators from `player_validators` into `abilityValidators`
     const playerValidatorsMap = playerValidators(player);
-    return { ...abilityValidators, ...playerValidatorsMap };
+    const newEdgeValidators = newEdgeValidator(edges, player);
+    return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators };
 }
 
 export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
