@@ -182,7 +182,8 @@ class Board(JsonableTracked):
         newEdge.tracked_attributes.update(newEdge.start_values)
 
     def remove_node(self, node):
-        node.owner.count -= 1
+        if node.owner:
+            node.owner.count -= 1
         for edge in node.edges:
             opp = edge.opposite(node)
             opp.edges.discard(edge)

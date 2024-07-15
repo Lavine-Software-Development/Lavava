@@ -163,7 +163,7 @@ function playerValidators(player: OtherPlayer): {
     // Strongest Freeze. Can swap an incoming flowing edge, hard countering an attack
     const dynamicEdgeOwnEither = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge; // Type casting to Edge for TypeScript
-        return edge.dynamic && (edge.from_node.owner === player || (edge.to_node.owner == player && !edge.on));
+        return edge.dynamic && (edge.from_node.owner === player || edge.to_node.owner == player);
     };
 
     const attackingEdge = (data: IDItem[]): boolean => {
