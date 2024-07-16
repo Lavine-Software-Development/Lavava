@@ -30,6 +30,8 @@ const Profile: React.FC = () => {
 
 
     const handleLogout = () => {
+
+        
         localStorage.removeItem("userToken");
         sessionStorage.clear();
         navigate("/login");

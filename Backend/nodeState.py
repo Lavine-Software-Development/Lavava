@@ -9,6 +9,7 @@ from constants import (
     TRANSFER_RATE,
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
+    ZOMBIE_FULL_SIZE
 )
 from abc import abstractmethod
 import math
@@ -88,7 +89,9 @@ class DefaultState(AbstractState):
 class ZombieState(DefaultState):
 
     def __init__(self, node):
-        AbstractState.__init__(self, node, True, False, False, 1)
+        node.capture(None)
+        AbstractState.__init__(self, node, True, False, False, 1) # default on capture
+        self.node.value = ZOMBIE_FULL_SIZE
 
     def grow(self):
         return 0
@@ -100,7 +103,7 @@ class ZombieState(DefaultState):
 class CannonState(DefaultState):
     
     def __init__(self, node):
-        AbstractState.__init__(self, node, False, False, False, 5)
+        AbstractState.__init__(self, node, False, False, False, 5) # stays on capture
 
     def grow(self):
         return 0
@@ -108,7 +111,7 @@ class CannonState(DefaultState):
 class PumpState(DefaultState):
 
     def __init__(self, node):
-        AbstractState.__init__(self, node, False, False, False, 6)
+        AbstractState.__init__(self, node, False, False, False, 6) # stays on capture
         self.prep_shrink()
 
     def prep_shrink(self):
@@ -132,7 +135,7 @@ class PumpState(DefaultState):
 
 class CapitalState(DefaultState):
     def __init__(self, node, reset=True, update_on_new_owner=False):
-        AbstractState.__init__(self, node, reset, False, update_on_new_owner, 2)
+        AbstractState.__init__(self, node, reset, False, update_on_new_owner, 2) # default on capture
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
@@ -155,7 +158,7 @@ class CapitalState(DefaultState):
         return self.capitalized and super().accept_intake(incoming_player)
 
 
-class StartingCapitalState(CapitalState):
+class StartingCapitalState(CapitalState): # stays on capture
     def __init__(self, node, is_owned=False):
         super().__init__(node, False, True)
         self.capitalized = True
@@ -165,8 +168,9 @@ class StartingCapitalState(CapitalState):
         return 0
 
 
-class MineState(AbstractState):
+class MineState(AbstractState): # default on capture
     def __init__(self, node, absorbing_func, island):
+        node.port_count = 3
         self.bonus, self.bubble, self.ring_color, visual_id = MINE_DICT[island]
         super().__init__(node, True, True, False, visual_id)
         self.absorbing_func = absorbing_func
