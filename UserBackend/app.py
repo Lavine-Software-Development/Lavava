@@ -558,7 +558,7 @@ def get_abilities():
         },
         {
             "name": "Cannon", 
-            "cost": 3,
+            "cost": 4,
             "description": "Shoot energy at nodes"
         },
         {

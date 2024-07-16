@@ -18,6 +18,10 @@ export class State {
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
         // Draw the state
     }
+
+    removeSprites() {
+
+    }
 }
 
 export class ZombieState extends State {
@@ -38,6 +42,10 @@ export class ZombieState extends State {
             this.zombieSprite.setScale(currentScale);
         }
     }
+
+    removeSprites() {
+        this.zombieSprite?.destroy()
+    }
 }
 
 export class MineState extends State {
@@ -56,7 +64,7 @@ export class MineState extends State {
         this.ringColor = ringColor;
         this.unfilledColor = unfilledColor;
     }
-}
+ }
 
 export class CapitalState extends State {
     capitalized: boolean;
@@ -82,6 +90,10 @@ export class CapitalState extends State {
             this.starSprite.destroy();
             this.starSprite = null;
         }
+    }
+
+    removeSprites() {
+        this.starSprite?.destroy()
     }
 }
 
@@ -115,6 +127,10 @@ export class PumpState extends State {
         if (Math.abs(this.plusSprite.scaleX - currentScale) > 0.01) { // threshold to avoid minor changes
             this.plusSprite.setScale(currentScale);
         }
+    }
+
+    removeSprites() {
+        this.plusSprite?.destroy();
     }
 
 }
