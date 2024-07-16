@@ -795,3 +795,104 @@ ul {
     background: rgb(32, 32, 32);
 }
 
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+.scrollable-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.space {
+    margin-bottom: 20px;
+}
+
+.HtPabilities-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.HtPability-window {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    width: calc(33.333% - 20px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    transition: transform 0.2s, width 0.2s, height 0.2s;
+    cursor: pointer;
+    text-align: center;
+}
+
+.HtPability-window h1 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.HtPability-window h2 {
+    font-size: 1.2em;
+    margin-bottom: 8px;
+    color: #666;
+}
+
+.HtPability-window h3 {
+    font-size: 1em;
+    margin-bottom: 6px;
+    color: #999;
+}
+
+.HtPability-window p {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.HtPability-window.expanded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: auto;
+    z-index: 1000;
+    text-align: center;
+}
+
+.HtPoverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.HtPoverlay.visible {
+    display: block;
+}
+
+.HtPclose-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #999;
+}
+
+.HtPclose-button:hover {
+    color: #333;
+}

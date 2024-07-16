@@ -1,225 +1,201 @@
 import "../../styles/style.css";
-import React from "react";
+import React, { useState } from "react";
+
+type AbilityProps = {
+    title: string;
+    desc: string;
+    extra: string;
+    usage: string;
+    onClick: () => void;
+    onClose: () => void;
+    isExpanded: boolean;
+};
+
+type AbilityData = {
+    Name: string;
+    Description: string;
+    Extra_Description: string;
+    Usage: string;
+};
+
+type DataStructure = {
+    [key: string]: AbilityData[];
+};
+
+const data: DataStructure = {
+    "1 Credit Abilities": [
+        {
+            Name: "Spawn",
+            Description: "Claim an unclaimed node",
+            Extra_Description: "Starting energy for a spawned node is 5",
+            Usage: "Click on the node you want to spawn on."
+        },
+        {
+            Name: "Freeze",
+            Description: "Make a dynamic edge directional",
+            Extra_Description: "It'll swap and freeze in your advantage",
+            Usage: "Click on the dynamic edge you want to freeze."
+        },
+        {
+            Name: "Burn",
+            Description: "Convert a port node into a standard node",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Click on the port node you want to burn."
+        },
+        {
+            Name: "Zombie",
+            Description: "Turn a node you own into a Zombie State, making it harder to capture.",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Click on the node you want to turn into a Zombie State."
+        }
+    ],
+    "2 Credit Abilities": [
+        {
+            Name: "Bridge",
+            Description: "Create an edge between two port-nodes",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Click on the first node you want to bridge, then click on the second node you want to bridge to."
+        },
+        {
+            Name: "D-Bridge",
+            Description: "Create a directional edge between two port-nodes",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Click on the first node you want to D-Bridge, then click on the second node you want to D-Bridge to."
+        },
+        {
+            Name: "Rage",
+            Description: "Increase energy transfer rate from your nodes by 2.5 times.",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Once clicked, all nodes you own will be enraged for the next 10 seconds."
+        },
+        {
+            Name: "Poison",
+            Description: "Send poison along edges, causing affected nodes to lose energy over 20 seconds.",
+            Extra_Description: "Not sure what to put here",
+            Usage: ""
+        }
+    ],
+    "3 Credit Abilities": [
+        {
+            Name: "Nuke",
+            Description: "Destroy all nodes in designated area surrounding the users capital node",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Click on the node you want to nuke from. It cannot have a structure built on it."
+        },
+        {
+            Name: "Capital",
+            Description: "Turn a full node into a capital, changing its energy dynamics and acting as a win condition.",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Click on the node you want to turn into a capital. It cannot have a structure already built on it."
+        },
+        {
+            Name: "Cannon",
+            Description: "Fire a cannonball at an enemy node, dealing damage and reducing energy.",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Click on one of your own nodes you want a cannon to be built on, then click on the enemy node you want to fire at."
+        },
+        {
+            Name: "Pump",
+            Description: "Place on a node to replenish abilities once fully charged.",
+            Extra_Description: "Not sure what to put here",
+            Usage: "Click on the node you want the pump to be placed on. It cannot have a structure already built on it."
+        }
+    ]
+};
+
+const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, onClick, onClose, isExpanded }) => (
+    <div className={`HtPability-window ${isExpanded ? "expanded" : ""}`} onClick={!isExpanded ? onClick : undefined}>
+        {isExpanded && <button className="HtPclose-button" onClick={onClose}>×</button>}
+        <h1>{title}</h1>
+        <h2>{desc}</h2>
+        {isExpanded && (
+            <>
+                <h3>{usage}</h3>
+                <p>{extra}</p>
+            </>
+        )}
+    </div>
+);
+
+const AbilitiesList: React.FC<{ data: DataStructure }> = ({ data }) => {
+    const [expandedAbility, setExpandedAbility] = useState<string | null>(null);
+
+    const handleAbilityClick = (abilityName: string) => {
+        setExpandedAbility(abilityName === expandedAbility ? null : abilityName);
+    };
+
+    const handleClose = () => {
+        setExpandedAbility(null);
+    };
+
+    return (
+        <div className="HtPabilities-container">
+            {Object.keys(data).map((category) =>
+                data[category].map((ability, index) => {
+                    const isExpanded = expandedAbility === ability.Name;
+                    return (
+                        <Ability
+                            key={`${category}-${index}`}
+                            title={ability.Name}
+                            desc={ability.Description}
+                            extra={ability.Extra_Description}
+                            usage={ability.Usage}
+                            onClick={() => handleAbilityClick(ability.Name)}
+                            onClose={handleClose}
+                            isExpanded={isExpanded}
+                        />
+                    );
+                })
+            )}
+        </div>
+    );
+};
 
 const HowToPlay: React.FC = () => {
     return (
         <div className="scrollable-container">
             <h1>How To Play</h1>
-            <div className="space">
-                <h2>Main Idea</h2>
-            </div>
-            <div className="space">
-                This game is a real-time variation of the classic board game
-                Risk, with some other twists. It's built around graph theory,
-                and so rather than countries there are nodes, and instead of
-                borders between countries (determining who can attack who),
-                there are edges connecting nodes. The real time aspect is
-                distinctly demonstrated in two ways. Firstly, rather than
-                placing your troops at the beginning of each turn in select
-                territories (as you would in Risk), each territory you own
-                naturally grows at a constant rate, without any action. The
-                game-term for this naturally growing resource is energy, shown
-                visually through each nodes' size. Secondly, attacking, and
-                additionally the reallocating of energy happens in real time all
-                over the map: Each edge is directional, and can be turned on or
-                off (this state being determined by the owner of the
-                "from-node"). A turned on edge connecting two teammate nodes
-                ("teammate nodes" as in that they are the same color (have the
-                same owner)) will transfer energy from one node to the other in
-                the direction it points. A turned on edge connecting two
-                opposing nodes will remove energy at an equal rate from both
-                nodes. If the attacked node (the node the edge points toward)
-                loses all its energy before the atacking ndoe, then ownership of
-                the attacked node transfers to the attacker (it takes on the
-                attacking nodes color. This mechanic is identical to Risk).
-                Nodes continue growing and energy continually transfers along
-                edges throughout the game until only one player still having
-                nodes of their color remains.
-            </div>
-            <div className="space">
-                The main other twist is abilities! Each player is given 15
-                credits at the beginning of the game to select a set of
-                abilities from the ability menu. Each ability has a cost (in
-                credits) as well as a reload time to limit immediate repeated
-                usage in-game. At the bottom is a description of each ability.
-            </div>
-            <div className="space">
-                <h2>Phases and Ending</h2>
-            </div>
-            <div className="space">
-                The game is broken up into 3 main phases. First, start
-                selection. Each player chooses one starting spot. Then there is
-                the main part, as described in detail above. If no one wins in
-                that time, the end-game phase begins. The end-game phase is
-                still being experimented with but currently two things happen:
+            <section className="space">
+                <h2>Welcome to the game!</h2>
+                <p>
+                    This real-time strategy game is a thrilling twist on the classic board game Risk, built around the principles of graph theory. Here’s how to dive in and start playing:
+                </p>
+            </section>
+            <section className="space">
+                <h2>Game Overview</h2>
                 <ul>
                     <li>
-                        Growth stops. Nodes naturally stay at their current
-                        energy.
+                        <strong>Nodes and Edges:</strong> Instead of countries, you'll control nodes, and instead of borders, nodes are connected by edges. These edges determine the flow of energy and attacks.
                     </li>
                     <li>
-                        Free attacking. Attacking an opponents node costs you no
-                        energy The goal of these changes is too stop
-                        progression, and allow the current winner to snowball.
-                        If still no player has won after the timer for end-game
-                        phase completes, then the winner is determined by which
-                        player owns the most nodes.
+                        <strong>Energy Growth:</strong> Each node you own generates energy at a constant rate automatically. This energy is visually represented by the size of the nodes.
+                    </li>
+                    <li>
+                        <strong>Real-Time Actions:</strong> Both attacking and reallocating energy occur in real time across the map.
                     </li>
                 </ul>
-            </div>
-            <div className="space">
-                <h2>Other Tidbits of Information</h2>
-            </div>
-            <div className="space">
+            </section>
+            <section className="space">
+                <h2>Gameplay Mechanics</h2>
+                <h3>1. Energy Growth</h3>
                 <ul>
-                    <li>
-                        The board is randomly generated, and has approximately
-                        60 nodes and 80 edges.
-                    </li>
-                    <li>
-                        Nodes can be full. At that point they no longer
-                        naturally gain energy. This means you shouldn't let
-                        nodes be full unless neccessary.
-                    </li>
-                    <li>
-                        Many of the edges are in fact dynamic, meaning they can
-                        change the direction they point in. When between
-                        teammate nodes, the owner can swap their direction. When
-                        between opponent nodes they automatically point in favor
-                        of (away from) the larger node. However if both nodes
-                        are full, both players can turn it on and it will swap
-                        in their favor.
-                    </li>
-                    <li>
-                        Players start by choosing one random start point.
-                        Everything else comes from natural energy growth and
-                        transferring, and abilities.
-                    </li>
-                    <li>
-                        The map starts with 3 capital states, these can be
-                        captured and afford the owning player certain
-                        capabilties. Capitals are just one of multiple other
-                        'states' nodes can be in (usually as a result of
-                        abilities, as explored further below)
-                    </li>
-                    <li>
-                        The main win condition requires removing all other
-                        players from the map, but this can be tedious and so
-                        they can forfeit at any point once they're confident
-                        they've lost. However a secondary win condition exists
-                        in owning 3 full capitals.
-                    </li>
-                    <li>
-                        Every other node is randomly determined to be a
-                        port-node. Port-nodes affect certain interactions with
-                        specific abilities.
-                    </li>
+                    <li>Nodes you control will naturally grow in energy over time without any action needed from you.</li>
+                    <li>The growth rate is constant and contributes to the node's size, indicating its energy level.</li>
                 </ul>
-            </div>
-            <div className="space">
-                <h2>Ability Breakdown</h2>
-            </div>
-            <div className="space">
-                <h4>1 credit</h4>
+                <h3>2. Attacking and Energy Transfer</h3>
                 <ul>
-                    <li>
-                        Spawn: Choose an an unowned node anywhere and claim it.
-                        Identical to choosing a node to start the game.
-                    </li>
-                    <li>
-                        Freeze: Make a dynamic-edge directional. Effectively
-                        stops an opponent from attacking you through that edge,
-                        while still keeping it open for your use from the other
-                        side.
-                    </li>
-                    <li>
-                        Burn: Make a port node into a standard node (remove its
-                        ports).
-                    </li>
-                    <li>
-                        Zombie: Make a node you own into an unowned wall (Zombie
-                        State). It automatically is set to 200 energy, but all
-                        energy transferred into it is halved (affectively
-                        requires 400 energy to be recaptured by a player).
-                    </li>
+                    <li><strong>Directional Edges:</strong> Each edge connecting nodes is directional and can be turned on or off by the owner of the "from-node".</li>
+                    <li><strong>Energy Transfer Between Teammate Nodes:</strong> If an edge is turned on between two nodes you own (same color), energy will transfer in the direction the edge points.</li>
+                    <li><strong>Attacking Opponent Nodes:</strong> If an edge is turned on between your node and an opponent's node, energy will be deducted equally from both nodes.</li>
+                    <li><strong>Node Capture:</strong> If the attacked node’s energy drops to zero before the attacking node’s energy, the attacked node changes ownership to the attacker, adopting the attacker's color.</li>
                 </ul>
-                <h4>2 credits</h4>
-                <ul>
-                    <li>
-                        Bridge: The quintessential ability. Make a new edge
-                        between two port-nodes so long as it doesn't overlap any
-                        other edge.
-                    </li>
-                    <li>
-                        D-Bridge: Just a dynamic edge. Has its pros and cons.
-                    </li>
-                    <li>
-                        Rage: All nodes you own transfer energy at 2.5 times the
-                        rate. Meant for a rush-esque play.
-                    </li>
-                    <li>
-                        Poison: Choose an edge directly extending from a node
-                        you own. A poison is then sent to the opposing node.
-                        That poison then recurisvely spreads along all edges
-                        that are on. A poisoned node shrinks (loses energy) at
-                        the rate a normal node grows. This happens for 20
-                        seconds.
-                    </li>
-                </ul>
-                <h4>3 credits</h4>
-                <ul>
-                    <li>
-                        Nuke: Deletes a node, and all its connecting edges from
-                        the map. To use Nuke, the node selected must be within a
-                        certain perimeter outside a capital the said player
-                        controls.
-                    </li>
-                    <li>
-                        Capital: Turn any full node you own into a capital. It
-                        then immediately shrinks entirely, and then ceases to
-                        grow naturally, instead relying on transferred in
-                        energy. Capitals have a few usages. They cannot be
-                        poisoned or nuked, enable using Nukes (as explained
-                        above), be built to with a bridge, and most importantly
-                        act as a win condition. If a capital is ever captured,
-                        it returns to a normal node.
-                    </li>
-                    <li>
-                        Cannon: Placed on any node you own. That node can then
-                        shoot its energy anywhere onto the map. Can be used to
-                        capture unclaimed nodes, transfer energy to a teammate
-                        node in need, or to attack a node far away. If a cannon
-                        is ever captured, unlike capital, the capturing player
-                        now has access to the cannon.
-                    </li>
-                    <li>Pump: Placed on any node you own. Pump nodes stop naturally 
-                        growing similar to capitals. Transferring into them is also 
-                        halved, similar to Zombie. Once full, a pump can be drained 
-                        (clicked) and it then allows the player to replenish an ability 
-                        of their choice. One can either get two more 1-credit abilities, 
-                        or one singular 2-credit ability. You cannot replenish 3-credit 
-                        abilities.</li>
-                </ul>
-            </div>
-            <div className="space">
-                <h1>FAQ</h1>
-                Difference between lightly colored and darkly colored edges?
-                Lightly colored just means it's on but can't flow for 1 of 2
-                reasons:
-                <ul>
-                    <li>The from_node is too small</li>
-                    <li>
-                        The to_node is full (full nodes have a black outer ring.
-                        They cannot grow or intake energy) Clicking an edge
-                        turns it on or off. Flow can only happen when on
-                    </li>
-                </ul>
-            </div>
-            <div className="space">
-                <h1>Got Ideas?</h1>
-                Reach out pal I'd love to hear it. Still lots of ideas in
-                progess.
-            </div>
+                <p>Nodes continue to grow and transfer energy throughout the game until only one player remains with nodes of their color.</p>
+            </section>
+            <section className="space">
+                <h2>Abilities</h2>
+                <p>In addition to the basic gameplay mechanics, you can use abilities to gain an advantage over your opponents. Here are some of the abilities you can use:</p>
+                <AbilitiesList data={data} />
+            </section>
         </div>
     );
 };
