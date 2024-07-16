@@ -5,9 +5,8 @@
     font-family: "JetBrains Mono", monospace;
 }
 #app {
-    margin-top: 158px;  /* Same as the navbar height */
+    margin-top: 158px; /* Same as the navbar height */
 }
-
 
 .required {
     color: red;
@@ -35,7 +34,7 @@
 }
 
 body {
-    background-image: url("../images/AI\ background\ 1.png");
+    background-image: url("../public/assets/images/AI_background_1.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -145,7 +144,7 @@ input::placeholder {
 }
 
 .whiteText {
-    color: white
+    color: white;
 }
 
 .btn:hover {
@@ -440,17 +439,17 @@ ul {
 
 .leaderboard-item {
     display: flex;
-    align-items: center;  /* Vertically centers the items in the line */
-    justify-content: start;  /* Aligns items to the start of the flex container */
+    align-items: center; /* Vertically centers the items in the line */
+    justify-content: start; /* Aligns items to the start of the flex container */
     margin-bottom: 10px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
-    width: 100%;  /* Ensures the item stretches to the full width of its container */
+    width: 100%; /* Ensures the item stretches to the full width of its container */
 }
 
 .rank-icon {
-    margin-right: 10px;  /* Provides spacing between the medal and the username */
+    margin-right: 10px; /* Provides spacing between the medal and the username */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -469,14 +468,13 @@ ul {
 }
 
 .player-name {
-    flex-grow: 1;  /* Allows the username to take up any extra space */
-    margin-right: 20px;  /* Provides spacing between the username and the score */
+    flex-grow: 1; /* Allows the username to take up any extra space */
+    margin-right: 20px; /* Provides spacing between the username and the score */
 }
 
 .player-score {
     font-weight: bold;
 }
-
 
 .leaderboard-item .rank-icon .rank-1 {
     background-color: gold;
@@ -515,14 +513,15 @@ ul {
 }
 
 .popup button {
-    width: auto; /* Adjust width to fit content */
+    width: 30%;
     margin-top: 20px;
-    padding: 12px 20px; 
+    padding: 12px 20px;
     background-color: #e81e1e;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .popup button:hover {
@@ -795,3 +794,4 @@ ul {
 .btn-cancel:hover {
     background: rgb(32, 32, 32);
 }
+
