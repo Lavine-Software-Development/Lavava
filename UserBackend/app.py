@@ -445,7 +445,7 @@ def save_deck(current_user):
                 current_cards.pop(ability['name'])
             else:
                 # Add new card
-                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=description)
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=ability['description'])
                 db.session.add(new_card)
 
         # Remove cards not in the new deck

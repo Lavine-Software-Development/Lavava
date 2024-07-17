@@ -5,6 +5,7 @@ import {
     MINIMUM_TRANSFER_VALUE,
     EventCodes,
     NUKE_RANGE,
+    MINI_BRIDGE_RANGE,
 } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./node";
@@ -223,7 +224,7 @@ function newEdgeValidator(
                 node2.pos.x,
                 node2.pos.y
             );
-            return distance <= 100;
+            return distance <= MINI_BRIDGE_RANGE * 300;
         } else {
             return false;
         }

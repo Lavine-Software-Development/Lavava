@@ -11,7 +11,8 @@ import {
     AbilityCredits,
     AbilityReloadTimes,
     NUKE_RANGE,
-    PlayerColors, 
+    PlayerColors,
+    MINI_BRIDGE_RANGE, 
 } from "../objects/constants";
 import { PlayerStateEnum as PSE, GameStateEnum as GSE} from "../objects/enums";
 import { ReloadAbility } from "../objects/ReloadAbility";
@@ -295,8 +296,16 @@ export class MainScene extends Scene {
             const highlightedNode = this.highlight.item as Node;
             this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
             this.graphics.strokeCircle(highlightedNode.pos.x, highlightedNode.pos.y, (highlightedNode.value * NUKE_RANGE));
-        // } else if 
+        } else if (this.highlight.usage == KeyCodes.MINI_BRIDGE_CODE && this.abilityManager.clicks.length == 0)  {
+            const node = this.highlight.item as Node;
+            this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
+            this.graphics.strokeCircle(node.pos.x, node.pos.y, MINI_BRIDGE_RANGE * 300);
+        } else if (this.abilityManager.getMode() == KeyCodes.MINI_BRIDGE_CODE && this.abilityManager.clicks.length > 0) {
+            const node = this.abilityManager.clicks[0] as Node;
+            this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
+            this.graphics.strokeCircle(node.pos.x, node.pos.y, MINI_BRIDGE_RANGE * 300);
         }
+        
     }
 
     tick(): void {

@@ -12,7 +12,7 @@ export class AbstractAbilityManager {
     private events: { [key: number]: Event };
     private mode: number | null = null;
     private backupMode: number | null = null;
-    private clicks: IDItem[] = [];
+    clicks: IDItem[] = [];
     abilityText: Phaser.GameObjects.Text;
     BridgeGraphics: Phaser.GameObjects.Graphics;
 
