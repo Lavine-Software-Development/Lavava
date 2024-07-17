@@ -236,7 +236,7 @@ export class AbstractAbilityManager {
         if (this.ability) {
             this.abilityText.setText( this.ability.visual.name);
             if (
-                (this.ability?.visual.name == "Bridge" || this.ability?.visual.name == "D-Bridge") &&
+                (this.ability?.visual.name == "Bridge" || this.ability?.visual.name == "D-Bridge" || this.ability?.visual.name == "Mini-Bridge") &&
                 this.clicks.length > 0
             ) {
                 this.drawBridge(scene);   
@@ -267,7 +267,7 @@ export class AbstractAbilityManager {
 
         const normX = dx / magnitude;
         const normY = dy / magnitude;
-        if (this.ability?.visual.name == "D-Bridge") {
+        if (this.ability?.visual.name == "D-Bridge" || this.ability?.visual.name == "Mini-Bridge") {
             this.drawArrowWithCircles(startX, startY, normX, normY, magnitude, phaserColor(Colors.YELLOW));
         }
         else {

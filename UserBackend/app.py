@@ -535,10 +535,15 @@ def get_abilities():
             "cost": 2,
             "description": "Increase energy transfer speed"
         },
+        # {
+        #     "name": "D-Bridge", 
+        #     "cost": 2,
+        #     "description": "Create a two-way bridge"
+        # },
         {
-            "name": "D-Bridge", 
-            "cost": 2,
-            "description": "Create a two-way bridge"
+            "name": "Mini-Bridge", 
+            "cost": 1,
+            "description": "Create a two-way bridge with limited range"
         },
         {
             "name": "Bridge", 

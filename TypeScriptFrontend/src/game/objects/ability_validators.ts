@@ -213,18 +213,25 @@ function newEdgeValidator(
 
     // Check if the nodes are within the range of a mini bridge
     const checkMiniBridgeRange = (nodes: Node[]): boolean => {
-        const [node1, node2] = nodes;
-        const distance = Phaser.Math.Distance.Between(
-            node1.pos.x,
-            node1.pos.y,
-            node2.pos.x,
-            node2.pos.y
-        );
-        return distance <= 100;
+        if (nodes.length === 1) {
+            return true;
+        } else if (nodes.length === 2) {
+            const [node1, node2] = nodes;
+            const distance = Phaser.Math.Distance.Between(
+                node1.pos.x,
+                node1.pos.y,
+                node2.pos.x,
+                node2.pos.y
+            );
+            return distance <= 100;
+        } else {
+            return false;
+        }
     };
     
     const miniBridgeValidator = (data: IDItem[]): boolean => {
         const nodes = data as Node[];
+        
         return (
             checkMiniBridgeRange(nodes) &&
             fullSizeEdgeValidator(nodes)

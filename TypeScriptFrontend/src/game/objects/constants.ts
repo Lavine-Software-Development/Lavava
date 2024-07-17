@@ -82,6 +82,7 @@ export const NameToCode = {
     "Capital": KeyCodes.CAPITAL_CODE,
     "Cannon": KeyCodes.CANNON_CODE,
     "Pump": KeyCodes.PUMP_CODE,
+    "Mini-Bridge": KeyCodes.MINI_BRIDGE_CODE,
 };
 
 

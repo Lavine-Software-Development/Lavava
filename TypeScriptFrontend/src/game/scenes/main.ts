@@ -104,6 +104,7 @@ export class MainScene extends Scene {
         this.load.image("Cannon", "Cannon.png");
         this.load.image("Capital", "Capital.png");
         this.load.image("D-Bridge", "D-Bridge.png");
+        this.load.image("Mini-Bridge", "D-Bridge.png");
         this.load.image("Freeze", "Freeze.png");
         this.load.image("Nuke", "Nuke.png");
         this.load.image("Poison", "Poison.png");
@@ -294,6 +295,7 @@ export class MainScene extends Scene {
             const highlightedNode = this.highlight.item as Node;
             this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
             this.graphics.strokeCircle(highlightedNode.pos.x, highlightedNode.pos.y, (highlightedNode.value * NUKE_RANGE));
+        // } else if 
         }
     }
 
