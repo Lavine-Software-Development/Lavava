@@ -26,7 +26,7 @@ If there are any issues where you need to restart the servers, ssh into the appr
 
 ```
 sudo docker stop user-backend && sudo docker rm user-backend
-docker run -p 5001:5001 --name userbackend akashilangovan/userbackend
+sudo docker run -p 5001:5001 --name userbackend akashilangovan/userbackend
 ```
 
 or
@@ -51,5 +51,5 @@ Go to the directory of the server you want to deploy and change the names accord
 ```
 docker build -t userbackend .
 docker tag userbackend akashilangovan/userbackend
-docker tag akashilangovan/userbackend
+docker push akashilangovan/userbackend
 ```
