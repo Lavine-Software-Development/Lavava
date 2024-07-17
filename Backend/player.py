@@ -32,6 +32,8 @@ class DefaultPlayer(JsonableTick):
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
             self.abilities[key].use(data)
+        else:
+            print("failed to use ability, ", key)
 
     def default_values(self):
         self.count = 0

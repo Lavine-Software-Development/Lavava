@@ -509,6 +509,7 @@ def get_abilities():
             "name": "Freeze", 
             "cost": 1,
             "description": "Convert edge to one-way"
+            
         },
         {
             "name": "Spawn", 
@@ -557,7 +558,7 @@ def get_abilities():
         },
         {
             "name": "Cannon", 
-            "cost": 3,
+            "cost": 4,
             "description": "Shoot energy at nodes"
         },
         {

@@ -113,7 +113,7 @@ class WebSocketServer():
                         # await websocket.send(json.dumps({"action": "player_left"}))
                 else:
                     print("Player has left, but key remains, this should only happen once st most per player")
-                    
+            batch.post_tick()
 
             await asyncio.sleep(0.1)
         
