@@ -573,6 +573,7 @@ ul {
 .custom-button:hover::after, .ability-button:hover::after {
     opacity: 1;
     visibility: visible; /* Show the tooltip on hover */
+    transition-delay: 1s;
 }
 
 .start-fresh-button {
@@ -796,15 +797,22 @@ ul {
     background: rgb(32, 32, 32);
 }
 
-.click-instructions p {
+.click-instructions {
     display: inline-flex;
     align-items: center;
-    gap: 10px; /* Adjust the gap as needed */
-    font-size: 0.9em;
+    gap: 2em; /* Add gap between spans */
+}
+
+.click-instructions span {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8em;
+    margin-top: 1em;
 }
 
 .click-icon {
-    width: 16px; /* Adjust the size as needed */
-    height: 16px; /* Adjust the size as needed */
-    margin-right: 5px; /* Adjust the spacing as needed */
+    width: 1.2em;
+    height: auto;
+    margin-right: 10px; /* Adjust the spacing as needed */
+    margin-left: 10px;  
 }
