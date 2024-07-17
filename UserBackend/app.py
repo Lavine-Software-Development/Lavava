@@ -56,7 +56,6 @@ if config.DB_CONNECTED:
         deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=False)
         ability = db.Column(db.String(50), nullable=False)
         count = db.Column(db.Integer, nullable=False)
-        description = db.Column(db.String(100), default = "")
 
         def __init__(self, deck_id, ability, count):
             self.deck_id = deck_id
@@ -447,7 +446,7 @@ def save_deck(current_user):
                 current_cards.pop(ability['name'])
             else:
                 # Add new card
-                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=ability['description'])
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=description)
                 db.session.add(new_card)
 
         # Remove cards not in the new deck
