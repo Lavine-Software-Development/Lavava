@@ -627,26 +627,18 @@ def get_leaderboard():
 
 @app.route('/user/<string:username>', methods=['GET'])
 def get_user_details(username):
-    print(f"Fetching details for user: {username}")
     if not config.DB_CONNECTED:
-        print("Database not connected")
         return jsonify({"error": "Database not connected"}), 500
 
     try:
         user = User.query.filter_by(username=username).first()
         if not user:
-            print(f"No user found with username: {username}")
             return jsonify({"error": "User not found"}), 404
-
-        print(f"User found: {user.username}, {user.display_name}, {user.elo}")
         
         deck = Deck.query.filter_by(user_id=user.id).first()
         deck_cards = []
         if deck:
             deck_cards = DeckCard.query.filter_by(deck_id=deck.id).all()
-            print(f"Deck found with {len(deck_cards)} cards")
-        else:
-            print("No deck found for user")
         
         response = {
             "username": user.username,
@@ -654,10 +646,8 @@ def get_user_details(username):
             "elo": user.elo,
             "deck": [{"name": card.ability, "count": card.count} for card in deck_cards]
         }
-        print(f"Sending response: {response}")
         return jsonify(response)
     except Exception as e:
-        print(f"Error occurred: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
