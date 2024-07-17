@@ -129,27 +129,16 @@ class Node(JsonableTracked):
 
     def tick(self):
         self.value += self.grow()
-        self.effects_update()
+        self.effects_update(lambda effect: effect.count())
 
     def grow(self):
         return self.state.grow()
 
-    def effects_update(self):
-
-        removed_effects = self.effects_tick()
-
-        if removed_effects:
+    def effects_update(self, condition_func):
+        original_length = len(self.effects)
+        self.effects = {key: effect for key, effect in self.effects.items() if condition_func(effect)}
+        if len(self.effects) < original_length:
             self.calculate_interactions()
-    
-    def effects_tick(self):
-        effects_to_remove = [key for key, effect in self.effects.items() if not effect.count()]
-        if effects_to_remove:
-            copied = self.effects.copy()
-            for key in effects_to_remove:
-                copied.pop(key)
-            self.effects = copied
-            return True
-        return False
 
     def delivery(self, amount, player):
         self.value += self.state.intake(amount, player)
@@ -185,6 +174,7 @@ class Node(JsonableTracked):
         self.expand()
         if self.state.reset_on_capture:
             self.set_default_state()
+        self.effects_update(lambda effect: effect.capture_removal(player))
 
     def absorbing(self):
         for edge in self.incoming:
