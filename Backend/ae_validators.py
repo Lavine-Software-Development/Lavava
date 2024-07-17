@@ -1,5 +1,5 @@
 from math import dist
-from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
+from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINI_BRIDGE_RANGE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
 
 
 def no_click(data):
@@ -138,7 +138,7 @@ def make_new_edge_ports(check_new_edge, player):
     def check_mini_bridge_range(data):
         first_node, second_node = data
         distance = dist(first_node.pos, second_node.pos)
-        return distance <= 100  # Adjust the range as needed
+        return distance <= MINI_BRIDGE_RANGE  # Adjust the range as needed
 
     def mini_bridge_validator(data):
         return check_mini_bridge_range(data) and new_edge_ports(data)

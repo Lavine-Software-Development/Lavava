@@ -299,11 +299,11 @@ export class MainScene extends Scene {
         } else if (this.highlight.usage == KeyCodes.MINI_BRIDGE_CODE && this.abilityManager.clicks.length == 0)  {
             const node = this.highlight.item as Node;
             this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
-            this.graphics.strokeCircle(node.pos.x, node.pos.y, MINI_BRIDGE_RANGE * 300);
+            this.graphics.strokeCircle(node.pos.x, node.pos.y, MINI_BRIDGE_RANGE);
         } else if (this.abilityManager.getMode() == KeyCodes.MINI_BRIDGE_CODE && this.abilityManager.clicks.length > 0) {
             const node = this.abilityManager.clicks[0] as Node;
             this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
-            this.graphics.strokeCircle(node.pos.x, node.pos.y, MINI_BRIDGE_RANGE * 300);
+            this.graphics.strokeCircle(node.pos.x, node.pos.y, MINI_BRIDGE_RANGE);
         }
         
     }

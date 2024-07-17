@@ -224,7 +224,7 @@ function newEdgeValidator(
                 node2.pos.x,
                 node2.pos.y
             );
-            return distance <= MINI_BRIDGE_RANGE * 300;
+            return distance <= MINI_BRIDGE_RANGE;
         } else {
             return false;
         }
