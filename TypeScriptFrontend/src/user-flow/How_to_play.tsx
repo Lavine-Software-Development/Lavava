@@ -6,16 +6,34 @@ type AbilityProps = {
     desc: string;
     extra: string;
     usage: string;
+    image: string;
     onClick: () => void;
     onClose: () => void;
     isExpanded: boolean;
 };
+
+const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, image, onClick, onClose, isExpanded }) => (
+    <div className={`HtPability-window ${isExpanded ? "expanded" : ""}`} onClick={!isExpanded ? onClick : undefined}>
+        {isExpanded && <button className="HtPclose-button" onClick={onClose}>×</button>}
+        <h1>{title}</h1>
+        {!isExpanded && <img src={image} alt={title} className="ability-image" />}
+        {isExpanded && (
+            <>
+                <img src={image} alt={title} className="ability-image" />
+                <h2>{desc}</h2>
+                <h3>{usage}</h3>
+                <p>{extra}</p>
+            </>
+        )}
+    </div>
+);
 
 type AbilityData = {
     Name: string;
     Description: string;
     Extra_Description: string;
     Usage: string;
+    Image: string;
 };
 
 type DataStructure = {
@@ -28,25 +46,29 @@ const data: DataStructure = {
             Name: "Spawn",
             Description: "Claim an unclaimed node",
             Extra_Description: "Starting energy for a spawned node is 5",
-            Usage: "Click on the node you want to spawn on."
+            Usage: "Click on the node you want to spawn on.",
+            Image: "/assets/abilityIcons/Spawn.png"
         },
         {
             Name: "Freeze",
             Description: "Make a dynamic edge directional",
             Extra_Description: "It'll swap and freeze in your advantage",
-            Usage: "Click on the dynamic edge you want to freeze."
+            Usage: "Click on the dynamic edge you want to freeze.",
+            Image: "/assets/abilityIcons/Freeze.png"
         },
         {
             Name: "Burn",
             Description: "Convert a port node into a standard node",
             Extra_Description: "Not sure what to put here",
-            Usage: "Click on the port node you want to burn."
+            Usage: "Click on the port node you want to burn.",
+            Image: "/assets/abilityIcons/Burn.png"
         },
         {
             Name: "Zombie",
-            Description: "Turn a node you own into a Zombie State, making it harder to capture.",
+            Description: "Turn a node you own into a Zombie State.",
             Extra_Description: "Not sure what to put here",
-            Usage: "Click on the node you want to turn into a Zombie State."
+            Usage: "Click on the node you want to turn into a Zombie State.",
+            Image: "/assets/abilityIcons/Zombie.png"
         }
     ],
     "2 Credit Abilities": [
@@ -54,25 +76,29 @@ const data: DataStructure = {
             Name: "Bridge",
             Description: "Create an edge between two port-nodes",
             Extra_Description: "Not sure what to put here",
-            Usage: "Click on the first node you want to bridge, then click on the second node you want to bridge to."
+            Usage: "Click on the first node you want to bridge, then click on the second node you want to bridge to.",
+            Image: "/assets/abilityIcons/Bridge.png"
         },
         {
             Name: "D-Bridge",
             Description: "Create a directional edge between two port-nodes",
             Extra_Description: "Not sure what to put here",
-            Usage: "Click on the first node you want to D-Bridge, then click on the second node you want to D-Bridge to."
+            Usage: "Click on the first node you want to D-Bridge, then click on the second node you want to D-Bridge to.",
+            Image: "/assets/abilityIcons/D-Bridge.png"
         },
         {
             Name: "Rage",
             Description: "Increase energy transfer rate from your nodes by 2.5 times.",
             Extra_Description: "Not sure what to put here",
-            Usage: "Once clicked, all nodes you own will be enraged for the next 10 seconds."
+            Usage: "Once clicked, all nodes you own will be enraged for the next 10 seconds.",
+            Image: "/assets/abilityIcons/Rage.png"
         },
         {
             Name: "Poison",
-            Description: "Send poison along edges, causing affected nodes to lose energy over 20 seconds.",
+            Description: "Send poison along edges, edge loses energy over 20 seconds.",
             Extra_Description: "Not sure what to put here",
-            Usage: ""
+            Usage: "",
+            Image: "/assets/abilityIcons/Poison.png"
         }
     ],
     "3 Credit Abilities": [
@@ -80,42 +106,32 @@ const data: DataStructure = {
             Name: "Nuke",
             Description: "Destroy all nodes in designated area surrounding the users capital node",
             Extra_Description: "Not sure what to put here",
-            Usage: "Click on the node you want to nuke from. It cannot have a structure built on it."
+            Usage: "Click on the node you want to nuke from. It cannot have a structure built on it.",
+            Image: "/assets/abilityIcons/Nuke.png"
         },
         {
             Name: "Capital",
-            Description: "Turn a full node into a capital, changing its energy dynamics and acting as a win condition.",
+            Description: "Turn a full node into a capital.",
             Extra_Description: "Not sure what to put here",
-            Usage: "Click on the node you want to turn into a capital. It cannot have a structure already built on it."
+            Usage: "Click on the node you want to turn into a capital. It cannot have a structure already built on it.",
+            Image: "/assets/abilityIcons/Capital.png"
         },
         {
             Name: "Cannon",
             Description: "Fire a cannonball at an enemy node, dealing damage and reducing energy.",
             Extra_Description: "Not sure what to put here",
-            Usage: "Click on one of your own nodes you want a cannon to be built on, then click on the enemy node you want to fire at."
+            Usage: "Click on one of your own nodes you want a cannon to be built on, then click on the enemy node you want to fire at.",
+            Image: "/assets/abilityIcons/Cannon.png"
         },
         {
             Name: "Pump",
             Description: "Place on a node to replenish abilities once fully charged.",
             Extra_Description: "Not sure what to put here",
-            Usage: "Click on the node you want the pump to be placed on. It cannot have a structure already built on it."
+            Usage: "Click on the node you want the pump to be placed on. It cannot have a structure already built on it.",
+            Image: "/assets/abilityIcons/Pump.png"
         }
     ]
 };
-
-const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, onClick, onClose, isExpanded }) => (
-    <div className={`HtPability-window ${isExpanded ? "expanded" : ""}`} onClick={!isExpanded ? onClick : undefined}>
-        {isExpanded && <button className="HtPclose-button" onClick={onClose}>×</button>}
-        <h1>{title}</h1>
-        <h2>{desc}</h2>
-        {isExpanded && (
-            <>
-                <h3>{usage}</h3>
-                <p>{extra}</p>
-            </>
-        )}
-    </div>
-);
 
 const AbilitiesList: React.FC<{ data: DataStructure }> = ({ data }) => {
     const [expandedAbility, setExpandedAbility] = useState<string | null>(null);
@@ -140,6 +156,7 @@ const AbilitiesList: React.FC<{ data: DataStructure }> = ({ data }) => {
                             desc={ability.Description}
                             extra={ability.Extra_Description}
                             usage={ability.Usage}
+                            image={ability.Image}
                             onClick={() => handleAbilityClick(ability.Name)}
                             onClose={handleClose}
                             isExpanded={isExpanded}

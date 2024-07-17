@@ -819,18 +819,25 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    align-items: flex-start;
+    padding-top: 15px;
+
+    
 }
 
 .HtPability-window {
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 15px;
-    width: calc(33.333% - 20px);
+    width: 20%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: #fff;
     transition: transform 0.2s, width 0.2s, height 0.2s;
     cursor: pointer;
     text-align: center;
+    flex: 1 0 auto;
+    min-height: 200px;
+    
 }
 
 .HtPability-window h1 {
@@ -840,32 +847,30 @@ body {
 }
 
 .HtPability-window h2 {
-    font-size: 1.2em;
+    font-size: 1em;
     margin-bottom: 8px;
     color: #666;
 }
 
 .HtPability-window h3 {
-    font-size: 1em;
+    font-size: 0.9em;
     margin-bottom: 6px;
     color: #999;
 }
 
 .HtPability-window p {
-    font-size: 0.9em;
+    font-size: 0.8em;
     color: #666;
 }
 
 .HtPability-window.expanded {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    height: auto;
-    z-index: 1000;
+    transform: scale(1); 
+    z-index: 1000; 
+    width: calc(35% - 20px); 
+    height: auto; 
     text-align: center;
 }
+
 
 .HtPoverlay {
     position: fixed;
@@ -882,6 +887,11 @@ body {
     display: block;
 }
 
+.HtPability-window:hover {
+    transform: scale(1.05); 
+    z-index: 10; 
+}
+
 .HtPclose-button {
     position: absolute;
     top: 10px;
@@ -895,4 +905,12 @@ body {
 
 .HtPclose-button:hover {
     color: #333;
+}
+
+.ability-image {
+    width: 75px;  
+    height: auto;
+    margin: 10px 0;
+    align-self: center;
+
 }
