@@ -465,8 +465,6 @@ export class MainScene extends Scene {
     initialize_data(): void {
 
         this.ratio = [this.sys.game.config.width as number / 1000, this.sys.game.config.height as number / 700];
-        console.log(this.ratio);
-        console.log("that was the ratio");
 
         let startData = this.board;
         const pi = Number(startData.player_id.toString());
