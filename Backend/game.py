@@ -44,9 +44,7 @@ class ServerGame(JsonableTick):
                 return False
         else:  
             new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
-            print("sign")
             player.use_ability(key, new_data)
-            print("huh")
         
     def event(self, key, player_id, data):
         player = self.player_dict[player_id]

@@ -69,7 +69,7 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
     return true;
 };
 
-function attackValidators(nodes: Node[], player: OtherPlayer) {
+function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number]) {
     return function capitalRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
         const capitals = nodes.filter(
@@ -77,11 +77,18 @@ function attackValidators(nodes: Node[], player: OtherPlayer) {
         );
 
         const inCapitalRange = (capital: Node): boolean => {
+            const [ratioX, ratioY] = ratio;
             const { x: x1, y: y1 } = node.pos;
             const { x: x2, y: y2 } = capital.pos;
-            const distance = (x1 - x2) ** 2 + (y1 - y2) ** 2;
+            
+            // Scale the distance calculation
+            const scaledDx = (x1 - x2) / ratioX;
+            const scaledDy = (y1 - y2) / ratioY;
+            
+            const scaledDistance = scaledDx ** 2 + scaledDy ** 2;
             const capitalNukeRange = (NUKE_RANGE * capital.value) ** 2;
-            return distance <= capitalNukeRange;
+            
+            return scaledDistance <= capitalNukeRange;
         };
 
         return (
@@ -214,6 +221,7 @@ function newEdgeValidator(
 
 export function makeAbilityValidators(
     player: OtherPlayer,
+    ratio: [number, number],
     nodes: Node[],
     edges: Edge[]
 ): { [key: string]: ValidatorFunc } {
@@ -224,7 +232,7 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
-        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player),
+        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player, ratio),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`

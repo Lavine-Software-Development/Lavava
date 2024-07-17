@@ -64,6 +64,7 @@ export class MainScene extends Scene {
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
+    private ratio: [number, number];
 
     private rainbowColors: string[] = [
         '#B8860B',  // Dark Goldenrod
@@ -159,6 +160,7 @@ export class MainScene extends Scene {
         const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
         const ab = makeAbilityValidators(
             this.mainPlayer,
+            this.ratio,
             Object.values(this.nodes),
             Object.values(this.edges)
         );
@@ -269,31 +271,39 @@ export class MainScene extends Scene {
         }
     }
 
+
+    private drawScaledCircle(node: Node, radius: number, color: readonly [number, number, number]): void {
+        const [ratioX, ratioY] = this.ratio;
+        this.graphics.lineStyle(3, phaserColor(color), 1);
+    
+        // Draw the ellipse, scaling it appropriately
+        this.graphics.strokeEllipse(
+            node.pos.x,
+            node.pos.y,
+            radius * 2 * ratioX, // radus * 2 to get diameter
+            radius * 2 * ratioY
+        );
+    }
+
     update(): void {
         this.graphics.clear();
         this.abilityManager.draw(this);
     
         // Iterate over the values of the dictionary to draw each node
     
-        if (this.abilityManager.getMode() == KeyCodes.NUKE_CODE) {
-            // Filter the dictionary values to find the capitals
+        if (this.abilityManager.getMode() === KeyCodes.NUKE_CODE) {
             const capitals = Object.values(this.nodes).filter(
                 (node) =>
                     node.stateName === "capital" &&
                     node.owner === this.mainPlayer
             );
-    
-            // For each node in capitals, draw a pink hollow circle on the node of the size of its this.value
-            capitals.forEach((node) => {
-                this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
-                this.graphics.strokeCircle(node.pos.x, node.pos.y, (node.value * NUKE_RANGE));
-            });
 
+            capitals.forEach((node) => {
+                this.drawScaledCircle(node, node.value * NUKE_RANGE, Colors.PINK);
+            });
         } else if (this.highlight.usage == KeyCodes.CAPITAL_CODE) {
-            // Draw a pink hollow circle around the highlighted node
             const highlightedNode = this.highlight.item as Node;
-            this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
-            this.graphics.strokeCircle(highlightedNode.pos.x, highlightedNode.pos.y, (highlightedNode.value * NUKE_RANGE));
+            this.drawScaledCircle(highlightedNode, highlightedNode.value * NUKE_RANGE, Colors.PINK);
         }
     }
 
@@ -453,6 +463,11 @@ export class MainScene extends Scene {
     }
 
     initialize_data(): void {
+
+        this.ratio = [this.sys.game.config.width as number / 1000, this.sys.game.config.height as number / 700];
+        console.log(this.ratio);
+        console.log("that was the ratio");
+
         let startData = this.board;
         const pi = Number(startData.player_id.toString());
         const pc = startData.player_count;

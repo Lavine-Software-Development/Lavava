@@ -64,8 +64,10 @@ export class Node extends IDItem implements INode {
     }
 
     set state(state: State) {
-        this._state.removeSprites();
-        this.destroyCannon();
+        if (this._state) {
+            this._state.removeSprites();
+            this.destroyCannon();
+        }
         this._state = state;
     }
 
