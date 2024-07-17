@@ -795,3 +795,16 @@ ul {
 .btn-cancel:hover {
     background: rgb(32, 32, 32);
 }
+
+.click-instructions p {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px; /* Adjust the gap as needed */
+    font-size: 0.9em;
+}
+
+.click-icon {
+    width: 16px; /* Adjust the size as needed */
+    height: 16px; /* Adjust the size as needed */
+    margin-right: 5px; /* Adjust the spacing as needed */
+}
