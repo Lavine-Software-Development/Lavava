@@ -156,12 +156,9 @@ class Batch:
         #     self.game.eliminate(player_id)
         #     self.has_left[player_id] = True
         elif key in ALL_ABILITIES:
-            print("ABILITY")
             self.game.effect(key, player_id, data['items'])
         elif key in EVENTS:
-            print("EVENT")
             self.game.event(key, player_id, data['items'])
         else:
             print("NOT ALLOWED")
-        print("Done processing")
         

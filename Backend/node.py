@@ -128,7 +128,7 @@ class Node(JsonableTracked):
         return self.owner is not None and self.owner.ps.value < PSE.ELIMINATED.value
 
     def tick(self):
-        self.value += self.grow()
+        self.value = min(self.value + self.grow(), self.full_size)
         self.effects_update(lambda effect: effect.count())
 
     def grow(self):
@@ -190,7 +190,11 @@ class Node(JsonableTracked):
         return self.state.swap_status
 
     def full(self):
-        return self.value >= self.state.full_size
+        return self.value >= self.full_size
+    
+    @property
+    def full_size(self):
+        return self.state.full_size
     
     @property
     def incoming(self):

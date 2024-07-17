@@ -14,7 +14,6 @@ class WebSocketServer():
 
     async def handler(self, websocket, path):
         async for message in websocket:
-            print("message", message)
             data = json.loads(message)
             await self.process_message(websocket, data)
 

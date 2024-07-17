@@ -21,7 +21,7 @@ class Poisoned(AbstractSpreadingEffect):
         return (self.originator, self.length - self.counter)
     
     def capture_removal(self, player) -> bool:
-        return self.originator == player
+        return self.originator != player
 
 
 class NodeEnraged(AbstractSpreadingEffect):
@@ -35,4 +35,4 @@ class NodeEnraged(AbstractSpreadingEffect):
         return killed
     
     def capture_removal(self, player):
-        return True
+        return False
