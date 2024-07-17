@@ -1,4 +1,5 @@
 
+# from ..UserBackend.app import token_to_display_name
 from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED, FORFEIT_AND_LEAVE_CODE
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
@@ -24,6 +25,7 @@ class Batch:
         self.has_left = {}
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
+        self.token_disname = {}
         
 
     
@@ -51,14 +53,40 @@ class Batch:
         else:
             print(f"Request failed with status code {response.status_code}: {response.text}")
 
+
+    def set_token_to_display_name(self, token):
+        url = 'http://localhost:5001/get_display_name'
+        data = {"token": token}
+        response = requests.post(url, json=data)
+
+        data = response.json()
+        display_name = data.get('display_name')
+
+        self.token_disname[token] = display_name
+        print(f"Display name set to: {display_name}")
+        return display_name
+        
     def add_player(self, token, websocket, ability_data):
+        if not hasattr(self, 'token_disname'):
+            print("Warning: token_disname attribute not found in add_player. Creating it.")
+            self.token_disname = {}
+
         player_id = len(self.token_ids)
         if self.ability_process(player_id, ability_data):
             self.token_ids[token] = player_id
             self.id_sockets[player_id] = websocket
             self.has_left[player_id] = False
+            
+            display_name = self.set_token_to_display_name(token)
+            
+            print(f"Player added:")
+            print(f"  Token: {token[:10]}...") # Only print part of the token for security
+            print(f"  Display Name: {display_name}")
+            print(f"  Player ID: {player_id}")
+            
             return False
         else:
+            print(f"Invalid ability selection for player with token: {token[:10]}...")
             return "CHEATING: INVALID ABILITY SELECTION"
         
     def remove_player(self, token):
