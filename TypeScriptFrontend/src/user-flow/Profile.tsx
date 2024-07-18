@@ -27,6 +27,13 @@ const Profile: React.FC = () => {
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
     const [popupMessage, setPopupMessage] = useState('');
     const [showPopup, setShowPopup] = useState(false);
+    const [showChangePassword, setShowChangePassword] = useState(false);
+
+    const handleChangePassword = () => {
+        setShowChangePassword(true);
+        navigate("/change-password");
+        console.log("Change password functionality to be implemented");
+    };
 
 
     const handleLogout = () => {
@@ -143,7 +150,10 @@ const Profile: React.FC = () => {
                     )}
                 </div>
                 <p className="whiteText"><span className="text-shadow">Email:</span> {profileData.email}</p>
-                <button className="logout-btn" onClick={handleLogout}>Log Out</button>
+                <div className="button-container">
+                    <button className="change-password-btn" onClick={handleChangePassword}>Change Password</button>
+                    <button className="logout-btn" onClick={handleLogout}>Log Out</button>
+                </div>
             </div>
             <div className="info-cards">
                 <div className="info-card linear-gradient">
