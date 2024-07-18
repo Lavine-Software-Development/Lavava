@@ -103,7 +103,7 @@ class ZombieState(DefaultState):
 class CannonState(DefaultState):
     
     def __init__(self, node):
-        AbstractState.__init__(self, node, False, False, False, 5) # stays on capture
+        AbstractState.__init__(self, node, True, False, False, 5) # stays on capture
 
     def grow(self):
         return 0
@@ -111,7 +111,7 @@ class CannonState(DefaultState):
 class PumpState(DefaultState):
 
     def __init__(self, node):
-        AbstractState.__init__(self, node, False, False, False, 6) # stays on capture
+        AbstractState.__init__(self, node, True, False, False, 6) # stays on capture
         self.prep_shrink()
 
     def prep_shrink(self):

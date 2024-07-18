@@ -172,6 +172,8 @@ class Node(JsonableTracked):
     def update_ownerships(self, player=None):
         if self.owner is not None and self.owner != player:
             self.owner.count -= 1
+            if self.owner.count == 0:
+                self.owner.killer = player
         if player is not None:
             player.count += 1
         self.owner = player

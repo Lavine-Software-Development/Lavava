@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { NetworkContext } from "../game/NetworkContext";
 import { abilityCountsConversion } from "../game/objects/utilities";
 
-const updateCallback = () => {
-    console.log("Update received");
-};
 
 const Lobby: React.FC = () => {
     const [boardData, setBoardData] = useState(null);
@@ -18,7 +15,7 @@ const Lobby: React.FC = () => {
     const lobbyData = (code: string, count: number) => {
         if (code === "INVALID") {
             network?.disconnectWebSocket();
-            navigate("/home");
+            navigate("/home?invalidCode=true");
         }
         setGameID(code);
         setPlayerCount(count);
@@ -46,26 +43,11 @@ const Lobby: React.FC = () => {
         
         network?.connectWebSocket();
         network?.setupUser(abilityCounts)
+        console.log("Lobby shit going on");
         network?.getBoardData().then((data) => {
             navigate("/play", { state: { boardData: data } });
         });
 
-        // Handle back button
-        const handleBackButton = (event: PopStateEvent) => {
-            event.preventDefault();
-            handleCancel();
-        };
-
-        // Push a new state to the history when entering the lobby
-        history.pushState({ page: "lobby" }, "Lobby Page");
-
-        // Add event listener for the popstate event
-        window.addEventListener('popstate', handleBackButton);
-
-        // Cleanup function
-        return () => {
-            window.removeEventListener('popstate', handleBackButton);
-        };
     }, []);
 
     if (!boardData) {
