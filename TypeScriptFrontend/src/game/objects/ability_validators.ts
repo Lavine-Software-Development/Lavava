@@ -52,6 +52,19 @@ const defaultNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     );
 };
 
+const isWithinScaledRange = (
+    pos1: { x: number, y: number }, 
+    pos2: { x: number, y: number }, 
+    ratio: [number, number],
+    range: number
+): boolean => {
+    const [ratioX, ratioY] = ratio;
+    const scaledDx = (pos1.x - pos2.x) / ratioX;
+    const scaledDy = (pos1.y - pos2.y) / ratioY;
+    const scaledDistanceSquared = scaledDx ** 2 + scaledDy ** 2;
+    return scaledDistanceSquared <= range ** 2;
+};
+
 // Option for improved Nuke, allowing attacks on unowned nodes (and theoretically one's own)
 const defaultNode = (data: IDItem): boolean => {
     const node = data as Node;
@@ -78,18 +91,8 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
         );
 
         const inCapitalRange = (capital: Node): boolean => {
-            const [ratioX, ratioY] = ratio;
-            const { x: x1, y: y1 } = node.pos;
-            const { x: x2, y: y2 } = capital.pos;
-            
-            // Scale the distance calculation
-            const scaledDx = (x1 - x2) / ratioX;
-            const scaledDy = (y1 - y2) / ratioY;
-            
-            const scaledDistance = scaledDx ** 2 + scaledDy ** 2;
-            const capitalNukeRange = (NUKE_RANGE * capital.value) ** 2;
-            
-            return scaledDistance <= capitalNukeRange;
+            const capitalNukeRange = NUKE_RANGE * capital.value;
+            return isWithinScaledRange(node.pos, capital.pos, ratio, capitalNukeRange);
         };
 
         return (
@@ -194,7 +197,8 @@ function playerValidators(player: OtherPlayer): {
 
 function newEdgeValidator(
     edges: Edge[],
-    player: OtherPlayer
+    player: OtherPlayer,
+    ratio: [number, number]
 ): { [key: string]: ValidatorFunc } {
 
     const newEdgeStandard = (data: Node[], ): boolean => {
@@ -223,17 +227,9 @@ function newEdgeValidator(
     const checkMiniBridgeRange = (nodes: Node[]): boolean => {
         if (nodes.length === 1) {
             return true;
-        } else if (nodes.length === 2) {
-            const [node1, node2] = nodes;
-            const distance = Phaser.Math.Distance.Between(
-                node1.pos.x,
-                node1.pos.y,
-                node2.pos.x,
-                node2.pos.y
-            );
-            return distance <= MINI_BRIDGE_RANGE;
         } else {
-            return false;
+            const [node1, node2] = nodes;
+            return isWithinScaledRange(node1.pos, node2.pos, ratio, MINI_BRIDGE_RANGE);
         }
     };
     
@@ -269,7 +265,7 @@ export function makeAbilityValidators(
 
     // Merge the validators from `player_validators` into `abilityValidators`
     const playerValidatorsMap = playerValidators(player);
-    const newEdgeValidators = newEdgeValidator(edges, player);
+    const newEdgeValidators = newEdgeValidator(edges, player, ratio);
     return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators };
 }
 
