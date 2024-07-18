@@ -56,9 +56,11 @@ export class MainScene extends Scene {
     private board: any;
     private countdown: number;
     private full_capitals: number[];
+
     private timerText: Phaser.GameObjects.Text;
     private capitalsText: Phaser.GameObjects.Text;
     private statusText: Phaser.GameObjects.Text;
+    private eliminatedText: Phaser.GameObjects.Text;
     private eloText: Phaser.GameObjects.Text;
     private eloDifference: Phaser.GameObjects.Text;
     private leaveMatchButton: Phaser.GameObjects.Text;
@@ -618,6 +620,29 @@ export class MainScene extends Scene {
             let cannon = this.nodes[tuple[1][0]] as Node;
             let target = this.nodes[tuple[1][1]] as Node;
             this.cannonShot(cannon, target, tuple[1][2])
+        }
+        else if (tuple[0] == "player_elimination") {
+            let player1 = tuple[1][0];
+            let player2 = tuple[1][1];
+
+            let eliminationText = this.add.text(
+                this.sys.game.config.width as number / 2,
+                this.sys.game.config.height as number / 2,
+                `${player2} killed ${player1}`,
+                { fontFamily: 'Arial', fontSize: '32px', color: '#FF0000' }
+            );
+            eliminationText.setOrigin(0.5);
+            
+            //Make the text fade out after a few seconds
+            this.tweens.add({
+                targets: eliminationText,
+                alpha: 0,
+                duration: 6000,
+                ease: 'Power2',
+                onComplete: () => {
+                    eliminationText.destroy();
+                }
+            });
         }
     }
 

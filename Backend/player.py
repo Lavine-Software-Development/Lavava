@@ -36,6 +36,7 @@ class DefaultPlayer(JsonableTick):
             print("failed to use ability, ", key)
 
     def default_values(self):
+        self.killer = None
         self.count = 0
         self.abilities = dict()
         self.ps = PlayerState()

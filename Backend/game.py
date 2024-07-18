@@ -143,6 +143,8 @@ class ServerGame(JsonableTick):
                 player.update()
                 if player.count == 0:
                     self.eliminate(player.id, True)
+                    self.update_extra_info(("player_elimination", (player.id, player.killer.id)))
+                    print("the killer is", player.killer)
 
     def determine_ranks_from_capitalize_or_timeout(self):
         # total owned nodes: a
