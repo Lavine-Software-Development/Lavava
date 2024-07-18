@@ -33,7 +33,7 @@ or
 
 ```
 sudo docker stop gameserver && sudo docker rm gameserver
-docker run -p 5553:5553 --name gameserver akashilangovan/gameserver
+sudo docker run -p 5553:5553 --name gameserver akashilangovan/gameserver
 ```
 
 The container names might have changed when people restart so run:

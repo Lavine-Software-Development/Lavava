@@ -16,7 +16,7 @@ load_dotenv()
 
 app = Flask(__name__)
 # CORS(app)
-CORS(app, origins=["https://www.durb.ca"], allow_headers=["Content-Type"])
+CORS(app, origins=["https://www.durb.ca", "https://localhost:8080"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
 
@@ -112,10 +112,20 @@ def token_required(f):
     
     return decorated
 @app.after_request
+
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'https://www.durb.ca')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
+    # Get the origin of the request
+    origin = request.headers.get('Origin')
+
+    # List of allowed origins
+    allowed_origins = ["https://www.durb.ca", "http://localhost:3000"]
+
+    # Add CORS headers only if the request's origin is in the allowed list
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
+    
     return response
 @app.route('/login', methods=['POST'])
 def login():
