@@ -86,14 +86,22 @@ def validators_needing_player(player):
         edge = data[0]
         return my_node([edge.from_node]) and standard_node_attack([edge.to_node], player)
 
-    def dynamic_edge_own_either(data):
+    def dynamic_edge_own_from_node(data):
         edge = data[0]
         return edge.dynamic and (edge.from_node.owner == player)
+    
+    def dynamic_edge_own_either_but_not_flowing(data):
+        edge = data[0]
+        return edge.dynamic and ((edge.from_node.owner == player) or (edge.to_node.owner == player and not edge.flowing))
+    
+    def dynamic_edge_own_either(data):
+        edge = data[0]
+        return edge.dynamic and (edge.from_node.owner == player or edge.to_node.owner == player)
     
     return {
         CAPITAL_CODE: capital_logic,
         POISON_CODE: attacking_edge,
-        FREEZE_CODE: dynamic_edge_own_either,
+        FREEZE_CODE: dynamic_edge_own_either_but_not_flowing,
         ZOMBIE_CODE: my_default_node,
         CANNON_CODE: my_default_port_node,
         PUMP_CODE: my_default_node,

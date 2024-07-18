@@ -42,9 +42,14 @@ class WebSocketServer():
             if data['action'] == 'cancel_match':
                 await self.handle_cancel_match(token, game_code)
             elif data['action'] == 'reconnect':
-                batch = self.running_games[game_code]
-                catch_me_up_json = batch.reconnect_player(token, websocket)
-                await websocket.send(catch_me_up_json)
+                if game_code in self.running_games:
+                    batch = self.running_games[game_code]
+                    catch_me_up_json = batch.reconnect_player(token, websocket)
+                    await websocket.send(catch_me_up_json)
+                else:
+                    # game has ended
+                    print("recconection rejected! Game has ended")
+                    await websocket.send(json.dumps({"action": "leave_game"}))
         else:
             player_type = data["type"]
             player_count = data["players"]
@@ -86,33 +91,30 @@ class WebSocketServer():
             if len(batch.token_ids) == 1:
                 self.waiting_players.pop(game_id)
             else:
-                batch.remove_player(token)
+                batch.remove_player_from_lobby(token)
         else:
             print("Game not found. Can't be cancelled")
 
     async def send_ticks(self, batch_code: str):
         batch = self.running_games[batch_code]
-        to_remove = []
         while not batch.done():
             batch.tick()
-            for id, websocket in batch.id_sockets.items():
-                if not batch.return_player_has_left(id):
-                    try:
-                        batch_json = batch.tick_repr_json(id)
-                        await websocket.send(batch_json)
-                    except websockets.exceptions.ConnectionClosed:
-                        pass
-                        # print(f"Error sending tick to websocket")
-                        # if batch.40 connections not connected still then 
+            for id in list(batch.id_sockets.keys()):
+                if id in batch.id_sockets:  # Check if the key still exists
+                    websocket = batch.id_sockets[id]
+                    if batch.still_send(id):
+                        try:
+                            batch_json = batch.tick_repr_json(id)
+                            await websocket.send(batch_json)
+                        except websockets.exceptions.ConnectionClosed:
+                            batch.did_not_respond(id)
+                    else:
+                        batch.remove_player_from_game(id)
+                        # await websocket.send(json.dumps({"action": "player_left"}))
                 else:
-                    print("Player has left")
-                    await websocket.send(json.dumps({"action": "player_left"}))
-                    to_remove.append(id)
+                    print("Player has left, but key remains, this should only happen once st most per player")
             batch.post_tick()
-            for i in to_remove:
-                batch.id_sockets.pop(i)  # Use pop with default to avoid KeyError
 
-            to_remove.clear()  # Clear the list for the next loop iteration
             await asyncio.sleep(0.1)
         
         # should be its own delete function, but leaving for now due to async complexity
