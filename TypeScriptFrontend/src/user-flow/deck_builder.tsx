@@ -189,7 +189,7 @@ const DeckBuilder: React.FC = () => {
 
                         {/* icon placement on top of text */}
                         <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
-                        style={{ width: '50%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
+                        style={{ width: '70%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
 
                         <div className="ability-name">{ability.name}</div>
                         <div className="ability-cost">Cost: {ability.cost}</div>
@@ -211,6 +211,16 @@ const DeckBuilder: React.FC = () => {
                 {error && <p className="error-message">{error}</p>}
                 <div className="salary-display">
                     <h2>Salary: {salary}</h2>
+                </div>
+                <div className="click-instructions">
+                    <span className="click-instruction">
+                        <img src="/assets/left_click.png" alt="Left click" className="click-icon" />
+                        Select
+                    </span>
+                    <span className="click-instruction">
+                        <img src="/assets/right_click.png" alt="Right click" className="click-icon" />
+                        Deselect
+                    </span>
                 </div>
             </div>
         </div>

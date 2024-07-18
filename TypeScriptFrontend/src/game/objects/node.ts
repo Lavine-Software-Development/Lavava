@@ -15,7 +15,7 @@ export class Node extends IDItem implements INode {
     is_port: boolean;
     portPercent: number;
     ports: Array<number>;
-    state: State;
+    private _state: State;
     private _value: number;
     delayChange = false;
     delayedValue = 0;
@@ -63,16 +63,32 @@ export class Node extends IDItem implements INode {
         }
     }
 
+    set state(state: State) {
+        if (this._state) {
+            this._state.removeSprites();
+            
+            this.destroyCannon();
+        }
+        this._state = state;
+    }
+
+    get state() {
+        return this._state;
+    }
+
     public delete(): void {
         // Remove graphics from the scene
         if (this.graphics) {
             this.graphics.clear();
             this.graphics.destroy();
         }
-    
+
+        this.destroyCannon();
+    }
+
+    destroyCannon() {
         if (this.cannonGraphics) {
             this.cannonGraphics.clear();
-            this.cannonGraphics.destroy();
         }
     }
 

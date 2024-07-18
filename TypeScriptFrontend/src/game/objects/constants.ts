@@ -47,6 +47,7 @@ export const KeyCodes = {
     CAPITAL_CODE: 99,
     CANNON_CODE: 101,
     PUMP_CODE: 117,
+    MINI_BRIDGE_CODE: 109,
 };
 
 export const EventCodes = {
@@ -81,6 +82,7 @@ export const NameToCode = {
     "Capital": KeyCodes.CAPITAL_CODE,
     "Cannon": KeyCodes.CANNON_CODE,
     "Pump": KeyCodes.PUMP_CODE,
+    "Mini-Bridge": KeyCodes.MINI_BRIDGE_CODE,
 };
 
 
@@ -116,3 +118,4 @@ export const GROWTH_STOP = 250;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
 export const NUKE_RANGE = 0.7;
+export const MINI_BRIDGE_RANGE = 100;

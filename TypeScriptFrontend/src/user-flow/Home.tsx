@@ -6,7 +6,10 @@ const Home: React.FC = () => {
     const navigate = useNavigate();
     const [selectedAbilities, setSelectedAbilities] = useState<any[]>([]);
     const [tab, setTab] = useState("");
-    const [playerCount, setPlayerCount] = useState(2);
+    const [playerCount, setPlayerCount] = useState(() => {
+        const savedPlayerCount = sessionStorage.getItem('playerCount');
+        return savedPlayerCount ? parseInt(savedPlayerCount, 10) : 2;
+    });
     const [keyCode, setKeyCode] = useState("");
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showSalaryPopup, setShowSalaryPopup] = useState(false);
@@ -15,9 +18,17 @@ const Home: React.FC = () => {
     const [friendlyMode, setFriendlyMode] = useState<string>(
         sessionStorage.getItem("friendlyMode") || "join"
     );
+    const [showInvalidCodePopup, setShowInvalidCodePopup] = useState(false);
 
     useEffect(() => {
         sessionStorage.removeItem("key_code");
+        const urlParams = new URLSearchParams(window.location.search);
+        const invalidCode = urlParams.get('invalidCode');
+        if (invalidCode === 'true') {
+            setShowInvalidCodePopup(true);
+        // Remove the query parameter
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const token = localStorage.getItem("userToken");
@@ -63,6 +74,7 @@ const Home: React.FC = () => {
 
     const hostTab = (e: number) => {
         setPlayerCount(e);
+        sessionStorage.setItem('playerCount', e.toString());
         setPlayerCountDropdownOpen(false);
     };
 
@@ -418,6 +430,12 @@ const Home: React.FC = () => {
                             Build
                         </button>
                         <button onClick={handleClosePopups}>Cancel</button>
+                    </div>
+                )}
+                {showInvalidCodePopup && (
+                    <div className="popup invalid-code-popup">
+                        <p>Invalid game code. Please try again.</p>
+                        <button onClick={() => setShowInvalidCodePopup(false)}>OK</button>
                     </div>
                 )}
             </div>

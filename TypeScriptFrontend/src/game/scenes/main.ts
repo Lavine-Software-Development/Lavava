@@ -11,7 +11,8 @@ import {
     AbilityCredits,
     AbilityReloadTimes,
     NUKE_RANGE,
-    PlayerColors, 
+    PlayerColors,
+    MINI_BRIDGE_RANGE, 
 } from "../objects/constants";
 import { PlayerStateEnum as PSE, GameStateEnum as GSE} from "../objects/enums";
 import { ReloadAbility } from "../objects/ReloadAbility";
@@ -56,14 +57,17 @@ export class MainScene extends Scene {
     private board: any;
     private countdown: number;
     private full_capitals: number[];
+
     private timerText: Phaser.GameObjects.Text;
     private capitalsText: Phaser.GameObjects.Text;
     private statusText: Phaser.GameObjects.Text;
+    private eliminatedText: Phaser.GameObjects.Text;
     private eloText: Phaser.GameObjects.Text;
     private eloDifference: Phaser.GameObjects.Text;
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
+    private ratio: [number, number];
 
     private rainbowColors: string[] = [
         '#B8860B',  // Dark Goldenrod
@@ -104,6 +108,7 @@ export class MainScene extends Scene {
         this.load.image("Cannon", "Cannon.png");
         this.load.image("Capital", "Capital.png");
         this.load.image("D-Bridge", "D-Bridge.png");
+        this.load.image("Mini-Bridge", "D-Bridge.png");
         this.load.image("Freeze", "Freeze.png");
         this.load.image("Nuke", "Nuke.png");
         this.load.image("Poison", "Poison.png");
@@ -159,6 +164,7 @@ export class MainScene extends Scene {
         const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
         const ab = makeAbilityValidators(
             this.mainPlayer,
+            this.ratio,
             Object.values(this.nodes),
             Object.values(this.edges)
         );
@@ -269,32 +275,47 @@ export class MainScene extends Scene {
         }
     }
 
+
+    private drawScaledCircle(node: Node, radius: number, color: readonly [number, number, number]): void {
+        const [ratioX, ratioY] = this.ratio;
+        this.graphics.lineStyle(3, phaserColor(color), 1);
+    
+        // Draw the ellipse, scaling it appropriately
+        this.graphics.strokeEllipse(
+            node.pos.x,
+            node.pos.y,
+            radius * 2 * ratioX, // radus * 2 to get diameter
+            radius * 2 * ratioY
+        );
+    }
+
     update(): void {
         this.graphics.clear();
         this.abilityManager.draw(this);
     
         // Iterate over the values of the dictionary to draw each node
     
-        if (this.abilityManager.getMode() == KeyCodes.NUKE_CODE) {
-            // Filter the dictionary values to find the capitals
+        if (this.abilityManager.getMode() === KeyCodes.NUKE_CODE) {
             const capitals = Object.values(this.nodes).filter(
                 (node) =>
                     node.stateName === "capital" &&
                     node.owner === this.mainPlayer
             );
-    
-            // For each node in capitals, draw a pink hollow circle on the node of the size of its this.value
-            capitals.forEach((node) => {
-                this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
-                this.graphics.strokeCircle(node.pos.x, node.pos.y, (node.value * NUKE_RANGE));
-            });
 
+            capitals.forEach((node) => {
+                this.drawScaledCircle(node, node.value * NUKE_RANGE, Colors.PINK);
+            });
         } else if (this.highlight.usage == KeyCodes.CAPITAL_CODE) {
-            // Draw a pink hollow circle around the highlighted node
             const highlightedNode = this.highlight.item as Node;
-            this.graphics.lineStyle(3, phaserColor(Colors.PINK), 1);
-            this.graphics.strokeCircle(highlightedNode.pos.x, highlightedNode.pos.y, (highlightedNode.value * NUKE_RANGE));
+            this.drawScaledCircle(highlightedNode, highlightedNode.value * NUKE_RANGE, Colors.PINK);
+        } else if (this.highlight.usage == KeyCodes.MINI_BRIDGE_CODE && this.abilityManager.clicks.length == 0)  {
+            const node = this.highlight.item as Node;
+            this.drawScaledCircle(node, MINI_BRIDGE_RANGE, Colors.PINK);
+        } else if (this.abilityManager.getMode() == KeyCodes.MINI_BRIDGE_CODE && this.abilityManager.clicks.length > 0) {
+            const node = this.abilityManager.clicks[0] as Node;
+            this.drawScaledCircle(node, MINI_BRIDGE_RANGE, Colors.PINK);
         }
+        
     }
 
     tick(): void {
@@ -453,6 +474,9 @@ export class MainScene extends Scene {
     }
 
     initialize_data(): void {
+
+        this.ratio = [this.sys.game.config.width as number / 1000, this.sys.game.config.height as number / 700];
+
         let startData = this.board;
         const pi = Number(startData.player_id.toString());
         const pc = startData.player_count;
@@ -605,6 +629,29 @@ export class MainScene extends Scene {
             let cannon = this.nodes[tuple[1][0]] as Node;
             let target = this.nodes[tuple[1][1]] as Node;
             this.cannonShot(cannon, target, tuple[1][2])
+        }
+        else if (tuple[0] == "player_elimination") {
+            let player1 = tuple[1][0];
+            let player2 = tuple[1][1];
+
+            let eliminationText = this.add.text(
+                this.sys.game.config.width as number / 2,
+                this.sys.game.config.height as number / 2,
+                `${player2} killed ${player1}`,
+                { fontFamily: 'Arial', fontSize: '32px', color: '#FF0000' }
+            );
+            eliminationText.setOrigin(0.5);
+            
+            //Make the text fade out after a few seconds
+            this.tweens.add({
+                targets: eliminationText,
+                alpha: 0,
+                duration: 6000,
+                ease: 'Power2',
+                onComplete: () => {
+                    eliminationText.destroy();
+                }
+            });
         }
     }
 

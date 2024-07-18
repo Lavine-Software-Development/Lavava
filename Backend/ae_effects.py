@@ -23,12 +23,13 @@ from constants import (
     MINIMUM_TRANSFER_VALUE,
     GROWTH_STOP,
     NODE_MINIMUM_VALUE,
+    MINI_BRIDGE_CODE,
 )
 
-def make_bridge(buy_new_edge, bridge_type):
+def make_bridge(buy_new_edge, bridge_type, mini=False):
     def bridge_effect(data, player):
         id1, id2 = data
-        buy_new_edge(id1, id2, bridge_type)
+        buy_new_edge(id1, id2, bridge_type, mini)
 
     return bridge_effect
 
@@ -37,6 +38,9 @@ def make_nuke(remove_node):
     def nuke_effect(data, player):
         node = data[0]
         remove_node(node)
+        if node.owner.count == 0:
+            node.owner.killer = player
+            print("someone is nuked out")
 
     return nuke_effect
 
@@ -106,6 +110,7 @@ def make_ability_effects(board):
     return {
         BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE),
         D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
+        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE, True),
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),

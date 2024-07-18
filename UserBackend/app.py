@@ -132,7 +132,7 @@ def login():
     if request.method == 'OPTIONS':
         return '', 200  # CORS preflight request
     data = request.json
-    login_identifier = data.get('username')  # This could be either username or email
+    login_identifier = data.get('username').lower()  # This could be either username or email
     password = data.get('password')
 
     if not login_identifier or not password:
@@ -172,8 +172,8 @@ def login():
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
-    username = data.get('username')
-    email = data.get('email')  # Email is received and will be used to send welcome email
+    username = data.get('username').lower()
+    email = data.get('email').lower()  # Email is received and will be used to send welcome email
     password = data.get('password') # password received and used to check requirements before sending email
 
     if config.DB_CONNECTED:
@@ -232,7 +232,7 @@ def send_confirmation_email(user_email, link):
 @app.route('/reset_password', methods=['POST'])
 def reset_password():
     data = request.json
-    username = data.get('username') # email or username
+    username = data.get('username').lower() # email or username
     password = data.get('password') 
     repeatPassword = data.get('repeatPassword')
 
@@ -462,7 +462,7 @@ def save_deck(current_user):
                 current_cards.pop(ability['name'])
             else:
                 # Add new card
-                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=description)
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'])
                 db.session.add(new_card)
 
         # Remove cards not in the new deck
@@ -523,9 +523,14 @@ def username_to_elo(name: str):
 def get_abilities():
     abilities = [
         {
-            "name": "Freeze", 
+            "name": "Bridge", 
+            "cost": 2,
+            "description": "Create a one-way bridge"
+        },
+        {
+            "name": "Mini-Bridge", 
             "cost": 1,
-            "description": "Convert edge to one-way"
+            "description": "Create a two-way bridge with limited range"
         },
         {
             "name": "Spawn", 
@@ -533,35 +538,36 @@ def get_abilities():
             "description": "Claim unowned node anywhere"
         },
         {
-            "name": "Zombie", 
+            "name": "Freeze", 
             "cost": 1,
-            "description": "Big defensive Structure on node"
+            "description": "Convert edge to one-way"
+            
         },
         {
             "name": "Burn", 
             "cost": 1,
             "description": "Remove ports from node"
         },
-        {
-            "name": "Poison", 
-            "cost": 2,
-            "description": "Spreadable effect to shrink nodes"
-        },
+        # {
+        #     "name": "Zombie", 
+        #     "cost": 1,
+        #     "description": "Big defensive Structure on node"
+        # },
+        # {
+        #     "name": "Poison", 
+        #     "cost": 2,
+        #     "description": "Spreadable effect to shrink nodes"
+        # },
         {
             "name": "Rage", 
             "cost": 2,
             "description": "Increase energy transfer speed"
         },
-        {
-            "name": "D-Bridge", 
-            "cost": 2,
-            "description": "Create a two-way bridge"
-        },
-        {
-            "name": "Bridge", 
-            "cost": 2,
-            "description": "Create a one-way bridge"
-        },
+        # {
+        #     "name": "D-Bridge", 
+        #     "cost": 2,
+        #     "description": "Create a two-way bridge"
+        # },
         {
             "name": "Capital", 
             "cost": 3,
@@ -573,14 +579,14 @@ def get_abilities():
             "description": "Destroy node and edges (capital needed)"
         },
         {
-            "name": "Cannon", 
-            "cost": 3,
-            "description": "Shoot energy at nodes"
-        },
-        {
             "name": "Pump", 
             "cost": 3,
             "description": "Store energy to replenish abilities"
+        },
+        {
+            "name": "Cannon", 
+            "cost": 4,
+            "description": "Shoot energy at nodes"
         }
     ]
     return jsonify({"abilities": abilities, "salary": 20})
@@ -605,10 +611,13 @@ def update_elo():
 @app.route('/leaderboard', methods=['GET'])
 def get_leaderboard():
     if config.DB_CONNECTED:
-        # Query the database for all confirmed users, ordered by elo descending
         confirmed_users = User.query.filter_by(email_confirm=True).order_by(desc(User.elo)).all()
         leaderboard = [
-            {"userName": user.username, "elo": user.elo} 
+            {
+                "userName": user.username,
+                "displayName": user.display_name,
+                "elo": user.elo
+            } 
             for user in confirmed_users
         ]
         return jsonify({"leaderboard": leaderboard})
@@ -636,6 +645,31 @@ def get_leaderboard():
             {"userName": "David", "elo": 1200}
         ]
     })
+
+@app.route('/user/<string:username>', methods=['GET'])
+def get_user_details(username):
+    if not config.DB_CONNECTED:
+        return jsonify({"error": "Database not connected"}), 500
+
+    try:
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        
+        deck = Deck.query.filter_by(user_id=user.id).first()
+        deck_cards = []
+        if deck:
+            deck_cards = DeckCard.query.filter_by(deck_id=deck.id).all()
+        
+        response = {
+            "username": user.username,
+            "displayName": user.display_name,
+            "elo": user.elo,
+            "deck": [{"name": card.ability, "count": card.count} for card in deck_cards]
+        }
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':

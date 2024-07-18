@@ -1,4 +1,5 @@
-from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
+from math import dist
+from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINI_BRIDGE_RANGE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
 
 
 def no_click(data):
@@ -85,14 +86,22 @@ def validators_needing_player(player):
         edge = data[0]
         return my_node([edge.from_node]) and standard_node_attack([edge.to_node], player)
 
-    def dynamic_edge_own_either(data):
+    def dynamic_edge_own_from_node(data):
         edge = data[0]
         return edge.dynamic and (edge.from_node.owner == player)
+    
+    def dynamic_edge_own_either_but_not_flowing(data):
+        edge = data[0]
+        return edge.dynamic and ((edge.from_node.owner == player) or (edge.to_node.owner == player and not edge.flowing))
+    
+    def dynamic_edge_own_either(data):
+        edge = data[0]
+        return edge.dynamic and (edge.from_node.owner == player or edge.to_node.owner == player)
     
     return {
         CAPITAL_CODE: capital_logic,
         POISON_CODE: attacking_edge,
-        FREEZE_CODE: dynamic_edge_own_either,
+        FREEZE_CODE: dynamic_edge_own_either_but_not_flowing,
         ZOMBIE_CODE: my_default_node,
         CANNON_CODE: my_default_port_node,
         PUMP_CODE: my_default_node,
@@ -132,17 +141,30 @@ def make_new_edge_ports(check_new_edge, player):
         if all([node.is_port for node in data]):
             return no_crossovers(check_new_edge, data, player)
         return False
-    return new_edge_ports
+    
+    # Check if the nodes are within the range of a mini bridge
+    def check_mini_bridge_range(data):
+        first_node, second_node = data
+        distance = dist(first_node.pos, second_node.pos)
+        return distance <= MINI_BRIDGE_RANGE  # Adjust the range as needed
+
+    def mini_bridge_validator(data):
+        return check_mini_bridge_range(data) and new_edge_ports(data)
+
+    return {
+        BRIDGE_CODE: new_edge_ports,
+        D_BRIDGE_CODE: new_edge_ports,
+        MINI_BRIDGE_CODE: mini_bridge_validator,  # Add mini bridge validator
+    }
+
 
 def make_ability_validators(board, player):
     return {
         SPAWN_CODE: unowned_node,
-        BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
-        D_BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
         BURN_CODE: owned_burnable_node,
         RAGE_CODE: no_click,
         NUKE_CODE: attack_validators(board.player_capitals, player),
-    } | validators_needing_player(player)
+    } | validators_needing_player(player) | make_new_edge_ports(board.check_new_edge, player)
 
 
 def make_effect_validators(board):
