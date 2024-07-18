@@ -13,8 +13,7 @@ class CapitalTracker:
         else:
             if node.state_name == 'capital':
                 self.add(node)
-        print("this node",self.tracked_id_states)
-        print("owners:",self.capital_owners)
+                
     def remove(self, node):
         del self.tracked_id_states[node.id]
         self.capital_owners[node.id].capital_handover(False)

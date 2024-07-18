@@ -14,7 +14,6 @@ class WebSocketServer():
 
     async def handler(self, websocket, path):
         async for message in websocket:
-            print("message", message)
             data = json.loads(message)
             await self.process_message(websocket, data)
 
@@ -78,7 +77,6 @@ class WebSocketServer():
             await websocket.send(message)
             
             if self.waiting_players[game_code].is_ready():
-                print("Game is ready to start")
                 self.running_games[game_code] = self.waiting_players.pop(game_code)
                 print("created game with code ----------------------", game_code)
                 await self.start_game(game_code)

@@ -446,7 +446,7 @@ def save_deck(current_user):
                 current_cards.pop(ability['name'])
             else:
                 # Add new card
-                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=ability['description'])
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'])
                 db.session.add(new_card)
 
         # Remove cards not in the new deck
@@ -507,10 +507,14 @@ def username_to_elo(name: str):
 def get_abilities():
     abilities = [
         {
-            "name": "Freeze", 
+            "name": "Bridge", 
+            "cost": 2,
+            "description": "Create a one-way bridge"
+        },
+        {
+            "name": "Mini-Bridge", 
             "cost": 1,
-            "description": "Convert edge to one-way"
-            
+            "description": "Create a two-way bridge with limited range"
         },
         {
             "name": "Spawn", 
@@ -518,20 +522,26 @@ def get_abilities():
             "description": "Claim unowned node anywhere"
         },
         {
-            "name": "Zombie", 
+            "name": "Freeze", 
             "cost": 1,
-            "description": "Big defensive Structure on node"
+            "description": "Convert edge to one-way"
+            
         },
         {
             "name": "Burn", 
             "cost": 1,
             "description": "Remove ports from node"
         },
-        {
-            "name": "Poison", 
-            "cost": 2,
-            "description": "Spreadable effect to shrink nodes"
-        },
+        # {
+        #     "name": "Zombie", 
+        #     "cost": 1,
+        #     "description": "Big defensive Structure on node"
+        # },
+        # {
+        #     "name": "Poison", 
+        #     "cost": 2,
+        #     "description": "Spreadable effect to shrink nodes"
+        # },
         {
             "name": "Rage", 
             "cost": 2,
@@ -543,16 +553,6 @@ def get_abilities():
         #     "description": "Create a two-way bridge"
         # },
         {
-            "name": "Mini-Bridge", 
-            "cost": 1,
-            "description": "Create a two-way bridge with limited range"
-        },
-        {
-            "name": "Bridge", 
-            "cost": 2,
-            "description": "Create a one-way bridge"
-        },
-        {
             "name": "Capital", 
             "cost": 3,
             "description": "Create a capital" 
@@ -563,14 +563,14 @@ def get_abilities():
             "description": "Destroy node and edges (capital needed)"
         },
         {
-            "name": "Cannon", 
-            "cost": 4,
-            "description": "Shoot energy at nodes"
-        },
-        {
             "name": "Pump", 
             "cost": 3,
             "description": "Store energy to replenish abilities"
+        },
+        {
+            "name": "Cannon", 
+            "cost": 4,
+            "description": "Shoot energy at nodes"
         }
     ]
     return jsonify({"abilities": abilities, "salary": 20})

@@ -224,8 +224,9 @@ input::placeholder {
 
 .ability-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr); /* Changed from 4 to 5 */
     gap: 10px;
+    /* margin-top: 20px; Add some space below the title */
 }
 
 .ability-button {
@@ -586,6 +587,24 @@ ul {
 
 .save-button {
     background-color: #007BFF; /* Blue color for 'Save' button */
+}
+
+.container#deck-builder-container {
+    max-width: 1200px; /* Increased from typical 960px or 1024px */
+    width: 90%; /* Use percentage for responsiveness */
+    /* margin: 0 auto; Center the container */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align content to the top */
+    min-height: 80vh; /* Ensure container has enough height */
+}
+
+/* Add a media query for responsiveness */
+@media (max-width: 1200px) {
+    .container#deck-builder-container {
+        width: 95%;
+    }
 }
 
 .save-button:hover {
