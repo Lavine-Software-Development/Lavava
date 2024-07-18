@@ -118,4 +118,4 @@ export const GROWTH_STOP = 250;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
 export const NUKE_RANGE = 0.7;
-export const MINI_BRIDGE_RANGE = 150;
+export const MINI_BRIDGE_RANGE = 90;
