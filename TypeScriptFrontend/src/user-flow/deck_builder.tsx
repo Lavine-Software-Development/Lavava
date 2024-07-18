@@ -212,6 +212,16 @@ const DeckBuilder: React.FC = () => {
                 <div className="salary-display">
                     <h2>Salary: {salary}</h2>
                 </div>
+                <div className="click-instructions">
+                    <span className="click-instruction">
+                        <img src="/assets/left_click.png" alt="Left click" className="click-icon" />
+                        Select
+                    </span>
+                    <span className="click-instruction">
+                        <img src="/assets/right_click.png" alt="Right click" className="click-icon" />
+                        Deselect
+                    </span>
+                </div>
             </div>
         </div>
     );

@@ -169,12 +169,17 @@ class Board(JsonableTracked):
             self.nodeDict[edge2[1]],
         )
 
-    def buy_new_edge(self, node_from, node_to, edge_type):
+    def buy_new_edge(self, node_from, node_to, edge_type, mini):
         new_id = self.new_edge_id()
         if edge_type == DYNAMIC_EDGE:
             newEdge = DynamicEdge(node_to, node_from, new_id)
         else:
             newEdge = Edge(node_to, node_from, new_id)
+
+        # if not mini bridge, then destroy ports
+        if not mini:
+            for node in [node_to, node_from]:
+                node.is_port = False
 
         newEdge.check_status()
         newEdge.popped = True

@@ -11,7 +11,8 @@ import {
     AbilityCredits,
     AbilityReloadTimes,
     NUKE_RANGE,
-    PlayerColors, 
+    PlayerColors,
+    MINI_BRIDGE_RANGE, 
 } from "../objects/constants";
 import { PlayerStateEnum as PSE, GameStateEnum as GSE} from "../objects/enums";
 import { ReloadAbility } from "../objects/ReloadAbility";
@@ -107,6 +108,7 @@ export class MainScene extends Scene {
         this.load.image("Cannon", "Cannon.png");
         this.load.image("Capital", "Capital.png");
         this.load.image("D-Bridge", "D-Bridge.png");
+        this.load.image("Mini-Bridge", "D-Bridge.png");
         this.load.image("Freeze", "Freeze.png");
         this.load.image("Nuke", "Nuke.png");
         this.load.image("Poison", "Poison.png");
@@ -306,7 +308,14 @@ export class MainScene extends Scene {
         } else if (this.highlight.usage == KeyCodes.CAPITAL_CODE) {
             const highlightedNode = this.highlight.item as Node;
             this.drawScaledCircle(highlightedNode, highlightedNode.value * NUKE_RANGE, Colors.PINK);
+        } else if (this.highlight.usage == KeyCodes.MINI_BRIDGE_CODE && this.abilityManager.clicks.length == 0)  {
+            const node = this.highlight.item as Node;
+            this.drawScaledCircle(node, MINI_BRIDGE_RANGE, Colors.PINK);
+        } else if (this.abilityManager.getMode() == KeyCodes.MINI_BRIDGE_CODE && this.abilityManager.clicks.length > 0) {
+            const node = this.abilityManager.clicks[0] as Node;
+            this.drawScaledCircle(node, MINI_BRIDGE_RANGE, Colors.PINK);
         }
+        
     }
 
     tick(): void {

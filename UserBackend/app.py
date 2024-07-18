@@ -446,7 +446,7 @@ def save_deck(current_user):
                 current_cards.pop(ability['name'])
             else:
                 # Add new card
-                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=description)
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=ability['description'])
                 db.session.add(new_card)
 
         # Remove cards not in the new deck
@@ -537,10 +537,15 @@ def get_abilities():
             "cost": 2,
             "description": "Increase energy transfer speed"
         },
+        # {
+        #     "name": "D-Bridge", 
+        #     "cost": 2,
+        #     "description": "Create a two-way bridge"
+        # },
         {
-            "name": "D-Bridge", 
-            "cost": 2,
-            "description": "Create a two-way bridge"
+            "name": "Mini-Bridge", 
+            "cost": 1,
+            "description": "Create a two-way bridge with limited range"
         },
         {
             "name": "Bridge", 
