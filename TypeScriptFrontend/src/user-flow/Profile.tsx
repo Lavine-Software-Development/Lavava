@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
 import { Link, useNavigate } from 'react-router-dom';
 import config from '../env-config';
+import { abilityColors } from "../user-flow/ability_utils";
 
 interface ProfileData {
     userName: string;
@@ -160,7 +161,7 @@ const Profile: React.FC = () => {
                 <h2 className="text-shadow default-deck-text">Default Deck</h2>
                 <div className="abilities-container-profile">
                 {profileData.abilities.map((item, index) => (
-                    <div key={index} className="ability-square">
+                    <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
                     <div className="ability-icon">
                         <img
                         src={`./assets/abilityIcons/${item.name}.png`}

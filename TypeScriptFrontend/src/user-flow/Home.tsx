@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import config from "../env-config";
+import { abilityColors } from "../user-flow/ability_utils";
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -268,7 +269,7 @@ const Home: React.FC = () => {
                             <h3 style={{ textAlign: "center" }}>(No elo)</h3>
                             <div className="abilities-container-friendly">
                                 {selectedAbilities.map((ability, index) => (
-                                <div key={index} className="ability-square">
+                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[ability.name] }}>
                                     <div className="ability-icon">
                                     <img
                                         src={`./assets/abilityIcons/${ability.name}.png`}
@@ -350,7 +351,7 @@ const Home: React.FC = () => {
                             <h3 style={{ textAlign: "center" }}>(For elo)</h3>
                             <div className="abilities-container-ladder">
                                 {selectedAbilities.map((ability, index) => (
-                                <div key={index} className="ability-square">
+                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[ability.name] }}>
                                     <div className="ability-icon">
                                     <img
                                         src={`./assets/abilityIcons/${ability.name}.png`}
