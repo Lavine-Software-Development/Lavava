@@ -41,7 +41,7 @@ def make_nuke(remove_node):
         node = data[0]
         remove_node(node)
         if node.owner.count == 0:
-            node.owner.killer = player
+            node.owner.killed_event(player)
             print("someone is nuked out")
 
     return nuke_effect
@@ -60,7 +60,7 @@ def make_cannon_shot(id_dict, update_method):
         else:
             loss = cannon.value - MINIMUM_TRANSFER_VALUE
         transfer = loss * CANNON_SHOT_DAMAGE_PERCENTAGE
-        cannon.value -= transfer
+        cannon.value -= loss
         target.delivery(transfer, player)
         update_method(("cannon_shot", (data[0], data[1], transfer)))
 
