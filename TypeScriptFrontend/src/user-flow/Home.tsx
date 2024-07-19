@@ -355,7 +355,7 @@ const Home: React.FC = () => {
                                 <p style={{ textAlign: "center" }} key={index}>
                                     {ability.name}
                                     <img
-                                        src={`./public/assets/abilityIcons/${ability.name}.png`}
+                                        src={`./assets/abilityIcons/${ability.name}.png`}
                                         alt={ability.name}
                                         style={{
                                             width: "30px",

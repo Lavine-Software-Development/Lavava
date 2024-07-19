@@ -177,7 +177,7 @@ const DeckBuilder: React.FC = () => {
                     >
                         {/* icon in background 
                         <div style={{zIndex: 0, opacity: 0.25}}>
-                            <img src={`./public/assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
+                            <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
                             style={{objectFit: 'contain', width: '90%', height: '90%'}}/>
                         </div>
 

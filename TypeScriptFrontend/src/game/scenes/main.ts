@@ -116,6 +116,7 @@ export class MainScene extends Scene {
         this.load.image("Spawn", "Spawn.png");
         this.load.image("Zombie", "Zombie.png");
         this.load.image('Pump', 'Pump.png');
+
     }
     
     create(): void {
@@ -209,7 +210,8 @@ export class MainScene extends Scene {
         this.abilityManager = new AbstractAbilityManager(
             this,
             abilities,
-            events
+            events,
+            y_position + spacing,
         );
     }
 
@@ -244,7 +246,7 @@ export class MainScene extends Scene {
     forfeit(code: number): void {
         console.log("Forfeiting")
         this.simple_send(code);
-        this.abilityManager.forfeit(this);
+        this.abilityManager.forfeit();
     }
 
     keydown(key: number): void {
@@ -538,6 +540,13 @@ export class MainScene extends Scene {
                         );
                         this.statusText.setOrigin(1, 0);
                     }
+                }
+
+                if ('credits' in new_data["player"] && new_data["player"]["credits"] !== this.mainPlayer.credits) {
+                    console.log("credits updated!!");
+                    console.log(new_data["player"]["credits"]);
+                    this.mainPlayer.credits = new_data["player"]["credits"];
+                    this.abilityManager.credits = new_data["player"]["credits"];
                 }
 
                 if (this.gs != new_data["gs"]) {

@@ -17,7 +17,7 @@ class DefaultPlayer(JsonableTick):
     def __init__(self, id):
 
         recurse_values = {'abilities'}
-        tick_values = {'ps'}
+        tick_values = {'ps', 'credits'}
         # tick_values = {'ps', 'count'}
         super().__init__(id, set(), recurse_values, tick_values)
 
@@ -42,6 +42,7 @@ class DefaultPlayer(JsonableTick):
         self.ps = PlayerState()
         self.rank = 0
         self.full_capital_count = 0
+        self.credits = 0
 
     def eliminate(self, rank):
         self.rank = rank
