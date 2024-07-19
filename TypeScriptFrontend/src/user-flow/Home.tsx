@@ -264,25 +264,22 @@ const Home: React.FC = () => {
                                     Join Game
                                 </button>
                             </div>
-                            <h1 style={{ textAlign: "center" }}>
-                                Friendly Match
-                            </h1>
+                            <h1 style={{ textAlign: "center" }}>Friendly Match</h1>
                             <h3 style={{ textAlign: "center" }}>(No elo)</h3>
-                            {selectedAbilities.map((ability, index) => (
-                                <p style={{ textAlign: "center" }} key={index}>
-                                    {ability.name}
-                                    <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name}
-                                        style={{
-                                            width: "30px",
-                                            height: "30px",
-                                            objectFit: "contain",
-                                            marginLeft: "10px",
-                                            marginRight: "10px",
-                                        }}
+                            <div className="abilities-container-friendly">
+                                {selectedAbilities.map((ability, index) => (
+                                <div key={index} className="ability-square">
+                                    <div className="ability-icon">
+                                    <img
+                                        src={`./assets/abilityIcons/${ability.name}.png`}
+                                        alt={ability.name}
+                                        className="ability-img"
                                     />
-                                    : {ability.count}
-                                </p>
-                            ))}
+                                    </div>
+                                    <div className="ability-count">{ability.count}</div>
+                                </div>
+                                ))}
+                            </div>
                             {friendlyMode === "host" ? (
                                 <>
                                     {/* <label>Player Count:</label> */}
@@ -350,26 +347,22 @@ const Home: React.FC = () => {
                     ) : tab === "LADDER" ? (
                         <div>
                             <h1 style={{ textAlign: "center" }}>Ladder</h1>
-                            <h3 style={{ textAlign: "center" }}>(For Elo)</h3>
-                            {selectedAbilities.map((ability, index) => (
-                                <p style={{ textAlign: "center" }} key={index}>
-                                    {ability.name}
+                            <h3 style={{ textAlign: "center" }}>(For elo)</h3>
+                            <div className="abilities-container-ladder">
+                                {selectedAbilities.map((ability, index) => (
+                                <div key={index} className="ability-square">
+                                    <div className="ability-icon">
                                     <img
-                                        src={`./public/assets/abilityIcons/${ability.name}.png`}
+                                        src={`./assets/abilityIcons/${ability.name}.png`}
                                         alt={ability.name}
-                                        style={{
-                                            width: "30px",
-                                            height: "30px",
-                                            objectFit: "contain",
-                                            marginLeft: "10px",
-                                            marginRight: "10px",
-                                        }}
+                                        className="ability-img"
                                     />
-                                    : {ability.count}
-                                </p>
-                            ))}
-                            {/* <label>Player Count:</label> */}
-                            <div style={{ height: '65px' }}></div> 
+                                    </div>
+                                    <div className="ability-count">{ability.count}</div>
+                                </div>
+                                ))}
+                            </div>
+                            <div style={{ height: '43px' }}></div> 
                             <div
                                 className="player-count-drop-down-container"
                                 ref={playerCountDropdownRef}
