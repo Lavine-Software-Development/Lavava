@@ -97,9 +97,23 @@ def poison_effect(data, player):
     edge = data[0]
     edge.to_node.set_state("poison", (player, POISON_TICKS))
 
+# weak burn, only gets one node
 def burn_effect(data, player):
     node = data[0]
     node.is_port = False
+
+# medium burn, gets all interrupted paths of ports *IF FLOWING*
+def burn_setting_effect(data, player):
+    node = data[0]
+    node.set_state("burn")
+
+# strongest burn, gets all interrupted paths of ports
+def spreading_burn_effect(data, player):
+    node = data[0]
+    node.is_port = False
+    for edge in node.outgoing:
+        if edge.to_node.is_port:
+            spreading_burn_effect((edge.to_node), player)
 
 def capital_effect(data, player):
     node = data[0]
@@ -121,7 +135,7 @@ def make_ability_effects(board):
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),
-        BURN_CODE: burn_effect,
+        BURN_CODE: burn_setting_effect,
         POISON_CODE: poison_effect,
         CAPITAL_CODE: capital_effect,
         ZOMBIE_CODE: zombie_effect,

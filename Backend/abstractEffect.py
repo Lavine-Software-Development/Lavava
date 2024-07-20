@@ -21,6 +21,7 @@ class AbstractSpreadingEffect(AbstractEffect):
         super().__init__(expiry_time, effect_type)
         self.incubation_timer = incubation_timer
 
+    @property
     def past_incubation(self):
         return self.counter > self.incubation_timer
 
