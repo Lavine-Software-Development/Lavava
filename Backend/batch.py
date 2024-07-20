@@ -30,7 +30,7 @@ class Batch:
         print(f"Player {player_id} did not respond {self.not_responsive_count[player_id]} times")
     
     def still_send(self, player_id):
-        return self.not_responsive_count[player_id] < 30
+        return self.not_responsive_count[player_id] < 40
         # the frontend sends a message every 1 second to ensure connectivity, and reconnects if lost
         # There are 10 ticks a second, meaning if it hasn't tried to reconnect after 15 ticks (1.5 seconds), it's gone
 

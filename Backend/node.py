@@ -54,7 +54,8 @@ class Node(JsonableTracked):
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
         elif status_name in EFFECT_NAMES:
-            self.effects = self.effects | {status_name: self.new_effect(status_name, data)}
+            if new_effect := self.new_effect(status_name, data):
+                self.effects = self.effects | {status_name: new_effect}
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
@@ -84,7 +85,7 @@ class Node(JsonableTracked):
         elif effect_name == 'rage':
             return Enraged()
         else:
-            print("Effect not found")
+            return None
 
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1
