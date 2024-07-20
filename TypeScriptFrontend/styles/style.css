@@ -208,6 +208,10 @@ input::placeholder {
          1px  1px 0 black; /* White outline */
 }
 
+.default-deck-text {
+    text-align: center;
+}
+
 .info-cards {
     display: flex;
     flex-direction: column;
@@ -217,14 +221,19 @@ input::placeholder {
 .info-card {
     width: 300px;
 }
-.info-card h2 .elo-value {
-    color: white;
+
+.info-card .elo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
 }
 
 .ability-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr); /* Changed from 4 to 5 */
     gap: 10px;
+    /* margin-top: 20px; Add some space below the title */
 }
 
 .ability-button {
@@ -572,6 +581,7 @@ ul {
 .custom-button:hover::after, .ability-button:hover::after {
     opacity: 1;
     visibility: visible; /* Show the tooltip on hover */
+    transition-delay: 1s;
 }
 
 .start-fresh-button {
@@ -584,6 +594,24 @@ ul {
 
 .save-button {
     background-color: #007BFF; /* Blue color for 'Save' button */
+}
+
+.container#deck-builder-container {
+    max-width: 1200px; /* Increased from typical 960px or 1024px */
+    width: 90%; /* Use percentage for responsiveness */
+    /* margin: 0 auto; Center the container */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align content to the top */
+    min-height: 80vh; /* Ensure container has enough height */
+}
+
+/* Add a media query for responsiveness */
+@media (max-width: 1200px) {
+    .container#deck-builder-container {
+        width: 95%;
+    }
 }
 
 .save-button:hover {
@@ -793,6 +821,191 @@ ul {
 
 .btn-cancel:hover {
     background: rgb(32, 32, 32);
+}
+
+.click-instructions {
+    display: inline-flex;
+    align-items: center;
+    gap: 2em; /* Add gap between spans */
+}
+
+.click-instructions span {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8em;
+    margin-top: 1em;
+}
+
+.click-icon {
+    width: 1.2em;
+    height: auto;
+    margin-right: 10px; /* Adjust the spacing as needed */
+    margin-left: 10px;  
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 60px;
+    width: 100%;
+}
+
+.change-password-btn, .logout-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    flex: 1;
+    margin: 0 5px;
+    margin-top: 15px;
+    width: 200px;
+    height: 100px;
+}
+
+.change-password-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.change-password-btn:hover {
+    background-color: #45a049;
+}
+
+.logout-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.logout-btn:hover {
+    background-color: #da190b;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text for better contrast */
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: white;
+}
+
+.modal-content ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.modal-content li {
+    margin-bottom: 5px;
+}
+
+.modal-content button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: white;
+    color: #007bff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.modal-content button:hover {
+    background-color: #f8f9fa;
+    color: #0056b3;
+}
+
+.player-name {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.abilities-container-friendly {
+    display: flex;
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    flex-wrap: wrap; /* Allow wrapping to the next line if there are many abilities */
+    margin-top: 5px;
+}
+
+.abilities-container-ladder {
+    display: flex;
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    flex-wrap: wrap; /* Allow wrapping to the next line if there are many abilities */
+    margin-top: 30px;
+}
+  
+.abilities-container-profile {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next line */
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    max-width: calc(2 * 4rem + 10px); 
+    margin: 0 auto;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.abilities-container-leaderboard {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next line */
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    margin-top: 5px; /* Add space at the top */
+    margin-bottom: 5px;
+}
+
+.ability-square {
+    position: relative;
+    width: 4rem; /* Adjust the size of the square as needed */
+    height: 4rem; /* Adjust the size of the square as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Adjust the border style as needed */
+    border-radius: 8px; /* Optional: Add border radius for rounded corners */
+}
+
+.ability-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ability-img {
+    width: 2.5rem; /* Adjust the icon size as needed */
+    height: 2.5rem; /* Adjust the icon size as needed */
+    object-fit: contain;
+}
+
+.ability-count {
+    position: absolute;
+    bottom: 1px; /* Adjust the position as needed */
+    right: 1px; /* Adjust the position as needed */
+    color: #000; /* Adjust the text color as needed */
+    padding: 2px 5px; /* Adjust the padding as needed */
+    font-size: 0.8rem; /* Adjust the font size as needed */
 }
 
 body {

@@ -1,10 +1,12 @@
 import { IDItem } from "./idItem";
 import { OtherPlayer } from "./otherPlayer";
+import { myPlayer } from "./myPlayer";
 import {
     KeyCodes,
     MINIMUM_TRANSFER_VALUE,
     EventCodes,
     NUKE_RANGE,
+    MINI_BRIDGE_RANGE,
 } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./node";
@@ -51,6 +53,19 @@ const defaultNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
     );
 };
 
+const isWithinScaledRange = (
+    pos1: { x: number, y: number }, 
+    pos2: { x: number, y: number }, 
+    ratio: [number, number],
+    range: number
+): boolean => {
+    const [ratioX, ratioY] = ratio;
+    const scaledDx = (pos1.x - pos2.x) / ratioX;
+    const scaledDy = (pos1.y - pos2.y) / ratioY;
+    const scaledDistanceSquared = scaledDx ** 2 + scaledDy ** 2;
+    return scaledDistanceSquared <= range ** 2;
+};
+
 // Option for improved Nuke, allowing attacks on unowned nodes (and theoretically one's own)
 const defaultNode = (data: IDItem): boolean => {
     const node = data as Node;
@@ -69,7 +84,7 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
     return true;
 };
 
-function attackValidators(nodes: Node[], player: OtherPlayer) {
+function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number]) {
     return function capitalRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
         const capitals = nodes.filter(
@@ -77,11 +92,8 @@ function attackValidators(nodes: Node[], player: OtherPlayer) {
         );
 
         const inCapitalRange = (capital: Node): boolean => {
-            const { x: x1, y: y1 } = node.pos;
-            const { x: x2, y: y2 } = capital.pos;
-            const distance = (x1 - x2) ** 2 + (y1 - y2) ** 2;
-            const capitalNukeRange = (NUKE_RANGE * capital.value) ** 2;
-            return distance <= capitalNukeRange;
+            const capitalNukeRange = NUKE_RANGE * capital.value;
+            return isWithinScaledRange(node.pos, capital.pos, ratio, capitalNukeRange);
         };
 
         return (
@@ -163,7 +175,7 @@ function playerValidators(player: OtherPlayer): {
     // Strongest Freeze. Can swap an incoming flowing edge, hard countering an attack
     const dynamicEdgeOwnEither = (data: IDItem[]): boolean => {
         const edge = data[0] as Edge; // Type casting to Edge for TypeScript
-        return edge.dynamic && (edge.from_node.owner === player || (edge.to_node.owner == player && !edge.on));
+        return edge.dynamic && (edge.from_node.owner === player || edge.to_node.owner == player);
     };
 
     const attackingEdge = (data: IDItem[]): boolean => {
@@ -186,10 +198,11 @@ function playerValidators(player: OtherPlayer): {
 
 function newEdgeValidator(
     edges: Edge[],
-    player: OtherPlayer
-): ValidatorFunc {
+    player: OtherPlayer,
+    ratio: [number, number]
+): { [key: string]: ValidatorFunc } {
 
-    const newEdgeStandard = (data: Node[]): boolean => {
+    const newEdgeStandard = (data: Node[], ): boolean => {
         if (data.length === 1) {
             const firstNode = data[0];
             return firstNode.owner === player && firstNode.is_port;
@@ -204,35 +217,60 @@ function newEdgeValidator(
         }
     };
 
-    return (data: IDItem[]): boolean => {
+    const fullSizeEdgeValidator = (data: IDItem[]): boolean => {
         const nodes = data as Node[]; // Assert all data items are Nodes
         return (
             nodes.every((node) => node.portCount > 0) && newEdgeStandard(nodes)
         );
     };
+
+    // Check if the nodes are within the range of a mini bridge
+    const checkMiniBridgeRange = (nodes: Node[]): boolean => {
+        if (nodes.length === 1) {
+            return true;
+        } else {
+            const [node1, node2] = nodes;
+            return isWithinScaledRange(node1.pos, node2.pos, ratio, MINI_BRIDGE_RANGE);
+        }
+    };
+    
+    const miniBridgeValidator = (data: IDItem[]): boolean => {
+        const nodes = data as Node[];
+        
+        return (
+            checkMiniBridgeRange(nodes) &&
+            fullSizeEdgeValidator(nodes)
+        );
+    };
+
+    return {
+        [KeyCodes.BRIDGE_CODE]: fullSizeEdgeValidator,
+        [KeyCodes.D_BRIDGE_CODE]: fullSizeEdgeValidator,
+        [KeyCodes.MINI_BRIDGE_CODE]: miniBridgeValidator,
+    };
 }
 
 export function makeAbilityValidators(
-    player: OtherPlayer,
+    player: myPlayer,
+    ratio: [number, number],
     nodes: Node[],
     edges: Edge[]
 ): { [key: string]: ValidatorFunc } {
     const abilityValidators: { [key: string]: ValidatorFunc } = {
         [KeyCodes.SPAWN_CODE]: unownedNode,
-        [KeyCodes.BRIDGE_CODE]: newEdgeValidator(edges, player),
-        [KeyCodes.D_BRIDGE_CODE]: newEdgeValidator(edges, player),
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
-        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player),
+        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player, ratio),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
     const playerValidatorsMap = playerValidators(player);
-    return { ...abilityValidators, ...playerValidatorsMap };
+    const newEdgeValidators = newEdgeValidator(edges, player, ratio);
+    return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators };
 }
 
-export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
+export function makeEventValidators(player: myPlayer, edges: Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {
@@ -253,18 +291,17 @@ export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
     }
 
     function pumpDrainValidator(data: IDItem[]): boolean {
-        const node = data[0] as Node;
-        if (data.length === 1) {
-            return (
-                node.owner === player &&
-                node.stateName === "pump" &&
-                node.full
-            );
-        } else if (data.length > 1) {
-            const ability = data[1] as ReloadAbility;
-            return ability.credits < 3;
-        }
-        return false;
+    const node = data[0] as Node;
+        return (
+            node.owner === player &&
+            node.stateName === "pump" &&
+            node.full
+        );
+    }
+
+    function creditUsageValidator(data: IDItem[]): boolean {
+        const ability = data[0] as ReloadAbility;
+        return player.credits >= ability.credits;
     }
 
     function edgeValidator(data: IDItem[]): boolean {
@@ -284,6 +321,7 @@ export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
         [EventCodes.PUMP_DRAIN_CODE]: pumpDrainValidator,
         [EventCodes.STANDARD_LEFT_CLICK]: edgeValidator,
         [EventCodes.STANDARD_RIGHT_CLICK]: edgeValidator,
+        [EventCodes.CREDIT_USAGE_CODE]: creditUsageValidator,
     };
 }
 

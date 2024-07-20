@@ -12,7 +12,8 @@ from constants import (
 from helpers import do_intersect
 from edge import Edge
 from dynamicEdge import DynamicEdge
-from tracker import Tracker
+# from tracker import Tracker
+from capital_tracker import CapitalTracker
 from tracking_decorator.track_changes import track_changes
 
 
@@ -24,7 +25,8 @@ class Board(JsonableTracked):
         self.edges = []
         self.edge_dict = defaultdict(set)
         self.extra_edges = 0
-        self.tracker = Tracker()
+        # self.tracker = Tracker()
+        self.tracker = CapitalTracker()
         self.player_capitals = defaultdict(set)
         self.full_player_capitals = []
 
@@ -39,7 +41,9 @@ class Board(JsonableTracked):
 
     def track_starting_states(self):
         for node in self.nodes:
-            if node.state_name != "default":
+            # if node.state_name != "default":
+            #     self.tracker.node(node)
+            if node.state_name == "capital" and node.owner:
                 self.tracker.node(node)
 
     def track_state_changes(self, nodes):
@@ -165,12 +169,17 @@ class Board(JsonableTracked):
             self.nodeDict[edge2[1]],
         )
 
-    def buy_new_edge(self, node_from, node_to, edge_type):
+    def buy_new_edge(self, node_from, node_to, edge_type, mini):
         new_id = self.new_edge_id()
         if edge_type == DYNAMIC_EDGE:
             newEdge = DynamicEdge(node_to, node_from, new_id)
         else:
             newEdge = Edge(node_to, node_from, new_id)
+
+        # if not mini bridge, then destroy ports
+        if not mini:
+            for node in [node_to, node_from]:
+                node.is_port = False
 
         newEdge.check_status()
         newEdge.popped = True
@@ -182,7 +191,8 @@ class Board(JsonableTracked):
         newEdge.tracked_attributes.update(newEdge.start_values)
 
     def remove_node(self, node):
-        node.owner.count -= 1
+        if node.owner:
+            node.owner.count -= 1
         for edge in node.edges:
             opp = edge.opposite(node)
             opp.edges.discard(edge)

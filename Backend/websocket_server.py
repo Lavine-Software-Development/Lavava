@@ -14,7 +14,6 @@ class WebSocketServer():
 
     async def handler(self, websocket, path):
         async for message in websocket:
-            print("message", message)
             data = json.loads(message)
             await self.process_message(websocket, data)
 
@@ -34,10 +33,10 @@ class WebSocketServer():
         if 'items' in data:
             # print("yoooooo")
 
-            try:
-                self.running_games[game_code].process(token, data)
-            except KeyError:
-                print("Game key not found. Server needs better handling!")
+            # try:
+            self.running_games[game_code].process(token, data)
+            # except KeyError:
+            #     print("Game key not found. Server needs better handling!")
         elif 'action' in data:
             if data['action'] == 'cancel_match':
                 await self.handle_cancel_match(token, game_code)
@@ -78,7 +77,6 @@ class WebSocketServer():
             await websocket.send(message)
             
             if self.waiting_players[game_code].is_ready():
-                print("Game is ready to start")
                 self.running_games[game_code] = self.waiting_players.pop(game_code)
                 print("created game with code ----------------------", game_code)
                 await self.start_game(game_code)
@@ -113,7 +111,7 @@ class WebSocketServer():
                         # await websocket.send(json.dumps({"action": "player_left"}))
                 else:
                     print("Player has left, but key remains, this should only happen once st most per player")
-                    
+            batch.post_tick()
 
             await asyncio.sleep(0.1)
         

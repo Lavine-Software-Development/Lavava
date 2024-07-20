@@ -113,25 +113,27 @@ export class ReloadAbility extends IDItem {
         this.y = 0;
     }
 
-    overlapsWithPosition(position: Phaser.Math.Vector2): boolean {
+    overlapsWithTriangle(position: Phaser.Math.Vector2): boolean {
         // Assuming pointerTriangle has x, y, width, and height properties
         if (this.pointerTriangle && this.pointerTriangle.visible) {
             const bounds = new Phaser.Geom.Rectangle(
                 this.pointerTriangle.x - this.pointerTriangle.originX * this.pointerTriangle.width,
                 this.pointerTriangle.y - this.pointerTriangle.originY * this.pointerTriangle.height,
                 this.pointerTriangle.width,
-                this.pointerTriangle.height
-            );
-
-            return bounds.contains(position.x, position.y);
-        } else {
-            const bounds = new Phaser.Geom.Rectangle(
-                this.x, this.y, 150, 150
-            );
-
+                this.pointerTriangle.height);
             return bounds.contains(position.x, position.y);
         }
+        return false;
     }
+
+    overlapsWithSquare(position: Phaser.Math.Vector2): boolean {
+        const bounds = new Phaser.Geom.Rectangle(
+            this.x, this.y, 150, 150
+        );
+
+        return bounds.contains(position.x, position.y);
+     }
+
 
     get phaserColor(): number {
         return phaserColor(this.visual.color);
@@ -194,8 +196,8 @@ export class ReloadAbility extends IDItem {
 
 
         // Create the text associated with the pointerTriangle
-        let z = 3 - this.credits; // Calculate the value of z
-        this.pointerTriangleText = scene.add.text(this.x - 45, this.y + this.squareSize / 2, `+${z}`, {
+        let z = this.credits; // Calculate the value of z
+        this.pointerTriangleText = scene.add.text(this.x - 45, this.y + this.squareSize / 2, `-${z}`, {
             font: 'bold 24px Arial',
             fill: '#000000'
         });

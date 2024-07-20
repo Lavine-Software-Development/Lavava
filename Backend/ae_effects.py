@@ -3,6 +3,8 @@ from constants import (
     BRIDGE_CODE,
     CANNON_CODE,
     CANNON_SHOT_CODE,
+    CANNON_SHOT_DAMAGE_PERCENTAGE,
+    CREDIT_USAGE_CODE,
     D_BRIDGE_CODE,
     POISON_TICKS,
     PUMP_DRAIN_CODE,
@@ -23,12 +25,13 @@ from constants import (
     MINIMUM_TRANSFER_VALUE,
     GROWTH_STOP,
     NODE_MINIMUM_VALUE,
+    MINI_BRIDGE_CODE,
 )
 
-def make_bridge(buy_new_edge, bridge_type):
+def make_bridge(buy_new_edge, bridge_type, mini=False):
     def bridge_effect(data, player):
         id1, id2 = data
-        buy_new_edge(id1, id2, bridge_type)
+        buy_new_edge(id1, id2, bridge_type, mini)
 
     return bridge_effect
 
@@ -37,6 +40,9 @@ def make_nuke(remove_node):
     def nuke_effect(data, player):
         node = data[0]
         remove_node(node)
+        if node.owner.count == 0:
+            node.owner.killed_event(player)
+            print("someone is nuked out")
 
     return nuke_effect
 
@@ -50,10 +56,11 @@ def make_cannon_shot(id_dict, update_method):
     def cannon_shot(player, data):
         cannon, target = id_dict[data[0]], id_dict[data[1]]
         if target.owner == player:
-            transfer = min(cannon.value - MINIMUM_TRANSFER_VALUE, GROWTH_STOP - target.value)
+            loss = min(cannon.value - MINIMUM_TRANSFER_VALUE, (GROWTH_STOP - target.value) * (1 / CANNON_SHOT_DAMAGE_PERCENTAGE))
         else:
-            transfer = cannon.value - MINIMUM_TRANSFER_VALUE
-        cannon.value -= transfer
+            loss = cannon.value - MINIMUM_TRANSFER_VALUE
+        transfer = loss * CANNON_SHOT_DAMAGE_PERCENTAGE
+        cannon.value -= loss
         target.delivery(transfer, player)
         update_method(("cannon_shot", (data[0], data[1], transfer)))
 
@@ -62,11 +69,15 @@ def make_cannon_shot(id_dict, update_method):
 def make_pump_drain(id_dict):
     def pump_drain(player, data):
         pump_node = id_dict[data[0]]
-        ability_code = data[1]
-        player.abilities[ability_code].remaining += 3 - BREAKDOWNS[ability_code].credits
+        player.credits += 2
         pump_node.state.draining = True
         
     return pump_drain
+
+def credit_usage_effect(player, data):
+    ability_code = data[0]
+    player.credits -= BREAKDOWNS[ability_code].credits
+    player.abilities[ability_code].remaining += 1
 
 def freeze_effect(data, player):
     edge = data[0] 
@@ -106,6 +117,7 @@ def make_ability_effects(board):
     return {
         BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE),
         D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
+        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE, True),
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),
@@ -125,6 +137,7 @@ def make_event_effects(board, update_method):
         PUMP_DRAIN_CODE : make_pump_drain(board.id_dict),
         STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].switch(),
         STANDARD_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].click_swap(),
+        CREDIT_USAGE_CODE: credit_usage_effect
     }
 
 

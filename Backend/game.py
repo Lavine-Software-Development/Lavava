@@ -1,5 +1,5 @@
 from jsonable import JsonableTick
-from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, SECTION_LENGTHS, SPAWN_CODE, EVENT_CODES
+from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, SECTION_LENGTHS, SPAWN_CODE, EVENTS
 from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GSE
 from board import Board
@@ -44,9 +44,7 @@ class ServerGame(JsonableTick):
                 return False
         else:  
             new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
-            print("sign")
             player.use_ability(key, new_data)
-            print("huh")
         
     def event(self, key, player_id, data):
         player = self.player_dict[player_id]
@@ -88,7 +86,7 @@ class ServerGame(JsonableTick):
     def make_events_dict(self):
         validators = make_effect_validators(self.board)
         effects = make_event_effects(self.board, self.update_extra_info)
-        return {code: Event(validators[code], effects[code]) for code in EVENT_CODES}
+        return {code: Event(validators[code], effects[code]) for code in EVENTS}
 
     def set_abilities(self, player, abilities):
         self.player_dict[player].set_abilities(abilities, self.ability_effects, self.board)
@@ -145,6 +143,7 @@ class ServerGame(JsonableTick):
                 player.update()
                 if player.count == 0:
                     self.eliminate(player.id, True)
+                    self.update_extra_info(("player_elimination", (player.id, player.killer.id)))
 
     def determine_ranks_from_capitalize_or_timeout(self):
         # total owned nodes: a
