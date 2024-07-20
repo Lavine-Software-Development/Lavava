@@ -324,10 +324,6 @@ export class MainScene extends Scene {
         
     }
 
-    tick(): void {
-        this.burning = this.burning.filter((node) => !node.burn());
-    }
-
     addToBurn(node: Node): void {
         this.burning.push(node);
     }

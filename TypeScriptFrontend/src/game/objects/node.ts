@@ -178,14 +178,6 @@ export class Node extends IDItem implements INode {
         this.graphics = this._scene.add.graphics();
         this.cannonGraphics = this._scene.add.graphics();
     }
-    burn(): boolean {
-        this.portPercent -= 0.01;
-        if (this.portPercent <= 0) {
-            this.ports = [];
-            return true;
-        }
-        return false;
-    }
 
     draw(): void {
         this.graphics.clear();
@@ -208,7 +200,7 @@ export class Node extends IDItem implements INode {
                 } else if (this.ports.length > 0) {
                     this.drawPorts(Colors.ORANGE);
                     if (this.portPercent > 0) {
-                        this.portPercent -= 0.05;
+                        this.portPercent -= 0.02;
                     }
                     else {
                         this.ports = [];

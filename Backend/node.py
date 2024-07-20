@@ -11,7 +11,7 @@ from constants import (
     BLACK,
 )
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState, PumpState
-from nodeEffect import Poisoned, NodeEnraged
+from nodeEffect import Burning, Poisoned, Enraged
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
 from method_mulitplier import method_multipliers
@@ -77,13 +77,12 @@ class Node(JsonableTracked):
         else:
             return DefaultState(self)
 
-
     def new_effect(self, effect_name, data=[]):
         if effect_name == 'poison':
             originator, length = data
             return Poisoned(originator, length)
         elif effect_name == 'rage':
-            return NodeEnraged()
+            return Enraged()
         else:
             print("Effect not found")
 
