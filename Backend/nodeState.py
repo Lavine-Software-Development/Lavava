@@ -29,9 +29,9 @@ class AbstractState(JsonableSkeleton):
 
     def grow(self):
         change = GROWTH_RATE * self.node.grow_multiplier
-        if self.can_grow(change):
-            return change
-        return 0
+        if self.node.value >= self.full_size or self.node.value + change < 0:
+            return 0
+        return change
     
     def can_grow(self, change):
         return 0 < self.node.value + change < self.full_size
