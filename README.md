@@ -25,7 +25,7 @@ There are currently 3 kinds of structures: Capitals, Cannons, and Pumps. 3 capit
 - Players start by choosing one random start point. Everything else comes from natural energy growth, transferring, and abilities.
 - The map starts with 3 capital states, these can be captured and afford the owning player certain capabilties. Capitals are just one of multiple other 'states' nodes can be in (usually as a result of abilities, as explored further below)
 - The main win condition requires removing all other players from the map, but this can be tedious and so they can forfeit at any point once they're confident they've lost. However a secondary win condition exists in owning 3 full capitals.
-- Every other node is randomly determined to be a port-node. Port-nodes affect certain interactions with specific abilities.
+- 2/3 nodes are randomly determined to be port-nodes. Port-nodes affect certain interactions with specific abilities.
 
 # Ability Breakdown
 1 Credit

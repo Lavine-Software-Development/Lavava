@@ -11,7 +11,7 @@ from constants import (
     BLACK,
 )
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState, PumpState
-from nodeEffect import Burning, Poisoned, Enraged
+from nodeEffect import Poisoned, Enraged
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
 from method_mulitplier import method_multipliers

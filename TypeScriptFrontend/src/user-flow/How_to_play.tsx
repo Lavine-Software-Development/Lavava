@@ -1,5 +1,6 @@
 import "../../styles/style.css";
 import React from "react";
+import { Link } from 'react-router-dom';
 
 const HowToPlay: React.FC = () => {
     return (
@@ -55,7 +56,7 @@ const HowToPlay: React.FC = () => {
                 <ul>
                     <li>
                         Growth stops. Nodes naturally stay at their current
-                        energy.
+                        energy. (this feature is not in play)
                     </li>
                     <li>
                         Free attacking. Attacking an opponents node costs you no
@@ -64,6 +65,25 @@ const HowToPlay: React.FC = () => {
                         If still no player has won after the timer for end-game
                         phase completes, then the winner is determined by which
                         player owns the most nodes.
+                    </li>
+                </ul>
+            </div>
+            <div className="space">
+                <h2>Structures</h2>
+            </div>
+            <div className="space">
+            There are currently 3 kinds of structures: Capitals, Cannons, and Pumps.
+             3 capitals start on the board, whereas the other two structures can only come
+            from being placed by a player using an ability. Structures follow a set of rules:
+            <ul>
+                    <li>
+                        Do not grow, unlike the rest of nodes
+                    </li>
+                    <li>
+                        When captured by an opponent, lose their structure. (The 3 starting capitals on the map are an exception to this rule)
+                    </li>
+                    <li>
+                        Cannot be nuked.
                     </li>
                 </ul>
             </div>
@@ -82,7 +102,7 @@ const HowToPlay: React.FC = () => {
                         nodes be full unless neccessary.
                     </li>
                     <li>
-                        Many of the edges are in fact dynamic, meaning they can
+                        Many of the edges are in fact dynamic (or two-way), meaning they can
                         change the direction they point in. When between
                         teammate nodes, the owner can swap their direction. When
                         between opponent nodes they automatically point in favor
@@ -98,9 +118,7 @@ const HowToPlay: React.FC = () => {
                     <li>
                         The map starts with 3 capital states, these can be
                         captured and afford the owning player certain
-                        capabilties. Capitals are just one of multiple other
-                        'states' nodes can be in (usually as a result of
-                        abilities, as explored further below)
+                        capabilties.
                     </li>
                     <li>
                         The main win condition requires removing all other
@@ -110,9 +128,7 @@ const HowToPlay: React.FC = () => {
                         in owning 3 full capitals.
                     </li>
                     <li>
-                        Every other node is randomly determined to be a
-                        port-node. Port-nodes affect certain interactions with
-                        specific abilities.
+                        2/3 nodes are randomly determined to be port-nodes. Port-nodes affect certain interactions with specific abilities.
                     </li>
                 </ul>
             </div>
@@ -127,78 +143,47 @@ const HowToPlay: React.FC = () => {
                         Identical to choosing a node to start the game.
                     </li>
                     <li>
-                        Freeze: Make a dynamic-edge directional. Effectively
+                        Mini-Bridge: Make a new two-way edge between two port-nodes so long as it doesn't overlap any other edge. Does not Remove ports from nodes its placed on. Has a limited range.
+                    </li>
+                    <li>
+                        Freeze: Make a dynamic (two-way) edge directional (one-way). Effectively
                         stops an opponent from attacking you through that edge,
                         while still keeping it open for your use from the other
-                        side.
+                        side. Can also flip a contested edge in your advantage, so long as it is not flowing.
                     </li>
                     <li>
                         Burn: Make a port node into a standard node (remove its
-                        ports).
-                    </li>
-                    <li>
-                        Zombie: Make a node you own into an unowned wall (Zombie
-                        State). It automatically is set to 200 energy, but all
-                        energy transferred into it is halved (affectively
-                        requires 400 energy to be recaptured by a player).
+                        ports). The burning effect can along flowing outward edge to other port nodes.
+                        Used effectively, this can remove many ports.
                     </li>
                 </ul>
                 <h4>2 credits</h4>
                 <ul>
                     <li>
-                        Bridge: The quintessential ability. Make a new edge
-                        between two port-nodes so long as it doesn't overlap any
-                        other edge.
+                        Bridge: Make a new edge between two *port-nodes* so long as it doesn't overlap any other edge. Bridge removes ports from nodes its placed on.
                     </li>
                     <li>
-                        D-Bridge: Just a dynamic edge. Has its pros and cons.
-                    </li>
-                    <li>
-                        Rage: All nodes you own transfer energy at 2.5 times the
+                        Rage: All nodes you own transfer energy at 3.5 times the
                         rate. Meant for a rush-esque play.
                     </li>
                     <li>
-                        Poison: Choose an edge directly extending from a node
-                        you own. A poison is then sent to the opposing node.
-                        That poison then recurisvely spreads along all edges
-                        that are on. A poisoned node shrinks (loses energy) at
-                        the rate a normal node grows. This happens for 20
-                        seconds.
+                        Capital: Turn any full node you own into a capital. It then immediately shrinks entirely. Flow into them so can become *full*. Capitals act as a win condition, among all the other advantages of structures. Also, allow for using Nuke within the capitals range: determined by its size and a multiplier. Also, capitals cannot be placed directly beside eachother.
                     </li>
                 </ul>
                 <h4>3 credits</h4>
                 <ul>
                     <li>
-                        Nuke: Deletes a node, and all its connecting edges from
-                        the map. To use Nuke, the node selected must be within a
-                        certain perimeter outside a capital the said player
-                        controls.
+                        Nuke: Deletes a node, and all its connecting edges from the map. To use Nuke, the node selected must be within a certain perimeter outside a capital (starting or placed) the said player controls. You cannot Nuke structures.
                     </li>
                     <li>
-                        Capital: Turn any full node you own into a capital. It
-                        then immediately shrinks entirely, and then ceases to
-                        grow naturally, instead relying on transferred in
-                        energy. Capitals have a few usages. They cannot be
-                        poisoned or nuked, enable using Nukes (as explained
-                        above), be built to with a bridge, and most importantly
-                        act as a win condition. If a capital is ever captured,
-                        it returns to a normal node.
+                        Pump: Placed on any node you own. Once full, a pump can be drained (clicked) and it then allows the player to replenish an ability of their choice. One can either get two more 1-credit abilities, or one singular 2-credit ability. You cannot replenish 3-credit+ abilities. Also, pumps take in 150% of the energy flowed into them, both from its owner, and by attackers.
                     </li>
+                </ul>
+                <h4>4 credits</h4>
+                <ul>
                     <li>
-                        Cannon: Placed on any node you own. That node can then
-                        shoot its energy anywhere onto the map. Can be used to
-                        capture unclaimed nodes, transfer energy to a teammate
-                        node in need, or to attack a node far away. If a cannon
-                        is ever captured, unlike capital, the capturing player
-                        now has access to the cannon.
+                        Cannon: Placed on any port-node you own. That node can then shoot its energy to another node so long as its shot path doesn't overlap any other edge. Can be used to capture unclaimed nodes, transfer energy to a teammate node in need, or to attack a node far away. 
                     </li>
-                    <li>Pump: Placed on any node you own. Pump nodes stop naturally 
-                        growing similar to capitals. Transferring into them is also 
-                        halved, similar to Zombie. Once full, a pump can be drained 
-                        (clicked) and it then allows the player to replenish an ability 
-                        of their choice. One can either get two more 1-credit abilities, 
-                        or one singular 2-credit ability. You cannot replenish 3-credit 
-                        abilities.</li>
                 </ul>
             </div>
             <div className="space">
@@ -217,8 +202,8 @@ const HowToPlay: React.FC = () => {
             </div>
             <div className="space">
                 <h1>Got Ideas?</h1>
-                Reach out pal I'd love to hear it. Still lots of ideas in
-                progess.
+                <Link to="/team">Reach out</Link> pal I'd love to hear it. Still lots of ideas in
+                progress.
             </div>
         </div>
     );
