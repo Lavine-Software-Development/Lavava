@@ -1,6 +1,6 @@
 import "../../styles/style.css";
 import React, { useState } from "react";
-import abilityColors from "./ability_utils";  
+import abilityColors from "./ability_utils";
 
 const lightenColor = (color: string, percent: number) => {
     let r: number, g: number, b: number;
@@ -24,25 +24,37 @@ type AbilityProps = {
     image: string;
     onClick: () => void;
     colour: string;
+    reusable: boolean;
+    secondaryAbility: string | null;
 };
 
-const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, image, onClick, colour }) => (
-    <div
-        className="HtPability-window"
-        onClick={onClick}
-        style={{ 
-            '--ability-color': colour, 
-            borderColor: colour, 
-            backgroundColor: `${colour}1A`, 
-            background: `linear-gradient(135deg, ${colour}1A 30%, rgba(255, 255, 255, 0.9) 100%)`,
-            border: `2px solid ${colour}`, 
-            boxShadow: `0 2px 4px ${colour}1A`
-        } as React.CSSProperties}
-    >
-        <h1>{title}</h1>
-        <img src={image} alt={title} className="ability-image" />
-    </div>
-);
+const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, image, onClick, colour, reusable, secondaryAbility }) => {
+    const [showDropdown, setShowDropdown] = useState<boolean>(false);
+
+    const handleMouseEnter = () => setShowDropdown(true);
+    const handleMouseLeave = () => setShowDropdown(false);
+
+    return (
+        <div
+            className="HtPability-window"
+            onClick={onClick}
+            style={{
+                '--ability-color': colour,
+                borderColor: colour,
+                backgroundColor: `${colour}1A`,
+                background: `linear-gradient(135deg, ${colour}1A 30%, rgba(255, 255, 255, 0.9) 100%)`,
+                border: `2px solid ${colour}`,
+                boxShadow: `0 2px 4px ${colour}1A`
+            } as React.CSSProperties}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            <h1>{title}</h1>
+            <img src={image} alt={title} className="ability-image" />
+            
+        </div>
+    );
+};
 
 
 type AbilityData = {
@@ -51,41 +63,81 @@ type AbilityData = {
     Extra_Description: string;
     Usage: string;
     Image: string;
+    Gif: string;
+    Stats: {
+        ReloadTime: string;
+        Credits: number;
+        ClickTypeAndCount: string;
+        Reusable: boolean;
+        SecondaryAbility: string | null;
+    };
 };
 
 type DataStructure = {
     [key: string]: AbilityData[];
 };
 
-const data: DataStructure = {
+const data: DataStructure = {  
     "1 Credit Abilities": [
         {
             Name: "Spawn",
             Description: "Claim an unclaimed node",
             Extra_Description: "Starting energy for a spawned node is 5",
             Usage: "Click on the node you want to spawn on.",
-            Image: "/assets/abilityIcons/Spawn.png"
+            Image: "/assets/abilityIcons/Spawn.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "20 seconds",
+                Credits: 1,
+                ClickTypeAndCount: "1 click",
+                Reusable: true,
+                SecondaryAbility: "This is demo of the more information section"
+            }
         },
         {
             Name: "Freeze",
             Description: "Make a dynamic edge directional",
             Extra_Description: "It'll swap and freeze in your advantage",
             Usage: "Click on the dynamic edge you want to freeze.",
-            Image: "/assets/abilityIcons/Freeze.png"
+            Image: "/assets/abilityIcons/Freeze.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "4 seconds",
+                Credits: 1,
+                ClickTypeAndCount: "1 click",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         },
         {
             Name: "Burn",
             Description: "Convert a port node into a standard node",
             Extra_Description: "Not sure what to put here",
             Usage: "Click on the port node you want to burn.",
-            Image: "/assets/abilityIcons/Burn.png"
+            Image: "/assets/abilityIcons/Burn.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "1 second",
+                Credits: 1,
+                ClickTypeAndCount: "1 click",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         },
         {
             Name: "Zombie",
             Description: "Turn a node you own into a Zombie State.",
             Extra_Description: "Not sure what to put here",
             Usage: "Click on the node you want to turn into a Zombie State.",
-            Image: "/assets/abilityIcons/Zombie.png"
+            Image: "/assets/abilityIcons/Zombie.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "2 seconds",
+                Credits: 1,
+                ClickTypeAndCount: "1 click",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         }
     ],
     "2 Credit Abilities": [
@@ -94,28 +146,60 @@ const data: DataStructure = {
             Description: "Create an edge between two port-nodes",
             Extra_Description: "Not sure what to put here",
             Usage: "Click on the first node you want to bridge, then click on the second node you want to bridge to.",
-            Image: "/assets/abilityIcons/Bridge.png"
+            Image: "/assets/abilityIcons/Bridge.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "2 seconds",
+                Credits: 2,
+                ClickTypeAndCount: "2 clicks",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         },
         {
             Name: "D-Bridge",
             Description: "Create a directional edge between two port-nodes",
             Extra_Description: "Not sure what to put here",
             Usage: "Click on the first node you want to D-Bridge, then click on the second node you want to D-Bridge to.",
-            Image: "/assets/abilityIcons/D-Bridge.png"
+            Image: "/assets/abilityIcons/D-Bridge.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "8 seconds",
+                Credits: 2,
+                ClickTypeAndCount: "2 clicks",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         },
         {
             Name: "Rage",
             Description: "Increase energy transfer rate from your nodes by 2.5 times.",
             Extra_Description: "Not sure what to put here",
             Usage: "Once clicked, all nodes you own will be enraged for the next 10 seconds.",
-            Image: "/assets/abilityIcons/Rage.png"
+            Image: "/assets/abilityIcons/Rage.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "20 seconds",
+                Credits: 2,
+                ClickTypeAndCount: "1 click",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         },
         {
             Name: "Poison",
             Description: "Send poison along edges, edge loses energy over 20 seconds.",
             Extra_Description: "Not sure what to put here",
             Usage: "",
-            Image: "/assets/abilityIcons/Poison.png"
+            Image: "/assets/abilityIcons/Poison.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "5 seconds",
+                Credits: 2,
+                ClickTypeAndCount: "1 click",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         }
     ],
     "3 Credit Abilities": [
@@ -124,28 +208,60 @@ const data: DataStructure = {
             Description: "Destroy all nodes in designated area surrounding the users capital node",
             Extra_Description: "Not sure what to put here",
             Usage: "Click on the node you want to nuke from. It cannot have a structure built on it.",
-            Image: "/assets/abilityIcons/Nuke.png"
+            Image: "/assets/abilityIcons/Nuke.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "2 seconds",
+                Credits: 3,
+                ClickTypeAndCount: "1 click",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         },
         {
             Name: "Capital",
             Description: "Turn a full node into a capital.",
             Extra_Description: "Not sure what to put here",
             Usage: "Click on the node you want to turn into a capital. It cannot have a structure already built on it.",
-            Image: "/assets/abilityIcons/Capital.png"
+            Image: "/assets/abilityIcons/Capital.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "15 seconds",
+                Credits: 3,
+                ClickTypeAndCount: "1 click",
+                Reusable: false,
+                SecondaryAbility: null
+            }
         },
         {
             Name: "Cannon",
             Description: "Fire a cannonball at an enemy node, dealing damage and reducing energy.",
             Extra_Description: "Not sure what to put here",
             Usage: "Click on one of your own nodes you want a cannon to be built on, then click on the enemy node you want to fire at.",
-            Image: "/assets/abilityIcons/Cannon.png"
+            Image: "/assets/abilityIcons/Cannon.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "15 seconds",
+                Credits: 3,
+                ClickTypeAndCount: "2 clicks",
+                Reusable: true,
+                SecondaryAbility: "Can be captured and used by opponents."
+            }
         },
         {
             Name: "Pump",
             Description: "Place on a node to replenish abilities once fully charged.",
             Extra_Description: "Not sure what to put here",
             Usage: "Click on the node you want the pump to be placed on. It cannot have a structure already built on it.",
-            Image: "/assets/abilityIcons/Pump.png"
+            Image: "/assets/abilityIcons/Pump.png",
+            Gif: "",
+            Stats: {
+                ReloadTime: "15 seconds",
+                Credits: 3,
+                ClickTypeAndCount: "1 click",
+                Reusable: true,
+                SecondaryAbility: "Can be drained to replenish abilities."
+            }
         }
     ]
 };
@@ -154,7 +270,6 @@ type AbilitiesListProps = {
     data: DataStructure;
     onAbilityClick: (ability: AbilityData) => void;
 };
-
 
 const AbilitiesList: React.FC<AbilitiesListProps> = ({ data, onAbilityClick }) => (
     <div className="HtPabilities-container">
@@ -168,7 +283,9 @@ const AbilitiesList: React.FC<AbilitiesListProps> = ({ data, onAbilityClick }) =
                     usage={ability.Usage}
                     image={ability.Image}
                     onClick={() => onAbilityClick(ability)}
-                    colour={abilityColors[ability.Name] || 'rgb(200, 200, 200)'} 
+                    colour={abilityColors[ability.Name] || 'rgb(200, 200, 200)'}
+                    reusable={ability.Stats.Reusable}
+                    secondaryAbility={ability.Stats.SecondaryAbility}
                 />
             ))
         )}
@@ -180,17 +297,32 @@ type AbilityDetailProps = {
     onClose: () => void;
 };
 
+
 const AbilityDetail: React.FC<AbilityDetailProps> = ({ ability, onClose }) => {
+    const [showSecondary, setShowSecondary] = useState<boolean>(false);
+
+    React.useEffect(() => {
+        setShowSecondary(false); 
+    }, [ability]);
+
     if (!ability) return null;
 
     const backgroundColor = abilityColors[ability.Name] || 'rgb(200, 200, 200)';
     const lightenedColor = lightenColor(backgroundColor, 0.7);
 
+    const handleInfoClick = () => {
+        if (ability.Stats.Reusable) {
+            setShowSecondary(!showSecondary);
+        }
+    };
+
     return (
-        <div 
+        <div
             className="HtPdetail-view"
-            style={{ 
-                backgroundColor: lightenedColor 
+            style={{
+                backgroundColor: lightenedColor,
+                padding: '20px',
+                maxWidth: '600px',
             }}
         >
             <button className="HtPclose-button" onClick={onClose}>×</button>
@@ -199,6 +331,30 @@ const AbilityDetail: React.FC<AbilityDetailProps> = ({ ability, onClose }) => {
             <h2>{ability.Description}</h2>
             <h3>{ability.Usage}</h3>
             <p>{ability.Extra_Description}</p>
+            <div className="ability-stats">
+                <h3>Stats:</h3>
+                <ul>
+                    <li><strong>Reload Time:</strong> {ability.Stats.ReloadTime}</li>
+                    <li><strong>Credits:</strong> {ability.Stats.Credits}</li>
+                    <li><strong>Click Type and Count:</strong> {ability.Stats.ClickTypeAndCount}</li>
+                    <li>
+                        <strong>Reusable:</strong> 
+                        {ability.Stats.Reusable ? "Yes" : "No"}
+                        {ability.Stats.Reusable && (
+                            <button
+                                onClick={handleInfoClick}
+                                className="info-button"
+                                title="Click to see more about the secondary ability"
+                            >
+                                <span className="info-icon">(i)</span>
+                            </button>
+                        )}
+                    </li>
+                    {showSecondary && ability.Stats.SecondaryAbility && (
+                        <li><strong>Secondary Ability:</strong> {ability.Stats.SecondaryAbility}</li>
+                    )}
+                </ul>
+            </div>
         </div>
     );
 };
@@ -211,7 +367,6 @@ const HowToPlay: React.FC = () => {
     const handleAbilityClick = (ability: AbilityData) => {
         setSelectedAbility(ability);
         setShowGif(true);
-        setTimeout(() => setShowGif(false), 3000); // Hide GIF after 3 seconds
     };
 
     const handleClose = () => {
@@ -260,7 +415,7 @@ const HowToPlay: React.FC = () => {
             <section className="space">
                 <h2>Abilities</h2>
                 <p>In addition to the basic gameplay mechanics, you can use abilities to gain an advantage over your opponents. Here are some of the abilities you can use:</p>
-                <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
+                <div style={{ display: 'flex', gap: '20px', height: 'auto' }}>
                     <div className="HtPabilities-container" style={{ width: selectedAbility ? '50%' : '100%', height: selectedAbility ? 'auto' : '100vh' }}>
                         <AbilitiesList data={data} onAbilityClick={handleAbilityClick} />
                     </div>
