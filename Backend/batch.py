@@ -9,6 +9,10 @@ from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, jso
 import requests
 from pympler import asizeof
 import json
+from config import config
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Batch:
     def __init__(self, count, mode, token, websocket, ability_data):
@@ -40,7 +44,7 @@ class Batch:
         connection_ranks = [item[0] for item in sorted(connection_ranks, key=lambda x: x[1])]
         # this ends up as player token, player id, in order of rank
 
-        url = 'https://userbackend.durb.ca:5001/elo'
+        url = config.USER_BACKEND_URL + '/elo'
         # url = 'http://172.17.0.2:5001/elo' comment out for local testing
         data = {"ordered_players": connection_ranks}
         try:

@@ -242,7 +242,7 @@ export class MainScene extends Scene {
             this.network.socket.readyState === WebSocket.CLOSED
         ) {
             console.log("Detected disconnection, attempting to reconnect...");
-            // this.network.attemptReconnect();
+            this.network.attemptReconnect();
         }
     }
 
