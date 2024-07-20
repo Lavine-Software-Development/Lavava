@@ -11,15 +11,15 @@ from config import config
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, desc
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-
 from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
-
+ 
 if config.DB_CONNECTED:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -111,10 +111,26 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     
     return decorated
+@app.after_request
 
+def after_request(response):
+    # Get the origin of the request
+    origin = request.headers.get('Origin')
 
+    # List of allowed origins
+    allowed_origins = ["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"]
+
+    # Add CORS headers only if the request's origin is in the allowed list
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
+    
+    return response
 @app.route('/login', methods=['POST'])
 def login():
+    if request.method == 'OPTIONS':
+        return '', 200  # CORS preflight request
     data = request.json
     login_identifier = data.get('username').lower()  # This could be either username or email
     password = data.get('password')
@@ -657,4 +673,5 @@ def get_user_details(username):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run( debug=True, host='0.0.0.0', port=5001,)
+    

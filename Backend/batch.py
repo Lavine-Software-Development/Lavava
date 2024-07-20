@@ -40,9 +40,14 @@ class Batch:
         connection_ranks = [item[0] for item in sorted(connection_ranks, key=lambda x: x[1])]
         # this ends up as player token, player id, in order of rank
 
-        url = 'http://localhost:5001/elo'
+        url = 'https://userbackend.durb.ca:5001/elo'
+        # url = 'http://172.17.0.2:5001/elo' comment out for local testing
         data = {"ordered_players": connection_ranks}
-        response = requests.post(url, json=data)
+        try:
+            response = requests.post(url, json=data)
+        except Exception as e:
+            print(e)
+            return
         
         if response.status_code == 200:
             try:

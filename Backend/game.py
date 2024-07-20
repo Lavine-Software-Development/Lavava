@@ -9,7 +9,7 @@ from player import DefaultPlayer
 from ae_effects import make_event_effects
 from ae_validators import make_effect_validators
 from event import Event
-
+import sys
 class ServerGame(JsonableTick):
     def __init__(self, player_count, gs):
 
@@ -34,7 +34,7 @@ class ServerGame(JsonableTick):
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
-        print(player.ps.state, PSE.START_SELECTION)
+        # print(player.ps.state, PSE.START_SELECTION)
         if player.ps.state == PSE.START_SELECTION:
             if key == SPAWN_CODE:
                 data_items = [self.board.id_dict[d] for d in data]
@@ -98,7 +98,9 @@ class ServerGame(JsonableTick):
     @property
     def all_player_starts_selected(self):
         return all([p.ps.state in (PSE.START_WAITING, PSE.ELIMINATED) for p in self.player_dict.values()])
-    
+    @property 
+    def no_player_starts_selected(self):
+        return all([p.ps.state == PSE.START_SELECTION for p in self.player_dict.values()]) 
     def update_timer(self):
 
         if self.countdown_timer > 0:
@@ -108,8 +110,15 @@ class ServerGame(JsonableTick):
                 self.times[self.current_section] = 3
 
             if self.countdown_timer <= 0:
-
+                if self.no_player_starts_selected:
+                    print("Neither player selected start node")
+                    for player in self.player_dict.values():
+                        player.ps.eliminate()
+                        self.update_extra_info("Aborted")
+                    self.board.end_game()
+                    return
                 if self.gs.value < GSE.END_GAME.value:
+                    print("updating section")
                     self.current_section += 1
 
                     if self.gs.value == GSE.START_SELECTION.value:
@@ -125,6 +134,8 @@ class ServerGame(JsonableTick):
         self.update_timer()
         # print("remaining player:", self.remaining)
         if self.gs.value >= GSE.PLAY.value:
+            # print("Gamestaet value: " + str(self.gs.value))
+            sys.stdout.flush()
             self.board.update()
             self.player_update()
 
@@ -143,7 +154,13 @@ class ServerGame(JsonableTick):
                 player.update()
                 if player.count == 0:
                     self.eliminate(player.id, True)
-                    self.update_extra_info(("player_elimination", (player.id, player.killer.id)))
+                    if player.killer:
+                        self.update_extra_info(("player_elimination", (player.id, player.killer.id)))
+                    else:
+                        self.update_extra_info(("timed_out", (player.id)))
+
+
+                    print("the killer is", player.killer)
 
     def determine_ranks_from_capitalize_or_timeout(self):
         # total owned nodes: a

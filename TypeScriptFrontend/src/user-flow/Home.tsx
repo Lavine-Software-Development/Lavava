@@ -8,7 +8,7 @@ const Home: React.FC = () => {
     const [selectedAbilities, setSelectedAbilities] = useState<any[]>([]);
     const [tab, setTab] = useState("");
     const [playerCount, setPlayerCount] = useState(() => {
-        const savedPlayerCount = sessionStorage.getItem('playerCount');
+        const savedPlayerCount = sessionStorage.getItem("playerCount");
         return savedPlayerCount ? parseInt(savedPlayerCount, 10) : 2;
     });
     const [keyCode, setKeyCode] = useState("");
@@ -24,11 +24,15 @@ const Home: React.FC = () => {
     useEffect(() => {
         sessionStorage.removeItem("key_code");
         const urlParams = new URLSearchParams(window.location.search);
-        const invalidCode = urlParams.get('invalidCode');
-        if (invalidCode === 'true') {
+        const invalidCode = urlParams.get("invalidCode");
+        if (invalidCode === "true") {
             setShowInvalidCodePopup(true);
-        // Remove the query parameter
-            window.history.replaceState({}, document.title, window.location.pathname);
+            // Remove the query parameter
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            );
         }
 
         const storedAbilities = sessionStorage.getItem("selectedAbilities");
@@ -48,15 +52,18 @@ const Home: React.FC = () => {
                     Authorization: `Bearer ${token}`,
                 },
             })
-                .then(response => response.json())
-                .then(data => {
+                .then((response) => response.json())
+                .then((data) => {
                     if (data && data.abilities) {
                         const abilities = data.abilities;
-                        sessionStorage.setItem("selectedAbilities", JSON.stringify(abilities));
+                        sessionStorage.setItem(
+                            "selectedAbilities",
+                            JSON.stringify(abilities)
+                        );
                         setSelectedAbilities(abilities);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error("Failed to fetch abilities:", error);
                 });
         }
@@ -69,13 +76,11 @@ const Home: React.FC = () => {
         if (storedFriendlyMode) {
             setFriendlyMode(storedFriendlyMode);
         }
-        
     }, []);
-
 
     const hostTab = (e: number) => {
         setPlayerCount(e);
-        sessionStorage.setItem('playerCount', e.toString());
+        sessionStorage.setItem("playerCount", e.toString());
         setPlayerCountDropdownOpen(false);
     };
 
@@ -83,6 +88,7 @@ const Home: React.FC = () => {
         sessionStorage.setItem("type", "HOST");
         sessionStorage.setItem("player_count", playerCount.toString());
         sessionStorage.removeItem("key_code");
+        sessionStorage.setItem("reconnect", "false");
         navigate("/lobby");
     };
 
@@ -90,12 +96,14 @@ const Home: React.FC = () => {
         sessionStorage.setItem("type", "LADDER");
         sessionStorage.setItem("player_count", playerCount.toString());
         sessionStorage.removeItem("key_code");
+        sessionStorage.setItem("reconnect", "false");
         navigate("/lobby");
     };
 
     const handleJoinGame = () => {
         sessionStorage.setItem("type", "JOIN");
         sessionStorage.setItem("key_code", keyCode);
+        sessionStorage.setItem("reconnect", "false");
         navigate("/lobby");
     };
 
@@ -226,13 +234,13 @@ const Home: React.FC = () => {
                         onClick={() => navigate("/login")}
                     />
                 )} */}
-                 <input
+                <input
                     type="submit"
                     className="btn"
                     value="The Team"
                     onClick={() => navigate("/team")}
                 />
-                <div style={{ height: '10px' }}></div> 
+                <div style={{ height: "10px" }}></div>
             </div>
             {selectedAbilities.length > 0 && tab !== "" && (
                 <div className="profile-card">
@@ -267,6 +275,7 @@ const Home: React.FC = () => {
                             </div>
                             <h1 style={{ textAlign: "center" }}>Friendly Match</h1>
                             <h3 style={{ textAlign: "center" }}>(No elo)</h3>
+
                             <div className="abilities-container-friendly">
                                 {selectedAbilities.map((ability, index) => (
                                 <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[ability.name] }}>
@@ -320,9 +329,7 @@ const Home: React.FC = () => {
                                 </>
                             ) : (
                                 <>
-                                    <div
-                                        className="key-code-container"
-                                    >
+                                    <div className="key-code-container">
                                         <input
                                             type="text"
                                             className="text-box"
@@ -358,6 +365,7 @@ const Home: React.FC = () => {
                                         alt={ability.name}
                                         className="ability-img"
                                     />
+
                                     </div>
                                     <div className="ability-count">{ability.count}</div>
                                 </div>
@@ -429,7 +437,9 @@ const Home: React.FC = () => {
                 {showInvalidCodePopup && (
                     <div className="popup invalid-code-popup">
                         <p>Invalid game code. Please try again.</p>
-                        <button onClick={() => setShowInvalidCodePopup(false)}>OK</button>
+                        <button onClick={() => setShowInvalidCodePopup(false)}>
+                            OK
+                        </button>
                     </div>
                 )}
             </div>
@@ -438,3 +448,4 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
