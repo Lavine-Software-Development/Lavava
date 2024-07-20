@@ -114,7 +114,8 @@ export class MainScene extends Scene {
         this.load.image("Rage", "Rage.png");
         this.load.image("Spawn", "Spawn.png");
         this.load.image("Zombie", "Zombie.png");
-        this.load.image("Pump", "Pump.png");
+
+        this.load.image('Pump', 'Pump.png');
     }
 
     create(): void {
@@ -156,16 +157,17 @@ export class MainScene extends Scene {
         Object.values(this.edges).forEach((edge) => edge.draw());
     }
 
+    getEdges(): Edge[] {
+        return Object.values(this.edges);
+    }
+
     private createAbilityManager() {
-        const ev = makeEventValidators(
-            this.mainPlayer,
-            Object.values(this.edges)
-        );
+        const ev = makeEventValidators(this.mainPlayer, this.getEdges.bind(this));
         const ab = makeAbilityValidators(
             this.mainPlayer,
             this.ratio,
             Object.values(this.nodes),
-            Object.values(this.edges)
+            this.getEdges.bind(this)
         );
         const events: { [key: number]: Event } = {};
         const abilities: { [key: number]: ReloadAbility } = {};
@@ -208,7 +210,8 @@ export class MainScene extends Scene {
         this.abilityManager = new AbstractAbilityManager(
             this,
             abilities,
-            events
+            events,
+            y_position + spacing,
         );
     }
 
@@ -246,7 +249,7 @@ export class MainScene extends Scene {
     forfeit(code: number): void {
         console.log("Forfeiting");
         this.simple_send(code);
-        this.abilityManager.forfeit(this);
+        this.abilityManager.forfeit();
     }
 
     keydown(key: number): void {
@@ -333,10 +336,6 @@ export class MainScene extends Scene {
             const node = this.abilityManager.clicks[0] as Node;
             this.drawScaledCircle(node, MINI_BRIDGE_RANGE, Colors.PINK);
         }
-    }
-
-    tick(): void {
-        this.burning = this.burning.filter((node) => !node.burn());
     }
 
     addToBurn(node: Node): void {
@@ -516,7 +515,7 @@ export class MainScene extends Scene {
             ])
         );
 
-        this.parse(this.edges, e);
+        this.parse(this.edges, e, false);
 
         VISUALS[NameToCode["Spawn"]].color = this.mainPlayer.color;
     }
@@ -552,6 +551,13 @@ export class MainScene extends Scene {
                         );
                         this.statusText.setOrigin(1, 0);
                     }
+                }
+
+                if ('credits' in new_data["player"] && new_data["player"]["credits"] !== this.mainPlayer.credits) {
+                    console.log("credits updated!!");
+                    console.log(new_data["player"]["credits"]);
+                    this.mainPlayer.credits = new_data["player"]["credits"];
+                    this.abilityManager.credits = new_data["player"]["credits"];
                 }
 
                 if (this.gs != new_data["gs"]) {
@@ -650,12 +656,10 @@ export class MainScene extends Scene {
                     });
                 }
 
-                this.parse(this.nodes, new_data["board"]["nodes"], true);
-                this.parse(this.edges, new_data["board"]["edges"]);
-                this.parse(
-                    this.abilityManager.abilities,
-                    new_data["player"]["abilities"]
-                );
+
+                this.parse(this.nodes, new_data["board"]["nodes"], new_data["isRefresh"], true);
+                this.parse(this.edges, new_data["board"]["edges"], new_data["isRefresh"]);
+                this.parse(this.abilityManager.abilities, new_data["player"]["abilities"], false);
                 Object.values(this.edges).forEach((edge) => edge.draw());
             } else {
             }
@@ -672,20 +676,33 @@ export class MainScene extends Scene {
             let player1 = tuple[1][0];
             let player2 = tuple[1][1];
 
-            let eliminationText = this.add.text(
-                (this.sys.game.config.width as number) / 2,
-                (this.sys.game.config.height as number) / 2,
-                `${player2} killed ${player1}`,
-                { fontFamily: "Arial", fontSize: "32px", color: "#FF0000" }
-            );
+            let eliminationText;
+
+            if (player2 == this.mainPlayer.name && this.otherPlayers.length > 2) {
+                eliminationText = this.add.text(
+                    this.sys.game.config.width as number / 2,
+                    20,
+                    `3 credit reward for killing player ${player1}`,
+                    { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
+                );
+            } else {
+                eliminationText = this.add.text(
+                    this.sys.game.config.width as number / 2,
+                    20,
+                    `player ${player2} killed player ${player1}`,
+                    { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
+                );
+            }
+
             eliminationText.setOrigin(0.5);
 
             //Make the text fade out after a few seconds
             this.tweens.add({
                 targets: eliminationText,
                 alpha: 0,
-                duration: 6000,
-                ease: "Power2",
+
+                duration: 8000,
+                ease: 'Power2',
                 onComplete: () => {
                     eliminationText.destroy();
                 },
@@ -805,7 +822,17 @@ export class MainScene extends Scene {
         );
     }
 
-    parse(this, items, updates, redraw = false) {
+    parse(this, items, updates, refresh, redraw=false) {
+
+        if (refresh === true) {
+            Object.keys(items).forEach(key => {
+                if (!updates.hasOwnProperty(key)) {
+                    items[key].delete();
+                    delete items[key];
+                }
+            });
+        }
+
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {
                 let new_edge = new Edge(

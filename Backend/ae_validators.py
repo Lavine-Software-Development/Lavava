@@ -1,5 +1,5 @@
 from math import dist
-from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINI_BRIDGE_RANGE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
+from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINI_BRIDGE_RANGE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE, CREDIT_USAGE_CODE
 
 
 def no_click(data):
@@ -121,20 +121,18 @@ def make_cannon_shot_check(check_new_edge, id_dict):
         return can_shoot and can_accept and no_crossovers(check_new_edge, [id_dict[data[0]], id_dict[data[1]]], player)
     return cannon_shot_check
 
+
 def make_pump_drain_check(id_dict):
 
-    def valid_node(node, player):
+    def pump_drain(player, data):
+        node = id_dict[data[0]]
         return node.state_name == "pump" and node.owner == player and node.full()
-    
-    def valid_ability(ability_code, player):
-        return ability_code in player.abilities and BREAKDOWNS[ability_code].credits < 3
-
-    def pump_drain_check(player, data):
-        pump = id_dict[data[0]]
-        ability_code = data[1]
-        return valid_node(pump, player) and valid_ability(ability_code, player)
         
-    return pump_drain_check
+    return pump_drain
+
+def valid_ability_for_credits(player, data):
+    ability_code = data[0]
+    return ability_code in player.abilities and BREAKDOWNS[ability_code].credits <= player.credits
 
 def make_new_edge_ports(check_new_edge, player):
     def new_edge_ports(data):
@@ -173,5 +171,6 @@ def make_effect_validators(board):
         PUMP_DRAIN_CODE: make_pump_drain_check(board.id_dict),
         STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].valid_left_click(player),
         STANDARD_RIGHT_CLICK: lambda player, data: board.id_dict[data[0]].valid_right_click(player),
+        CREDIT_USAGE_CODE : valid_ability_for_credits,
     }
 

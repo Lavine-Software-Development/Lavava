@@ -206,6 +206,10 @@ input::placeholder {
         1px 1px 0 black; /* White outline */
 }
 
+.default-deck-text {
+    text-align: center;
+}
+
 .info-cards {
     display: flex;
     flex-direction: column;
@@ -215,8 +219,12 @@ input::placeholder {
 .info-card {
     width: 300px;
 }
-.info-card h2 .elo-value {
-    color: white;
+
+.info-card .elo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
 }
 
 .ability-grid {
@@ -840,7 +848,7 @@ ul {
 .button-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
+    margin-top: 60px;
     width: 100%;
 }
 
@@ -853,6 +861,9 @@ ul {
     transition: background-color 0.3s;
     flex: 1;
     margin: 0 5px;
+    margin-top: 15px;
+    width: 200px;
+    height: 100px;
 }
 
 .change-password-btn {
@@ -932,3 +943,70 @@ ul {
     text-decoration: underline;
 }
 
+.abilities-container-friendly {
+    display: flex;
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    flex-wrap: wrap; /* Allow wrapping to the next line if there are many abilities */
+    margin-top: 5px;
+}
+
+.abilities-container-ladder {
+    display: flex;
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    flex-wrap: wrap; /* Allow wrapping to the next line if there are many abilities */
+    margin-top: 30px;
+}
+  
+.abilities-container-profile {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next line */
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    max-width: calc(2 * 4rem + 10px); 
+    margin: 0 auto;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.abilities-container-leaderboard {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next line */
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    margin-top: 5px; /* Add space at the top */
+    margin-bottom: 5px;
+}
+
+.ability-square {
+    position: relative;
+    width: 4rem; /* Adjust the size of the square as needed */
+    height: 4rem; /* Adjust the size of the square as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Adjust the border style as needed */
+    border-radius: 8px; /* Optional: Add border radius for rounded corners */
+}
+
+.ability-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ability-img {
+    width: 2.5rem; /* Adjust the icon size as needed */
+    height: 2.5rem; /* Adjust the icon size as needed */
+    object-fit: contain;
+}
+
+.ability-count {
+    position: absolute;
+    bottom: 1px; /* Adjust the position as needed */
+    right: 1px; /* Adjust the position as needed */
+    color: #000; /* Adjust the text color as needed */
+    padding: 2px 5px; /* Adjust the padding as needed */
+    font-size: 0.8rem; /* Adjust the font size as needed */
+}

@@ -4,17 +4,17 @@ import config from '../env-config';
 const teamMembers = [
     { 
         name: 'Ryan', 
-        profilePic: '../images/Team/ryan.jpg', 
+        profilePic: './assets/Team/ryan.jpg', 
         intro: 'Frontend Developer' 
     },
     { 
         name: 'Ian', 
-        profilePic: '../images/Team/ian_lavine.jpeg', 
+        profilePic: './assets/Team/ian_lavine.jpeg', 
         intro: 'Backend Developer' 
     },
     { 
         name: 'Akash', 
-        profilePic: '../images/Team/akash.jpeg', 
+        profilePic: './assets/Team/akash.jpeg', 
         intro: 'Networking Engineer' 
     }
 ];
@@ -60,7 +60,7 @@ const Team: React.FC = () => {
     };
 
     return (
-        <div class="team-section">
+        <div className="team-section">
             <h1 className="team-title">The Team</h1>
             <div className="team-container">
                 {teamMembers.map((member, index) => (

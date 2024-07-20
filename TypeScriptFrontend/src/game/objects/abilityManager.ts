@@ -15,11 +15,14 @@ export class AbstractAbilityManager {
     clicks: IDItem[] = [];
     abilityText: Phaser.GameObjects.Text;
     BridgeGraphics: Phaser.GameObjects.Graphics;
+    _credits: number = 0;
+    bonusCreditsText: Phaser.GameObjects.Text;
 
     constructor(
         scene: Phaser.Scene,
         abilities: { [key: number]: ReloadAbility },
-        events: { [key: number]: Event }
+        events: { [key: number]: Event },
+        bonusTextY: number
     ) {
         this.abilities = abilities;
         this.events = events;
@@ -34,11 +37,36 @@ export class AbstractAbilityManager {
             color: "#000000",
         });
 
+        this.bonusCreditsText = scene.add.text(x - 80, bonusTextY, "", {
+            fontSize: "60px",
+            align: "right",
+            color: "#000000",
+        });
+
         // Set origin to (1, 1) to align text to the bottom right
         this.abilityText.setOrigin(1, 1);
     }
 
-    forfeit(scene): void {
+    get credits(): number {
+        return this._credits;
+    }
+
+    set credits(value: number) {
+        this._credits = value;
+        if (value == 0) {
+            this.bonusCreditsText.setText("");
+            return
+        }
+        else {
+            this.updateBonusCreditsText(value);
+        }
+    }
+
+    updateBonusCreditsText(value: number): void {
+        this.bonusCreditsText.setText(`+${value}`);
+    }
+
+    forfeit(): void {
         this.reset();
     }
 
@@ -54,6 +82,10 @@ export class AbstractAbilityManager {
         // Remove the ability text if it exists
         if (this.abilityText) {
             this.abilityText.destroy();
+        }
+
+        if (this.bonusCreditsText) {
+            this.bonusCreditsText.destroy();
         }
     
         // Call delete on each ability
@@ -114,7 +146,7 @@ export class AbstractAbilityManager {
     clickSelect(position): number | null {
         for (const key in this.abilities) {
             const ability = this.abilities[key];
-            if (ability.overlapsWithPosition(position)) {
+            if (ability.overlapsWithSquare(position)) {
                 return ability.id;
             }
         }
@@ -208,7 +240,7 @@ export class AbstractAbilityManager {
         // loop through all the abilities values, and pass them into validate
         for (const key in this.abilities) {
             const ability = this.abilities[key];
-            if (ability.overlapsWithPosition(position)) {
+            if (ability.overlapsWithTriangle(position)) {
                 const item = this.validate(ability);
                 if (item) {
                     return item;
@@ -247,7 +279,7 @@ export class AbstractAbilityManager {
     
         for (let key in this.abilities) {
             const isSelected = this.mode === parseInt(key);
-            let clickable = this.event?.visual.name == "Pump Drain" && this.abilities[key].credits < 3;
+            let clickable = this.credits >= this.abilities[key].credits;
             this.abilities[key].draw(scene, isSelected, clickable);
         }
     }

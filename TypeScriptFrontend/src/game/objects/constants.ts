@@ -55,6 +55,7 @@ export const EventCodes = {
     PUMP_DRAIN_CODE: 5,
     STANDARD_LEFT_CLICK: 1,
     STANDARD_RIGHT_CLICK: 3,
+    CREDIT_USAGE_CODE: 6,
 };
 
 export const stateCodes = {
@@ -91,13 +92,15 @@ export const AbilityCredits = {
     [KeyCodes.FREEZE_CODE]: 1,
     [KeyCodes.BURN_CODE]: 1,
     [KeyCodes.ZOMBIE_CODE]: 1,
+    [KeyCodes.MINI_BRIDGE_CODE]: 1,
     [KeyCodes.BRIDGE_CODE]: 2,
     [KeyCodes.D_BRIDGE_CODE]: 2,
     [KeyCodes.RAGE_CODE]: 2,
     [KeyCodes.POISON_CODE]: 2,
+    [KeyCodes.CAPITAL_CODE]: 2,
     [KeyCodes.NUKE_CODE]: 3,
-    [KeyCodes.CAPITAL_CODE]: 3,
-    [KeyCodes.CANNON_CODE]: 3,
+    [KeyCodes.PUMP_CODE]: 3,
+    [KeyCodes.CANNON_CODE]: 4,
 };
 
 export const AbilityReloadTimes = {
@@ -118,4 +121,4 @@ export const GROWTH_STOP = 250;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
 export const NUKE_RANGE = 0.7;
-export const MINI_BRIDGE_RANGE = 100;
+export const MINI_BRIDGE_RANGE = 150;

@@ -570,7 +570,7 @@ def get_abilities():
         # },
         {
             "name": "Capital", 
-            "cost": 3,
+            "cost": 2,
             "description": "Create a capital" 
         },
         {

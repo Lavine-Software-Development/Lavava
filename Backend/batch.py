@@ -30,7 +30,7 @@ class Batch:
         print(f"Player {player_id} did not respond {self.not_responsive_count[player_id]} times")
     
     def still_send(self, player_id):
-        return self.not_responsive_count[player_id] < 30
+        return self.not_responsive_count[player_id] < 40
         # the frontend sends a message every 1 second to ensure connectivity, and reconnects if lost
         # There are 10 ticks a second, meaning if it hasn't tried to reconnect after 15 ticks (1.5 seconds), it's gone
 
@@ -89,6 +89,7 @@ class Batch:
         game_dict = self.game.full_tick_json
         game_dict["player"] = self.player_tick_repr(player_id)
         game_dict["isFirst"] = False
+        game_dict["isRefresh"] = True
         return plain_json(game_dict)
         
     def start(self):
@@ -104,6 +105,7 @@ class Batch:
         start_dict["player_id"] = player_id
         start_dict["abilities"] = json_abilities.start_json()
         start_dict['isFirst'] = True
+        start_dict["isRefresh"] = False
         start_json = plain_json(start_dict)
         return start_json
     
@@ -118,6 +120,7 @@ class Batch:
         if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {} and self.mode == "LADDER":
             self.tick_dict["new_elos"] = self.elo_changes[player_id]
         self.tick_dict["isFirst"] = False
+        self.tick_dict["isRefresh"] = False
         tick_json = plain_json(self.tick_dict)
         return tick_json
 
@@ -161,12 +164,9 @@ class Batch:
         #     self.game.eliminate(player_id)
         #     self.has_left[player_id] = True
         elif key in ALL_ABILITIES:
-            print("ABILITY")
             self.game.effect(key, player_id, data['items'])
         elif key in EVENTS:
-            print("EVENT")
             self.game.event(key, player_id, data['items'])
         else:
             print("NOT ALLOWED")
-        print("Done processing")
         

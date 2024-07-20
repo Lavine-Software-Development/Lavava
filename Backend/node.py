@@ -11,7 +11,7 @@ from constants import (
     BLACK,
 )
 from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState, PumpState
-from nodeEffect import Poisoned, NodeEnraged
+from nodeEffect import Poisoned, Enraged
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
 from method_mulitplier import method_multipliers
@@ -54,7 +54,8 @@ class Node(JsonableTracked):
             self.state = self.new_state(status_name, data)
             self.state_name = status_name
         elif status_name in EFFECT_NAMES:
-            self.effects = self.effects | {status_name: self.new_effect(status_name, data)}
+            if new_effect := self.new_effect(status_name, data):
+                self.effects = self.effects | {status_name: new_effect}
         self.calculate_interactions()
 
     def new_state(self, state_name, data=None):
@@ -77,15 +78,14 @@ class Node(JsonableTracked):
         else:
             return DefaultState(self)
 
-
     def new_effect(self, effect_name, data=[]):
         if effect_name == 'poison':
             originator, length = data
             return Poisoned(originator, length)
         elif effect_name == 'rage':
-            return NodeEnraged()
+            return Enraged()
         else:
-            print("Effect not found")
+            return None
 
     def calculate_interactions(self):
         inter_grow, inter_intake, inter_expel = 1, 1, 1
@@ -128,28 +128,17 @@ class Node(JsonableTracked):
         return self.owner is not None and self.owner.ps.value < PSE.ELIMINATED.value
 
     def tick(self):
-        self.value += self.grow()
-        self.effects_update()
+        self.value = min(self.value + self.grow(), self.full_size)
+        self.effects_update(lambda effect: effect.count())
 
     def grow(self):
         return self.state.grow()
 
-    def effects_update(self):
-
-        removed_effects = self.effects_tick()
-
-        if removed_effects:
+    def effects_update(self, condition_func):
+        original_length = len(self.effects)
+        self.effects = {key: effect for key, effect in self.effects.items() if condition_func(effect)}
+        if len(self.effects) < original_length:
             self.calculate_interactions()
-    
-    def effects_tick(self):
-        effects_to_remove = [key for key, effect in self.effects.items() if not effect.count()]
-        if effects_to_remove:
-            copied = self.effects.copy()
-            for key in effects_to_remove:
-                copied.pop(key)
-            self.effects = copied
-            return True
-        return False
 
     def delivery(self, amount, player):
         self.value += self.state.intake(amount, player)
@@ -173,7 +162,7 @@ class Node(JsonableTracked):
         if self.owner is not None and self.owner != player:
             self.owner.count -= 1
             if self.owner.count == 0:
-                self.owner.killer = player
+                self.owner.killed_event(player)
         if player is not None:
             player.count += 1
         self.owner = player
@@ -187,6 +176,7 @@ class Node(JsonableTracked):
         self.expand()
         if self.state.reset_on_capture:
             self.set_default_state()
+        self.effects_update(lambda effect: effect.capture_removal(player))
 
     def absorbing(self):
         for edge in self.incoming:
@@ -202,7 +192,11 @@ class Node(JsonableTracked):
         return self.state.swap_status
 
     def full(self):
-        return self.value >= self.state.full_size
+        return self.value >= self.full_size
+    
+    @property
+    def full_size(self):
+        return self.state.full_size
     
     @property
     def incoming(self):
