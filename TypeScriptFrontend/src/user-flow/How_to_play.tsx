@@ -8,23 +8,12 @@ type AbilityProps = {
     usage: string;
     image: string;
     onClick: () => void;
-    onClose: () => void;
-    isExpanded: boolean;
 };
 
-const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, image, onClick, onClose, isExpanded }) => (
-    <div className={`HtPability-window ${isExpanded ? "expanded" : ""}`} onClick={!isExpanded ? onClick : undefined}>
-        {isExpanded && <button className="HtPclose-button" onClick={onClose}>×</button>}
+const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, image, onClick }) => (
+    <div className="HtPability-window" onClick={onClick}>
         <h1>{title}</h1>
-        {!isExpanded && <img src={image} alt={title} className="ability-image" />}
-        {isExpanded && (
-            <>
-                <img src={image} alt={title} className="ability-image" />
-                <h2>{desc}</h2>
-                <h3>{usage}</h3>
-                <p>{extra}</p>
-            </>
-        )}
+        <img src={image} alt={title} className="ability-image" />
     </div>
 );
 
@@ -133,42 +122,63 @@ const data: DataStructure = {
     ]
 };
 
-const AbilitiesList: React.FC<{ data: DataStructure }> = ({ data }) => {
-    const [expandedAbility, setExpandedAbility] = useState<string | null>(null);
+type AbilitiesListProps = {
+    data: DataStructure;
+    onAbilityClick: (ability: AbilityData) => void;
+};
 
-    const handleAbilityClick = (abilityName: string) => {
-        setExpandedAbility(abilityName === expandedAbility ? null : abilityName);
-    };
+const AbilitiesList: React.FC<AbilitiesListProps> = ({ data, onAbilityClick }) => (
+    <div className="HtPabilities-container">
+        {Object.keys(data).map((category) =>
+            data[category].map((ability, index) => (
+                <Ability
+                    key={`${category}-${index}`}
+                    title={ability.Name}
+                    desc={ability.Description}
+                    extra={ability.Extra_Description}
+                    usage={ability.Usage}
+                    image={ability.Image}
+                    onClick={() => onAbilityClick(ability)}
+                />
+            ))
+        )}
+    </div>
+);
 
-    const handleClose = () => {
-        setExpandedAbility(null);
-    };
+type AbilityDetailProps = {
+    ability: AbilityData | null;
+    onClose: () => void;
+};
+
+const AbilityDetail: React.FC<AbilityDetailProps> = ({ ability, onClose }) => {
+    if (!ability) return null;
 
     return (
-        <div className="HtPabilities-container">
-            {Object.keys(data).map((category) =>
-                data[category].map((ability, index) => {
-                    const isExpanded = expandedAbility === ability.Name;
-                    return (
-                        <Ability
-                            key={`${category}-${index}`}
-                            title={ability.Name}
-                            desc={ability.Description}
-                            extra={ability.Extra_Description}
-                            usage={ability.Usage}
-                            image={ability.Image}
-                            onClick={() => handleAbilityClick(ability.Name)}
-                            onClose={handleClose}
-                            isExpanded={isExpanded}
-                        />
-                    );
-                })
-            )}
+        <div className="HtPdetail-view">
+            <button className="HtPclose-button" onClick={onClose}>×</button>
+            <h1>{ability.Name}</h1>
+            <img src={ability.Image} alt={ability.Name} className="ability-image" />
+            <h2>{ability.Description}</h2>
+            <h3>{ability.Usage}</h3>
+            <p>{ability.Extra_Description}</p>
         </div>
     );
 };
 
 const HowToPlay: React.FC = () => {
+    const [selectedAbility, setSelectedAbility] = useState<AbilityData | null>(null);
+    const [showGif, setShowGif] = useState<boolean>(false);
+
+    const handleAbilityClick = (ability: AbilityData) => {
+        setSelectedAbility(ability);
+        setShowGif(true);
+        setTimeout(() => setShowGif(false), 3000); // Hide GIF after 3 seconds
+    };
+
+    const handleClose = () => {
+        setSelectedAbility(null);
+    };
+
     return (
         <div className="scrollable-container">
             <h1>How To Play</h1>
@@ -211,7 +221,17 @@ const HowToPlay: React.FC = () => {
             <section className="space">
                 <h2>Abilities</h2>
                 <p>In addition to the basic gameplay mechanics, you can use abilities to gain an advantage over your opponents. Here are some of the abilities you can use:</p>
-                <AbilitiesList data={data} />
+                <div style={{ display: 'flex', gap: '20px', height: '100vh' }}>
+                    <div className="HtPabilities-container" style={{ width: selectedAbility ? '50%' : '100%', height: selectedAbility ? 'auto' : '100vh' }}>
+                        <AbilitiesList data={data} onAbilityClick={handleAbilityClick} />
+                    </div>
+                    {selectedAbility && (
+                        <AbilityDetail ability={selectedAbility} onClose={handleClose} />
+                    )}
+                </div>
+                {showGif && (
+                    <img src="/assets/animatedAbilities/Blue+West.gif" alt="Ability Animation" className="HtPability-gif" />
+                )}
             </section>
         </div>
     );
