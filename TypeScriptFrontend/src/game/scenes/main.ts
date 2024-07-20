@@ -161,13 +161,17 @@ export class MainScene extends Scene {
 
     }
 
+    getEdges(): Edge[] {
+        return Object.values(this.edges);
+    }
+
     private createAbilityManager() {
-        const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
+        const ev = makeEventValidators(this.mainPlayer, this.getEdges.bind(this));
         const ab = makeAbilityValidators(
             this.mainPlayer,
             this.ratio,
             Object.values(this.nodes),
-            Object.values(this.edges)
+            this.getEdges.bind(this)
         );
         const events: { [key: number]: Event; } = {};
         const abilities: { [key: number]: ReloadAbility; } = {};
@@ -506,7 +510,7 @@ export class MainScene extends Scene {
         );
 
 
-        this.parse(this.edges, e);
+        this.parse(this.edges, e, false);
 
         VISUALS[NameToCode["Spawn"]].color = this.mainPlayer.color;
 
@@ -623,9 +627,9 @@ export class MainScene extends Scene {
                     new_data['extra_info'].forEach((tuple) => { this.parse_extra_info(tuple); });
                 }
 
-                this.parse(this.nodes, new_data["board"]["nodes"], true);
-                this.parse(this.edges, new_data["board"]["edges"]);
-                this.parse(this.abilityManager.abilities, new_data["player"]["abilities"]);
+                this.parse(this.nodes, new_data["board"]["nodes"], new_data["isRefresh"], true);
+                this.parse(this.edges, new_data["board"]["edges"], new_data["isRefresh"]);
+                this.parse(this.abilityManager.abilities, new_data["player"]["abilities"], false);
                 Object.values(this.edges).forEach((edge) => edge.draw());
             } else {
                 
@@ -730,7 +734,16 @@ export class MainScene extends Scene {
         }).join('');
     }
 
-    parse(this, items, updates, redraw=false) {
+    parse(this, items, updates, refresh, redraw=false) {
+
+        if (refresh === true) {
+            Object.keys(items).forEach(key => {
+                if (!updates.hasOwnProperty(key)) {
+                    items[key].delete();
+                    delete items[key];
+                }
+            });
+        }
 
         for (const u in updates) {
             if (!items.hasOwnProperty(u)) {
