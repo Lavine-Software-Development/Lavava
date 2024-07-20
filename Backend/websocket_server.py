@@ -158,7 +158,7 @@ class WebSocketServer():
         #         print(f"An exception occurred: {e}")
 
     async def problem(self, message):
-        pass
+        print("Problem:", message)
 
     def run(self):
         loop = asyncio.get_event_loop()

@@ -84,6 +84,7 @@ class Batch:
         game_dict = self.game.full_tick_json
         game_dict["player"] = self.player_tick_repr(player_id)
         game_dict["isFirst"] = False
+        game_dict["isRefresh"] = True
         return plain_json(game_dict)
         
     def start(self):
@@ -99,6 +100,7 @@ class Batch:
         start_dict["player_id"] = player_id
         start_dict["abilities"] = json_abilities.start_json()
         start_dict['isFirst'] = True
+        start_dict["isRefresh"] = False
         start_json = plain_json(start_dict)
         return start_json
     
@@ -113,6 +115,7 @@ class Batch:
         if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {} and self.mode == "LADDER":
             self.tick_dict["new_elos"] = self.elo_changes[player_id]
         self.tick_dict["isFirst"] = False
+        self.tick_dict["isRefresh"] = False
         tick_json = plain_json(self.tick_dict)
         return tick_json
 
