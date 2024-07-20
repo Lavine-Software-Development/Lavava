@@ -27,10 +27,11 @@ const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.PINK);
 const PUMP_DRAIN_V = createEventVisual("Pump Drain", Colors.DARK_PURPLE);
 const STANDARD_LEFT_CLICK_V = createEventVisual("Switch", Colors.GREY);
 const STANDARD_RIGHT_CLICK_V = createEventVisual("Swap", Colors.GREY);
+const CREDIT_USAGE_V = createEventVisual("Credit Usage", Colors.DARK_PURPLE);
 
 interface EventVisualParameters {
     [index: string]: EventVisual | AbilityVisual;
-}
+};
 
 // Maps for visuals
 export const VISUALS: EventVisualParameters = {
@@ -52,6 +53,7 @@ export const VISUALS: EventVisualParameters = {
     [EventCodes.PUMP_DRAIN_CODE]: PUMP_DRAIN_V,
     [EventCodes.STANDARD_LEFT_CLICK]: STANDARD_LEFT_CLICK_V,
     [EventCodes.STANDARD_RIGHT_CLICK]: STANDARD_RIGHT_CLICK_V,
+    [EventCodes.CREDIT_USAGE_CODE]: CREDIT_USAGE_V,
 };
 
 interface ClickParameters {
@@ -81,7 +83,8 @@ interface EventParameters {
 
 export const EVENTS: EventParameters = {
     [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE],
-    [EventCodes.PUMP_DRAIN_CODE]: [2, ClickType.NODE],
+    [EventCodes.PUMP_DRAIN_CODE]: [1, ClickType.NODE],
     [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE],
     [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE],
+    [EventCodes.CREDIT_USAGE_CODE]: [1, ClickType.ABILITY],
 };

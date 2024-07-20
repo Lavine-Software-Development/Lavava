@@ -33,10 +33,10 @@ class WebSocketServer():
         if 'items' in data:
             # print("yoooooo")
 
-            try:
-                self.running_games[game_code].process(token, data)
-            except KeyError:
-                print("Game key not found. Server needs better handling!")
+            # try:
+            self.running_games[game_code].process(token, data)
+            # except KeyError:
+            #     print("Game key not found. Server needs better handling!")
         elif 'action' in data:
             if data['action'] == 'cancel_match':
                 await self.handle_cancel_match(token, game_code)

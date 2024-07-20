@@ -1,5 +1,6 @@
 import { IDItem } from "./idItem";
 import { OtherPlayer } from "./otherPlayer";
+import { myPlayer } from "./myPlayer";
 import {
     KeyCodes,
     MINIMUM_TRANSFER_VALUE,
@@ -250,7 +251,7 @@ function newEdgeValidator(
 }
 
 export function makeAbilityValidators(
-    player: OtherPlayer,
+    player: myPlayer,
     ratio: [number, number],
     nodes: Node[],
     edges: Edge[]
@@ -269,7 +270,7 @@ export function makeAbilityValidators(
     return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators };
 }
 
-export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
+export function makeEventValidators(player: myPlayer, edges: Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {
@@ -290,18 +291,17 @@ export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
     }
 
     function pumpDrainValidator(data: IDItem[]): boolean {
-        const node = data[0] as Node;
-        if (data.length === 1) {
-            return (
-                node.owner === player &&
-                node.stateName === "pump" &&
-                node.full
-            );
-        } else if (data.length > 1) {
-            const ability = data[1] as ReloadAbility;
-            return ability.credits < 3;
-        }
-        return false;
+    const node = data[0] as Node;
+        return (
+            node.owner === player &&
+            node.stateName === "pump" &&
+            node.full
+        );
+    }
+
+    function creditUsageValidator(data: IDItem[]): boolean {
+        const ability = data[0] as ReloadAbility;
+        return player.credits >= ability.credits;
     }
 
     function edgeValidator(data: IDItem[]): boolean {
@@ -321,6 +321,7 @@ export function makeEventValidators(player: OtherPlayer, edges: Edge[]): {
         [EventCodes.PUMP_DRAIN_CODE]: pumpDrainValidator,
         [EventCodes.STANDARD_LEFT_CLICK]: edgeValidator,
         [EventCodes.STANDARD_RIGHT_CLICK]: edgeValidator,
+        [EventCodes.CREDIT_USAGE_CODE]: creditUsageValidator,
     };
 }
 

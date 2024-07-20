@@ -116,6 +116,7 @@ export class MainScene extends Scene {
         this.load.image("Spawn", "Spawn.png");
         this.load.image("Zombie", "Zombie.png");
         this.load.image('Pump', 'Pump.png');
+
     }
     
     create(): void {
@@ -209,7 +210,8 @@ export class MainScene extends Scene {
         this.abilityManager = new AbstractAbilityManager(
             this,
             abilities,
-            events
+            events,
+            y_position + spacing,
         );
     }
 
@@ -244,7 +246,7 @@ export class MainScene extends Scene {
     forfeit(code: number): void {
         console.log("Forfeiting")
         this.simple_send(code);
-        this.abilityManager.forfeit(this);
+        this.abilityManager.forfeit();
     }
 
     keydown(key: number): void {
@@ -540,6 +542,13 @@ export class MainScene extends Scene {
                     }
                 }
 
+                if ('credits' in new_data["player"] && new_data["player"]["credits"] !== this.mainPlayer.credits) {
+                    console.log("credits updated!!");
+                    console.log(new_data["player"]["credits"]);
+                    this.mainPlayer.credits = new_data["player"]["credits"];
+                    this.abilityManager.credits = new_data["player"]["credits"];
+                }
+
                 if (this.gs != new_data["gs"]) {
                     this.gs = new_data["gs"] as GSE;
                 }
@@ -634,19 +643,31 @@ export class MainScene extends Scene {
             let player1 = tuple[1][0];
             let player2 = tuple[1][1];
 
-            let eliminationText = this.add.text(
-                this.sys.game.config.width as number / 2,
-                this.sys.game.config.height as number / 2,
-                `${player2} killed ${player1}`,
-                { fontFamily: 'Arial', fontSize: '32px', color: '#FF0000' }
-            );
+            let eliminationText;
+
+            if (player2 == this.mainPlayer.name && this.otherPlayers.length > 2) {
+                eliminationText = this.add.text(
+                    this.sys.game.config.width as number / 2,
+                    20,
+                    `3 credit reward for killing player ${player1}`,
+                    { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
+                );
+            } else {
+                eliminationText = this.add.text(
+                    this.sys.game.config.width as number / 2,
+                    20,
+                    `player ${player2} killed player ${player1}`,
+                    { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
+                );
+            }
+
             eliminationText.setOrigin(0.5);
             
             //Make the text fade out after a few seconds
             this.tweens.add({
                 targets: eliminationText,
                 alpha: 0,
-                duration: 6000,
+                duration: 8000,
                 ease: 'Power2',
                 onComplete: () => {
                     eliminationText.destroy();
