@@ -12,30 +12,30 @@ const HowToPlay: React.FC = () => {
             <div className="space">
                 This game is a real-time variation of the classic board game
                 Risk, with some other twists. It's built around graph theory,
-                and so rather than countries there are nodes, and instead of
+                and so rather than countries there are dots, and instead of
                 borders between countries (determining who can attack who),
-                there are edges connecting nodes. The real time aspect is
+                there are lines connecting dots. The real-time aspect is
                 distinctly demonstrated in two ways. Firstly, rather than
                 placing your troops at the beginning of each turn in select
                 territories (as you would in Risk), each territory you own
                 naturally grows at a constant rate, without any action. The
                 game-term for this naturally growing resource is energy, shown
-                visually through each nodes' size. Secondly, attacking, and
-                additionally the reallocating of energy happens in real time all
-                over the map: Each edge is directional, and can be turned on or
+                visually through each dots' size. Secondly, attacking and
+                energy reallocation happen in real time all
+                over the map: Each line is directional, and can be turned on or
                 off (this state being determined by the owner of the
-                "from-node"). A turned on edge connecting two teammate nodes
-                ("teammate nodes" as in that they are the same color (have the
-                same owner)) will transfer energy from one node to the other in
-                the direction it points. A turned on edge connecting two
-                opposing nodes will remove energy at an equal rate from both
-                nodes. If the attacked node (the node the edge points toward)
+                "from-dot"). A flowing line connecting two teammate dots
+                ("teammate dots" as in that they are the same color (have the
+                same owner)) will transfer energy from one dot to the other in
+                the direction the line points. A flowing line connecting two
+                opposing dots will remove energy at an equal rate from both
+                dots. If the attacked dot (the dot the line points toward)
                 loses all its energy before the atacking ndoe, then ownership of
-                the attacked node transfers to the attacker (it takes on the
-                attacking nodes color. This mechanic is identical to Risk).
-                Nodes continue growing and energy continually transfers along
-                edges throughout the game until only one player still having
-                nodes of their color remains.
+                the attacked dot transfers to the attacker (it takes on the
+                attacking dots color). This mechanic is identical to Risk.
+                Dots continue growing and energy continually transfers along
+                lines throughout the game until only one player still having
+                dots of their color remains... or until someone wins by another method....
             </div>
             <div className="space">
                 The main other twist is abilities! Each player is given 20
@@ -55,16 +55,16 @@ const HowToPlay: React.FC = () => {
                 still being experimented with but currently two things happen:
                 <ul>
                     <li>
-                        Growth stops. Nodes naturally stay at their current
+                        Growth stops. dots naturally stay at their current
                         energy. (this feature is not in play)
                     </li>
                     <li>
-                        Free attacking. Attacking an opponents node costs you no
+                        Free attacking. Attacking an opponents dot costs you no
                         energy The goal of these changes is too stop
                         progression, and allow the current winner to snowball.
                         If still no player has won after the timer for end-game
                         phase completes, then the winner is determined by which
-                        player owns the most nodes.
+                        player owns the most dots.
                     </li>
                 </ul>
             </div>
@@ -77,7 +77,7 @@ const HowToPlay: React.FC = () => {
             from being placed by a player using an ability. Structures follow a set of rules:
             <ul>
                     <li>
-                        Do not grow, unlike the rest of nodes
+                        Do not grow, unlike the rest of dots
                     </li>
                     <li>
                         When captured by an opponent, lose their structure. (The 3 starting capitals on the map are an exception to this rule)
@@ -94,19 +94,19 @@ const HowToPlay: React.FC = () => {
                 <ul>
                     <li>
                         The board is randomly generated, and has approximately
-                        60 nodes and 80 edges.
+                        60 dots and 80 lines.
                     </li>
                     <li>
-                        Nodes can be full. At that point they no longer
+                        dots can be full. At that point they no longer
                         naturally gain energy. This means you shouldn't let
-                        nodes be full unless neccessary.
+                        dots be full unless neccessary.
                     </li>
                     <li>
-                        Many of the edges are in fact dynamic (or two-way), meaning they can
+                        Many of the lines are in fact dynamic (or two-way), meaning they can
                         change the direction they point in. When between
-                        teammate nodes, the owner can swap their direction. When
-                        between opponent nodes they automatically point in favor
-                        of (away from) the larger node. However if both nodes
+                        teammate dots, the owner can swap their direction. When
+                        between opponent dots they automatically point in favor
+                        of (away from) the larger dot. However if both dots
                         are full, both players can turn it on and it will swap
                         in their favor.
                     </li>
@@ -128,7 +128,7 @@ const HowToPlay: React.FC = () => {
                         in owning 3 full capitals.
                     </li>
                     <li>
-                        2/3 nodes are randomly determined to be port-nodes. Port-nodes affect certain interactions with specific abilities.
+                        2/3 dots are randomly determined to be port-dots. Port-dots affect certain interactions with specific abilities.
                     </li>
                 </ul>
             </div>
@@ -139,63 +139,63 @@ const HowToPlay: React.FC = () => {
                 <h4>1 credit</h4>
                 <ul>
                     <li>
-                        Spawn: Choose an an unowned node anywhere and claim it.
-                        Identical to choosing a node to start the game.
+                        Spawn: Choose an an unowned dot anywhere and claim it.
+                        Identical to choosing a dot to start the game.
                     </li>
                     <li>
-                        Mini-Bridge: Make a new two-way edge between two port-nodes so long as it doesn't overlap any other edge. Does not Remove ports from nodes its placed on. Has a limited range.
+                        Mini-Bridge: Make a new two-way line between two port-dots so long as it doesn't overlap any other line. Does not Remove ports from dots its placed on. Has a limited range.
                     </li>
                     <li>
-                        Freeze: Make a dynamic (two-way) edge directional (one-way). Effectively
-                        stops an opponent from attacking you through that edge,
+                        Freeze: Make a dynamic (two-way) line directional (one-way). Effectively
+                        stops an opponent from attacking you through that line,
                         while still keeping it open for your use from the other
-                        side. Can also flip a contested edge in your advantage, so long as it is not flowing.
+                        side. Can also flip a contested line in your advantage, so long as it is not flowing.
                     </li>
                     <li>
-                        Burn: Make a port node into a standard node (remove its
-                        ports). The burning effect can along flowing outward edge to other port nodes.
+                        Burn: Make a port dot into a standard dot (remove its
+                        ports). The burning effect can along flowing outward line to other port dots.
                         Used effectively, this can remove many ports.
                     </li>
                 </ul>
                 <h4>2 credits</h4>
                 <ul>
                     <li>
-                        Bridge: Make a new edge between two *port-nodes* so long as it doesn't overlap any other edge. Bridge removes ports from nodes its placed on.
+                        Bridge: Make a new line between two *port-dots* so long as it doesn't overlap any other line. Bridge removes ports from dots its placed on.
                     </li>
                     <li>
-                        Rage: All nodes you own transfer energy at 3.5 times the
+                        Rage: All dots you own transfer energy at 3.5 times the
                         rate. Meant for a rush-esque play.
                     </li>
                     <li>
-                        Capital: Turn any full node you own into a capital. It then immediately shrinks entirely. Flow into them so can become *full*. Capitals act as a win condition, among all the other advantages of structures. Also, allow for using Nuke within the capitals range: determined by its size and a multiplier. Also, capitals cannot be placed directly beside eachother.
+                        Capital: Turn any full dot you own into a capital. It then immediately shrinks entirely. Flow into them so can become *full*. Capitals act as a win condition, among all the other advantages of structures. Also, allow for using Nuke within the capitals range: determined by its size and a multiplier. Also, capitals cannot be placed directly beside eachother.
                     </li>
                 </ul>
                 <h4>3 credits</h4>
                 <ul>
                     <li>
-                        Nuke: Deletes a node, and all its connecting edges from the map. To use Nuke, the node selected must be within a certain perimeter outside a capital (starting or placed) the said player controls. You cannot Nuke structures.
+                        Nuke: Deletes a dot, and all its connecting lines from the map. To use Nuke, the dot selected must be within a certain perimeter outside a capital (starting or placed) the said player controls. You cannot Nuke structures.
                     </li>
                     <li>
-                        Pump: Placed on any node you own. Once full, a pump can be drained (clicked) and it then allows the player to replenish an ability of their choice. One can either get two more 1-credit abilities, or one singular 2-credit ability. You cannot replenish 3-credit+ abilities. Also, pumps take in 150% of the energy flowed into them, both from its owner, and by attackers.
+                        Pump: Placed on any dot you own. Once full, a pump can be drained (clicked) and it then allows the player to replenish an ability of their choice. One can either get two more 1-credit abilities, or one singular 2-credit ability. You cannot replenish 3-credit+ abilities. Also, pumps take in 150% of the energy flowed into them, both from its owner, and by attackers.
                     </li>
                 </ul>
                 <h4>4 credits</h4>
                 <ul>
                     <li>
-                        Cannon: Placed on any port-node you own. That node can then shoot its energy to another node so long as its shot path doesn't overlap any other edge. Can be used to capture unclaimed nodes, transfer energy to a teammate node in need, or to attack a node far away. 
+                        Cannon: Placed on any port-dot you own. That dot can then shoot its energy to another dot so long as its shot path doesn't overlap any other line. Can be used to capture unclaimed dots, transfer energy to a teammate dot in need, or to attack a dot far away. 
                     </li>
                 </ul>
             </div>
             <div className="space">
                 <h1>FAQ</h1>
-                Difference between lightly colored and darkly colored edges?
+                Difference between lightly colored and darkly colored lines?
                 Lightly colored just means it's on but can't flow for 1 of 2
                 reasons:
                 <ul>
-                    <li>The from_node is too small</li>
+                    <li>The from_dot is too small</li>
                     <li>
-                        The to_node is full (full nodes have a black outer ring.
-                        They cannot grow or intake energy) Clicking an edge
+                        The to_dot is full (full dots have a black outer ring.
+                        They cannot grow or intake energy) Clicking an line
                         turns it on or off. Flow can only happen when on
                     </li>
                 </ul>
