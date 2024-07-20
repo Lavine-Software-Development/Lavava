@@ -161,13 +161,17 @@ export class MainScene extends Scene {
 
     }
 
+    getEdges(): Edge[] {
+        return Object.values(this.edges);
+    }
+
     private createAbilityManager() {
-        const ev = makeEventValidators(this.mainPlayer, Object.values(this.edges));
+        const ev = makeEventValidators(this.mainPlayer, this.getEdges.bind(this));
         const ab = makeAbilityValidators(
             this.mainPlayer,
             this.ratio,
             Object.values(this.nodes),
-            Object.values(this.edges)
+            this.getEdges.bind(this)
         );
         const events: { [key: number]: Event; } = {};
         const abilities: { [key: number]: ReloadAbility; } = {};

@@ -1,6 +1,6 @@
 import { IDItem } from "./idItem";
 import { OtherPlayer } from "./otherPlayer";
-import { myPlayer } from "./myPlayer";
+import { MyPlayer } from "./myPlayer";
 import {
     KeyCodes,
     MINIMUM_TRANSFER_VALUE,
@@ -103,10 +103,10 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
     };
 }
 
-function capitalValidator(edges: Edge[], player: OtherPlayer): ValidatorFunc {
+function capitalValidator(getEdges: () => Edge[], player: OtherPlayer): ValidatorFunc {
     const neighbors = (node: Node): Node[] => {
         const neighbors: Node[] = [];
-        edges.forEach((edge) => {
+        getEdges().forEach((edge) => {
             try {
                 const neighbor = edge.other(node);
                 if (neighbor) neighbors.push(neighbor);
@@ -197,7 +197,7 @@ function playerValidators(player: OtherPlayer): {
 }
 
 function newEdgeValidator(
-    edges: Edge[],
+    getEdges: () => Edge[],
     player: OtherPlayer,
     ratio: [number, number]
 ): { [key: string]: ValidatorFunc } {
@@ -212,7 +212,7 @@ function newEdgeValidator(
             return (
                 firstNode.id !== secondNode.id &&
                 secondNode.is_port &&
-                checkNewEdge(firstNode, secondNode, edges)
+                checkNewEdge(firstNode, secondNode, getEdges())
             );
         }
     };
@@ -251,26 +251,26 @@ function newEdgeValidator(
 }
 
 export function makeAbilityValidators(
-    player: myPlayer,
+    player: MyPlayer,
     ratio: [number, number],
     nodes: Node[],
-    edges: Edge[]
+    getEdges: () => Edge[],
 ): { [key: string]: ValidatorFunc } {
     const abilityValidators: { [key: string]: ValidatorFunc } = {
         [KeyCodes.SPAWN_CODE]: unownedNode,
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
-        [KeyCodes.CAPITAL_CODE]: capitalValidator(edges, player),
+        [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
         [KeyCodes.NUKE_CODE]: attackValidators(nodes, player, ratio),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
     const playerValidatorsMap = playerValidators(player);
-    const newEdgeValidators = newEdgeValidator(edges, player, ratio);
+    const newEdgeValidators = newEdgeValidator(getEdges, player, ratio);
     return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators };
 }
 
-export function makeEventValidators(player: myPlayer, edges: Edge[]): {
+export function makeEventValidators(player: MyPlayer, getEdges: () => Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {
@@ -285,7 +285,7 @@ export function makeEventValidators(player: myPlayer, edges: Edge[]): {
             const firstNode = data[0] as Node;
             const secondNode = data[1] as Node;
             return !(secondNode.owner === player && secondNode.full) &&
-            checkNewEdge(firstNode, secondNode, edges);
+            checkNewEdge(firstNode, secondNode, getEdges());
         }
         return false;
     }
