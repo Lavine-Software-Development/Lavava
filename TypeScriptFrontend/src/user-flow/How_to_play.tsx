@@ -1,5 +1,20 @@
 import "../../styles/style.css";
 import React, { useState } from "react";
+import abilityColors from "./ability_utils";  
+
+const lightenColor = (color: string, percent: number) => {
+    let r: number, g: number, b: number;
+
+    // Extract RGB values from color
+    [r, g, b] = color.match(/\d+/g)!.map(Number);
+
+    // Calculate the lightened color
+    r = Math.min(255, Math.floor(r + (255 - r) * percent));
+    g = Math.min(255, Math.floor(g + (255 - g) * percent));
+    b = Math.min(255, Math.floor(b + (255 - b) * percent));
+
+    return `rgb(${r}, ${g}, ${b})`;
+};
 
 type AbilityProps = {
     title: string;
@@ -8,14 +23,27 @@ type AbilityProps = {
     usage: string;
     image: string;
     onClick: () => void;
+    colour: string;
 };
 
-const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, image, onClick }) => (
-    <div className="HtPability-window" onClick={onClick}>
+const Ability: React.FC<AbilityProps> = ({ title, desc, extra, usage, image, onClick, colour }) => (
+    <div
+        className="HtPability-window"
+        onClick={onClick}
+        style={{ 
+            '--ability-color': colour, 
+            borderColor: colour, 
+            backgroundColor: `${colour}1A`, 
+            background: `linear-gradient(135deg, ${colour}1A 30%, rgba(255, 255, 255, 0.9) 100%)`,
+            border: `2px solid ${colour}`, 
+            boxShadow: `0 2px 4px ${colour}1A`
+        } as React.CSSProperties}
+    >
         <h1>{title}</h1>
         <img src={image} alt={title} className="ability-image" />
     </div>
 );
+
 
 type AbilityData = {
     Name: string;
@@ -127,6 +155,7 @@ type AbilitiesListProps = {
     onAbilityClick: (ability: AbilityData) => void;
 };
 
+
 const AbilitiesList: React.FC<AbilitiesListProps> = ({ data, onAbilityClick }) => (
     <div className="HtPabilities-container">
         {Object.keys(data).map((category) =>
@@ -139,6 +168,7 @@ const AbilitiesList: React.FC<AbilitiesListProps> = ({ data, onAbilityClick }) =
                     usage={ability.Usage}
                     image={ability.Image}
                     onClick={() => onAbilityClick(ability)}
+                    colour={abilityColors[ability.Name] || 'rgb(200, 200, 200)'} 
                 />
             ))
         )}
@@ -153,8 +183,16 @@ type AbilityDetailProps = {
 const AbilityDetail: React.FC<AbilityDetailProps> = ({ ability, onClose }) => {
     if (!ability) return null;
 
+    const backgroundColor = abilityColors[ability.Name] || 'rgb(200, 200, 200)';
+    const lightenedColor = lightenColor(backgroundColor, 0.7);
+
     return (
-        <div className="HtPdetail-view">
+        <div 
+            className="HtPdetail-view"
+            style={{ 
+                backgroundColor: lightenedColor 
+            }}
+        >
             <button className="HtPclose-button" onClick={onClose}>×</button>
             <h1>{ability.Name}</h1>
             <img src={ability.Image} alt={ability.Name} className="ability-image" />
@@ -164,6 +202,7 @@ const AbilityDetail: React.FC<AbilityDetailProps> = ({ ability, onClose }) => {
         </div>
     );
 };
+
 
 const HowToPlay: React.FC = () => {
     const [selectedAbility, setSelectedAbility] = useState<AbilityData | null>(null);
