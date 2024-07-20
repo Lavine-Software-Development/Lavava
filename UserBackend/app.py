@@ -16,10 +16,10 @@ load_dotenv()
 
 app = Flask(__name__)
 # CORS(app)
-CORS(app, origins=["https://www.durb.ca", "https://localhost:8080"], allow_headers=["Content-Type"])
+CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
-
+ 
 if config.DB_CONNECTED:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -118,7 +118,7 @@ def after_request(response):
     origin = request.headers.get('Origin')
 
     # List of allowed origins
-    allowed_origins = ["https://www.durb.ca", "http://localhost:3000"]
+    allowed_origins = ["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"]
 
     # Add CORS headers only if the request's origin is in the allowed list
     if origin in allowed_origins:
@@ -673,5 +673,5 @@ def get_user_details(username):
 
 
 if __name__ == '__main__':
-    app.run( debug=True, host='0.0.0.0', port=5001, ssl_context=('fullchain.pem', 'privkey.pem'),)
+    app.run( debug=True, host='0.0.0.0', port=5001,)
     

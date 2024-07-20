@@ -3,7 +3,7 @@ const ENV_CONFIG = {
     gameBackend: import.meta.env.VITE_GAME_BACKEND,
     userBackend: import.meta.env.VITE_USER_BACKEND,
 };
-console.log(import.meta.env.VITE_DISABLE_CONTEXT_MENU);
-console.log(import.meta.env.VITE_GAME_BACKEND);
+console.log(ENV_CONFIG.userBackend);
+console.log(ENV_CONFIG.gameBackend);
 export default ENV_CONFIG;
 

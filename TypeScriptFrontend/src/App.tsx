@@ -6,6 +6,7 @@ import {
     Navigate,
     RouterProvider,
     Outlet,
+    useLocation,
 } from "react-router-dom";
 import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
 import WebSocketTest from "./websocketClient";
@@ -46,16 +47,19 @@ const router = createBrowserRouter(
 );
 
 function MainLayout() {
-    return (
-        <div id="app">
-            <NavBar />
-            <div id="content">
+    const location = useLocation();
+    const hideNavBar = location.pathname === "/play";
+    if (hideNavBar) {
+        return <Outlet />;
+    } else {
+        return (
+            <div id="app">
+                <NavBar />
                 <Outlet />
             </div>
-        </div>
-    );
+        );
+    }
 }
-
 function PhaserGameWrapper() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const currentScene = (scene: Phaser.Scene) => {};

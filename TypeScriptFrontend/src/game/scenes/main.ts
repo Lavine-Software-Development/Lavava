@@ -662,7 +662,8 @@ export class MainScene extends Scene {
         }
     }
 
-    private parse_extra_info(tuple: [string, any]) {
+    private parse_extra_info(tuple) {
+        console.log(tuple);
         if (tuple[0] === "cannon_shot") {
             let cannon = this.nodes[tuple[1][0]] as Node;
             let target = this.nodes[tuple[1][1]] as Node;
@@ -677,6 +678,48 @@ export class MainScene extends Scene {
                 `${player2} killed ${player1}`,
                 { fontFamily: "Arial", fontSize: "32px", color: "#FF0000" }
             );
+            eliminationText.setOrigin(0.5);
+
+            //Make the text fade out after a few seconds
+            this.tweens.add({
+                targets: eliminationText,
+                alpha: 0,
+                duration: 6000,
+                ease: "Power2",
+                onComplete: () => {
+                    eliminationText.destroy();
+                },
+            });
+        } else if (tuple[0] == "timed_out") {
+            let player1 = tuple[1][0];
+
+            let eliminationText = this.add.text(
+                (this.sys.game.config.width as number) / 2,
+                (this.sys.game.config.height as number) / 2,
+                `${player1} timed out`,
+                { fontFamily: "Arial", fontSize: "32px", color: "#FF0000" }
+            );
+
+            eliminationText.setOrigin(0.5);
+
+            //Make the text fade out after a few seconds
+            this.tweens.add({
+                targets: eliminationText,
+                alpha: 0,
+                duration: 6000,
+                ease: "Power2",
+                onComplete: () => {
+                    eliminationText.destroy();
+                },
+            });
+        } else if (tuple == "Aborted") {
+            let eliminationText = this.add.text(
+                (this.sys.game.config.width as number) / 2,
+                (this.sys.game.config.height as number) / 2,
+                `Game Aborted due to neither player picking start node`,
+                { fontFamily: "Arial", fontSize: "32px", color: "#FF0000" }
+            );
+
             eliminationText.setOrigin(0.5);
 
             //Make the text fade out after a few seconds
