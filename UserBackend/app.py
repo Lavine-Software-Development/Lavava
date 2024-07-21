@@ -1,4 +1,5 @@
 import jwt
+import os
 import datetime
 from flask import Flask, jsonify, request, url_for
 from flask_cors import CORS
@@ -21,7 +22,9 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 
  
 if config.DB_CONNECTED:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
+    db_path = os.path.join('/app/game_data', 'game.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db = SQLAlchemy(app)
