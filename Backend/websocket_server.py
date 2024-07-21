@@ -4,7 +4,7 @@ import asyncio
 from batch import Batch
 import json
 import signal
-
+import ssl 
 class WebSocketServer():
     def __init__(self, port):
         self.server = "0.0.0.0"
@@ -14,7 +14,6 @@ class WebSocketServer():
 
     async def handler(self, websocket, path):
         async for message in websocket:
-            print("message", message)
             data = json.loads(message)
             await self.process_message(websocket, data)
 
@@ -34,10 +33,10 @@ class WebSocketServer():
         if 'items' in data:
             # print("yoooooo")
 
-            try:
-                self.running_games[game_code].process(token, data)
-            except KeyError:
-                print("Game key not found. Server needs better handling!")
+            # try:
+            self.running_games[game_code].process(token, data)
+            # except KeyError:
+            #     print("Game key not found. Server needs better handling!")
         elif 'action' in data:
             if data['action'] == 'cancel_match':
                 await self.handle_cancel_match(token, game_code)
@@ -78,7 +77,6 @@ class WebSocketServer():
             await websocket.send(message)
             
             if self.waiting_players[game_code].is_ready():
-                print("Game is ready to start")
                 self.running_games[game_code] = self.waiting_players.pop(game_code)
                 print("created game with code ----------------------", game_code)
                 await self.start_game(game_code)
@@ -160,13 +158,15 @@ class WebSocketServer():
         #         print(f"An exception occurred: {e}")
 
     async def problem(self, message):
-        pass
+        print("Problem:", message)
 
     def run(self):
         loop = asyncio.get_event_loop()
 
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ssl_context.load_cert_chain(certfile="fullchain.pem", keyfile="privkey.pem")
         # Starting the server
-        start_server = websockets.serve(self.handler, self.server, self.port)
+        start_server = websockets.serve(self.handler, self.server, self.port, ssl=ssl_context)
         server = loop.run_until_complete(start_server)
 
         # Print server running

@@ -5,9 +5,8 @@
     font-family: "JetBrains Mono", monospace;
 }
 #app {
-    margin-top: 158px;  /* Same as the navbar height */
+    margin-top: 158px; /* Same as the navbar height */
 }
-
 
 .required {
     color: red;
@@ -35,7 +34,7 @@
 }
 
 body {
-    background-image: url("../images/AI\ background\ 1.png");
+    background-image: url("../public/assets/images/AI_background_1.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -145,7 +144,7 @@ input::placeholder {
 }
 
 .whiteText {
-    color: white
+    color: white;
 }
 
 .btn:hover {
@@ -179,7 +178,8 @@ input::placeholder {
     width: 400px;
 }
 
-.profile-card h2, .info-card h2 {
+.profile-card h2,
+.info-card h2 {
     color: black;
 }
 
@@ -202,11 +202,12 @@ input::placeholder {
 }
 
 .text-shadow {
-    text-shadow: 
-        -1px -1px 0 black,  
-         1px -1px 0 black,
-        -1px  1px 0 black,
-         1px  1px 0 black; /* White outline */
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+        1px 1px 0 black; /* White outline */
+}
+
+.default-deck-text {
+    text-align: center;
 }
 
 .info-cards {
@@ -218,14 +219,19 @@ input::placeholder {
 .info-card {
     width: 300px;
 }
-.info-card h2 .elo-value {
-    color: white;
+
+.info-card .elo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
 }
 
 .ability-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr); /* Changed from 4 to 5 */
     gap: 10px;
+    /* margin-top: 20px; Add some space below the title */
 }
 
 .ability-button {
@@ -440,17 +446,17 @@ ul {
 
 .leaderboard-item {
     display: flex;
-    align-items: center;  /* Vertically centers the items in the line */
-    justify-content: start;  /* Aligns items to the start of the flex container */
+    align-items: center; /* Vertically centers the items in the line */
+    justify-content: start; /* Aligns items to the start of the flex container */
     margin-bottom: 10px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
-    width: 100%;  /* Ensures the item stretches to the full width of its container */
+    width: 100%; /* Ensures the item stretches to the full width of its container */
 }
 
 .rank-icon {
-    margin-right: 10px;  /* Provides spacing between the medal and the username */
+    margin-right: 10px; /* Provides spacing between the medal and the username */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -469,14 +475,13 @@ ul {
 }
 
 .player-name {
-    flex-grow: 1;  /* Allows the username to take up any extra space */
-    margin-right: 20px;  /* Provides spacing between the username and the score */
+    flex-grow: 1; /* Allows the username to take up any extra space */
+    margin-right: 20px; /* Provides spacing between the username and the score */
 }
 
 .player-score {
     font-weight: bold;
 }
-
 
 .leaderboard-item .rank-icon .rank-1 {
     background-color: gold;
@@ -515,14 +520,15 @@ ul {
 }
 
 .popup button {
-    width: auto; /* Adjust width to fit content */
+    width: 30%;
     margin-top: 20px;
-    padding: 12px 20px; 
+    padding: 12px 20px;
     background-color: #e81e1e;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .popup button:hover {
@@ -547,14 +553,15 @@ ul {
     margin: 10px; /* Add spacing between buttons */
     padding: 10px 20px; /* Add padding inside buttons */
     border-radius: 8px; /* Make corners rounded */
-    background-color: #007BFF; /* Change background color */
+    background-color: #007bff; /* Change background color */
     color: white; /* Change text color */
     border: none; /* Remove default border */
     cursor: pointer; /* Change cursor on hover */
     position: relative; /* Position tooltip relative to the button */
 }
 
-.custom-button::after, .ability-button::after {
+.custom-button::after,
+.ability-button::after {
     content: attr(data-tooltip);
     position: absolute;
     bottom: calc(100% + 5px); /* Adjust spacing from button */
@@ -565,14 +572,16 @@ ul {
     padding: 5px 10px;
     border-radius: 4px;
     white-space: nowrap;
-    opacity: 0; 
+    opacity: 0;
     visibility: hidden; /* Initially hide the tooltip */
     transition: opacity 0.3s, visibility 0.3s;
 }
 
-.custom-button:hover::after, .ability-button:hover::after {
+.custom-button:hover::after,
+.ability-button:hover::after {
     opacity: 1;
     visibility: visible; /* Show the tooltip on hover */
+    transition-delay: 1s;
 }
 
 .start-fresh-button {
@@ -584,7 +593,25 @@ ul {
 }
 
 .save-button {
-    background-color: #007BFF; /* Blue color for 'Save' button */
+    background-color: #007bff; /* Blue color for 'Save' button */
+}
+
+.container#deck-builder-container {
+    max-width: 1200px; /* Increased from typical 960px or 1024px */
+    width: 90%; /* Use percentage for responsiveness */
+    /* margin: 0 auto; Center the container */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align content to the top */
+    min-height: 80vh; /* Ensure container has enough height */
+}
+
+/* Add a media query for responsiveness */
+@media (max-width: 1200px) {
+    .container#deck-builder-container {
+        width: 95%;
+    }
 }
 
 .save-button:hover {
@@ -627,7 +654,7 @@ ul {
     margin-left: 10px;
     padding: 5px 10px;
     border-radius: 10px;
-    background-color: #007BFF; /* Blue color for 'Edit' button */
+    background-color: #007bff; /* Blue color for 'Edit' button */
     color: white; /* White text color */
     border: none; /* Remove default border */
 }
@@ -707,7 +734,8 @@ ul {
     object-fit: cover;
 }
 
-.team-member h3, .team-member p {
+.team-member h3,
+.team-member p {
     color: black;
 }
 
@@ -738,7 +766,7 @@ ul {
     background-color: rgba(0, 0, 0, 0.5);
     border: 1px solid #ccc; /* Add a border for better visibility */
     color: white; /* Set the text color */
-    padding: 10px; 
+    padding: 10px;
     text-shadow: 1px 1px 2px black;
 }
 
@@ -752,7 +780,8 @@ ul {
     background-color: #0056b3; /* Darker shade on hover */
 }
 
-.contact-form input[type="text"], .contact-form input[type="email"] {
+.contact-form input[type="text"],
+.contact-form input[type="email"] {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -772,11 +801,11 @@ ul {
 }
 
 .error-message {
-    font-size: 18px; 
+    font-size: 18px;
 }
 
 .loading-message {
-    font-size: 18px; 
+    font-size: 18px;
 }
 
 .btn-cancel {
@@ -789,22 +818,42 @@ ul {
     color: white;
     cursor: pointer;
     transition: 0.9s;
-    font-weight: bold; 
+    font-weight: bold;
 }
 
 .btn-cancel:hover {
     background: rgb(32, 32, 32);
 }
 
+.click-instructions {
+    display: inline-flex;
+    align-items: center;
+    gap: 2em; /* Add gap between spans */
+}
+
+.click-instructions span {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8em;
+    margin-top: 1em;
+}
+
+.click-icon {
+    width: 1.2em;
+    height: auto;
+    margin-right: 10px; /* Adjust the spacing as needed */
+    margin-left: 10px;
+}
 
 .button-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
+    margin-top: 60px;
     width: 100%;
 }
 
-.change-password-btn, .logout-btn {
+.change-password-btn,
+.logout-btn {
     padding: 8px 16px;
     border: none;
     border-radius: 4px;
@@ -812,10 +861,13 @@ ul {
     transition: background-color 0.3s;
     flex: 1;
     margin: 0 5px;
+    margin-top: 15px;
+    width: 200px;
+    height: 100px;
 }
 
 .change-password-btn {
-    background-color: #4CAF50;
+    background-color: #4caf50;
     color: white;
 }
 
@@ -889,4 +941,72 @@ ul {
 .player-name {
     cursor: pointer;
     text-decoration: underline;
+}
+
+.abilities-container-friendly {
+    display: flex;
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    flex-wrap: wrap; /* Allow wrapping to the next line if there are many abilities */
+    margin-top: 5px;
+}
+
+.abilities-container-ladder {
+    display: flex;
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    flex-wrap: wrap; /* Allow wrapping to the next line if there are many abilities */
+    margin-top: 30px;
+}
+  
+.abilities-container-profile {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next line */
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    max-width: calc(2 * 4rem + 10px); 
+    margin: 0 auto;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.abilities-container-leaderboard {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next line */
+    justify-content: center; /* Center the abilities container */
+    gap: 10px; /* Adjust the gap between squares as needed */
+    margin-top: 5px; /* Add space at the top */
+    margin-bottom: 5px;
+}
+
+.ability-square {
+    position: relative;
+    width: 4rem; /* Adjust the size of the square as needed */
+    height: 4rem; /* Adjust the size of the square as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Adjust the border style as needed */
+    border-radius: 8px; /* Optional: Add border radius for rounded corners */
+}
+
+.ability-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ability-img {
+    width: 2.5rem; /* Adjust the icon size as needed */
+    height: 2.5rem; /* Adjust the icon size as needed */
+    object-fit: contain;
+}
+
+.ability-count {
+    position: absolute;
+    bottom: 1px; /* Adjust the position as needed */
+    right: 1px; /* Adjust the position as needed */
+    color: #000; /* Adjust the text color as needed */
+    padding: 2px 5px; /* Adjust the padding as needed */
+    font-size: 0.8rem; /* Adjust the font size as needed */
 }

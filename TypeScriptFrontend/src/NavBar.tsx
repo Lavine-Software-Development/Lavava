@@ -8,7 +8,7 @@ export function NavBar() {
         <nav className="navbar fixed-top">
             <NavLink to="/leaderboard" className="navLinkContainer">
                 <img
-                    src="./images/leaderboard logo.png"
+                    src="/assets/images/leaderboard_logo.png"
                     width="60"
                     height="50"
                     alt=""
@@ -18,7 +18,7 @@ export function NavBar() {
             </NavLink>
             <NavLink to="/home" className="navLinkContainer">
                 <img
-                    src="./images/Home_orange.png"
+                    src="/assets/images/Home_orange.png"
                     width="50"
                     height="50"
                     alt=""
@@ -28,7 +28,7 @@ export function NavBar() {
             </NavLink>
             <NavLink to="/profile" className="navLinkContainer">
                 <img
-                    src="./images/profile icon.png"
+                    src="/assets/images/profile_icon.png"
                     width="50"
                     height="50"
                     alt=""
@@ -39,3 +39,4 @@ export function NavBar() {
         </nav>
     );
 }
+

@@ -63,13 +63,13 @@ def starter_capitals(nodes):
                 )
             ):
                 node.set_state("capital", True)
-                node.value = 100
+                node.value = 50
                 capitals += 1
             return_nodes.append(node)
         else:
             if islands < CAPITAL_ISLAND_COUNT and (node.item_type == NODE or node.is_port):
                 node.set_state("capital", True)
-                node.value = 100
+                node.value = 50
                 islands += 1
                 return_nodes.append(node)
     return return_nodes

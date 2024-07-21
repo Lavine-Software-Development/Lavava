@@ -1,85 +1,78 @@
-import { useRef, useState, useContext } from "react";
-import React from "react";
-
-import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
-import { useEffect } from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import {
-    BrowserRouter as Router,
-    Routes,
+    createBrowserRouter,
+    createRoutesFromElements,
     Route,
-    Link,
     Navigate,
+    RouterProvider,
+    Outlet,
+    useLocation,
 } from "react-router-dom";
-import WebSocketTest from "./websocketClient"; // Import your WebSocketTest component if not already done
+import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
+import WebSocketTest from "./websocketClient";
 import Login from "./user-flow/login";
 import Register from "./user-flow/Register";
 import ForgotPassword from "./user-flow/reset_password";
 import Home from "./user-flow/Home";
 import Profile from "./user-flow/Profile";
-import Team from './user-flow/team';
+import Team from "./user-flow/team";
 import DeckBuilder from "./user-flow/deck_builder";
 import { NavBar } from "./NavBar";
 import Leaderboard from "./user-flow/Leaderboard";
 import HowToPlay from "./user-flow/How_to_play";
 import ChangePassword from "./user-flow/change_password";
 import Lobby from "./user-flow/lobby";
-import { NetworkContext, NetworkProvider } from "./game/NetworkContext";
-import { use } from "matter";
-function App() {
-    const phaserRef = useRef<IRefPhaserGame | null>(null);
+import { NetworkProvider } from "./game/NetworkContext";
 
-    // Event emitted from the PhaserGame component
+const router = createBrowserRouter(
+    createRoutesFromElements(
+        <Route path="/" element={<MainLayout />}>
+            <Route index element={<Navigate replace to="/login" />} />
+            <Route path="play" element={<PhaserGameWrapper />} />
+            <Route path="lobby" element={<Lobby />} />
+            <Route path="websocket-test" element={<WebSocketTest />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="home" element={<Home />} />
+            <Route path="builder" element={<DeckBuilder />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="how-to-play" element={<HowToPlay />} />
+            <Route path="team" element={<Team />} />
+            <Route path="change-password" element={<ChangePassword />} />
+            <Route path="*" element={<Navigate replace to="/login" />} />
+        </Route>
+    )
+);
+
+function MainLayout() {
+    const location = useLocation();
+    const hideNavBar =
+        location.pathname === "/play" || location.pathname === "/lobby";
+    if (hideNavBar) {
+        return <Outlet />;
+    } else {
+        return (
+            <div id="app">
+                <NavBar />
+                <Outlet />
+            </div>
+        );
+    }
+}
+function PhaserGameWrapper() {
+    const phaserRef = useRef<IRefPhaserGame | null>(null);
     const currentScene = (scene: Phaser.Scene) => {};
-    return (
-        <Router>
-            <NetworkProvider>
-                <div
-                    style={{
-                        fontFamily: "Arial, sans-serif",
-                        lineHeight: "1.6",
-                    }}
-                >
-                    <Routes>
-                        <Route
-                            path="/play"
-                            element={
-                                <div>
-                                    <PhaserGame
-                                        ref={phaserRef}
-                                        currentActiveScene={currentScene}
-                                    />
-                                </div>
-                            }
-                        />
-                        <Route path="/lobby" element={<Lobby />} />
-                        <Route
-                            path="*"
-                            element={
-                                <div id="app">
-                                    <NavBar />
-                                    <Routes>
-                                        <Route path="/websocket-test" element={<WebSocketTest />} />
-                                        <Route path="/" element={<Navigate replace to="/login" />} />
-                                        <Route path="/login" element={<Login />} />
-                                        <Route path="/register" element={<Register />} />
-                                        <Route path="/forgot-password" element={<ForgotPassword />} />
-                                        <Route path="/home" element={<Home />} />
-                                        <Route path="/builder" element={<DeckBuilder />} />
-                                        <Route path="/profile" element={<Profile />} />
-                                        <Route path="/leaderboard" element={<Leaderboard />} />
-                                        <Route path="/how-to-play" element={<HowToPlay />} />
-                                        <Route path="/team" element={<Team />} />
-                                        <Route path="/change-password" element={<ChangePassword />} />
-                                    </Routes>
-                                </div>
-                            }
-                        />
-                    </Routes>
-                </div>
-            </NetworkProvider>
-        </Router>
-    );
+
+    return <PhaserGame ref={phaserRef} currentActiveScene={currentScene} />;
 }
 
-export default App;
+export default function App() {
+    return (
+        <NetworkProvider>
+            <RouterProvider router={router} />
+        </NetworkProvider>
+    );
+}
 

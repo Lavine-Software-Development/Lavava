@@ -2,6 +2,7 @@ from jsonable import JsonableSkeleton
 from constants import (
     GROWTH_RATE,
     MINIMUM_TRANSFER_VALUE,
+    PUMP_INTAKE_MULTIPLIER,
     STANDARD_SHRINK_SPEED,
     MINE_DICT,
     GROWTH_STOP,
@@ -28,9 +29,9 @@ class AbstractState(JsonableSkeleton):
 
     def grow(self):
         change = GROWTH_RATE * self.node.grow_multiplier
-        if self.can_grow(change):
-            return change
-        return 0
+        if self.node.value >= self.full_size or self.node.value + change < 0:
+            return 0
+        return change
     
     def can_grow(self, change):
         return 0 < self.node.value + change < self.full_size
@@ -103,7 +104,7 @@ class ZombieState(DefaultState):
 class CannonState(DefaultState):
     
     def __init__(self, node):
-        AbstractState.__init__(self, node, True, False, False, 5) # stays on capture
+        AbstractState.__init__(self, node, True, False, False, 5) # does not stay on capture
 
     def grow(self):
         return 0
@@ -111,7 +112,7 @@ class CannonState(DefaultState):
 class PumpState(DefaultState):
 
     def __init__(self, node):
-        AbstractState.__init__(self, node, True, False, False, 6) # stays on capture
+        AbstractState.__init__(self, node, True, False, False, 6) # does not stay on capture
         self.prep_shrink()
 
     def prep_shrink(self):
@@ -131,6 +132,9 @@ class PumpState(DefaultState):
             return 0
         self.shrink_count -= 1
         return STANDARD_SHRINK_SPEED
+    
+    def intake(self, amount, incoming_player):
+        return super().intake(amount, incoming_player) * PUMP_INTAKE_MULTIPLIER
 
 
 class CapitalState(DefaultState):
