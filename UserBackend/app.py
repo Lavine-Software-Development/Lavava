@@ -199,8 +199,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail)".format(email)}), 200
-
+    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail). Note that it can take up to 10 minutes for emails to deliver. ".format(email)}), 200
 
 @app.route('/confirm_email/<token>')
 def confirm_email(token):
@@ -676,5 +675,5 @@ def get_user_details(username):
 
 
 if __name__ == '__main__':
-    app.run( debug=True, host='0.0.0.0', port=5001, ssl_context=('fullchain.pem', 'privkey.pem'),)
+    app.run( debug=True, host='0.0.0.0', port=5001)
     
