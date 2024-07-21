@@ -48,7 +48,8 @@ const router = createBrowserRouter(
 
 function MainLayout() {
     const location = useLocation();
-    const hideNavBar = location.pathname === "/play";
+    const hideNavBar =
+        location.pathname === "/play" || location.pathname === "/lobby";
     if (hideNavBar) {
         return <Outlet />;
     } else {
