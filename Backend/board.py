@@ -8,6 +8,7 @@ from constants import (
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
     EDGE_COUNT,
+    CAPITALS_NEEDED_FOR_WIN,
 )
 from helpers import do_intersect
 from edge import Edge
@@ -129,7 +130,7 @@ class Board(JsonableTracked):
         return True
     
     def victory_check(self):
-        return any(count >= 3 for count in self.full_player_capitals)
+        return any(count >= CAPITALS_NEEDED_FOR_WIN for count in self.full_player_capitals)
 
     def new_edge_id(self):
         return (
