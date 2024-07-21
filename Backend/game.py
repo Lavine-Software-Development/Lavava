@@ -34,7 +34,6 @@ class ServerGame(JsonableTick):
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
-        # print(player.ps.state, PSE.START_SELECTION)
         if player.ps.state == PSE.START_SELECTION:
             if key == SPAWN_CODE:
                 data_items = [self.board.id_dict[d] for d in data]
@@ -169,7 +168,7 @@ class ServerGame(JsonableTick):
 
         # total owned full capitals: b
         # maximum of 3
-        player_capitals = {player.id: player.full_capital_count for player in self.player_dict.values()}
+        player_capitals = {player.id: self.board.full_player_capitals[player.id] for player in self.player_dict.values()}
 
         # score equals 100b + a
         # effectively, the player with the most full capitals wins, with total nodes as a tiebreaker

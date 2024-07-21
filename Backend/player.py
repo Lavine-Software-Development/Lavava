@@ -3,7 +3,6 @@ from typing import Optional
 from ability import ReloadAbility
 from constants import (
     GREY,
-    CAPITAL_WIN_COUNT,
     START_MONEY,
     START_MONEY_RATE,
     CAPITAL_BONUS,
@@ -49,7 +48,6 @@ class DefaultPlayer(JsonableTick):
         self.abilities = dict()
         self.ps = PlayerState()
         self.rank = 0
-        self.full_capital_count = 0
         self.credits = 0
 
     def eliminate(self, rank):
@@ -74,9 +72,6 @@ class DefaultPlayer(JsonableTick):
 
     def capital_handover(self, gain):
         pass
-
-    def check_capital_win(self):
-        return self.full_capital_count == CAPITAL_WIN_COUNT
 
 
 class MoneyPlayer(DefaultPlayer):
