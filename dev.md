@@ -18,38 +18,28 @@ docker build -t game-server .
 docker run -p 5001:5001 game-server
 ```
 
-# Lightsail
+# Lightsail Restarts
 
 We host our servers on AWS Lighstail which is just a wrapper around ec2. There are two instances for each of our servers. The lightsail instances simply pull and run the docker containers you built and ran locally.
 
 If there are any issues where you need to restart the servers, ssh into the appropriate server and run:
 
+### User backend
+
 ```
-sudo docker stop user-backend && sudo docker rm user-backend
-sudo docker run -p 5001:5001 --name userbackend akashilangovan/userbackend
+sudo docker stop userbackend && sudo docker rm userbackend
+sudo docker run -d -p 5001:5001 -v $(pwd)/game_data:/app/game_data --name userbackend akashilangovan/userbackend_deploy
 ```
 
-or
+## Game server
 
 ```
 sudo docker stop gameserver && sudo docker rm gameserver
-sudo docker run -p 5553:5553 --name gameserver akashilangovan/gameserver
+sudo docker run -p 5553:5553 --name gameserver akashilangovan/gameserver_deploy
 ```
 
-The container names might have changed when people restart so run:
+Run this command after to ensure the proper container is running:
 
 ```
 sudo docker ps -a
-```
-
-to check the current running one and run the previous command accordingly
-
-# Deploying a new version of either backend
-
-Go to the directory of the server you want to deploy and change the names accordingly.
-
-```
-docker build -t userbackend .
-docker tag userbackend akashilangovan/userbackend
-docker push akashilangovan/userbackend
 ```
