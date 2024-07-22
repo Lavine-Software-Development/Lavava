@@ -1,4 +1,4 @@
-from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, NUKE_RANGE, PUMP_CODE
+from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, STRUCTURE_RANGES, ZOMBIE_CODE, CANNON_CODE, PUMP_CODE
 
 
 def no_click(data):
@@ -31,20 +31,20 @@ def standard_node_attack(data, player):
     )
 
 
-def attack_validators(capital_func, player):
+def attack_validators(get_structures, player):
 
     def capital_ranged_node_attack(data):
         node = data[0]
-        capitals = capital_func[player]
+        structures = get_structures(player)
 
-        def in_capital_range(capital):
+        def in_structure_range(structure):
             x1, y1 = node.pos
-            x2, y2 = capital.pos
+            x2, y2 = structure.pos
             distance = (x1 - x2) ** 2 + (y1 - y2) ** 2
-            capital_nuke_range = (NUKE_RANGE * capital.value) ** 2
-            return distance <= capital_nuke_range
+            structure_nuke_range = (STRUCTURE_RANGES[structure.state_name] * structure.value) ** 2
+            return distance <= structure_nuke_range
 
-        return default_node([node]) and any(in_capital_range(capital) for capital in capitals)
+        return default_node([node]) and any(in_structure_range(structure) for structure in structures)
 
     return capital_ranged_node_attack
 
@@ -149,7 +149,7 @@ def make_ability_validators(board, player):
         D_BRIDGE_CODE: make_new_edge_ports(board.check_new_edge, player),
         BURN_CODE: owned_burnable_node,
         RAGE_CODE: no_click,
-        NUKE_CODE: attack_validators(board.player_capitals, player),
+        NUKE_CODE: attack_validators(board.get_player_structures, player),
     } | validators_needing_player(player)
 
 

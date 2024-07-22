@@ -4,7 +4,7 @@ import {
     KeyCodes,
     MINIMUM_TRANSFER_VALUE,
     EventCodes,
-    NUKE_RANGE,
+    NUKE_OPTION_STRINGS,
 } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./node";
@@ -72,28 +72,28 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
 function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number]) {
     return function capitalRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
-        const capitals = nodes.filter(
-            (node) => node.stateName === "capital" && node.owner === player
+        const structures = nodes.filter(
+            (node) => node.stateName in [ NUKE_OPTION_STRINGS ] && node.owner === player
         );
 
-        const inCapitalRange = (capital: Node): boolean => {
+        const inStructureRange = (structure: Node): boolean => {
             const [ratioX, ratioY] = ratio;
             const { x: x1, y: y1 } = node.pos;
-            const { x: x2, y: y2 } = capital.pos;
+            const { x: x2, y: y2 } = structure.pos;
             
             // Scale the distance calculation
             const scaledDx = (x1 - x2) / ratioX;
             const scaledDy = (y1 - y2) / ratioY;
             
             const scaledDistance = scaledDx ** 2 + scaledDy ** 2;
-            const capitalNukeRange = (NUKE_RANGE * capital.value) ** 2;
+            const capitalNukeRange = (structure.state.nuke_range * structure.value) ** 2;
             
             return scaledDistance <= capitalNukeRange;
         };
 
         return (
             defaultNode(node) &&
-            capitals.some((capital) => inCapitalRange(capital))
+            structures.some((structure) => inStructureRange(structure))
         );
     };
 }

@@ -9,6 +9,7 @@ from constants import (
     NODE_COUNT,
     EDGE_COUNT,
     CAPITALS_NEEDED_FOR_WIN,
+    STRUCTURE_RANGES
 )
 from helpers import do_intersect
 from edge import Edge
@@ -55,6 +56,9 @@ class Board(JsonableTracked):
             node = self.id_dict[id]
             if node.state_name == "capital" and node.owner:
                 self.player_capitals[node.owner].add(node)
+
+    def get_player_structures(self, player):
+        return {node for node in self.nodes if node.state_name in STRUCTURE_RANGES and node.owner == player}
 
     def reset(self, nodes, edges):
         self.nodes = nodes

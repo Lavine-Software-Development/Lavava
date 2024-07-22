@@ -115,4 +115,11 @@ export const AbilityReloadTimes = {
 export const GROWTH_STOP = 250;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
-export const NUKE_RANGE = 0.7;
+
+
+export const CAPITAL_NUKE_RANGE = 0.8;
+export const PUMP_NUKE_RANGE = 0.6;
+export const CANNON_NUKE_RANGE = 0.4;
+
+export const NUKE_OPTION_STRINGS = ["cannon", "pump", "capital"];
+export const NUKE_OPTION_CODES = [KeyCodes.CANNON_CODE, KeyCodes.PUMP_CODE, KeyCodes.CAPITAL_CODE];
