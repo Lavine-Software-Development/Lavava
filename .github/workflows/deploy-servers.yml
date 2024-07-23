@@ -69,4 +69,4 @@ jobs:
             sudo docker pull akashilangovan/userbackend:latest
             sudo docker stop userbackend_act || true
             sudo docker rm userbackend_act || true
-            sudo docker run -p 5001:5001 -d --name userbackend_act akashilangovan/userbackend:latest
+            sudo docker run -d -p 5001:5001 -v $(pwd)/game_data:/app/game_data --name userbackend_act akashilangovan/userbackend:latest
