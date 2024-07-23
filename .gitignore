@@ -8,4 +8,7 @@ node_modules/
 backend/venv/
 UserBackend/venv/
 UserBackend/instance
+UserBackend/game_data/game.db
 .env
+.secrets
+game.db
