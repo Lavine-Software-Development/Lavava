@@ -46,7 +46,7 @@ jobs:
           context: ./UserBackend
           push: true
           tags: akashilangovan/userbackend:latest
-      - name: Deploy to Game Server
+      - name: Deploy Game Server
         if: steps.check_game_server.outputs.changed == 'true'
         uses: appleboy/ssh-action@master
         with:
@@ -58,7 +58,7 @@ jobs:
             sudo docker stop gameserver_act|| true
             sudo docker rm gameserver_act || true
             sudo docker run -p 5553:5553 -d --name gameserver_act akashilangovan/gameserver:latest
-      - name: Deploy to UserBackend
+      - name: Deploy UserBackend
         if: steps.check_user_backend.outputs.changed == 'true'
         uses: appleboy/ssh-action@master
         with:
