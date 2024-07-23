@@ -10,7 +10,8 @@ from constants import (
     TRANSFER_RATE,
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
-    ZOMBIE_FULL_SIZE
+    ZOMBIE_FULL_SIZE,
+    CAPITAL_FULL_SIZE,
 )
 from abc import abstractmethod
 import math
@@ -160,6 +161,10 @@ class CapitalState(DefaultState):
     
     def accept_intake(self, incoming_player):
         return self.capitalized and super().accept_intake(incoming_player)
+    
+    @property
+    def full_size(self):
+        return CAPITAL_FULL_SIZE
 
 
 class StartingCapitalState(CapitalState): # stays on capture

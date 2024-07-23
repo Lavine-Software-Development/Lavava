@@ -5,7 +5,7 @@ import {
     KeyCodes,
     MINIMUM_TRANSFER_VALUE,
     EventCodes,
-    NUKE_RANGE,
+    NUKE_OPTION_STRINGS,
     MINI_BRIDGE_RANGE,
 } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
@@ -85,20 +85,20 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
 };
 
 function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number]) {
-    return function capitalRangedNodeAttack(data: IDItem[]): boolean {
+    return function structureRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
-        const capitals = nodes.filter(
-            (node) => node.stateName === "capital" && node.owner === player
+        const structures = nodes.filter(
+            (node) =>  NUKE_OPTION_STRINGS.includes(node.stateName) && node.owner === player
         );
 
-        const inCapitalRange = (capital: Node): boolean => {
-            const capitalNukeRange = NUKE_RANGE * capital.value;
-            return isWithinScaledRange(node.pos, capital.pos, ratio, capitalNukeRange);
+        const inStructureRange = (structure: Node): boolean => {
+            const nukeRange = structure.state.nuke_range * structure.value;
+            return isWithinScaledRange(node.pos, structue.pos, ratio, nukeRange);
         };
 
         return (
             defaultNode(node) &&
-            capitals.some((capital) => inCapitalRange(capital))
+            structures.some((structure) => inStructureRange(structure))
         );
     };
 }

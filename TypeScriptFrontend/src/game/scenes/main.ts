@@ -7,11 +7,12 @@ import {
     NameToCode,
     stateCodes,
     EventCodes,
-    GROWTH_STOP,
+    PRE_STRUCTURE_RANGES,
     AbilityCredits,
     AbilityReloadTimes,
-    NUKE_RANGE,
     PlayerColors,
+    NUKE_OPTION_STRINGS,
+    NUKE_OPTION_CODES, 
     MINI_BRIDGE_RANGE,
 } from "../objects/constants";
 import { PlayerStateEnum as PSE, GameStateEnum as GSE } from "../objects/enums";
@@ -303,26 +304,19 @@ export class MainScene extends Scene {
         // Iterate over the values of the dictionary to draw each node
 
         if (this.abilityManager.getMode() === KeyCodes.NUKE_CODE) {
-            const capitals = Object.values(this.nodes).filter(
+            const structures = Object.values(this.nodes).filter(
                 (node) =>
-                    node.stateName === "capital" &&
+                    NUKE_OPTION_STRINGS.includes(node.stateName) &&
                     node.owner === this.mainPlayer
             );
 
-            capitals.forEach((node) => {
-                this.drawScaledCircle(
-                    node,
-                    node.value * NUKE_RANGE,
-                    Colors.PINK
-                );
+            structures.forEach((node) => {
+                this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.BLACK);
             });
-        } else if (this.highlight.usage == KeyCodes.CAPITAL_CODE) {
+
+        } else if (this.highlight.usage !== null && NUKE_OPTION_CODES.includes(this.highlight.usage)) {
             const highlightedNode = this.highlight.item as Node;
-            this.drawScaledCircle(
-                highlightedNode,
-                highlightedNode.value * NUKE_RANGE,
-                Colors.PINK
-            );
+            this.drawScaledCircle(highlightedNode, PRE_STRUCTURE_RANGES[this.highlight.usage], Colors.BLACK);
         } else if (
             this.highlight.usage == KeyCodes.MINI_BRIDGE_CODE &&
             this.abilityManager.clicks.length == 0

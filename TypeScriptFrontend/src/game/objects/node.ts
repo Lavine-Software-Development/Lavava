@@ -166,7 +166,7 @@ export class Node extends IDItem implements INode {
     }
 
     get full(): boolean {
-        return this.value >= GROWTH_STOP;
+        return this.value >= this.state.full_size;
     }
 
     get portCount(): number {
