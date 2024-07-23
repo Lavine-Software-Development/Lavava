@@ -83,8 +83,11 @@ class Batch:
 
     def remove_player_from_game(self, id):
         self.id_sockets.pop(id)
-        self.game.eliminate(id)
-        print("Player has left")
+        if id in self.game.remaining:
+            print("Player has left")
+            self.game.eliminate(id)
+        else:
+            print("Player has already left")
 
     def reconnect_player(self, token, websocket):
         player_id = self.token_ids[token]
