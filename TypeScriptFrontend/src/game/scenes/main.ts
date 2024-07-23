@@ -7,7 +7,7 @@ import {
     NameToCode,
     stateCodes,
     EventCodes,
-    GROWTH_STOP,
+    PRE_STRUCTURE_RANGES,
     AbilityCredits,
     AbilityReloadTimes,
     PlayerColors,
@@ -300,12 +300,12 @@ export class MainScene extends Scene {
             );
 
             structures.forEach((node) => {
-                this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.PINK);
+                this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.BLACK);
             });
 
-        } else if (this.highlight.usage !== null && NUKE_OPTION_CODES.includes(this.highlight.usage) ) {
+        } else if (this.highlight.usage !== null && NUKE_OPTION_CODES.includes(this.highlight.usage)) {
             const highlightedNode = this.highlight.item as Node;
-            this.drawScaledCircle(highlightedNode, highlightedNode.value * highlightedNode.state.nuke_range, Colors.BLACK);
+            this.drawScaledCircle(highlightedNode, PRE_STRUCTURE_RANGES[this.highlight.usage], Colors.BLACK);
         }
     }
 

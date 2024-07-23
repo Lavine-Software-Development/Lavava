@@ -70,10 +70,10 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
 };
 
 function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number]) {
-    return function capitalRangedNodeAttack(data: IDItem[]): boolean {
+    return function structureRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
         const structures = nodes.filter(
-            (node) => node.stateName in [ NUKE_OPTION_STRINGS ] && node.owner === player
+            (node) =>  NUKE_OPTION_STRINGS.includes(node.stateName) && node.owner === player
         );
 
         const inStructureRange = (structure: Node): boolean => {
