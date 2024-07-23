@@ -148,14 +148,6 @@ class WebSocketServer():
         for id, websocket in batch.id_sockets.items():
              await websocket.send(batch.start_repr_json(id))
         print("Sent start data to player")
-            # tasks.append(asyncio.create_task(self.threaded_client_in_game(i, websocket, batch)))
-        
-        # Wait for all tasks to complete and handle exceptions
-        # for task in tasks:
-        #     try:
-        #         await task
-        #     except Exception as e:
-        #         print(f"An exception occurred: {e}")
 
     async def problem(self, message):
         print("Problem:", message)
