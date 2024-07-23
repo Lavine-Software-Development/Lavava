@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ENV_CONFIG from './env-config';
+import ENV_CONFIG from "./env-config";
 const WebSocketTest: React.FC = () => {
     const [ws, setWs] = useState<WebSocket | null>(null);
     const [messages, setMessages] = useState<string[]>([]);
@@ -8,6 +8,7 @@ const WebSocketTest: React.FC = () => {
 
     // URL of your WebSocket server
     const serverUrl = ENV_CONFIG.gameBackend;
+    // const serverUrl = import.meta.env.VITE_WS_SERVER_URL;
 
     useEffect(() => {
         // Clean up on unmount
