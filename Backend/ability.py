@@ -2,7 +2,7 @@ from jsonable import JsonableTracked
 from constants import TIME_AMOUNT
 from abc import abstractmethod
 from tracking_decorator.track_changes import track_changes
-
+#test github actions
 @track_changes('remaining')
 class AbstractAbility(JsonableTracked):
     def __init__(self, id, validation_func, effect_func, in_game_cost, player, remaining=float("inf")):
