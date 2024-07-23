@@ -161,7 +161,6 @@ class WebSocketServer():
         start_server = websockets.serve(self.handler, self.server, self.port, ssl=ssl_context)
         server = loop.run_until_complete(start_server)
 
-        # Print server running
         print("Websocket server running on {}:{}".format(self.server, self.port))
 
         # Setup graceful shutdown

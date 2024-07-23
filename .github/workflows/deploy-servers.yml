@@ -55,8 +55,8 @@ jobs:
           key: ${{ secrets.GAME_SERVER_SSH_KEY }}
           script: |
             sudo docker pull akashilangovan/gameserver:latest
-            sudo docker stop gamserver|| true
-            sudo docker rm gameserfer || true
+            sudo docker stop gameserver|| true
+            sudo docker rm gameserver || true
             sudo docker run -d --name server1 akashilangovan/gameserver:latest
       - name: Deploy to UserBackend
         if: steps.check_user_backend.outputs.changed == 'true'
