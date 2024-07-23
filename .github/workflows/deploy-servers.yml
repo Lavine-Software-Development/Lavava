@@ -66,7 +66,7 @@ jobs:
           username: ${{ secrets.USER_BACKEND_USERNAME }}
           key: ${{ secrets.USER_BACKEND_SSH_KEY }}
           script: |
-            docker pull akashilangovan/userbackend:latest
-            docker stop userbackend || true
-            docker rm userbackend || true
-            docker run -d --name userbackend akashilangovan/userbackend:latest
+            sudo docker pull akashilangovan/userbackend:latest
+            sudo docker stop userbackend || true
+            sudo docker rm userbackend || true
+            sudo docker run -d --name userbackend akashilangovan/userbackend:latest
