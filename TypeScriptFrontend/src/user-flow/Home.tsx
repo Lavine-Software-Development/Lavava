@@ -258,7 +258,7 @@ const Home: React.FC = () => {
                                     }}
                                     onClick={switchToHost}
                                 >
-                                    Host Game
+                                    Host Game test
                                 </button>
                                 <button
                                     className="btn"
@@ -273,21 +273,32 @@ const Home: React.FC = () => {
                                     Join Game
                                 </button>
                             </div>
-                            <h1 style={{ textAlign: "center" }}>Friendly Match</h1>
+                            <h1 style={{ textAlign: "center" }}>
+                                Friendly Match
+                            </h1>
                             <h3 style={{ textAlign: "center" }}>(No elo)</h3>
 
                             <div className="abilities-container-friendly">
                                 {selectedAbilities.map((ability, index) => (
-                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[ability.name] }}>
-                                    <div className="ability-icon">
-                                    <img
-                                        src={`./assets/abilityIcons/${ability.name}.png`}
-                                        alt={ability.name}
-                                        className="ability-img"
-                                    />
+                                    <div
+                                        key={index}
+                                        className="ability-square"
+                                        style={{
+                                            backgroundColor:
+                                                abilityColors[ability.name],
+                                        }}
+                                    >
+                                        <div className="ability-icon">
+                                            <img
+                                                src={`./assets/abilityIcons/${ability.name}.png`}
+                                                alt={ability.name}
+                                                className="ability-img"
+                                            />
+                                        </div>
+                                        <div className="ability-count">
+                                            {ability.count}
+                                        </div>
                                     </div>
-                                    <div className="ability-count">{ability.count}</div>
-                                </div>
                                 ))}
                             </div>
                             {friendlyMode === "host" ? (
@@ -358,20 +369,28 @@ const Home: React.FC = () => {
                             <h3 style={{ textAlign: "center" }}>(For elo)</h3>
                             <div className="abilities-container-ladder">
                                 {selectedAbilities.map((ability, index) => (
-                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[ability.name] }}>
-                                    <div className="ability-icon">
-                                    <img
-                                        src={`./assets/abilityIcons/${ability.name}.png`}
-                                        alt={ability.name}
-                                        className="ability-img"
-                                    />
-
+                                    <div
+                                        key={index}
+                                        className="ability-square"
+                                        style={{
+                                            backgroundColor:
+                                                abilityColors[ability.name],
+                                        }}
+                                    >
+                                        <div className="ability-icon">
+                                            <img
+                                                src={`./assets/abilityIcons/${ability.name}.png`}
+                                                alt={ability.name}
+                                                className="ability-img"
+                                            />
+                                        </div>
+                                        <div className="ability-count">
+                                            {ability.count}
+                                        </div>
                                     </div>
-                                    <div className="ability-count">{ability.count}</div>
-                                </div>
                                 ))}
                             </div>
-                            <div style={{ height: '43px' }}></div> 
+                            <div style={{ height: "43px" }}></div>
                             <div
                                 className="player-count-drop-down-container"
                                 ref={playerCountDropdownRef}
