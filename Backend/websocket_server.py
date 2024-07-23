@@ -163,7 +163,6 @@ class WebSocketServer():
 
         print("Websocket server running on {}:{}".format(self.server, self.port))
 
-        # Setup graceful shutdown
         for signame in ('SIGINT', 'SIGTERM'):
             loop.add_signal_handler(getattr(signal, signame),
                                     lambda: asyncio.ensure_future(self.shutdown(server, signame)))

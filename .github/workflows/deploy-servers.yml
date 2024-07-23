@@ -55,9 +55,9 @@ jobs:
           key: ${{ secrets.GAME_SERVER_SSH_KEY }}
           script: |
             sudo docker pull akashilangovan/gameserver:latest
-            sudo docker stop gameserver|| true
-            sudo docker rm gameserver || true
-            sudo docker run -d --name server1 akashilangovan/gameserver:latest
+            sudo docker stop gameserver_act|| true
+            sudo docker rm gameserver_act || true
+            sudo docker run -d --name gameserver_act akashilangovan/gameserver:latest
       - name: Deploy to UserBackend
         if: steps.check_user_backend.outputs.changed == 'true'
         uses: appleboy/ssh-action@master
@@ -67,6 +67,6 @@ jobs:
           key: ${{ secrets.USER_BACKEND_SSH_KEY }}
           script: |
             sudo docker pull akashilangovan/userbackend:latest
-            sudo docker stop userbackend || true
-            sudo docker rm userbackend || true
-            sudo docker run -d --name userbackend akashilangovan/userbackend:latest
+            sudo docker stop userbackend_act || true
+            sudo docker rm userbackend_act || true
+            sudo docker run -d --name userbackend_act akashilangovan/userbackend:latest
