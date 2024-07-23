@@ -84,7 +84,7 @@ app.config['MAIL_USERNAME'] = 'lavavaacc@gmail.com'
 app.config['MAIL_PASSWORD'] = 'enwueidxiwivjvxn'  # Use the app password you generated
 mail = Mail(app)
 
-s = URLSafeTimedSerializer(app.config['SECRET_KEY']) # serializer
+s = URLSafeTimedSerializer(app.config['SECRET_KEY']) 
 
 def token_required(f):
     @wraps(f)
