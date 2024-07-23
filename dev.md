@@ -7,7 +7,7 @@ Make sure you have docker installed and runnnig and run the following commands f
 ```
 cd UserBackend/
 docker build -t user-backend .
-docker run -p 5553:5553 user-backend
+docker run -p 5001:5001 user-backend
 ```
 
 ##### Websocket Server
@@ -15,7 +15,7 @@ docker run -p 5553:5553 user-backend
 ```
 cd Backend/
 docker build -t game-server .
-docker run -p 5001:5001 game-server
+docker run -p 5553:5553 game-server
 ```
 
 # Lightsail Restarts
