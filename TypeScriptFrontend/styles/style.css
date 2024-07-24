@@ -163,7 +163,7 @@ input::placeholder {
 }
 
 .dashboard-container {
-    display: flex;
+    display: inline-flex;
     gap: 20px;
 }
 
@@ -914,4 +914,39 @@ ul {
 .current-user {
     font-weight: bold;
     color: #4CAF50;
+}
+
+.settings-card {
+    display: flex;
+    gap: 20px;
+}
+
+.profile-card h2 {
+    margin: 0 0 20px 0; /* Adds space below the heading */
+    color: #333; /* Dark text for contrast */
+    font-size: 24px; /* Larger text for headings */
+    text-align: center; /* Center the heading */
+}
+
+.settings-card input[type="number"] {
+    padding: 8px; /* Padding inside the input for comfort */
+    border: 1px solid #ccc; /* Subtle border */
+    border-radius: 4px; /* Rounded corners for the input */
+    font-size: 16px; /* Comfortable text size */
+    flex-grow: 1; /* Allows the input to grow and fill available space */
+}
+
+.settings-card .column {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 10px;
+}
+
+.settings-card .row {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Aligns items vertically in the center */
+    gap: 5px; /* Adjust the space between label and input */
+    width: 100%; /* Ensures the row takes full width of its container */
 }

@@ -1,3 +1,4 @@
+from crypt import methods
 import jwt
 import datetime
 from flask import Flask, jsonify, request, url_for
@@ -737,6 +738,21 @@ def get_user_details(username):
         return jsonify(response)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/default-host-settings', methods=['GET'])
+def get_default_host_settings():
+    default_settings = {
+        "totalNodes": 20,
+        "totalEdges": 40,
+        "portPercentage": 10,
+        "startingMainlandCapitals": 3,
+        "startingIslandCapitals": 2,
+        "startingCannons": 5,
+        "startingPumps": 2,
+        "twoWayPercentage": 50
+    }
+    return jsonify(default_settings)
+
 
 
 if __name__ == '__main__':

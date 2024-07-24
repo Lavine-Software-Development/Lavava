@@ -20,6 +20,8 @@ const Home: React.FC = () => {
     );
     const [showInvalidCodePopup, setShowInvalidCodePopup] = useState(false);
 
+    const [showSettingsButton, setShowSettingsButton] = useState(true);
+
     useEffect(() => {
         sessionStorage.removeItem("key_code");
         const urlParams = new URLSearchParams(window.location.search);
@@ -71,7 +73,6 @@ const Home: React.FC = () => {
         
     }, []);
 
-
     const hostTab = (e: number) => {
         setPlayerCount(e);
         sessionStorage.setItem('playerCount', e.toString());
@@ -83,6 +84,11 @@ const Home: React.FC = () => {
         sessionStorage.setItem("player_count", playerCount.toString());
         sessionStorage.removeItem("key_code");
         navigate("/lobby");
+    };
+
+    const handleSaveSettings = () => {
+        // Implement the logic to save or use the settings
+        console.log("Settings saved:", { totalNodes, totalEdges, portPercentage, startingMainlandCapitals, startingIslandCapitals, startingCannons, startingPumps, twoWayPercentage });
     };
 
     const handleLadderGame = () => {
@@ -169,11 +175,13 @@ const Home: React.FC = () => {
     const switchToHost = () => {
         setFriendlyMode("host");
         sessionStorage.setItem("friendlyMode", "host");
+        setShowSettingsButton(true);
     };
 
     const switchToJoin = () => {
         setFriendlyMode("join");
         sessionStorage.setItem("friendlyMode", "join");
+        setShowSettingsButton(false);
     };
 
     return (
@@ -312,6 +320,9 @@ const Home: React.FC = () => {
                                             </ul>
                                         )}
                                     </div>
+                                    {showSettingsButton && (
+                                        <button className="btn" onClick={() => navigate("/host-settings")} data-tooltip="Host Game Settings">Host Settings</button>
+                                    )}
                                     <button
                                         className="btn"
                                         style={{ backgroundColor: "green" }}
@@ -404,6 +415,42 @@ const Home: React.FC = () => {
                     ) : null}
                 </div>
             )}
+            {/* {showSettingsCard && (
+            // <div className="profile-card">
+            //     <h2>Settings</h2>
+            //     <div className="settings-card">
+            //         <div className="column">
+            //             <div className="row">
+            //                 <label>Total Nodes<input type="number" value={totalNodes} onChange={(e) => setTotalNodes(parseInt(e.target.value))} /></label>
+            //             </div>
+            //             <div className="row">
+            //                 <label>Total Edges<input type="number" value={totalEdges} onChange={(e) => setTotalEdges(parseInt(e.target.value))} /></label>
+            //             </div>
+            //             <div className="row">
+            //                 <label>Port Percentage<input type="number" value={portPercentage} onChange={(e) => setPortPercentage(parseInt(e.target.value))} /></label>
+            //             </div>
+            //             <div className="row">
+            //                 <label>Starting Mainland Capitals<input type="number" value={startingMainlandCapitals} onChange={(e) => setStartingMainlandCapitals(parseInt(e.target.value))} /></label>
+            //             </div>
+            //         </div>
+            //         <div className="column">
+            //             <div className="row">
+            //                 <label>Starting Island Capitals<input type="number" value={startingIslandCapitals} onChange={(e) => setStartingIslandCapitals(parseInt(e.target.value))} /></label>
+            //             </div>
+            //             <div className="row">
+            //                 <label>Starting Cannons<input type="number" value={startingCannons} onChange={(e) => setStartingCannons(parseInt(e.target.value))} /></label>
+            //             </div>
+            //             <div className="row">
+            //                 <label>Starting Pumps<input type="number" value={startingPumps} onChange={(e) => setStartingPumps(parseInt(e.target.value))} /></label>
+            //             </div>
+            //             <div className="row">
+            //                 <label>Two-Way Percentage<input type="number" value={twoWayPercentage} onChange={(e) => setTwoWayPercentage(parseInt(e.target.value))} /></label>
+            //             </div>
+            //         </div>
+            //     </div>
+            //     <button className="custom-button" onClick={handleSaveSettings} data-tooltip="Preset for host game settings">Save</button>
+            // </div>
+            )} */}
             <div className="popup-container">
                 {showSalaryPopup && (
                     <div className="popup salary-popup">

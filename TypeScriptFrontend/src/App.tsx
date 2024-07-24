@@ -25,6 +25,8 @@ import ChangePassword from "./user-flow/change_password";
 import Lobby from "./user-flow/lobby";
 import { NetworkContext, NetworkProvider } from "./game/NetworkContext";
 import { use } from "matter";
+import HostSettings from "./user-flow/host_settings";
+
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
 
@@ -70,6 +72,7 @@ function App() {
                                         <Route path="/how-to-play" element={<HowToPlay />} />
                                         <Route path="/team" element={<Team />} />
                                         <Route path="/change-password" element={<ChangePassword />} />
+                                        <Route path="/host-settings" element={<HostSettings />} />
                                     </Routes>
                                 </div>
                             }
