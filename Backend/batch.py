@@ -23,9 +23,11 @@ class Batch:
         self.gs = GameState()
         self.game = ServerGame(self.player_count, self.gs)
         self.has_left = {}
+        self.display_names = [] #just the display names to be displayed on the front end
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
         self.token_disname = {}
+        #self.display_names = [] #just the display names to be displayed on the front end
         
 
     
@@ -64,6 +66,7 @@ class Batch:
 
         self.token_disname[token] = display_name
         print(f"Display name set to: {display_name}")
+        #self.display_names.append(display_name)
         return display_name
         
     def add_player(self, token, websocket, ability_data):
@@ -117,6 +120,7 @@ class Batch:
         start_dict["player_id"] = player_id
         start_dict["abilities"] = json_abilities.start_json()
         start_dict['isFirst'] = True
+        #start_dict["display_names_list"] = self.token_disname.values()
         start_json = plain_json(start_dict)
         return start_json
     
