@@ -890,3 +890,28 @@ ul {
     cursor: pointer;
     text-decoration: underline;
 }
+
+.game-history-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.game-history-item p {
+    margin: 5px 0;
+}
+
+.game-history-item ul {
+    list-style-type: none;
+    padding-left: 10px;
+}
+
+.game-history-item li {
+    margin: 3px 0;
+}
+
+.current-user {
+    font-weight: bold;
+    color: #4CAF50;
+}

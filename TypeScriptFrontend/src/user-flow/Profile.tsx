@@ -3,13 +3,25 @@ import '../../styles/style.css';
 import { Link, useNavigate } from 'react-router-dom';
 import config from '../env-config';
 
+interface PlayerData {
+    username: string;
+    rank: number;
+    is_current_user: boolean;
+}
+
+interface GameData {
+    game_id: number;
+    game_date: string;
+    players: PlayerData[];
+}
+
 interface ProfileData {
     userName: string;
     displayName: string;
     email: string;
     abilities: { name: string; count: number }[];
     elo: number;
-    past_games: number[];
+    last_game: GameData | null;
 }
 
 const Profile: React.FC = () => {
@@ -20,7 +32,7 @@ const Profile: React.FC = () => {
         email: 'Loading...',
         abilities: [], // Default to at least one empty list
         elo: 1000,
-        past_games: [],
+        last_game: null,
     });
 
     const [isEditing, setIsEditing] = useState(false);
@@ -164,9 +176,24 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="info-card linear-gradient">
                     <h2><span className="text-shadow">ELO:</span> <span className="elo-value">{profileData.elo}</span></h2>
-                    {profileData.past_games.map((position, index) => (
-                        <p key={index}>Game {index + 1}: {position}</p>
-                    ))}
+                    <h3 className="text-shadow">Most Recent Game</h3>
+                    {profileData.last_game ? (
+                        <div className="game-history-item">
+                            <p><strong>Date:</strong> {new Date(profileData.last_game.game_date).toLocaleString()}</p>
+                            <p><strong>Game ID:</strong> {profileData.last_game.game_id}</p>
+                            <p><strong>Players:</strong></p>
+                            <ul>
+                                {profileData.last_game.players.map((player, index) => (
+                                    <li key={index} className={player.is_current_user ? 'current-user' : ''}>
+                                        {player.username} - Rank: {player.rank}
+                                        {player.is_current_user && ' (You)'}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : (
+                        <p>No recent games played.</p>
+                    )}
                 </div>
             </div>
         </div>

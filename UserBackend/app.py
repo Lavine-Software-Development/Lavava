@@ -11,6 +11,8 @@ from config import config
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, desc
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+import json
+from sqlalchemy.types import Text
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -65,8 +67,20 @@ if config.DB_CONNECTED:
     class Game(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-        user_ids = db.Column(db.JSON, nullable=False)
-        user_ranks = db.Column(db.JSON, nullable=False)
+        usernames = db.Column(Text, nullable=False)
+        user_ranks = db.Column(Text, nullable=False)
+
+        def __init__(self, usernames, user_ranks):
+            self.usernames = json.dumps(usernames)
+            self.user_ranks = json.dumps(user_ranks)
+
+        @property
+        def usernames_list(self):
+            return json.loads(self.usernames)
+
+        @property
+        def user_ranks_list(self):
+            return json.loads(self.user_ranks)
 
 
     with app.app_context():
@@ -334,15 +348,32 @@ def get_profile(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
         if user:
-            games = Game.query.filter(Game.user_ids.contains(str(user.id))).order_by(Game.game_date.desc()).limit(3).all()
-            past_games = [game.user_ranks.get(str(user.id), "N/A") for game in games]
+            most_recent_game = Game.query.filter(Game.usernames.like(f'%{user.username}%')).order_by(Game.game_date.desc()).first()
+            last_game_data = None
+            if most_recent_game:
+                last_game_data = {
+                    "game_id": most_recent_game.id,
+                    "game_date": most_recent_game.game_date.isoformat(),
+                    "players": []
+                }
+                for username, rank in zip(most_recent_game.usernames_list, most_recent_game.user_ranks_list):
+                    player_data = {
+                        "username": username,
+                        "rank": rank,
+                        "is_current_user": (username == user.username)
+                    }
+                    last_game_data["players"].append(player_data)
+
+                # Sort players by rank
+                last_game_data["players"].sort(key=lambda x: x["rank"])
+
             return jsonify({
                 "userName": user.username,
                 "displayName": user.display_name,
                 "email": user.email,
                 "abilities": user_decks(current_user),
                 "elo": user.elo,
-                "past_games": past_games
+                "last_game": last_game_data
             })
         else:
             return jsonify({"error": "User not found"}), 404
@@ -353,8 +384,31 @@ def get_profile(current_user):
             "email": "john.doe@example.com",
             "abilities": user_decks(current_user),
             "elo": 1138,
-            "past_games": ["1st", "4th", "2nd"]
+            "last_game": {
+                "game_id": 12345,
+                "game_date": "2023-07-23T14:30:00",
+                "players": [
+                    {"username": "Current-User", "rank": 1, "is_current_user": True},
+                    {"username": "Player1", "rank": 2, "is_current_user": False},
+                    {"username": "Player3", "rank": 3, "is_current_user": False},
+                    {"username": "Player4", "rank": 4, "is_current_user": False}
+                ]
+            }
         })
+    
+
+# route for match history
+# will display the users last 20 matches
+# will be a route from the profile page where under the most recent match there will be a button to go to this match history route
+#@app.route('/match-history', methods=['GET'])
+#@token_required
+#def match_mistory(current_user):
+#    if config.DB_CONNECTED:
+#        user = User.query.filter_by(username=current_user).first()
+#        if user:
+#            match_history = Game.query.filter(Game.usernames.contains(user.username)).order_by(Game.game_date.desc()).limit(20).all()
+
+
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
@@ -570,7 +624,41 @@ def get_abilities():
     ]
     return jsonify({"abilities": abilities, "salary": 20})
 
-@app.route('/elo', methods=['POST'])
+
+@app.route('/save_game', methods=['POST'])
+def save_game():
+    data = request.json
+    ordered_tokens = data.get("ordered_players")
+    print(ordered_tokens)
+
+    if not ordered_tokens:
+        return jsonify({"error": "Missing ordered players"}), 400
+    
+    if config.DB_CONNECTED:
+        usernames = []
+        user_ranks = []
+        for rank, token in enumerate(ordered_tokens, start=1):
+            #username = token_to_username(token)
+            username = token
+            print(username)
+            user = User.query.filter_by(username=username).first()
+            if user:
+                usernames.append(username)
+            
+            else:
+                usernames.append("Guest")
+            user_ranks.append(rank)
+        
+        new_game = Game(usernames=usernames, user_ranks=user_ranks)
+        db.session.add(new_game)
+        db.session.commit()
+
+        return update_elo()
+    
+    else:
+        return update_elo()
+
+
 def update_elo():
     # important that order is maintained throughout the process, as that preserves ranking in game
     # hence why lists are used
