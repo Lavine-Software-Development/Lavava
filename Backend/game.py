@@ -166,9 +166,7 @@ class ServerGame(JsonableTick):
         # theoretical maximum of 65
         player_nodes = {player.id: player.count for player in self.player_dict.values()}
 
-        # total owned full capitals: b
-        # maximum of 3
-        player_capitals = {player.id: self.board.full_player_capitals[player.id] for player in self.player_dict.values()}
+        player_capitals = self.only_winner_capitals_count()
 
         # score equals 100b + a
         # effectively, the player with the most full capitals wins, with total nodes as a tiebreaker
@@ -179,6 +177,15 @@ class ServerGame(JsonableTick):
             self.player_dict[sorted_scores[i][0]].lose(i + 1)
 
         self.gs.end()
+
+    def hundred_per_capital(self):
+        # total owned full capitals: b
+        # maximum of 3
+        return {player.id: self.board.full_player_capitals[player.id] for player in self.player_dict.values()}
+
+    def only_winner_capitals_count(self):
+        # 1 if having 3 full capitals, 0 otherwise
+        return {player.id: int(self.board.full_player_capitals[player.id] >= 3) for player in self.player_dict.values()}
 
     def determine_ranks_from_elimination(self, winner):
         self.player_dict[winner].win()

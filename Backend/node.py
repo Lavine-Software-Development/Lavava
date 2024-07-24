@@ -109,9 +109,8 @@ class Node(JsonableTracked):
                 if AUTO_ATTACK:
                     edge.switch(True)
                     edge.popped = True
-            elif not edge.owned and AUTO_EXPAND:
+            elif not edge.owned and AUTO_EXPAND and not edge.popped:
                 edge.switch(True)
-                edge.popped = False
 
     def check_edge_stati(self):
         for edge in self.edges:
