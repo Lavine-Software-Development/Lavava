@@ -16,13 +16,14 @@ class ServerGame(JsonableTick):
         self.running = True
         self.gs = gs
         self.extra_info = []
+        self.counts = [0] * player_count
         self.board = Board(self.gs)
         self.player_dict = {
             i: DefaultPlayer(i) for i in range(player_count)
         }
 
         start_values = {'board'}
-        tick_values = {'countdown_timer', 'gs', 'extra_info'}
+        tick_values = {'countdown_timer', 'gs', 'extra_info', 'counts'}
         recurse_values = {'board'}
         super().__init__('game', start_values, recurse_values, tick_values)
 
@@ -131,6 +132,7 @@ class ServerGame(JsonableTick):
 
     def tick(self):
         self.update_timer()
+        self.counts = [self.player_dict[i].count for i in range(len(self.player_dict))]
         # print("remaining player:", self.remaining)
         if self.gs.value >= GSE.PLAY.value:
             # print("Gamestaet value: " + str(self.gs.value))
