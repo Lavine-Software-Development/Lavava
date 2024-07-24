@@ -950,3 +950,7 @@ ul {
     gap: 5px; /* Adjust the space between label and input */
     width: 100%; /* Ensures the row takes full width of its container */
 }
+
+.profile-card.with-settings {
+    width: 560px;
+}

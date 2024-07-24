@@ -15,6 +15,14 @@ const HostSettings: React.FC = () => {
     const navigate = useNavigate();
 
     const handleStartFresh = () => {
+        setTotalNodes(0);
+        setTotalEdges(0);
+        setPortPercentage(0);
+        setStartingMainlandCapitals(0);
+        setStartingIslandCapitals(0);
+        setStartingCannons(0);
+        setStartingPumps(0);
+        setTwoWayPercentage(0);
     };
 
     const handleSaveSettings = () => {
@@ -49,7 +57,7 @@ const HostSettings: React.FC = () => {
         }, []);
 
     return (
-        <div className="profile-card">
+        <div className="profile-card with-settings">
           <h2>Settings</h2>
           <div className="settings-card">
             <div className="column">
