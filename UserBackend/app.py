@@ -15,7 +15,7 @@ from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from dotenv import load_dotenv
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__) 
 CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 

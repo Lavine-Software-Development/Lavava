@@ -7,7 +7,7 @@ import signal
 import ssl 
 import logging
 
-# Configure logging
+# Configure logging 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -182,7 +182,6 @@ class WebSocketServer():
         for signame in ('SIGINT', 'SIGTERM'):
             loop.add_signal_handler(getattr(signal, signame),
                                     lambda: asyncio.ensure_future(self.shutdown(server, signame)))
-
         try:
             loop.run_forever()
         except Exception as e:
