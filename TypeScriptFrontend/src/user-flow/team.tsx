@@ -16,6 +16,11 @@ const teamMembers = [
         name: 'Akash', 
         profilePic: './assets/Team/akash.jpeg', 
         intro: 'Networking Engineer' 
+    },
+    {
+        name: 'Bilal',
+        profilePic: './assets/Team/bilal.png',
+        intro: 'Frontend Developer'
     }
 ];
 
