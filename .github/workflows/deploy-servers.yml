@@ -57,7 +57,7 @@ jobs:
             sudo docker pull akashilangovan/gameserver:latest
             sudo docker stop gameserver_act|| true
             sudo docker rm gameserver_act || true
-            sudo docker run -p 5553:5553 -d --name gameserver_act akashilangovan/gameserver:latest
+            sudo docker run -e ENV=PROD -p 5553:5553 -d --name gameserver_act akashilangovan/gameserver:latest
       - name: Deploy UserBackend
         if: steps.check_user_backend.outputs.changed == 'true'
         uses: appleboy/ssh-action@master
@@ -69,4 +69,4 @@ jobs:
             sudo docker pull akashilangovan/userbackend:latest
             sudo docker stop userbackend_act || true
             sudo docker rm userbackend_act || true
-            sudo docker run -d -p 5001:5001 -v /home/ec2-user/game_data:/app/game_data --name userbackend_act akashilangovan/userbackend:latest
+            sudo docker run -e ENV=PROD -d -p 5001:5001 -v /home/ec2-user/game_data:/app/game_data --name userbackend_act akashilangovan/userbackend:latest

@@ -22,7 +22,10 @@ app.config['SECRET_KEY'] = 'your_secret_key'
  
 if config.DB_CONNECTED:
     db_path = os.path.join('/app/game_data', 'game.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    if config.ENV == "PROD":
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -674,5 +677,11 @@ def get_user_details(username):
 
 
 if __name__ == '__main__':
-    app.run( debug=True, host='0.0.0.0', port=5001,ssl_context=('fullchain.pem', 'privkey.pem'))
+    print("Env var:" + str(config.ENV))
+    if config.ENV == "PROD":
+        certfile = "fullchain.pem"
+        keyfile = "privkey.pem"
+        app.run( debug=True, host='0.0.0.0', port=5001,ssl_context=(certfile, keyfile))
+    else:
+        app.run( debug=True, host='0.0.0.0', port=5001)
     
