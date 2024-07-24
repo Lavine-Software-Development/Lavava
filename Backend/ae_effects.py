@@ -56,7 +56,7 @@ def make_cannon_shot(id_dict, update_method):
     def cannon_shot(player, data):
         cannon, target = id_dict[data[0]], id_dict[data[1]]
         if target.owner == player:
-            loss = min(cannon.value - MINIMUM_TRANSFER_VALUE, (GROWTH_STOP - target.value) * (1 / CANNON_SHOT_DAMAGE_PERCENTAGE))
+            loss = min(cannon.value - MINIMUM_TRANSFER_VALUE, (target.full_size - target.value) * (1 / CANNON_SHOT_DAMAGE_PERCENTAGE))
         else:
             loss = cannon.value - MINIMUM_TRANSFER_VALUE
         transfer = loss * CANNON_SHOT_DAMAGE_PERCENTAGE

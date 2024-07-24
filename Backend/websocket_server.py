@@ -8,7 +8,7 @@ import ssl
 import logging
 
 # Configure logging 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class WebSocketServer():
@@ -140,7 +140,7 @@ class WebSocketServer():
                             batch_json = batch.tick_repr_json(id)
                             await websocket.send(batch_json)
                         except websockets.exceptions.ConnectionClosed:
-                            logger.warning(f"Connection closed for player {id} in game {batch_code}")
+                            # logger.warning(f"Connection closed for player {id} in game {batch_code}")
                             batch.did_not_respond(id)
                     else:
                         logger.info(f"Removing player {id} from game {batch_code}")
