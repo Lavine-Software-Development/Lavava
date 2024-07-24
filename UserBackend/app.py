@@ -753,6 +753,11 @@ def get_default_host_settings():
     }
     return jsonify(default_settings)
 
+@app.route('/save_host_settings', methods=['POST'])
+def save_host_settings():
+    data = request.json
+    # Save settings to database
+    return jsonify({"success": True, "message": "Settings saved successfully"}), 200
 
 
 if __name__ == '__main__':

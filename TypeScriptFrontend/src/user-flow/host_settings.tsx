@@ -26,10 +26,33 @@ const HostSettings: React.FC = () => {
     };
 
     const handleSaveSettings = () => {
-        // Implement your save logic here
-        // This could involve updating state, sending a request to a backend, etc.
-        console.log("Settings saved");
-    };
+        fetch(`${config.userBackend}/save_host_settings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+            },
+            body: JSON.stringify({
+                totalNodes,
+                totalEdges,
+                portPercentage,
+                startingMainlandCapitals,
+                startingIslandCapitals,
+                startingCannons,
+                startingPumps,
+                twoWayPercentage,
+            }),
+        })
+            .then((response) => response.ok)
+            .then((ok) => {
+                if (ok) {
+                    alert('Settings saved successfully');
+                }
+            })
+            .catch((error) => {
+                console.error('Failed to save the host settings', error);
+            });
+    }
 
     const handleMySettings = () => {
     };
@@ -39,6 +62,7 @@ const HostSettings: React.FC = () => {
     }
 
     useEffect(() => {
+        
         fetch(`${config.userBackend}/default-host-settings`)
             .then((response) => response.json())
             .then((data) => {
