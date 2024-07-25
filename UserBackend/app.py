@@ -1,5 +1,6 @@
 import jwt
 import datetime
+import json
 from flask import Flask, jsonify, request, url_for
 from flask_cors import CORS
 from functools import wraps
@@ -9,11 +10,9 @@ from itsdangerous import SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, func
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-import json
 from sqlalchemy.types import Text
-
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -64,7 +63,7 @@ if config.DB_CONNECTED:
             self.ability = ability
             self.count = count
 
-    class Game(db.Model):
+    class GameHistory(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
         usernames = db.Column(Text, nullable=False)
@@ -348,7 +347,7 @@ def get_profile(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
         if user:
-            most_recent_game = Game.query.filter(Game.usernames.like(f'%{user.username}%')).order_by(Game.game_date.desc()).first()
+            most_recent_game = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).first()
             last_game_data = None
             if most_recent_game:
                 last_game_data = {
@@ -395,19 +394,6 @@ def get_profile(current_user):
                 ]
             }
         })
-    
-
-# route for match history
-# will display the users last 20 matches
-# will be a route from the profile page where under the most recent match there will be a button to go to this match history route
-#@app.route('/match-history', methods=['GET'])
-#@token_required
-#def match_mistory(current_user):
-#    if config.DB_CONNECTED:
-#        user = User.query.filter_by(username=current_user).first()
-#        if user:
-#            match_history = Game.query.filter(Game.usernames.contains(user.username)).order_by(Game.game_date.desc()).limit(20).all()
-
 
 
 @app.route('/send-email', methods=['POST'])
@@ -472,9 +458,6 @@ def save_deck(current_user):
     data = request.json
     abilities = data.get('abilities')
 
-    if not abilities:
-        return jsonify({"success": False, "message": "Missing abilities"}), 400
-
     user = User.query.filter_by(username=current_user).first()
     if not user:
         return jsonify({"success": False, "message": "User not found"}), 404
@@ -500,7 +483,7 @@ def save_deck(current_user):
                 current_cards.pop(ability['name'])
             else:
                 # Add new card
-                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'], description=description)
+                new_card = DeckCard(deck_id=deck.id, ability=ability['name'], count=ability['count'])
                 db.session.add(new_card)
 
         # Remove cards not in the new deck
@@ -629,7 +612,6 @@ def get_abilities():
 def save_game():
     data = request.json
     ordered_tokens = data.get("ordered_players")
-    print(ordered_tokens)
 
     if not ordered_tokens:
         return jsonify({"error": "Missing ordered players"}), 400
@@ -640,7 +622,6 @@ def save_game():
         for rank, token in enumerate(ordered_tokens, start=1):
             #username = token_to_username(token)
             username = token
-            print(username)
             user = User.query.filter_by(username=username).first()
             if user:
                 usernames.append(username)
@@ -649,7 +630,7 @@ def save_game():
                 usernames.append("Guest")
             user_ranks.append(rank)
         
-        new_game = Game(usernames=usernames, user_ranks=user_ranks)
+        new_game = GameHistory(usernames=usernames, user_ranks=user_ranks)
         db.session.add(new_game)
         db.session.commit()
 
@@ -678,7 +659,22 @@ def update_elo():
 @app.route('/leaderboard', methods=['GET'])
 def get_leaderboard():
     if config.DB_CONNECTED:
-        confirmed_users = User.query.filter_by(email_confirm=True).order_by(desc(User.elo)).all()
+        # Subquery to count the number of games each user has participated in
+        subquery = (
+            db.session.query(User.username, func.count(GameHistory.id).label('game_count'))
+            .join(GameHistory, GameHistory.usernames.contains(User.username))
+            .group_by(User.username)
+            .subquery()
+        )
+
+        # Query to filter users based on game_count and email confirmation
+        confirmed_users = (
+            db.session.query(User)
+            .join(subquery, User.username == subquery.c.username)
+            .filter(User.email_confirm == True, subquery.c.game_count >= 3)
+            .order_by(desc(User.elo))
+            .all()
+        )
         leaderboard = [
             {
                 "userName": user.username,

@@ -216,8 +216,9 @@ input::placeholder {
 }
 
 .info-card {
-    width: 300px;
+    width: 400px;
 }
+
 .info-card h2 .elo-value {
     color: white;
 }
@@ -891,11 +892,41 @@ ul {
     text-decoration: underline;
 }
 
+.match-history-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
 .game-history-item {
     background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 10px;
+    border-radius: 5px;
+    padding: 15px;
     margin-bottom: 15px;
+    color: white;
+}
+
+.current-user-win{
+    font-weight: bold;
+    color: rgb(46, 197, 46);
+}
+
+.current-user-lose{
+    font-weight: bold;
+    color: rgb(161, 30, 30);
+}
+
+.match-history-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.match-history-btn:hover {
+    background-color: #218838;
 }
 
 .game-history-item p {
@@ -909,9 +940,4 @@ ul {
 
 .game-history-item li {
     margin: 3px 0;
-}
-
-.current-user {
-    font-weight: bold;
-    color: #4CAF50;
 }

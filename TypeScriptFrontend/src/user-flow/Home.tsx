@@ -2,6 +2,21 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import config from "../env-config";
 
+function getDeviceType() {
+    const ua = navigator.userAgent;
+
+    if (/mobile/i.test(ua)) {
+        return "Mobile";
+    }
+    if (/tablet/i.test(ua)) {
+        return "Tablet";
+    }
+    if (/iPad|PlayBook/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+        return "Tablet";
+    }
+    return "Desktop";
+}
+
 const Home: React.FC = () => {
     const navigate = useNavigate();
     const [selectedAbilities, setSelectedAbilities] = useState<any[]>([]);
@@ -101,6 +116,12 @@ const Home: React.FC = () => {
     const [playDropdownOpen, setPlayDropdownOpen] = useState<boolean>(false);
     const playDropdownRef = useRef<HTMLDivElement>(null);
     const handlePlayDropdownFocus = () => {
+        const deviceType = getDeviceType();
+        if (deviceType !== "Desktop") {
+            alert("Please use a desktop to play.");
+            return;
+        }
+        setPlayDropdownOpen(!playDropdownOpen);
         if (selectedAbilities.length > 0) {
             setPlayDropdownOpen(!playDropdownOpen);
         } else {

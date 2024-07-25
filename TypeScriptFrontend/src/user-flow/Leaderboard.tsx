@@ -79,8 +79,10 @@ const Leaderboard: React.FC = () => {
             {selectedUser && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h2>{selectedUser.displayName || selectedUser.username}</h2>
-                        <p><strong>Username:</strong> {selectedUser.username}</p>
+                        <h2>{selectedUser.displayName !== "Not Yet Specified" ? selectedUser.displayName : selectedUser.username}</h2>
+                        {selectedUser.displayName !== "Not Yet Specified" && (
+                            <p><strong>Username:</strong> {selectedUser.username}</p>
+                        )}
                         <p><strong>ELO:</strong> {selectedUser.elo}</p>
                         <h3>Deck:</h3>
                         {selectedUser.deck && selectedUser.deck.length > 0 ? (

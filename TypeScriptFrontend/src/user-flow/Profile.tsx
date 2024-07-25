@@ -39,18 +39,12 @@ const Profile: React.FC = () => {
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
     const [popupMessage, setPopupMessage] = useState('');
     const [showPopup, setShowPopup] = useState(false);
-    const [showChangePassword, setShowChangePassword] = useState(false);
 
     const handleChangePassword = () => {
-        setShowChangePassword(true);
         navigate("/change-password");
-        console.log("Change password functionality to be implemented");
     };
 
-
     const handleLogout = () => {
-
-        
         localStorage.removeItem("userToken");
         sessionStorage.clear();
         navigate("/login");
@@ -176,24 +170,32 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="info-card linear-gradient">
                     <h2><span className="text-shadow">ELO:</span> <span className="elo-value">{profileData.elo}</span></h2>
-                    <h3 className="text-shadow">Most Recent Game</h3>
+                    <h2 className="text-shadow">Most Recent Ladder Game</h2>
                     {profileData.last_game ? (
                         <div className="game-history-item">
-                            <p><strong>Date:</strong> {new Date(profileData.last_game.game_date).toLocaleString()}</p>
-                            <p><strong>Game ID:</strong> {profileData.last_game.game_id}</p>
+                            <p><strong>Date:</strong> {new Date(profileData.last_game.game_date).toLocaleDateString()} {new Date(profileData.last_game.game_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             <p><strong>Players:</strong></p>
                             <ul>
-                                {profileData.last_game.players.map((player, index) => (
-                                    <li key={index} className={player.is_current_user ? 'current-user' : ''}>
+                                {profileData.last_game.players.map((player, index) => {
+                                    let className = '';
+                                    if (player.is_current_user) {
+                                        className = player.rank === 1 ? 'current-user-win' : 'current-user-lose';
+                                        }
+                                    return (
+                                        <li key={index} className={className}>
                                         {player.username} - Rank: {player.rank}
                                         {player.is_current_user && ' (You)'}
-                                    </li>
-                                ))}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     ) : (
                         <p>No recent games played.</p>
                     )}
+                    <div className="button-container">
+                        <button className="match-history-btn">Match History</button>
+                    </div>
                 </div>
             </div>
         </div>
