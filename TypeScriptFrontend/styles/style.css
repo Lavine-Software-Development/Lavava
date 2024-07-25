@@ -941,3 +941,19 @@ ul {
 .game-history-item li {
     margin: 3px 0;
 }
+
+.sort-order-btn {
+    background-color: #08190c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.sort-arrow {
+    margin-left: 5px;
+    font-size: 1.2em;
+}

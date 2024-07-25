@@ -44,6 +44,10 @@ const Profile: React.FC = () => {
         navigate("/change-password");
     };
 
+    const handleMatchHistoryClick = () => {
+        navigate("/match-history");
+    };
+
     const handleLogout = () => {
         localStorage.removeItem("userToken");
         sessionStorage.clear();
@@ -194,7 +198,7 @@ const Profile: React.FC = () => {
                         <p>No recent games played.</p>
                     )}
                     <div className="button-container">
-                        <button className="match-history-btn">Match History</button>
+                        <button className="match-history-btn" onClick={handleMatchHistoryClick}>Match History</button>
                     </div>
                 </div>
             </div>

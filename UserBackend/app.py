@@ -735,5 +735,47 @@ def get_user_details(username):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/match-history', methods=['GET'])
+@token_required
+def get_match_history(current_user):
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            games = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).limit(20).all()
+            match_history = []
+            for game in games:
+                game_data = {
+                    "game_id": game.id,
+                    "game_date": game.game_date.isoformat(),
+                    "players": []
+                }
+                for username, rank in zip(game.usernames_list, game.user_ranks_list):
+                    player_data = {
+                        "username": username,
+                        "rank": rank,
+                        "is_current_user": (username == user.username)
+                    }
+                    game_data["players"].append(player_data)
+                game_data["players"].sort(key=lambda x: x["rank"])
+                match_history.append(game_data)
+            return jsonify({"match_history": match_history})
+        else:
+            return jsonify({"error": "User not found"}), 404
+    else:
+        # Return dummy data for testing when DB is not connected
+        return jsonify({
+            "match_history": [
+                {
+                    "game_id": i,
+                    "game_date": (datetime.datetime.now() - datetime.timedelta(days=i)).isoformat(),
+                    "players": [
+                        {"username": "Current-User", "rank": 1, "is_current_user": True},
+                    ] + [
+                        {"username": f"Player{j}", "rank": j+1, "is_current_user": False} for j in range(1, 4)
+                    ]
+                } for i in range(1, 21)
+            ]
+        })
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
