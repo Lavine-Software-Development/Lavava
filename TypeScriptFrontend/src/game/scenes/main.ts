@@ -485,8 +485,6 @@ export class MainScene extends Scene {
         const e = startData.board.edges;
     
         const display = startData.display_names_list;
-        console.log(display);
-        console.log("made it here");
         this.displayNames(display);
 
         this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
