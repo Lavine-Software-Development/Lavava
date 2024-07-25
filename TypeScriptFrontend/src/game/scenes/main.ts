@@ -57,9 +57,11 @@ export class MainScene extends Scene {
     private board: any;
     private countdown: number;
     private full_capitals: number[];
+    private lastCounts: number [];
 
     private timerText: Phaser.GameObjects.Text;
-    private capitalsText: Phaser.GameObjects.Text;
+    private capitalTexts: Phaser.GameObjects.Text[] = [];
+    private countTexts: Phaser.GameObjects.Text[] = [];
     private statusText: Phaser.GameObjects.Text;
     private eliminatedText: Phaser.GameObjects.Text;
     private eloText: Phaser.GameObjects.Text;
@@ -615,33 +617,104 @@ export class MainScene extends Scene {
                     this.timerText.setOrigin(1, 0);
                 }
 
-                if (
-                    "full_player_capitals" in new_data["board"] &&
-                    this.full_capitals[this.mainPlayer.name] !==
-                        new_data["board"]["full_player_capitals"][
-                            this.mainPlayer.name
-                        ]
-                ) {
-                    this.full_capitals =
-                        new_data["board"]["full_player_capitals"];
-
-                    if (this.capitalsText) this.capitalsText.destroy();
-
-                    if (this.full_capitals[this.mainPlayer.name] > 0) {
-                        this.capitalsText = this.add.text(
-                            600,
-                            10,
-                            `Capitals: ${
-                                this.full_capitals[this.mainPlayer.name]
-                            }`,
+                const updateDisplays = () => {
+                    const players = Object.keys(this.lastCounts);
+                
+                    // Display positions for up to 4 players
+                    const positions = [
+                        { xPercent: 2, yPercent: 99 },    // 2% from left, 99% from top
+                        { xPercent: 24, yPercent: 99 },   // 27% from left, 99% from top
+                        { xPercent: 46, yPercent: 99 },   // 52% from left, 99% from top
+                        { xPercent: 68, yPercent: 99 }    // 77% from left, 99% from top
+                    ];
+                
+                    // Clear existing texts
+                    if (this.capitalTexts) {
+                        this.capitalTexts.forEach(text => text.destroy());
+                    }
+                    if (this.countTexts) {
+                        this.countTexts.forEach(text => text.destroy());
+                    }
+                
+                    this.capitalTexts = [];
+                    this.countTexts = [];
+                
+                    // Display capital counts and regular counts for up to 4 players
+                    players.slice(0, 4).forEach((playerName, index) => {
+                        const capitalCount = this.full_capitals[playerName];
+                        const regularCount = new_data["counts"][playerName];
+                        const position = positions[index];
+                
+                        const x = (position.xPercent / 100) * (this.sys.game.config.width as number);
+                        const y = (position.yPercent / 100) * (this.sys.game.config.height as number);
+                
+                        const playerColor = this.rgbToHex(this.otherPlayers[playerName].color);
+                
+                        // Display regular count
+                        const countText = this.add.text(
+                            x,
+                            y - 30, // 30 pixels above the capital count
+                            `Count: `,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "24px",
-                                color: this.rgbToHex(this.mainPlayer.color),
+                                fontSize: "20px", // Slightly smaller font
+                                color: playerColor,
                             }
                         );
-                        this.capitalsText.setOrigin(1, 0);
-                    }
+                        countText.setOrigin(0, 1);  // Align to bottom-left
+                        
+                        const countNumber = this.add.text(
+                            countText.x + countText.width,
+                            y - 30,
+                            `${regularCount}`,
+                            {
+                                fontFamily: "Arial",
+                                fontSize: "20px",
+                                color: '#000000', // Black color for the number
+                            }
+                        );
+                        countNumber.setOrigin(0, 1);
+                
+                        this.countTexts.push(countText, countNumber);
+                
+                        // Display full capital count
+                        const capitalText = this.add.text(
+                            x,
+                            y,
+                            `Full Capitals: `,
+                            {
+                                fontFamily: "Arial",
+                                fontSize: "25px",
+                                color: playerColor,
+                            }
+                        );
+                        capitalText.setOrigin(0, 1);  // Align to bottom-left
+                
+                        const capitalNumber = this.add.text(
+                            capitalText.x + capitalText.width,
+                            y,
+                            `${capitalCount}`,
+                            {
+                                fontFamily: "Arial",
+                                fontSize: "25px",
+                                color: '#000000', // Black color for the number
+                            }
+                        );
+                        capitalNumber.setOrigin(0, 1);
+                
+                        this.capitalTexts.push(capitalText, capitalNumber);
+                    });
+                };
+
+                if ("full_player_capitals" in new_data["board"] &&
+                    JSON.stringify(this.full_capitals) !== JSON.stringify(new_data["board"]["full_player_capitals"])) {
+                    this.full_capitals = new_data["board"]["full_player_capitals"];
+                    updateDisplays();
+                }
+
+                if (JSON.stringify(this.lastCounts) !== JSON.stringify(new_data["counts"])) {
+                    this.lastCounts = {...new_data["counts"]};
+                    updateDisplays();
                 }
 
                 if ("extra_info" in new_data) {

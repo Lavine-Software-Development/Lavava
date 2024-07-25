@@ -258,7 +258,7 @@ const Home: React.FC = () => {
                                     }}
                                     onClick={switchToHost}
                                 >
-                                    Host Game test
+                                    Host Game
                                 </button>
                                 <button
                                     className="btn"

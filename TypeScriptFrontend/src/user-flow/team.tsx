@@ -9,13 +9,18 @@ const teamMembers = [
     },
     { 
         name: 'Ian', 
-        profilePic: './assets/Team/ian_lavine.jpeg', 
-        intro: 'Backend Developer' 
+        profilePic: './assets/Team/not_professional_ian.png', 
+        intro: 'Full Stack / Creator of Durb' 
     },
     { 
         name: 'Akash', 
         profilePic: './assets/Team/akash.jpeg', 
         intro: 'Networking Engineer' 
+    },
+    {
+        name: 'Bilal',
+        profilePic: './assets/Team/bilal.png',
+        intro: 'Frontend Developer'
     }
 ];
 

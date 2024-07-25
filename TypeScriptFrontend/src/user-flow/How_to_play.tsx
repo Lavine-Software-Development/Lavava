@@ -55,18 +55,33 @@ const HowToPlay: React.FC = () => {
                 still being experimented with but currently two things happen:
                 <ul>
                     <li>
-                        Growth stops. dots naturally stay at their current
-                        energy. (this feature is not in play)
+                        Start Selection (Upto 60 seconds): Each player chooses any unowned node. 
+                        As soon as every player has chosen, the second phase begins.
                     </li>
                     <li>
-                        Free attacking. Attacking an opponents dot costs you no
-                        energy The goal of these changes is too stop
+                        Main Play (Upto 300 seconds (5 minutes)): Abilities are now usable!  
+                        Try to spread out, take over the board, and claim capitals! 
+                    </li>
+                    <li>
+                        Overtime (Upto 120 seconds): Attacking now comes at no cost. Watch as your 
+                        opponents node shrinks, and yours does not. The goal of this change is to stop
                         progression, and allow the current winner to snowball.
-                        If still no player has won after the timer for end-game
-                        phase completes, then the winner is determined by which
-                        player owns the most dots.
                     </li>
                 </ul>
+            </div>
+            <div className="space">
+                <h3>Winning the Game</h3>
+            </div>
+            <div className="space">
+                When a player has no remaining nodes on the map, they are eliminated. Once only one 
+                remaining player has nodes on the map, they have a win by domination. In this case, 
+                the other players ranks are determiined by their order of elimination.
+            </div>
+            <div className="space">
+                However, players can also win by controlling 3 full capitals at once. In this case,
+                the other players rank are determined by total node count. Be careful of this rule. If 
+                you see another player is on the brink of a capital-win, your capitals will do nothing. 
+                Instead, at this point just focus on controlling more of the map.
             </div>
             <div className="space">
                 <h2>Structures</h2>
