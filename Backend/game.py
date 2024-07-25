@@ -1,5 +1,5 @@
 from jsonable import JsonableTick
-from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, SECTION_LENGTHS, SPAWN_CODE, EVENTS
+from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, OVERTIME_BONUS, SECTION_LENGTHS, SPAWN_CODE, EVENTS
 from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GSE
 from board import Board
@@ -97,9 +97,11 @@ class ServerGame(JsonableTick):
     @property
     def all_player_starts_selected(self):
         return all([p.ps.state in (PSE.START_WAITING, PSE.ELIMINATED) for p in self.player_dict.values()])
+    
     @property 
     def no_player_starts_selected(self):
         return all([p.ps.state == PSE.START_SELECTION for p in self.player_dict.values()]) 
+    
     def update_timer(self):
 
         if self.countdown_timer > 0:
@@ -113,9 +115,9 @@ class ServerGame(JsonableTick):
                     print("Neither player selected start node")
                     for player in self.player_dict.values():
                         player.ps.eliminate()
-                        self.update_extra_info("Aborted")
-                    self.board.end_game()
+                        self.update_extra_info(("Aborted"))
                     return
+                
                 if self.gs.value < GSE.END_GAME.value:
                     print("updating section")
                     self.current_section += 1
@@ -123,7 +125,7 @@ class ServerGame(JsonableTick):
                     if self.gs.value == GSE.START_SELECTION.value:
                         self.all_player_next()
                     else:
-                        self.board.end_game()
+                        self.end_game_events()
                 else:
                     self.determine_ranks_from_capitalize_or_timeout()
                 
@@ -146,6 +148,12 @@ class ServerGame(JsonableTick):
 
     def post_tick(self):
         self.extra_info.clear()
+
+    def end_game_events(self):
+        self.board.end_game()
+        for player in self.player_dict.values():
+            player.overtime_bonus()
+        self.update_extra_info(("End Game", OVERTIME_BONUS))
 
     def player_update(self):
         for player in self.player_dict.values():

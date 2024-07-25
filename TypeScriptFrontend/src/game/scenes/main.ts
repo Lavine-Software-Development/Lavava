@@ -661,11 +661,14 @@ export class MainScene extends Scene {
     }
 
     private parse_extra_info(tuple) {
-        console.log(tuple);
         if (tuple[0] === "cannon_shot") {
             let cannon = this.nodes[tuple[1][0]] as Node;
             let target = this.nodes[tuple[1][1]] as Node;
-            this.cannonShot(cannon, target, tuple[1][2]);
+            if (tuple.length > 3) {
+                this.cannonShot(cannon, target, tuple[1][2], tuple[1][3]);
+            } else {
+                this.cannonShot(cannon, target, tuple[1][2], tuple[1][2]);
+            }
         } else if (tuple[0] == "player_elimination") {
             let player1 = tuple[1][0];
             let player2 = tuple[1][1];
@@ -723,7 +726,7 @@ export class MainScene extends Scene {
                     eliminationText.destroy();
                 },
             });
-        } else if (tuple == "Aborted") {
+        } else if (tuple[0] == "Aborted") {
             let eliminationText = this.add.text(
                 (this.sys.game.config.width as number) / 2,
                 (this.sys.game.config.height as number) / 2,
@@ -743,16 +746,33 @@ export class MainScene extends Scene {
                     eliminationText.destroy();
                 },
             });
+            
+        } else if (tuple[0] == "End Game") {
+            let bonus = tuple[1] as number;
+            let bonusText = this.add.text(
+                this.sys.game.config.width as number / 2,
+                20,
+                `Overtime - Free Attack - ${bonus} credits available`,
+                { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
+            );
+
+            this.tweens.add({
+                targets: bonusText,
+                alpha: 0,
+                duration: 6000,
+                ease: "Power2",
+                onComplete: () => {
+                    bonusText.destroy();
+                },
+            });
         }
     }
 
-    private cannonShot(cannon: Node, target: Node, size: number) {
+    private cannonShot(cannon: Node, target: Node, size: number, end_size: number) {
         cannonAngle(cannon, target.pos.x, target.pos.y);
         target.delayChange = true;
 
-        let ball_size =
-            5 +
-            Math.max(Math.log10(size / 10) / 2 + size / 1000 + 0.15, 0) * 18;
+        let ball_size = 5 + Math.max(Math.log10(size / 10) / 2 + size / 1000 + 0.15, 0) * 18;
 
         // Create a Graphics object for the projectile
         const projectile = this.add.graphics();
@@ -792,6 +812,8 @@ export class MainScene extends Scene {
         // Create a tween to move the projectile
         this.tweens.add({
             targets: projectile,
+            scaleX: end_size / size,
+            scaleY: end_size / size,
             x: target.pos.x,
             y: target.pos.y,
             duration: distance * 2, // Adjust this multiplier to change the speed
