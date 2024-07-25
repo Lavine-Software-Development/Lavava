@@ -66,7 +66,7 @@ class Batch:
 
         self.token_disname[token] = display_name
         print(f"Display name set to: {display_name}")
-        #self.display_names.append(display_name)
+        self.display_names.append(display_name)
         return display_name
         
     def add_player(self, token, websocket, ability_data):
