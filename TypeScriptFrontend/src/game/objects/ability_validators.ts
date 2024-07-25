@@ -205,13 +205,12 @@ function newEdgeValidator(
     const newEdgeStandard = (data: Node[], ): boolean => {
         if (data.length === 1) {
             const firstNode = data[0];
-            return firstNode.owner === player && firstNode.is_port;
+            return firstNode.owner === player;
         } else {
             const firstNode = data[0];
             const secondNode = data[1];
             return (
                 firstNode.id !== secondNode.id &&
-                secondNode.is_port &&
                 checkNewEdge(firstNode, secondNode, getEdges())
             );
         }

@@ -78,7 +78,7 @@ def make_cannon_shot(id_dict, update_method):
         distance = dist(cannon.pos, target.pos)
         guaranteed_remaining_delivery = CANNON_SHOT_DAMAGE_PERCENTAGE * cannon_send
         delivery_distance_loss_percentage = 1 - min(distance / CANNON_SHOT_SHRINK_RANGE_CUTOFF, 1)
-        leftover_shrink_delivery = delivery_distance_loss_percentage * (1 - guaranteed_remaining_delivery)
+        leftover_shrink_delivery = delivery_distance_loss_percentage * (cannon_send - guaranteed_remaining_delivery)
         max_delivery = guaranteed_remaining_delivery + leftover_shrink_delivery
 
         if target.owner == cannon.owner and target.value + max_delivery > target.full_size:

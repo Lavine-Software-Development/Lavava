@@ -405,7 +405,6 @@ export class MainScene extends Scene {
                     const event_data = this.abilityManager.useEvent(
                         this.highlight
                     );
-                    // console.log("event data: ", event_data);
                     if (event_data !== false) {
                         if (
                             button === EventCodes.STANDARD_RIGHT_CLICK &&
@@ -550,8 +549,6 @@ export class MainScene extends Scene {
                 }
 
                 if ('credits' in new_data["player"] && new_data["player"]["credits"] !== this.mainPlayer.credits) {
-                    console.log("credits updated!!");
-                    console.log(new_data["player"]["credits"]);
                     this.mainPlayer.credits = new_data["player"]["credits"];
                     this.abilityManager.credits = new_data["player"]["credits"];
                 }
@@ -737,7 +734,7 @@ export class MainScene extends Scene {
         if (tuple[0] === "cannon_shot") {
             let cannon = this.nodes[tuple[1][0]] as Node;
             let target = this.nodes[tuple[1][1]] as Node;
-            if (tuple.length > 3) {
+            if (tuple[1].length > 3) {
                 this.cannonShot(cannon, target, tuple[1][2], tuple[1][3]);
             } else {
                 this.cannonShot(cannon, target, tuple[1][2], tuple[1][2]);
@@ -829,6 +826,8 @@ export class MainScene extends Scene {
                 { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
             );
 
+            bonusText.setOrigin(0.5);
+
             this.tweens.add({
                 targets: bonusText,
                 alpha: 0,
@@ -845,7 +844,7 @@ export class MainScene extends Scene {
         cannonAngle(cannon, target.pos.x, target.pos.y);
         target.delayChange = true;
 
-        let ball_size = 5 + Math.max(Math.log10(size / 10) / 2 + size / 1000 + 0.15, 0) * 18;
+        let ball_size = 10 + Math.max(Math.log10(size / 10) / 2 + size / 1000 + 0.15, 0) * 24;
 
         // Create a Graphics object for the projectile
         const projectile = this.add.graphics();
