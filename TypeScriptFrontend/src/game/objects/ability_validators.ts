@@ -217,10 +217,17 @@ function newEdgeValidator(
         }
     };
 
+    const fullSizeToNodeEdgeValidator = (data: IDItem[]): boolean => {
+        const nodes = data as Node[]; // Assert all data items are Nodes
+        return (
+            (nodes.length < 2 || nodes[1].is_port) && newEdgeStandard(nodes)
+        );
+    };
+
     const fullSizeEdgeValidator = (data: IDItem[]): boolean => {
         const nodes = data as Node[]; // Assert all data items are Nodes
         return (
-            nodes.every((node) => node.portCount > 0) && newEdgeStandard(nodes)
+            nodes.every((node) => node.is_port) && newEdgeStandard(nodes)
         );
     };
 
@@ -244,7 +251,7 @@ function newEdgeValidator(
     };
 
     return {
-        [KeyCodes.BRIDGE_CODE]: fullSizeEdgeValidator,
+        [KeyCodes.BRIDGE_CODE]: fullSizeToNodeEdgeValidator,
         [KeyCodes.D_BRIDGE_CODE]: fullSizeEdgeValidator,
         [KeyCodes.MINI_BRIDGE_CODE]: miniBridgeValidator,
     };
