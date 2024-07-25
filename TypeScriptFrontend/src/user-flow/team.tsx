@@ -3,6 +3,11 @@ import config from '../env-config';
 
 const teamMembers = [
     { 
+        name: 'Yichen', 
+        profilePic: './assets/Team/yichen.png', 
+        intro: 'Backend Developer' 
+    },
+    { 
         name: 'Ryan', 
         profilePic: './assets/Team/ryan.jpg', 
         intro: 'Frontend Developer' 
