@@ -69,4 +69,4 @@ jobs:
             sudo docker pull akashilangovan/userbackend:latest
             sudo docker stop userbackend_act || true
             sudo docker rm userbackend_act || true
-            sudo docker run -e ENV=PROD -d -p 5001:5001 -v /home/ec2-user/game_data:/app/game_data --name userbackend_act akashilangovan/userbackend:latest
+            sudo docker run -e ENV=PROD -e MJ_APIKEY_PUBLIC=${{ secrets.MJ_APIKEY_PUBLIC }} -e MJ_APIKEY_PRIVATE=${{ secrets.MJ_APIKEY_PRIVATE }} -d -p 5001:5001 -v /home/ec2-user/game_data:/app/game_data --name userbackend_act akashilangovan/userbackend:latest
