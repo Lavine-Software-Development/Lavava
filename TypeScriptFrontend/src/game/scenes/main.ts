@@ -40,6 +40,14 @@ import { AbilityVisual } from "../objects/immutable_visuals";
 import { NONE, Scene } from "phaser";
 
 import { Edge } from "../objects/edge";
+
+const positions = [
+    { xPercent: 2, yPercent: 99 },    // 2% from left, 99% from top
+    { xPercent: 24, yPercent: 99 },   // 27% from left, 99% from top
+    { xPercent: 46, yPercent: 99 },   // 52% from left, 99% from top
+    { xPercent: 68, yPercent: 99 }    // 77% from left, 99% from top
+];
+
 export class MainScene extends Scene {
     private nodes: { [key: string]: Node } = {};
     private edges: { [key: string]: Edge } = {};
@@ -487,9 +495,6 @@ export class MainScene extends Scene {
         const pc = startData.player_count;
         const n = startData.board.nodes;
         const e = startData.board.edges;
-    
-        const display = startData.display_names_list;
-        this.displayNames(display);
 
         this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
@@ -498,6 +503,9 @@ export class MainScene extends Scene {
                 ? new OtherPlayer(id, PlayerColors[index])
                 : this.mainPlayer;
         });
+
+        const display = startData.display_names_list;
+        this.displayNames(display);
 
         this.nodes = Object.fromEntries(
             Object.keys(n).map((id) => [
@@ -621,12 +629,6 @@ export class MainScene extends Scene {
                     const players = Object.keys(this.lastCounts);
                 
                     // Display positions for up to 4 players
-                    const positions = [
-                        { xPercent: 2, yPercent: 99 },    // 2% from left, 99% from top
-                        { xPercent: 24, yPercent: 99 },   // 27% from left, 99% from top
-                        { xPercent: 46, yPercent: 99 },   // 52% from left, 99% from top
-                        { xPercent: 68, yPercent: 99 }    // 77% from left, 99% from top
-                    ];
                 
                     // Clear existing texts
                     if (this.capitalTexts) {
@@ -653,11 +655,11 @@ export class MainScene extends Scene {
                         // Display regular count
                         const countText = this.add.text(
                             x,
-                            y - 30, // 30 pixels above the capital count
+                            y - 40, // 30 pixels above the capital count
                             `Count: `,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "20px", // Slightly smaller font
+                                fontSize: "19px", // Slightly smaller font
                                 color: playerColor,
                             }
                         );
@@ -665,11 +667,11 @@ export class MainScene extends Scene {
                         
                         const countNumber = this.add.text(
                             countText.x + countText.width,
-                            y - 30,
+                            y - 40,
                             `${regularCount}`,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "20px",
+                                fontSize: "19px",
                                 color: '#000000', // Black color for the number
                             }
                         );
@@ -680,11 +682,11 @@ export class MainScene extends Scene {
                         // Display full capital count
                         const capitalText = this.add.text(
                             x,
-                            y,
+                            y - 15,
                             `Full Capitals: `,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "25px",
+                                fontSize: "23px",
                                 color: playerColor,
                             }
                         );
@@ -692,11 +694,11 @@ export class MainScene extends Scene {
                 
                         const capitalNumber = this.add.text(
                             capitalText.x + capitalText.width,
-                            y,
+                            y - 15,
                             `${capitalCount}`,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "25px",
+                                fontSize: "23px",
                                 color: '#000000', // Black color for the number
                             }
                         );
@@ -984,21 +986,27 @@ export class MainScene extends Scene {
         }
     }
 
+    darken(color: readonly [number, number, number]): readonly [number, number, number] {
+        return[Math.round(color[0] * 0.4), Math.round(color[1] * 0.4), Math.round(color[2] * 0.4)];
+    }
+
     displayNames(namesList) {
-        const gameWidth = this.sys.game.config.width as number;
-        const gameHeight = this.sys.game.config.height as number;
-        const spacing = gameWidth / (namesList.length + 1);
         
         namesList.forEach((name: string, index: number) => {
+            let position = positions[index];
+            const playerColor = this.rgbToHex(this.darken(PlayerColors[index]));
+                
+            let x = (position.xPercent / 100) * (this.sys.game.config.width as number);
+            let y = (position.yPercent / 100) * (this.sys.game.config.height as number);
             this.add.text(
-                spacing * (index + 1), 
-                gameHeight - 30, 
+                x, 
+                y, 
                 name, 
                 {
                     fontSize: '16px',
-                    color: '#000000'  // Changed from 'fill' to 'color'
+                    color: playerColor,  // Changed from 'fill' to 'color'
                 }
-            ).setOrigin(0.5, 1);
+            ).setOrigin(0, 1);
         });
     }
 }

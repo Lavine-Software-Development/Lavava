@@ -84,6 +84,7 @@ class Batch:
             self.token_ids[token] = player_id
             self.id_sockets[player_id] = websocket
             self.not_responsive_count[player_id] = 0
+            self.set_token_to_display_name(token)
             return False
         else:
             print(f"Invalid ability selection for player with token: {token[:10]}...")
