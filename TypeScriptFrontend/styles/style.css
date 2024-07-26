@@ -47,8 +47,8 @@ input[type="password"]::-ms-clear {
 
 .password-toggle {
     position: absolute;
-    right: 10px;
-    top: 50%;
+    right: 12px;
+    top: 55%;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -63,7 +63,7 @@ input[type="password"]::-ms-clear {
 .eye-icon {
     width: 20px;
     height: 20px; 
-    opacity: 0.6;  
+    opacity: 0.6;   
 }
 
 .password-toggle:hover .eye-icon {
