@@ -1,3 +1,5 @@
+import os
+from mailjet_rest import Client
 import jwt
 import os
 import datetime
@@ -13,6 +15,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, desc
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from dotenv import load_dotenv
+import boto3
+from botocore.exceptions import ClientError
 load_dotenv()
 
 app = Flask(__name__) 
@@ -201,7 +205,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail). Note that it can take up to 10 minutes for emails to deliver. ".format(email)}), 200
+    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail). Note that it can take a while for emails to deliver. ".format(email)}), 200
 
 @app.route('/confirm_email/<token>')
 def confirm_email(token):
@@ -219,18 +223,6 @@ def confirm_email(token):
         db.session.commit()
     return '<h1>Email Confirmed!</h1><p>Proceed to login page to login.</p>' 
 
-#  sending email for registration
-def send_confirmation_email(user_email, link):
-    msg = Message("Email Confirmation!",
-                  sender='lavavaacc@gmail.com',
-                  recipients=[user_email])
-    msg.body = 'Follow the link to confirm your account: {}'.format(link)
-    try:
-        mail.send(msg)
-        return "Email sent successfully!"
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return "Error sending email."
 
 
 @app.route('/reset_password', methods=['POST'])
@@ -259,19 +251,173 @@ def reset_password():
     else:
         return jsonify({"success": False, "message": "Database connection error"}), 500
 
+def send_mailjet_email(to_email, to_name, subject, text_content, html_content=None):
+    mailjet = Client(auth=(config.MJ_APIKEY_PUBLIC, config.MJ_APIKEY_PRIVATE), version='v3.1')
+    data = {
+        'Messages': [
+            {
+                "From": {
+                    "Email": config.EMAIL_FROM,
+                    "Name": "Durb Game"
+                },
+                "To": [
+                    {
+                        "Email": to_email,
+                        "Name": to_name
+                    }
+                ],
+                "Subject": subject,
+                "TextPart": text_content,
+                "HTMLPart": html_content if html_content else None
+            }
+        ]
+    }
+    result = mailjet.send.create(data=data)
+    
+    return result.status_code, result.json()
+
+
+def send_confirmation_email(user_email, link):
+    subject = "Confirm Your Durb Game Account"
+    text_content = f'''Welcome to Durb Game!
+
+    Please confirm your account by clicking the following link:
+    {link}
+
+    If you didn't create an account with us, you can safely ignore this email.
+
+    Best regards,
+    The Durb Game Team'''
+
+    html_content = f'''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirm Your Durb Game Account</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            .container {{
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 20px;
+            }}
+            .button {{
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 15px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Welcome to Durb Game!</h2>
+            <p>Thank you for creating an account with us. To get started, please confirm your email address by clicking the button below:</p>
+            <a href="{link}" class="button">Confirm Your Account</a>
+            <p>If the button doesn't work, you can also copy and paste the following link into your browser:</p>
+            <p>{link}</p>
+            <p>If you didn't create an account with us, you can safely ignore this email.</p>
+            <p>Best regards,<br>The Durb Game Team</p>
+        </div>
+    </body>
+    </html>
+    '''
+    
+    status_code, response = send_mailjet_email(user_email, user_email, subject, text_content, html_content)
+    
+    if status_code == 200:
+        return "Confirmation email sent successfully!"
+    else:
+        print(f"Failed to send confirmation email: {response}")
+        return "Error sending confirmation email."
 
 def send_reset_email(user_email, link):
-    msg = Message("Reset Password - Ignore if not requested!",
-                  sender='lavavaacc@gmail.com',
-                  recipients=[user_email])
-    msg.body = 'IGNORE AND DO NOT CLICK THE LINK BELOW if you did not request to change your password.\n\nIf you did request a password reset follow the link to confirm your password reset: {} \nThis link will expire in 5 minutes.'.format(link)
-    try:
-        mail.send(msg)
-        return "Email sent successfully!"
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return "Error sending email."
+    subject = "Reset Your Durb Game Password"
+    text_content = f'''You have requested to reset your Durb Game password.
+
+    To reset your password, please click on the following link:
+    {link}
+
+    This link will expire in 5 minutes.
+
+    If you didn't request a password reset, please ignore this email. Your account remains secure.
+
+    Best regards,
+    The Durb Game Team'''
+
+    html_content = f'''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Durb Game Password</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            .container {{
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 20px;
+            }}
+            .button {{
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 15px;
+            }}
+            .warning {{
+                color: #ff0000;
+                font-weight: bold;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Reset Your Durb Game Password</h2>
+            <p>You have requested to reset your Durb Game password.</p>
+            <p>To reset your password, please click the button below:</p>
+            <a href="{link}" class="button">Reset Password</a>
+            <p>If the button doesn't work, you can also copy and paste the following link into your browser:</p>
+            <p>{link}</p>
+            <p><strong>This link will expire in 5 minutes.</strong></p>
+            <p class="warning">If you didn't request a password reset, please ignore this email. Your account remains secure.</p>
+            <p>Best regards,<br>The Durb Game Team</p>
+        </div>
+    </body>
+    </html>
+    '''
     
+    status_code, response = send_mailjet_email(user_email, user_email, subject, text_content, html_content)
+    
+    if status_code == 200:
+        return "Password reset email sent successfully!"
+    else:
+        print(f"Failed to send password reset email: {response}")
+        return "Error sending password reset email."
 
 @app.route('/confirm_password_reset/<token>')
 def confirm_password_reset(token):
@@ -703,11 +849,10 @@ def get_user_details(username):
 
 
 if __name__ == '__main__':
-    print("Env var:" + str(config.ENV))
     if config.ENV == "PROD":
         certfile = "fullchain.pem"
         keyfile = "privkey.pem"
-        app.run( debug=True, host='0.0.0.0', port=5001,ssl_context=(certfile, keyfile))
+        app.run( debug=False, host='0.0.0.0', port=5001,ssl_context=(certfile, keyfile))
     else:
-        app.run( debug=True, host='0.0.0.0', port=5001)
+        app.run( debug=False, host='0.0.0.0', port=5001)
     
