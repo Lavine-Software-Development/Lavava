@@ -5,8 +5,8 @@ export class OtherPlayer {
     eliminated: boolean;
     victor: boolean;
 
-    constructor(name: string, color: readonly [number, number, number], ready: boolean = false, eliminated: boolean = false, victor: boolean = false) {
-        this.name = name;
+    constructor(id: string, color: readonly [number, number, number], ready: boolean = false, eliminated: boolean = false, victor: boolean = false) {
+        this.name = id;
         this.color = color;
         this.ready = ready;
         this.eliminated = eliminated;

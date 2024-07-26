@@ -56,7 +56,7 @@ def starter_capitals(nodes):
         if len(node.edges) != 0:
             if (
                 (node.item_type == NODE or not node.is_port)
-                and sum(1 for edge in node.incoming if not edge.dynamic)
+                and sum(1 for edge in node.edges if (edge.dynamic or edge.to_node == node))
                 and capitals < CAPITAL_START_COUNT
                 and not any(
                     1 for neigh in node.neighbors if neigh.state_name == "capital"

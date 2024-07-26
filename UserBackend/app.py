@@ -147,10 +147,10 @@ def login():
         if login_identifier.lower() in ('default', 'other'):
             token = jwt.encode({
                 'user': login_identifier,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)  # Token expires in 24 hours
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72),  # Token expires in 72 hours
+                'display_name': login_identifier  # For non-DB users, use login identifier as display name
             }, app.config['SECRET_KEY'], algorithm="HS256")
             return jsonify({"token": token}), 200
-    
         return jsonify({"message": "Invalid credentials"}), 401
 
     user = User.query.filter(
@@ -168,11 +168,11 @@ def login():
     token = jwt.encode({
         'user_id': user.id,
         'user': user.username,
+        'display_name': user.display_name if hasattr(user, 'display_name') else user.username,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
     }, app.config['SECRET_KEY'], algorithm="HS256")
 
     return jsonify({"token": token}), 200
-
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -514,7 +514,33 @@ def token_to_username(token: str):
         return 'Expired token'
     except jwt.InvalidTokenError:
         return 'Invalid token'
-
+    
+# get user's display name
+@app.route('/get_display_name', methods=['POST'])
+def get_display_name():
+    data = request.json
+    token = data.get('token')
+    
+    if not token:
+        return jsonify({"display_name": "guest"})
+    
+    try:
+        decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        username = decoded['user']
+        
+        if config.DB_CONNECTED:
+            user = User.query.filter_by(username=username).first()
+            if user:
+                if user.display_name != "Not Yet Specified":
+                    return jsonify({"display_name": user.display_name})
+                else:
+                    return jsonify({"display_name": user.username})
+        else:
+            return jsonify({"display_name": username})
+        
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return jsonify({"display_name": "guest"})
+    
 def username_to_elo(name: str):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=name).first()

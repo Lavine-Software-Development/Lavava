@@ -140,6 +140,9 @@ def make_new_edge_ports(check_new_edge, player):
             return no_crossovers(check_new_edge, data, player)
         return False
     
+    def only_to_node_port(data):
+        return data[1].is_port and no_crossovers(check_new_edge, data, player)
+    
     # Check if the nodes are within the range of a mini bridge
     def check_mini_bridge_range(data):
         first_node, second_node = data
@@ -150,7 +153,7 @@ def make_new_edge_ports(check_new_edge, player):
         return check_mini_bridge_range(data) and new_edge_ports(data)
 
     return {
-        BRIDGE_CODE: new_edge_ports,
+        BRIDGE_CODE: only_to_node_port,
         D_BRIDGE_CODE: new_edge_ports,
         MINI_BRIDGE_CODE: mini_bridge_validator,  # Add mini bridge validator
     }

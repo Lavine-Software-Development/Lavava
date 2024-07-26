@@ -8,6 +8,7 @@ from constants import (
     CAPITAL_BONUS,
     BREAKDOWNS,
     KILL_BONUS,
+    OVERTIME_BONUS
 )
 from ae_validators import make_ability_validators
 from player_state import PlayerState
@@ -29,6 +30,9 @@ class DefaultPlayer(JsonableTick):
 
     def kill_bonus(self):
         self.credits += KILL_BONUS
+
+    def overtime_bonus(self):
+        self.credits += OVERTIME_BONUS
 
     def set_abilities(self, chosen_abilities, ability_effects, board):
         validators = make_ability_validators(board, self)

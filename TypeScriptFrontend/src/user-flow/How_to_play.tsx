@@ -63,7 +63,7 @@ const HowToPlay: React.FC = () => {
                         Try to spread out, take over the board, and claim capitals! 
                     </li>
                     <li>
-                        Overtime (Upto 120 seconds): Attacking now comes at no cost. Watch as your 
+                        Overtime (Upto 60 seconds): Attacking now comes at no cost. Watch as your 
                         opponents node shrinks, and yours does not. The goal of this change is to stop
                         progression, and allow the current winner to snowball.
                     </li>

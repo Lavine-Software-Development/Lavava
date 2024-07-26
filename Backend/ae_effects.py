@@ -1,9 +1,11 @@
+from math import dist
 from constants import (
     BREAKDOWNS,
     BRIDGE_CODE,
     CANNON_CODE,
     CANNON_SHOT_CODE,
     CANNON_SHOT_DAMAGE_PERCENTAGE,
+    CANNON_SHOT_SHRINK_RANGE_CUTOFF,
     CREDIT_USAGE_CODE,
     D_BRIDGE_CODE,
     POISON_TICKS,
@@ -28,10 +30,14 @@ from constants import (
     MINI_BRIDGE_CODE,
 )
 
-def make_bridge(buy_new_edge, bridge_type, mini=False):
+def make_bridge(buy_new_edge, bridge_type, only_to_node_port=False):
     def bridge_effect(data, player):
         id1, id2 = data
-        buy_new_edge(id1, id2, bridge_type, mini)
+        buy_new_edge(id1, id2, bridge_type)
+
+    def burn_bridge_effect(data, player):
+        id1, id2 = data
+        buy_new_edge(id1, id2, bridge_type, True, only_to_node_port)
 
     return bridge_effect
 
@@ -53,7 +59,7 @@ def make_rage(board_wide_effect):
     return rage_effect
 
 def make_cannon_shot(id_dict, update_method):
-    def cannon_shot(player, data):
+    def constant_cannon_shot(player, data):
         cannon, target = id_dict[data[0]], id_dict[data[1]]
         if target.owner == player:
             loss = min(cannon.value - MINIMUM_TRANSFER_VALUE, (target.full_size - target.value) * (1 / CANNON_SHOT_DAMAGE_PERCENTAGE))
@@ -64,7 +70,27 @@ def make_cannon_shot(id_dict, update_method):
         target.delivery(transfer, player)
         update_method(("cannon_shot", (data[0], data[1], transfer)))
 
-    return cannon_shot
+    def decreasing_cannon_shot(player, data):
+        cannon, target = id_dict[data[0]], id_dict[data[1]]
+
+        cannon_send = cannon.value - MINIMUM_TRANSFER_VALUE
+
+        distance = dist(cannon.pos, target.pos)
+        guaranteed_remaining_delivery = CANNON_SHOT_DAMAGE_PERCENTAGE * cannon_send
+        delivery_distance_loss_percentage = 1 - min(distance / CANNON_SHOT_SHRINK_RANGE_CUTOFF, 1)
+        leftover_shrink_delivery = delivery_distance_loss_percentage * (cannon_send - guaranteed_remaining_delivery)
+        max_delivery = guaranteed_remaining_delivery + leftover_shrink_delivery
+
+        if target.owner == cannon.owner and target.value + max_delivery > target.full_size:
+            send_to_delivery_ratio = cannon_send / max_delivery # delivery * ratio = send
+            max_delivery = target.full_size - target.value 
+            cannon_send = send_to_delivery_ratio * max_delivery
+
+        cannon.value -= cannon_send
+        target.delivery(max_delivery, player)
+        update_method(("cannon_shot", (data[0], data[1], cannon_send, max_delivery)))
+
+    return decreasing_cannon_shot
 
 def make_pump_drain(id_dict):
     def pump_drain(player, data):
@@ -129,9 +155,9 @@ def pump_effect(data, player):
 
 def make_ability_effects(board):
     return {
-        BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE),
+        BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE, True),
         D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
-        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE, True),
+        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),

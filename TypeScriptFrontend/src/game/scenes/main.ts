@@ -40,6 +40,14 @@ import { AbilityVisual } from "../objects/immutable_visuals";
 import { NONE, Scene } from "phaser";
 
 import { Edge } from "../objects/edge";
+
+const positions = [
+    { xPercent: 2, yPercent: 99 },    // 2% from left, 99% from top
+    { xPercent: 24, yPercent: 99 },   // 27% from left, 99% from top
+    { xPercent: 46, yPercent: 99 },   // 52% from left, 99% from top
+    { xPercent: 68, yPercent: 99 }    // 77% from left, 99% from top
+];
+
 export class MainScene extends Scene {
     private nodes: { [key: string]: Node } = {};
     private edges: { [key: string]: Edge } = {};
@@ -65,7 +73,7 @@ export class MainScene extends Scene {
     private statusText: Phaser.GameObjects.Text;
     private eliminatedText: Phaser.GameObjects.Text;
     private eloText: Phaser.GameObjects.Text;
-    private eloDifference: Phaser.GameObjects.Text;
+    private eloDifference: Phaser.GameObjects.Text; //text example
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
@@ -405,7 +413,6 @@ export class MainScene extends Scene {
                     const event_data = this.abilityManager.useEvent(
                         this.highlight
                     );
-                    // console.log("event data: ", event_data);
                     if (event_data !== false) {
                         if (
                             button === EventCodes.STANDARD_RIGHT_CLICK &&
@@ -497,6 +504,9 @@ export class MainScene extends Scene {
                 : this.mainPlayer;
         });
 
+        const display = startData.display_names_list;
+        this.displayNames(display);
+
         this.nodes = Object.fromEntries(
             Object.keys(n).map((id) => [
                 id,
@@ -550,8 +560,6 @@ export class MainScene extends Scene {
                 }
 
                 if ('credits' in new_data["player"] && new_data["player"]["credits"] !== this.mainPlayer.credits) {
-                    console.log("credits updated!!");
-                    console.log(new_data["player"]["credits"]);
                     this.mainPlayer.credits = new_data["player"]["credits"];
                     this.abilityManager.credits = new_data["player"]["credits"];
                 }
@@ -621,12 +629,6 @@ export class MainScene extends Scene {
                     const players = Object.keys(this.lastCounts);
                 
                     // Display positions for up to 4 players
-                    const positions = [
-                        { xPercent: 2, yPercent: 99 },    // 2% from left, 99% from top
-                        { xPercent: 24, yPercent: 99 },   // 27% from left, 99% from top
-                        { xPercent: 46, yPercent: 99 },   // 52% from left, 99% from top
-                        { xPercent: 68, yPercent: 99 }    // 77% from left, 99% from top
-                    ];
                 
                     // Clear existing texts
                     if (this.capitalTexts) {
@@ -653,11 +655,11 @@ export class MainScene extends Scene {
                         // Display regular count
                         const countText = this.add.text(
                             x,
-                            y - 30, // 30 pixels above the capital count
+                            y - 40, // 30 pixels above the capital count
                             `Count: `,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "20px", // Slightly smaller font
+                                fontSize: "19px", // Slightly smaller font
                                 color: playerColor,
                             }
                         );
@@ -665,11 +667,11 @@ export class MainScene extends Scene {
                         
                         const countNumber = this.add.text(
                             countText.x + countText.width,
-                            y - 30,
+                            y - 40,
                             `${regularCount}`,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "20px",
+                                fontSize: "19px",
                                 color: '#000000', // Black color for the number
                             }
                         );
@@ -680,11 +682,11 @@ export class MainScene extends Scene {
                         // Display full capital count
                         const capitalText = this.add.text(
                             x,
-                            y,
+                            y - 15,
                             `Full Capitals: `,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "25px",
+                                fontSize: "23px",
                                 color: playerColor,
                             }
                         );
@@ -692,11 +694,11 @@ export class MainScene extends Scene {
                 
                         const capitalNumber = this.add.text(
                             capitalText.x + capitalText.width,
-                            y,
+                            y - 15,
                             `${capitalCount}`,
                             {
                                 fontFamily: "Arial",
-                                fontSize: "25px",
+                                fontSize: "23px",
                                 color: '#000000', // Black color for the number
                             }
                         );
@@ -734,11 +736,14 @@ export class MainScene extends Scene {
     }
 
     private parse_extra_info(tuple) {
-        console.log(tuple);
         if (tuple[0] === "cannon_shot") {
             let cannon = this.nodes[tuple[1][0]] as Node;
             let target = this.nodes[tuple[1][1]] as Node;
-            this.cannonShot(cannon, target, tuple[1][2]);
+            if (tuple[1].length > 3) {
+                this.cannonShot(cannon, target, tuple[1][2], tuple[1][3]);
+            } else {
+                this.cannonShot(cannon, target, tuple[1][2], tuple[1][2]);
+            }
         } else if (tuple[0] == "player_elimination") {
             let player1 = tuple[1][0];
             let player2 = tuple[1][1];
@@ -796,7 +801,7 @@ export class MainScene extends Scene {
                     eliminationText.destroy();
                 },
             });
-        } else if (tuple == "Aborted") {
+        } else if (tuple[0] == "Aborted") {
             let eliminationText = this.add.text(
                 (this.sys.game.config.width as number) / 2,
                 (this.sys.game.config.height as number) / 2,
@@ -816,16 +821,35 @@ export class MainScene extends Scene {
                     eliminationText.destroy();
                 },
             });
+            
+        } else if (tuple[0] == "End Game") {
+            let bonus = tuple[1] as number;
+            let bonusText = this.add.text(
+                this.sys.game.config.width as number / 2,
+                20,
+                `Overtime - Free Attack - ${bonus} credits available`,
+                { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
+            );
+
+            bonusText.setOrigin(0.5);
+
+            this.tweens.add({
+                targets: bonusText,
+                alpha: 0,
+                duration: 6000,
+                ease: "Power2",
+                onComplete: () => {
+                    bonusText.destroy();
+                },
+            });
         }
     }
 
-    private cannonShot(cannon: Node, target: Node, size: number) {
+    private cannonShot(cannon: Node, target: Node, size: number, end_size: number) {
         cannonAngle(cannon, target.pos.x, target.pos.y);
         target.delayChange = true;
 
-        let ball_size =
-            5 +
-            Math.max(Math.log10(size / 10) / 2 + size / 1000 + 0.15, 0) * 18;
+        let ball_size = 10 + Math.max(Math.log10(size / 10) / 2 + size / 1000 + 0.15, 0) * 24;
 
         // Create a Graphics object for the projectile
         const projectile = this.add.graphics();
@@ -865,6 +889,8 @@ export class MainScene extends Scene {
         // Create a tween to move the projectile
         this.tweens.add({
             targets: projectile,
+            scaleX: end_size / size,
+            scaleY: end_size / size,
             x: target.pos.x,
             y: target.pos.y,
             duration: distance * 2, // Adjust this multiplier to change the speed
@@ -958,6 +984,30 @@ export class MainScene extends Scene {
         } else {
             return value;
         }
+    }
+
+    darken(color: readonly [number, number, number]): readonly [number, number, number] {
+        return[Math.round(color[0] * 0.4), Math.round(color[1] * 0.4), Math.round(color[2] * 0.4)];
+    }
+
+    displayNames(namesList) {
+        
+        namesList.forEach((name: string, index: number) => {
+            let position = positions[index];
+            const playerColor = this.rgbToHex(this.darken(PlayerColors[index]));
+                
+            let x = (position.xPercent / 100) * (this.sys.game.config.width as number);
+            let y = (position.yPercent / 100) * (this.sys.game.config.height as number);
+            this.add.text(
+                x, 
+                y, 
+                name, 
+                {
+                    fontSize: '16px',
+                    color: playerColor,  // Changed from 'fill' to 'color'
+                }
+            ).setOrigin(0, 1);
+        });
     }
 }
 
