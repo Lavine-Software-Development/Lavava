@@ -276,7 +276,7 @@ def send_mailjet_email(to_email, to_name, subject, text_content, html_content=No
     
     data = {'Messages': [message]}
     result = mailjet.send.create(data=data)
-    return result.status_code == 200
+    return result.status_code, result.json()
 
 
 def send_confirmation_email(user_email, link):
