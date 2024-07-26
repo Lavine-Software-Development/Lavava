@@ -13,6 +13,68 @@
     padding-left: 0.5rem;
 }
 
+/* Hide default reveal password icon for Webkit browsers (Chrome, Safari, newer versions of Edge) */
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+}
+
+/* Hide default reveal password icon for Firefox */
+input[type="password"]::-moz-reveal-password-button {
+    display: none !important;
+}
+
+/* Hide default reveal password icon for Internet Explorer and Edge (pre-Chromium) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none !important;
+}
+
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper input {
+    padding-right: 40px; /* Make room for the toggle button */
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 55%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.password-toggle:focus {
+    outline: none;
+}
+
+.eye-icon {
+    width: 20px;
+    height: 20px; 
+    opacity: 0.6;   
+}
+
+.password-toggle:hover .eye-icon {
+    opacity: 1;  /* Full opacity on hover */
+}
+
+/* Ensure the icon doesn't interfere with the input */
+.password-input-wrapper .fas.fa-lock {
+    right: 40px;
+}
+
 .password-requirements {
     list-style: none;
     padding: 0.5rem 0 0 0;
@@ -529,6 +591,8 @@ ul {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-left: 8px;
+    margin-right: 8px;
 }
 
 .popup button:hover {
