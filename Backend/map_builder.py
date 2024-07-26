@@ -12,7 +12,7 @@ from constants import (
 from helpers import do_intersect, angle_between_edges
 from edge import Edge
 from dynamicEdge import DynamicEdge
-from map_builder_helpers import starter_port_nodes, starter_capitals
+from map_builder_helpers import create_nodes, starter_capitals, random_choose_starter_ports, outsider_choose_starter_ports
 from random import randint
 
 
@@ -134,7 +134,7 @@ class MapBuilder:
     def convert_to_objects(self):
         edges = []
 
-        nodes = self.node_function(self.nodes)
+        nodes = create_nodes(self.nodes)
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
@@ -143,6 +143,7 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
+        outsider_choose_starter_ports(nodes)
         nodes = self.starter_states(nodes)
 
         self.edge_objects = edges
@@ -151,7 +152,3 @@ class MapBuilder:
     @property
     def starter_states(self):
         return starter_capitals
-
-    @property
-    def node_function(self):
-        return starter_port_nodes

@@ -8,7 +8,8 @@ from constants import (
     CAPITAL_BONUS,
     BREAKDOWNS,
     KILL_BONUS,
-    OVERTIME_BONUS
+    OVERTIME_BONUS,
+    START_CREDITS
 )
 from ae_validators import make_ability_validators
 from player_state import PlayerState
@@ -39,6 +40,9 @@ class DefaultPlayer(JsonableTick):
 
         for ab in chosen_abilities:
             self.abilities[ab] = ReloadAbility(ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].reload, self, chosen_abilities[ab])
+
+        leftover = START_CREDITS - sum(BREAKDOWNS[ab].credits * self.abilities[ab].remaining for ab in chosen_abilities)
+        self.credits += leftover
 
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
