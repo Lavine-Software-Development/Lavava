@@ -37,7 +37,7 @@ export class AbstractAbilityManager {
             color: "#000000",
         });
 
-        this.bonusCreditsText = scene.add.text(x - 80, bonusTextY, "", {
+        this.bonusCreditsText = scene.add.text(x - 110, bonusTextY, "", {
             fontSize: "60px",
             align: "right",
             color: "#000000",
