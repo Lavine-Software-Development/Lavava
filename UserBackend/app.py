@@ -1,4 +1,5 @@
 import os
+import re
 from mailjet_rest import Client
 import jwt
 import os
@@ -23,7 +24,8 @@ app = Flask(__name__)
 CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
- 
+EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+
 if config.DB_CONNECTED:
     db_path = os.path.join('/app/game_data', 'game.db')
     if config.ENV == "PROD":
@@ -530,6 +532,9 @@ def send_email():
 
     if not user_email or not message_body:
         return jsonify({"error": "Missing userEmail or message"}), 400
+    
+    if not re.match(EMAIL_REGEX, user_email):
+        return jsonify({"error": "Invalid email format"}), 400
 
     try:
         # Send email to the main recipient with CC to the user
