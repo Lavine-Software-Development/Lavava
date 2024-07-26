@@ -1,4 +1,6 @@
 from constants import (
+    BURN_SPREAD_DELAY,
+    BURN_TICKS,
     RAGE_TICKS,
     RAGE_MULTIPLIER,
     POISON_SPREAD_DELAY,
@@ -19,9 +21,12 @@ class Poisoned(AbstractSpreadingEffect):
     
     def spread(self):
         return (self.originator, self.length - self.counter)
+    
+    def capture_removal(self, player) -> bool:
+        return self.originator != player
 
 
-class NodeEnraged(AbstractSpreadingEffect):
+class Enraged(AbstractSpreadingEffect):
     def __init__(self):
         super().__init__(RAGE_TICKS, EffectType.EXPEL)
 
@@ -30,3 +35,20 @@ class NodeEnraged(AbstractSpreadingEffect):
     
     def can_spread(self, killed, new_owner):
         return killed
+    
+    def capture_removal(self, player):
+        return False
+    
+
+class Burning(AbstractSpreadingEffect):
+    def __init__(self):
+        super().__init__(BURN_TICKS, EffectType.NONE, BURN_SPREAD_DELAY)
+    
+    def effect(self, amount):
+        return 0
+
+    def can_spread(self, killed, new_owner):
+        return True
+
+    def capture_removal(self, player):
+        return True

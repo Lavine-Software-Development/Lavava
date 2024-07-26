@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
 import { Link, useNavigate } from 'react-router-dom';
 import config from '../env-config';
+import { abilityColors } from "../user-flow/ability_utils";
 
 interface ProfileData {
     userName: string;
@@ -27,9 +28,18 @@ const Profile: React.FC = () => {
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
     const [popupMessage, setPopupMessage] = useState('');
     const [showPopup, setShowPopup] = useState(false);
+    const [showChangePassword, setShowChangePassword] = useState(false);
+
+    const handleChangePassword = () => {
+        setShowChangePassword(true);
+        navigate("/change-password");
+        console.log("Change password functionality to be implemented");
+    };
 
 
     const handleLogout = () => {
+
+        
         localStorage.removeItem("userToken");
         sessionStorage.clear();
         navigate("/login");
@@ -141,23 +151,41 @@ const Profile: React.FC = () => {
                     )}
                 </div>
                 <p className="whiteText"><span className="text-shadow">Email:</span> {profileData.email}</p>
-                <button className="logout-btn" onClick={handleLogout}>Log Out</button>
+                <div className="button-container">
+                    <button className="change-password-btn" onClick={handleChangePassword}>Change Password</button>
+                    <button className="logout-btn" onClick={handleLogout}>Log Out</button>
+                </div>
             </div>
             <div className="info-cards">
                 <div className="info-card linear-gradient">
-                    <h2 className="text-shadow">Default Deck</h2>
-                    {profileData.abilities.map((item, index) => (
-                        <p className="whiteText" key={index}>{item.count} {item.name}</p>
-                    ))}
-                </div>
-                <div className="info-card linear-gradient">
-                    <h2><span className="text-shadow">ELO:</span> <span className="elo-value">{profileData.elo}</span></h2>
-                    {profileData.past_games.map((position, index) => (
-                        <p key={index}>Game {index + 1}: {position}</p>
-                    ))}
+                <h2 className="text-shadow default-deck-text">Default Deck</h2>
+                <div className="abilities-container-profile">
+                {profileData.abilities.map((item, index) => (
+                    <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
+                    <div className="ability-icon">
+                        <img
+                        src={`./assets/abilityIcons/${item.name}.png`}
+                        alt={item.name}
+                        className="ability-img"
+                        />
+                    </div>
+                    <div className="ability-count">{item.count}</div>
+                    </div>
+                ))}
                 </div>
             </div>
+            <div className="info-card linear-gradient">
+                <div className="elo-container">
+                    <h2>
+                        <span className="text-shadow elo-text">ELO:</span> <span className="elo-value">{profileData.elo}</span>
+                    </h2>
+                </div>
+                {profileData.past_games.map((position, index) => (
+                    <p key={index}>Game {index + 1}: {position}</p>
+                ))}
+            </div>
         </div>
+    </div>
     );
 };
 

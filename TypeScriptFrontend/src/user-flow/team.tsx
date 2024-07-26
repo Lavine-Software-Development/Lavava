@@ -3,19 +3,29 @@ import config from '../env-config';
 
 const teamMembers = [
     { 
+        name: 'Yichen', 
+        profilePic: './assets/Team/yichen.png', 
+        intro: 'Backend Developer' 
+    },
+    { 
         name: 'Ryan', 
-        profilePic: '../images/Team/ryan.jpg', 
+        profilePic: './assets/Team/ryan.jpg', 
         intro: 'Frontend Developer' 
     },
     { 
         name: 'Ian', 
-        profilePic: '../images/Team/ian_lavine.jpeg', 
-        intro: 'Backend Developer' 
+        profilePic: './assets/Team/not_professional_ian.png', 
+        intro: 'Full Stack / Creator of Durb' 
     },
     { 
         name: 'Akash', 
-        profilePic: '../images/Team/akash.jpeg', 
+        profilePic: './assets/Team/akash.jpeg', 
         intro: 'Networking Engineer' 
+    },
+    {
+        name: 'Bilal',
+        profilePic: './assets/Team/bilal.png',
+        intro: 'Frontend Developer'
     }
 ];
 
@@ -60,7 +70,7 @@ const Team: React.FC = () => {
     };
 
     return (
-        <div class="team-section">
+        <div className="team-section">
             <h1 className="team-title">The Team</h1>
             <div className="team-container">
                 {teamMembers.map((member, index) => (

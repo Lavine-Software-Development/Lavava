@@ -47,6 +47,7 @@ export const KeyCodes = {
     CAPITAL_CODE: 99,
     CANNON_CODE: 101,
     PUMP_CODE: 117,
+    MINI_BRIDGE_CODE: 109,
 };
 
 export const EventCodes = {
@@ -54,6 +55,7 @@ export const EventCodes = {
     PUMP_DRAIN_CODE: 5,
     STANDARD_LEFT_CLICK: 1,
     STANDARD_RIGHT_CLICK: 3,
+    CREDIT_USAGE_CODE: 6,
 };
 
 export const stateCodes = {
@@ -81,6 +83,7 @@ export const NameToCode = {
     "Capital": KeyCodes.CAPITAL_CODE,
     "Cannon": KeyCodes.CANNON_CODE,
     "Pump": KeyCodes.PUMP_CODE,
+    "Mini-Bridge": KeyCodes.MINI_BRIDGE_CODE,
 };
 
 
@@ -89,13 +92,15 @@ export const AbilityCredits = {
     [KeyCodes.FREEZE_CODE]: 1,
     [KeyCodes.BURN_CODE]: 1,
     [KeyCodes.ZOMBIE_CODE]: 1,
+    [KeyCodes.MINI_BRIDGE_CODE]: 1,
     [KeyCodes.BRIDGE_CODE]: 2,
     [KeyCodes.D_BRIDGE_CODE]: 2,
     [KeyCodes.RAGE_CODE]: 2,
     [KeyCodes.POISON_CODE]: 2,
+    [KeyCodes.CAPITAL_CODE]: 2,
     [KeyCodes.NUKE_CODE]: 3,
-    [KeyCodes.CAPITAL_CODE]: 3,
-    [KeyCodes.CANNON_CODE]: 3,
+    [KeyCodes.PUMP_CODE]: 3,
+    [KeyCodes.CANNON_CODE]: 4,
 };
 
 export const AbilityReloadTimes = {
@@ -113,6 +118,17 @@ export const AbilityReloadTimes = {
 };
 
 export const GROWTH_STOP = 250;
+export const CAPITAL_FULL_SIZE = 350;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
-export const NUKE_RANGE = 0.7;
+export const CAPITAL_NUKE_RANGE = 0.7;
+export const PUMP_NUKE_RANGE = 0.7;
+export const CANNON_NUKE_RANGE = 0.5;
+
+export const NUKE_OPTION_STRINGS = ["cannon", "pump", "capital"];
+export const NUKE_OPTION_CODES = [KeyCodes.CANNON_CODE, KeyCodes.PUMP_CODE, KeyCodes.CAPITAL_CODE];
+export const PRE_STRUCTURE_RANGES = {[KeyCodes.CANNON_CODE]: GROWTH_STOP * CANNON_NUKE_RANGE,
+                                    [KeyCodes.PUMP_CODE]: GROWTH_STOP * PUMP_NUKE_RANGE,
+                                    [KeyCodes.CAPITAL_CODE]: CAPITAL_FULL_SIZE * CAPITAL_NUKE_RANGE};
+
+export const MINI_BRIDGE_RANGE = 150;

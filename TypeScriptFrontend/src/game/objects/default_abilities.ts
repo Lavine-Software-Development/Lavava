@@ -20,16 +20,18 @@ const BURN_V = createAbilityVisual("Burn", "square", Colors.DARK_ORANGE);
 const RAGE_V = createAbilityVisual("Rage", "cross", Colors.LIGHT_GREEN);
 const CANNON_V = createAbilityVisual("Cannon", "cannon", Colors.GREY, "E");
 const PUMP_V = createAbilityVisual("Pump", "circle", Colors.DARK_PURPLE, "U");
+const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", "circle", Colors.YELLOW, "M");
 
 // Create instances of EventVisual using the factory function
 const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.PINK);
 const PUMP_DRAIN_V = createEventVisual("Pump Drain", Colors.DARK_PURPLE);
 const STANDARD_LEFT_CLICK_V = createEventVisual("Switch", Colors.GREY);
 const STANDARD_RIGHT_CLICK_V = createEventVisual("Swap", Colors.GREY);
+const CREDIT_USAGE_V = createEventVisual("Credit Usage", Colors.DARK_PURPLE);
 
 interface EventVisualParameters {
     [index: string]: EventVisual | AbilityVisual;
-}
+};
 
 // Maps for visuals
 export const VISUALS: EventVisualParameters = {
@@ -45,11 +47,13 @@ export const VISUALS: EventVisualParameters = {
     [KeyCodes.RAGE_CODE]: RAGE_V,
     [KeyCodes.CANNON_CODE]: CANNON_V,
     [KeyCodes.PUMP_CODE]: PUMP_V,
+    [KeyCodes.MINI_BRIDGE_CODE]: MINI_BRIDGE_V,
 
     [EventCodes.CANNON_SHOT_CODE]: CANNON_SHOT_V,
     [EventCodes.PUMP_DRAIN_CODE]: PUMP_DRAIN_V,
     [EventCodes.STANDARD_LEFT_CLICK]: STANDARD_LEFT_CLICK_V,
     [EventCodes.STANDARD_RIGHT_CLICK]: STANDARD_RIGHT_CLICK_V,
+    [EventCodes.CREDIT_USAGE_CODE]: CREDIT_USAGE_V,
 };
 
 interface ClickParameters {
@@ -61,6 +65,7 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.SPAWN_CODE]: [1, ClickType.NODE],
     [KeyCodes.BRIDGE_CODE]: [2, ClickType.NODE],
     [KeyCodes.D_BRIDGE_CODE]: [2, ClickType.NODE],
+    [KeyCodes.MINI_BRIDGE_CODE]: [2, ClickType.NODE],
     [KeyCodes.NUKE_CODE]: [1, ClickType.NODE],
     [KeyCodes.POISON_CODE]: [1, ClickType.EDGE],
     [KeyCodes.FREEZE_CODE]: [1, ClickType.EDGE],
@@ -78,7 +83,8 @@ interface EventParameters {
 
 export const EVENTS: EventParameters = {
     [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE],
-    [EventCodes.PUMP_DRAIN_CODE]: [2, ClickType.NODE],
+    [EventCodes.PUMP_DRAIN_CODE]: [1, ClickType.NODE],
     [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE],
     [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE],
+    [EventCodes.CREDIT_USAGE_CODE]: [1, ClickType.ABILITY],
 };

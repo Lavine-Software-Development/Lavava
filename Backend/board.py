@@ -8,6 +8,8 @@ from constants import (
     HORIZONTAL_ABILITY_GAP,
     NODE_COUNT,
     EDGE_COUNT,
+    CAPITALS_NEEDED_FOR_WIN,
+    STRUCTURE_RANGES
 )
 from helpers import do_intersect
 from edge import Edge
@@ -58,6 +60,9 @@ class Board(JsonableTracked):
             node = self.id_dict[id]
             if node.state_name == "capital" and node.owner:
                 self.player_capitals[node.owner].add(node)
+
+    def get_player_structures(self, player):
+        return {node for node in self.nodes if node.state_name in STRUCTURE_RANGES and node.owner == player}
 
     def reset(self, nodes, edges):
         self.nodes = nodes
@@ -133,7 +138,7 @@ class Board(JsonableTracked):
         return True
     
     def victory_check(self):
-        return any(count >= 3 for count in self.full_player_capitals)
+        return any(count >= CAPITALS_NEEDED_FOR_WIN for count in self.full_player_capitals)
 
     def new_edge_id(self):
         return (
@@ -169,12 +174,18 @@ class Board(JsonableTracked):
             self.nodeDict[edge2[1]],
         )
 
-    def buy_new_edge(self, node_from, node_to, edge_type):
+    def buy_new_edge(self, node_from, node_to, edge_type, destroy_ports=False, only_to_node_port=False):
         new_id = self.new_edge_id()
         if edge_type == DYNAMIC_EDGE:
             newEdge = DynamicEdge(node_to, node_from, new_id)
         else:
             newEdge = Edge(node_to, node_from, new_id)
+
+        # if not mini bridge, then destroy ports
+        if destroy_ports:
+            node_to.is_port = False
+            if not only_to_node_port:
+                node_from.is_port = False
 
         newEdge.check_status()
         newEdge.popped = True
@@ -186,7 +197,8 @@ class Board(JsonableTracked):
         newEdge.tracked_attributes.update(newEdge.start_values)
 
     def remove_node(self, node):
-        node.owner.count -= 1
+        if node.owner:
+            node.owner.count -= 1
         for edge in node.edges:
             opp = edge.opposite(node)
             opp.edges.discard(edge)

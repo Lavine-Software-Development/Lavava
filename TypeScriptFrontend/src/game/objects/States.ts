@@ -1,13 +1,17 @@
-import { Colors, MineVisuals } from "./constants";
+import { CANNON_NUKE_RANGE, CAPITAL_NUKE_RANGE, Colors, GROWTH_STOP, CAPITAL_FULL_SIZE, MineVisuals, PUMP_NUKE_RANGE, } from "./constants";
 import { random_equal_distributed_angles } from "./utilities"; // Ensure you import the angles function
 import * as Phaser from "phaser";
 
 export class State {
     name: string;
     graphic_override: boolean;
+    nuke_range: number;
+    full_size: number;
 
-    constructor(name: string, gaphic_override: boolean = false) {
+    constructor(name: string, nuke_range: number = 0, full_size: number = GROWTH_STOP, gaphic_override: boolean = false) {
         this.name = name;
+        this.nuke_range = nuke_range;
+        this.full_size = full_size;
         this.graphic_override = gaphic_override;
     }
 
@@ -18,13 +22,17 @@ export class State {
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
         // Draw the state
     }
+
+    removeSprites() {
+
+    }
 }
 
 export class ZombieState extends State {
     zombieSprite: Phaser.GameObjects.Image | null = null;
 
     constructor(name: string) {
-        super(name, true);
+        super(name, 0, GROWTH_STOP, true);
     }
 
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
@@ -37,6 +45,10 @@ export class ZombieState extends State {
             // threshold to avoid minor changes
             this.zombieSprite.setScale(currentScale);
         }
+    }
+
+    removeSprites() {
+        this.zombieSprite?.destroy()
     }
 }
 
@@ -56,14 +68,14 @@ export class MineState extends State {
         this.ringColor = ringColor;
         this.unfilledColor = unfilledColor;
     }
-}
+ }
 
 export class CapitalState extends State {
     capitalized: boolean;
     private starSprite: Phaser.GameObjects.Image | null = null;
 
     constructor(name: string, capitalized: boolean = false) {
-        super(name);
+        super(name, CAPITAL_NUKE_RANGE, CAPITAL_FULL_SIZE);
         this.capitalized = capitalized;
     }
 
@@ -83,6 +95,10 @@ export class CapitalState extends State {
             this.starSprite = null;
         }
     }
+
+    removeSprites() {
+        this.starSprite?.destroy()
+    }
 }
 
 export class CannonState extends State {
@@ -93,7 +109,7 @@ export class CannonState extends State {
         name: string,
         angle: number = random_equal_distributed_angles(1)[0]
     ) {
-        super(name);
+        super(name, CANNON_NUKE_RANGE);
         this.angle = angle;
         this.selected = false;
     }
@@ -117,6 +133,10 @@ export class PumpState extends State {
         }
     }
 
+    removeSprites() {
+        this.plusSprite?.destroy();
+    }
+
 }
 
 export const stateDict: { [key: number]: () => State } = {
@@ -132,6 +152,6 @@ export const stateDict: { [key: number]: () => State } = {
             Colors.YELLOW
         ),
     5: () => new CannonState("cannon"),
-    6: () => new PumpState("pump"),
+    6: () => new PumpState("pump", PUMP_NUKE_RANGE),
 };
 
