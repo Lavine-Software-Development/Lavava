@@ -65,7 +65,7 @@ export class MainScene extends Scene {
     private statusText: Phaser.GameObjects.Text;
     private eliminatedText: Phaser.GameObjects.Text;
     private eloText: Phaser.GameObjects.Text;
-    private eloDifference: Phaser.GameObjects.Text;
+    private eloDifference: Phaser.GameObjects.Text; //text example
     private leaveMatchButton: Phaser.GameObjects.Text;
     private navigate: Function;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
@@ -487,6 +487,9 @@ export class MainScene extends Scene {
         const pc = startData.player_count;
         const n = startData.board.nodes;
         const e = startData.board.edges;
+    
+        const display = startData.display_names_list;
+        this.displayNames(display);
 
         this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
@@ -979,6 +982,24 @@ export class MainScene extends Scene {
         } else {
             return value;
         }
+    }
+
+    displayNames(namesList) {
+        const gameWidth = this.sys.game.config.width as number;
+        const gameHeight = this.sys.game.config.height as number;
+        const spacing = gameWidth / (namesList.length + 1);
+        
+        namesList.forEach((name: string, index: number) => {
+            this.add.text(
+                spacing * (index + 1), 
+                gameHeight - 30, 
+                name, 
+                {
+                    fontSize: '16px',
+                    color: '#000000'  // Changed from 'fill' to 'color'
+                }
+            ).setOrigin(0.5, 1);
+        });
     }
 }
 

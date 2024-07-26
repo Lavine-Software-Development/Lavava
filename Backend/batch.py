@@ -1,4 +1,3 @@
-
 from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED, FORFEIT_AND_LEAVE_CODE
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
@@ -25,6 +24,7 @@ class Batch:
         self.mode = mode
         self.gs = GameState()
         self.game = ServerGame(self.player_count, self.gs)
+        self.token_disname = {} #just the display names to be displayed on the front end
         self.not_responsive_count = {}
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
@@ -64,7 +64,21 @@ class Batch:
         else:
             print(f"Request failed with status code {response.status_code}: {response.text}")
 
+
+    def set_token_to_display_name(self, token):
+        url = 'http://localhost:5001/get_display_name'
+        data = {"token": token}
+        response = requests.post(url, json=data)
+
+        data = response.json()
+        display_name = data.get('display_name')
+
+        self.token_disname[token] = display_name
+        print(f"Display name set to: {display_name}")
+        return display_name
+        
     def add_player(self, token, websocket, ability_data):
+
         player_id = len(self.token_ids)
         if self.ability_process(player_id, ability_data):
             self.token_ids[token] = player_id
@@ -72,6 +86,7 @@ class Batch:
             self.not_responsive_count[player_id] = 0
             return False
         else:
+            print(f"Invalid ability selection for player with token: {token[:10]}...")
             return "CHEATING: INVALID ABILITY SELECTION"
         
     def remove_player_from_lobby(self, token):
@@ -112,6 +127,7 @@ class Batch:
         start_dict["player_id"] = player_id
         start_dict["abilities"] = json_abilities.start_json()
         start_dict['isFirst'] = True
+        start_dict["display_names_list"] = list(self.token_disname.values())
         start_dict["isRefresh"] = False
         start_json = plain_json(start_dict)
         return start_json
@@ -138,7 +154,6 @@ class Batch:
         return self.game.player_dict[player_id].tick_json
     
     def tick(self):
-        # print(self.game.gs.value, GS.START_SELECTION.value)
 
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
