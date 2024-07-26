@@ -66,7 +66,8 @@ class Batch:
 
 
     def set_token_to_display_name(self, token):
-        url = 'http://localhost:5001/get_display_name'
+        # url = 'http://localhost:5001/get_display_name'
+        url = config.USER_BACKEND_URL + '/get_display_name'
         data = {"token": token}
         response = requests.post(url, json=data)
 
