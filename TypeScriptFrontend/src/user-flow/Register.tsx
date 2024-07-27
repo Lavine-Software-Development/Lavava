@@ -123,7 +123,7 @@ const Register: React.FC = () => {
                             onClick={togglePasswordVisibility}
                         >
                             <img 
-                                src={showPassword ? '../../public/assets/eye-off.png' : '../../public/assets/eye.png'} 
+                                src={showPassword ? './assets/eye-off.png' : './assets/eye.png'} 
                                 alt={showPassword ? "Hide password" : "Show password"}
                                 className="eye-icon"
                             />
