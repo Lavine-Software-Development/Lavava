@@ -14,20 +14,31 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Batch:
-    def __init__(self, count, mode, token, websocket, ability_data):
+    def __init__(self, count, competitive, mode, token, websocket, ability_data):
         self.full_tick_count = 0
         self.token_ids = {}
         self.id_sockets = {}
         self.elo_changes = {}
         self.ending_count = 0
         self.player_count = count
+        self.competitive = competitive
         self.mode = mode
         self.gs = GameState()
-        self.game = ServerGame(self.player_count, self.gs)
+        self.game = self.createGame() 
         self.token_disname = {} #just the display names to be displayed on the front end
         self.not_responsive_count = {}
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
+
+    def createGame(self):
+        url = config.USER_BACKEND_URL + '/get_settings'
+        data = {"mode": self.mode}
+        try:
+            settings = requests.post(url, json=data)
+            return ServerGame(self.player_count, self.gs, settings)
+        except Exception as e:
+            print(e)
+            return False
 
     def did_not_respond(self, player_id):
         self.not_responsive_count[player_id] += 1
@@ -138,11 +149,11 @@ class Batch:
         if self.elo_changes != {}:
             self.ending_count += 1
             return self.ending_count == 5
-        return self.mode != "LADDER" and self.gs.value == GS.GAME_OVER.value
+        return not self.competitive and self.gs.value == GS.GAME_OVER.value
     
     def tick_repr_json(self, player_id):
         self.tick_dict["player"] = self.player_tick_repr(player_id)
-        if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {} and self.mode == "LADDER":
+        if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {} and self.competitive:
             self.tick_dict["new_elos"] = self.elo_changes[player_id]
         self.tick_dict["isFirst"] = False
         self.tick_dict["isRefresh"] = False
@@ -160,7 +171,7 @@ class Batch:
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
         self.set_group_tick_repr()
-        if self.game.gs.value == GS.GAME_OVER.value and self.elo_changes == {} and self.mode == "LADDER":
+        if self.game.gs.value == GS.GAME_OVER.value and self.elo_changes == {} and self.competitive:
             self.update_elo()
         
     def post_tick(self):

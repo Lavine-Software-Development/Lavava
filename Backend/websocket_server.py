@@ -90,20 +90,22 @@ class WebSocketServer():
 
     async def handle_game_setup(self, websocket, data):
         player_type = data.get("type")
-        player_count = data.get("players")
+        player_count = data.get("players") # will be null for player_type JOIN
         abilities = data.get("abilities")
         token = data.get("token")
-        game_code = data.get("game_id")
 
-        logger.info(f"Setting up game: Type={player_type}, Players={player_count}, Code={game_code}")
+        logger.info(f"Setting up game: Type={player_type}, Players={player_count}")
 
         if player_type == "LADDER":
             game_code = self.waiting_ladder_count(str(player_count)) or str(player_count) + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
         elif player_type == "HOST":
             game_code = str(random.randint(1000, 9999))
+        else:
+            game_code = data.get("game_id")
 
         if player_type in ("HOST", "LADDER") and game_code not in self.waiting_players:
-            self.waiting_players[game_code] = Batch(int(player_count), player_type, token, websocket, abilities)
+            mode = data.get("mode")
+            self.waiting_players[game_code] = Batch(int(player_count), player_type == "LADDER", mode, token, websocket, abilities)
             logger.info(f"Created new game: {game_code}")
         elif player_type in ("JOIN", "LADDER") and game_code in self.waiting_players:
             if message := self.waiting_players[game_code].add_player(token, websocket, abilities):

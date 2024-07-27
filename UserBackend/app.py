@@ -695,7 +695,39 @@ def username_to_elo(name: str):
         dummy = {"other": 1200, "default": 1300}
         return dummy.get(name, 1100)  # Def
     
-@app.route('/abilities', methods=['GET'])
+@app.route('/abilities/royale', methods=['GET'])
+def get_abilities():
+    abilities = [
+        {
+            "name": "Bridge", 
+            "cost": 4,
+            "description": "Create a one-way bridge"
+        },
+        {
+            "name": "D-Bridge", 
+            "cost": 3,
+            "description": "Create a two-way bridge with"
+        },
+        {
+            "name": "Freeze", 
+            "cost": 2,
+            "description": "Convert edge to one-way"
+            
+        },
+        {
+            "name": "Rage", 
+            "cost": 5,
+            "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "Nuke", 
+            "cost": 6,
+            "description": "Destroy node and edges (capital needed)"
+        },
+    ]
+    return jsonify({"abilities": abilities, "salary": 20})
+    
+@app.route('/abilities/og', methods=['GET'])
 def get_abilities():
     abilities = [
         {
