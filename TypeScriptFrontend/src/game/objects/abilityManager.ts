@@ -1,4 +1,4 @@
-import { ReloadAbility } from "./ReloadAbility";
+import { AbstractAbility, CreditAbility } from "./ReloadAbility";
 import { IDItem } from "./idItem";
 import { Highlight } from "./highlight";
 import { Event } from "./event";
@@ -7,22 +7,23 @@ import { phaserColor } from "./utilities";
 import { Colors } from "./constants";
 import { ClickType } from "./enums";
 
+/**
+ * Represents an abstract class for managing abilities in a game.
+ * Child classes must implement the `clickable` method.
+ */
 export class AbstractAbilityManager {
-    abilities: { [key: number]: ReloadAbility };
+    abilities: { [key: number]: AbstractAbility };
     private events: { [key: number]: Event };
     private mode: number | null = null;
     private backupMode: number | null = null;
     clicks: IDItem[] = [];
     abilityText: Phaser.GameObjects.Text;
     BridgeGraphics: Phaser.GameObjects.Graphics;
-    _credits: number = 0;
-    bonusCreditsText: Phaser.GameObjects.Text;
 
     constructor(
         scene: Phaser.Scene,
-        abilities: { [key: number]: ReloadAbility },
+        abilities: { [key: number]: AbstractAbility },
         events: { [key: number]: Event },
-        bonusTextY: number
     ) {
         this.abilities = abilities;
         this.events = events;
@@ -37,33 +38,8 @@ export class AbstractAbilityManager {
             color: "#000000",
         });
 
-        this.bonusCreditsText = scene.add.text(x - 80, bonusTextY, "", {
-            fontSize: "60px",
-            align: "right",
-            color: "#000000",
-        });
-
         // Set origin to (1, 1) to align text to the bottom right
         this.abilityText.setOrigin(1, 1);
-    }
-
-    get credits(): number {
-        return this._credits;
-    }
-
-    set credits(value: number) {
-        this._credits = value;
-        if (value == 0) {
-            this.bonusCreditsText.setText("");
-            return
-        }
-        else {
-            this.updateBonusCreditsText(value);
-        }
-    }
-
-    updateBonusCreditsText(value: number): void {
-        this.bonusCreditsText.setText(`+${value}`);
     }
 
     forfeit(): void {
@@ -82,10 +58,6 @@ export class AbstractAbilityManager {
         // Remove the ability text if it exists
         if (this.abilityText) {
             this.abilityText.destroy();
-        }
-
-        if (this.bonusCreditsText) {
-            this.bonusCreditsText.destroy();
         }
     
         // Call delete on each ability
@@ -236,21 +208,7 @@ export class AbstractAbilityManager {
         return false;
     }
 
-    triangle_validate(position: Phaser.Math.Vector2): [IDItem, number] | false {
-        // loop through all the abilities values, and pass them into validate
-        for (const key in this.abilities) {
-            const ability = this.abilities[key];
-            if (ability.overlapsWithTriangle(position)) {
-                const item = this.validate(ability);
-                if (item) {
-                    return item;
-                }
-            }
-        }
-        return false;
-    }
-
-    get ability(): ReloadAbility | null {
+    get ability(): AbstractAbility | null {
         if (this.mode !== null && this.abilities[this.mode]) {
             return this.abilities[this.mode];
         }
@@ -279,9 +237,15 @@ export class AbstractAbilityManager {
     
         for (let key in this.abilities) {
             const isSelected = this.mode === parseInt(key);
-            let clickable = this.credits >= this.abilities[key].credits;
+            let clickable = this.clickable(key);
             this.abilities[key].draw(scene, isSelected, clickable);
         }
+    }
+
+    // make abstract method
+
+    clickable(key): boolean {
+        throw new Error("Method not implemented.");
     }
 
     private drawBridge(scene: Phaser.Scene) {
@@ -395,5 +359,71 @@ export class AbstractAbilityManager {
         this.BridgeGraphics.fill();
     }
     
+}
+
+export class CreditAbilityManager extends AbstractAbilityManager {
+
+    _credits: number = 0;
+    bonusCreditsText: Phaser.GameObjects.Text;
+
+    constructor(
+        scene: Phaser.Scene,
+        abilities: { [key: number]: CreditAbility },
+        events: { [key: number]: Event },
+        bonusTextY: number
+    ) {
+        super(scene, abilities, events);
+
+        this.bonusCreditsText = scene.add.text(scene.sys.canvas.width - 90, bonusTextY, "", {
+            fontSize: "60px",
+            align: "right",
+            color: "#000000",
+        });
+    }
+
+    clickable(key): boolean {
+        return this.credits >= this.abilities[key].credits;
+    }
+
+    get credits(): number {
+        return this._credits;
+    }
+
+    set credits(value: number) {
+        this._credits = value;
+        if (value == 0) {
+            this.bonusCreditsText.setText("");
+            return
+        }
+        else {
+            this.updateBonusCreditsText(value);
+        }
+    }
+
+    updateBonusCreditsText(value: number): void {
+        this.bonusCreditsText.setText(`+${value}`);
+    }
+
+    triangle_validate(position: Phaser.Math.Vector2): [IDItem, number] | false {
+        // loop through all the abilities values, and pass them into validate
+        for (const key in this.abilities) {
+            const ability = this.abilities[key] as CreditAbility;
+            if (ability.overlapsWithTriangle(position)) {
+                const item = this.validate(ability);
+                if (item) {
+                    return item;
+                }
+            }
+        }
+        return false;
+    }
+
+    delete() {
+        super.delete();
+        
+        if (this.bonusCreditsText) {
+            this.bonusCreditsText.destroy();
+        }
+    }
 }
 

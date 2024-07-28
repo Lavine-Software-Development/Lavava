@@ -137,6 +137,8 @@ class Batch:
         start_dict["player_id"] = player_id
         start_dict["abilities"] = json_abilities.start_json(self.settings)
         start_dict['isFirst'] = True
+        start_dict["mode"] = self.mode
+        start_dict["settings"] = self.settings
         start_dict["display_names_list"] = list(self.token_disname.values())
         start_dict["isRefresh"] = False
         start_json = plain_json(start_dict)

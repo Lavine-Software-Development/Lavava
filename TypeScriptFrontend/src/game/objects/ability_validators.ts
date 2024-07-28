@@ -11,7 +11,7 @@ import {
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./node";
 import { Edge } from "./edge";
-import { ReloadAbility } from "./ReloadAbility";
+import { AbstractAbility, CreditAbility } from "./ReloadAbility";
 
 function hasAnySame(
     num1: number,
@@ -84,22 +84,34 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
     return true;
 };
 
-function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number]) {
+function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number], nukeType: string) {
     return function structureRangedNodeAttack(data: IDItem[]): boolean {
         const node = data[0] as Node;
+
         const structures = nodes.filter(
-            (node) =>  NUKE_OPTION_STRINGS.includes(node.stateName) && node.owner === player
+            (node) => NUKE_OPTION_STRINGS.includes(node.stateName) && node.owner === player
         );
+
+        // get the nodes neighbors
+        const isNeighborOrOwner = (node1: Node): boolean => {
+            if (node1.owner === player) return true;
+            return node1.edges.some((edge) => edge.other(node1).owner === player);
+        }
 
         const inStructureRange = (structure: Node): boolean => {
             const nukeRange = structure.state.nuke_range * structure.value;
             return isWithinScaledRange(node.pos, structure.pos, ratio, nukeRange);
         };
 
-        return (
-            defaultNode(node) &&
-            structures.some((structure) => inStructureRange(structure))
-        );
+        if (nukeType === "neighbor") {
+            return isNeighborOrOwner(node);
+        }
+        else {
+            return (
+                defaultNode(node) &&
+                structures.some((structure) => inStructureRange(structure))
+            );
+        }
     };
 }
 
@@ -199,7 +211,8 @@ function playerValidators(player: OtherPlayer): {
 function newEdgeValidator(
     getEdges: () => Edge[],
     player: OtherPlayer,
-    ratio: [number, number]
+    ratio: [number, number],
+    bridgeFromPortNeeded: boolean
 ): { [key: string]: ValidatorFunc } {
 
     const newEdgeStandard = (data: Node[], ): boolean => {
@@ -250,15 +263,16 @@ function newEdgeValidator(
     };
 
     return {
-        [KeyCodes.BRIDGE_CODE]: fullSizeToNodeEdgeValidator,
         [KeyCodes.D_BRIDGE_CODE]: fullSizeEdgeValidator,
         [KeyCodes.MINI_BRIDGE_CODE]: miniBridgeValidator,
+        [KeyCodes.BRIDGE_CODE]: bridgeFromPortNeeded ? fullSizeEdgeValidator : fullSizeToNodeEdgeValidator,
     };
 }
 
 export function makeAbilityValidators(
     player: MyPlayer,
     ratio: [number, number],
+    settings: any,
     nodes: Node[],
     getEdges: () => Edge[],
 ): { [key: string]: ValidatorFunc } {
@@ -267,12 +281,12 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
-        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player, ratio),
+        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player, ratio, settings.nuke_type),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
     const playerValidatorsMap = playerValidators(player);
-    const newEdgeValidators = newEdgeValidator(getEdges, player, ratio);
+    const newEdgeValidators = newEdgeValidator(getEdges, player, ratio, settings.bridge_from_port_needed);
     return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators };
 }
 
@@ -306,7 +320,7 @@ export function makeEventValidators(player: MyPlayer, getEdges: () => Edge[]): {
     }
 
     function creditUsageValidator(data: IDItem[]): boolean {
-        const ability = data[0] as ReloadAbility;
+        const ability = data[0] as CreditAbility;
         return player.credits >= ability.credits;
     }
 

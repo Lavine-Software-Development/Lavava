@@ -16,9 +16,9 @@ import {
     MINI_BRIDGE_RANGE,
 } from "../objects/constants";
 import { PlayerStateEnum as PSE, GameStateEnum as GSE } from "../objects/enums";
-import { ReloadAbility } from "../objects/ReloadAbility";
+import { AbstractAbility, CreditAbility } from "../objects/ReloadAbility";
 import { Event } from "../objects/event";
-import { AbstractAbilityManager } from "../objects/abilityManager";
+import { AbstractAbilityManager, CreditAbilityManager } from "../objects/abilityManager";
 import { OtherPlayer } from "../objects/otherPlayer";
 import { MyPlayer } from "../objects/myPlayer";
 import {
@@ -78,6 +78,8 @@ export class MainScene extends Scene {
     private navigate: Function;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
     private ratio: [number, number];
+    private settings: any;
+    private mode: string;
 
     private rainbowColors: string[] = [
         "#B8860B", // Dark Goldenrod
@@ -162,7 +164,6 @@ export class MainScene extends Scene {
         this.scale.on("resize", this.handleResize, this);
 
         this.startReconnectionCheck();
-        // this.setupNavigationHandlers();
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -177,53 +178,56 @@ export class MainScene extends Scene {
         const ab = makeAbilityValidators(
             this.mainPlayer,
             this.ratio,
+            this.settings,
             Object.values(this.nodes),
             this.getEdges.bind(this)
         );
         const events: { [key: number]: Event } = {};
-        const abilities: { [key: number]: ReloadAbility } = {};
-        Object.values(EventCodes).forEach((eb: number) => {
-            events[eb] = new Event(
-                VISUALS[eb],
-                EVENTS[eb][0],
-                EVENTS[eb][1],
-                ev[eb]
-            );
-        });
 
         let y_position = 20;
         const squareSize = 150; // Size of each square
         const spacing = 15; // Spacing between squares
         const x_position = this.scale.width - squareSize - 10;
 
-        Object.entries(this.abilityCounts).forEach(([abk, count]) => {
-            // abk here is the ability code (converted from the name via NameToCode)
-            const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
+        if (this.mode == "royale") {
+            //... make royale ability Manager
+        }
+        else {
+            const abilities: { [key: number]: CreditAbility } = {};
+            Object.entries(this.abilityCounts).forEach(([abk, count]) => {
+                // abk here is the ability code (converted from the name via NameToCode)
+                const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
+    
+                abilities[abilityCode] = new CreditAbility(
+                    VISUALS[abilityCode] as AbilityVisual,
+                    CLICKS[abilityCode][0],
+                    CLICKS[abilityCode][1],
+                    ab[abilityCode],
+                    AbilityCredits[abilityCode],
+                    AbilityReloadTimes[abilityCode],
+                    abilityCode,
+                    count, // Use the count from abilityCounts
+                    1,
+                    x_position,
+                    y_position,
+                    this
+                );
+    
+                y_position += squareSize + spacing;
+            });
 
-            abilities[abilityCode] = new ReloadAbility(
-                VISUALS[abilityCode] as AbilityVisual,
-                CLICKS[abilityCode][0],
-                CLICKS[abilityCode][1],
-                ab[abilityCode],
-                AbilityCredits[abilityCode],
-                AbilityReloadTimes[abilityCode],
-                abilityCode,
-                count, // Use the count from abilityCounts
-                1,
-                x_position,
-                y_position,
-                this
-            );
+            Object.values(EventCodes).forEach((eb: number) => {
+                events[eb] = new Event(
+                    VISUALS[eb],
+                    EVENTS[eb][0],
+                    EVENTS[eb][1],
+                    ev[eb]
+                );
+            });
 
-            y_position += squareSize + spacing;
-        });
+            this.abilityManager = new CreditAbilityManager(this, abilities, events, y_position + spacing);
+        }
 
-        this.abilityManager = new AbstractAbilityManager(
-            this,
-            abilities,
-            events,
-            y_position + spacing,
-        );
     }
 
     private getRainbowColor(): string {
@@ -389,8 +393,9 @@ export class MainScene extends Scene {
             }
         }
 
-        if (this.ps === PSE.PLAY) {
-            let ability = this.abilityManager.triangle_validate(position);
+        if (this.ps === PSE.PLAY && this.mode === "original") {
+            let manager = this.abilityManager as CreditAbilityManager;
+            let ability = manager.triangle_validate(position);
             if (ability) {
                 return ability;
             }
@@ -447,17 +452,6 @@ export class MainScene extends Scene {
         this.network.sendMessage({ code: code, items: {} });
     }
 
-    // private setupNavigationHandlers(): void {
-    // Handles both back navigation and tab close events
-    // window.addEventListener('popstate', this.handleNavigationEvent.bind(this));
-    // window.addEventListener('beforeunload', this.handleNavigationEvent.bind(this));
-    // }
-
-    // private handleNavigationEvent(event: PopStateEvent | BeforeUnloadEvent): void {
-    //     event.preventDefault();
-    //     this.leaveMatchDirect();
-    // }
-
     private createLeaveMatchButton(): void {
         this.leaveMatchButton = this.add.text(10, 10, "Forfeit", {
             fontFamily: "Arial",
@@ -505,6 +499,8 @@ export class MainScene extends Scene {
         });
 
         const display = startData.display_names_list;
+        this.settings = startData.settings;
+        this.mode = startData.mode;
         this.displayNames(display);
 
         this.nodes = Object.fromEntries(
@@ -561,7 +557,8 @@ export class MainScene extends Scene {
 
                 if ('credits' in new_data["player"] && new_data["player"]["credits"] !== this.mainPlayer.credits) {
                     this.mainPlayer.credits = new_data["player"]["credits"];
-                    this.abilityManager.credits = new_data["player"]["credits"];
+                    let manager = this.abilityManager as CreditAbilityManager;
+                    manager.credits = new_data["player"]["credits"];
                 }
 
                 if (this.gs != new_data["gs"]) {
