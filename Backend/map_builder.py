@@ -12,7 +12,7 @@ from constants import (
 from helpers import do_intersect, angle_between_edges
 from edge import Edge
 from dynamicEdge import DynamicEdge
-from map_builder_helpers import starter_port_nodes, starter_capitals
+from map_builder_helpers import create_nodes, starter_capitals, just_remove_lonely_nodes, outsider_choose_starter_ports
 from random import randint
 
 
@@ -24,10 +24,10 @@ class MapBuilder:
         self.edge_objects = []
         self.edgeDict = defaultdict(set)
 
-    def build(self):
+    def build(self, settings):
         self.make_nodes()
         self.make_edges()
-        self.convert_to_objects()
+        self.convert_to_objects(settings)
 
     def make_nodes(self):  # assumes global list nodes is empty
         count = 0
@@ -131,10 +131,10 @@ class MapBuilder:
             + (self.nodes[edge[0]][1][1] - self.nodes[edge[1]][1][1]) ** 2
         ) < MAX_EDGE_LENGTH * min(SCREEN_WIDTH, SCREEN_HEIGHT) / (NODE_COUNT / 1.5)
 
-    def convert_to_objects(self):
+    def convert_to_objects(self, settings):
         edges = []
 
-        nodes = self.node_function(self.nodes)
+        nodes = create_nodes(self.nodes)
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
@@ -143,15 +143,13 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        nodes = self.starter_states(nodes)
+        outsider_choose_starter_ports(nodes, settings["ports_percentage"])
+        nodes = self.starter_states_and_removal(settings["starting_structures"])(nodes, settings)
 
         self.edge_objects = edges
         self.node_objects = nodes
 
-    @property
-    def starter_states(self):
-        return starter_capitals
-
-    @property
-    def node_function(self):
-        return starter_port_nodes
+    def starter_states_and_removal(self, structures):
+        if structures:
+            return starter_capitals
+        return just_remove_lonely_nodes

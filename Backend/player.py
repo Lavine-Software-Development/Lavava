@@ -30,7 +30,7 @@ class DefaultPlayer(JsonableTick):
     def killed_event(self, player):
         self.killer = player
 
-    def set_abilities(self, chosen_abilities, ability_effects, board):
+    def set_abilities(self, chosen_abilities, ability_effects, board, settings):
         pass
 
     def use_ability(self, key, data) -> Optional[dict]:
@@ -96,8 +96,8 @@ class CreditPlayer(DefaultPlayer):
     def overtime_bonus(self):
         self.credits += OVERTIME_BONUS
 
-    def set_abilities(self, chosen_abilities, ability_effects, board):
-        validators = make_ability_validators(board, self)
+    def set_abilities(self, chosen_abilities, ability_effects, board, settings):
+        validators = make_ability_validators(board, self, settings)
 
         for ab in chosen_abilities:
             self.abilities[ab] = CreditAbility(ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].reload, self, chosen_abilities[ab])
@@ -110,8 +110,8 @@ class RoyalePlayer(DefaultPlayer):
         self.mini_counter = 0
         self.elixir = 0
 
-    def set_abilities(self, chosen_abilities, ability_effects, board):
-        validators = make_ability_validators(board, self)
+    def set_abilities(self, chosen_abilities, ability_effects, board, settings):
+        validators = make_ability_validators(board, self, settings)
 
         for ab in chosen_abilities:
             self.abilities[ab] = RoyaleAbility(ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].elixir, self)

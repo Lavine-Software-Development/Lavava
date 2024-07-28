@@ -1,4 +1,4 @@
-from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED, FORFEIT_AND_LEAVE_CODE
+from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
 from playerStateEnums import PlayerStateEnum as PS
@@ -6,8 +6,6 @@ from game import ServerGame
 import json_abilities
 from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, json_cost, plain_json
 import requests
-from pympler import asizeof
-import json
 from config import config
 from dotenv import load_dotenv
 
@@ -24,18 +22,17 @@ class Batch:
         self.competitive = competitive
         self.mode = mode
         self.gs = GameState()
-        self.game = self.createGame() 
+        self.settings = self.getSettings() 
+        self.game = ServerGame(self.player_count, self.gs, self.settings)
         self.token_disname = {} #just the display names to be displayed on the front end
         self.not_responsive_count = {}
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
 
-    def createGame(self):
-        url = config.USER_BACKEND_URL + '/get_settings'
-        data = {"mode": self.mode}
+    def getSettings(self):
+        url = config.USER_BACKEND_URL + '/get_settings/' + self.mode
         try:
-            settings = requests.post(url, json=data)
-            return ServerGame(self.player_count, self.gs, settings)
+            return requests.get(url).json()
         except Exception as e:
             print(e)
             return False
@@ -138,7 +135,7 @@ class Batch:
         start_dict = self.game.start_json
         start_dict["player_count"] = self.player_count
         start_dict["player_id"] = player_id
-        start_dict["abilities"] = json_abilities.start_json()
+        start_dict["abilities"] = json_abilities.start_json(self.settings)
         start_dict['isFirst'] = True
         start_dict["display_names_list"] = list(self.token_disname.values())
         start_dict["isRefresh"] = False
@@ -179,7 +176,10 @@ class Batch:
 
     def ability_process(self, player, data):
         data = convert_keys_to_int(data)
-        if json_abilities.validate_ability_selection(data):
+        if self.settings["forced_deck"]:
+            self.game.set_abilities(player, self.settings["deck"])
+            return True
+        elif json_abilities.validate_ability_selection(data, self.settings):
             self.game.set_abilities(player, data)
             return True
         else:
