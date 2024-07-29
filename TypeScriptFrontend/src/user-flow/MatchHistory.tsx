@@ -15,28 +15,6 @@ interface GameData {
 
 const MatchHistory: React.FC = () => {
     const navigate = useNavigate();
-    // check if login token has expired
-    useEffect(() => {
-        const token = localStorage.getItem("userToken");
-        try {
-            if (token) {
-                const decodedToken = jwtDecode(token);
-                const currentTime = Date.now() / 1000; // convert to seconds
-                if (decodedToken.exp < currentTime) {
-                    localStorage.removeItem("userToken");
-                    navigate("/login");
-                }
-            } else {
-                localStorage.removeItem("userToken");
-                navigate("/login");
-            }
-        } catch (error) {
-            console.error("Error deccoding token:", error);
-            localStorage.removeItem("userToken");
-            navigate("/login");
-        }
-    }, []);
-
     const [matchHistory, setMatchHistory] = useState<GameData[]>([]);
     const [loading, setLoading] = useState(true);
     const [isDescending, setIsDescending] = useState(true);
@@ -58,6 +36,10 @@ const MatchHistory: React.FC = () => {
                 if (response.ok) {
                     setMatchHistory(data.match_history);
                 } else {
+                    if (data.message === 'Login Token has expired!') {
+                        localStorage.removeItem('userToken');
+                        navigate("/login");
+                    }
                     throw new Error(data.message);
                 }
             } catch (error) {

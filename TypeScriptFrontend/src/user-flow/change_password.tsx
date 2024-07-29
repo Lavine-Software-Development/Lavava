@@ -6,27 +6,41 @@ import { jwtDecode } from 'jwt-decode';
 
 const ForgotPassword: React.FC = () => {
     const navigate = useNavigate();
+    const [isTokenValid, setIstokenValid] = useState<boolean | null>(null);
+
     // check if login token has expired
     useEffect(() => {
-        const token = localStorage.getItem("userToken");
-        try {
-            if (token) {
+        const validateToken = () => {
+            const token = localStorage.getItem("userToken");
+            if (!token){
+                setIstokenValid(false);
+                return;
+            }
+
+            try {
                 const decodedToken = jwtDecode(token);
                 const currentTime = Date.now() / 1000; // convert to seconds
                 if (decodedToken.exp < currentTime) {
                     localStorage.removeItem("userToken");
-                    navigate("/login");
+                    setIstokenValid(false);
+                } else {
+                    setIstokenValid(true);
                 }
-            } else {
+            } catch (error) {
+                console.error("Error deccoding token:", error);
                 localStorage.removeItem("userToken");
-                navigate("/login");
+                setIstokenValid(false);
             }
-        } catch (error) {
-            console.error("Error deccoding token:", error);
-            localStorage.removeItem("userToken");
-            navigate("/login");
-        }
+        };
+
+        validateToken();
     }, []);
+
+    useEffect(() => {
+        if (isTokenValid === false) {
+            navigate("/login")
+        }
+    }, [isTokenValid, navigate]);
 
     const [password, setPassword] = useState('');
     const [repeatPassword, setRepeatPassword] = useState('');

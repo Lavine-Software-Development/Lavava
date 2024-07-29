@@ -12,26 +12,35 @@ interface Ability {
 
 const DeckBuilder: React.FC = () => {
     const navigate = useNavigate();
+    const [isTokenValid, setIstokenValid] = useState<boolean | null>(null);
+
     // check if login token has expired
     useEffect(() => {
-        const token = localStorage.getItem("userToken");
-        try {
-            if (token) {
+        const validateToken = () => {
+            const token = localStorage.getItem("userToken");
+            if (!token){
+                return;
+            }
+
+            try {
                 const decodedToken = jwtDecode(token);
                 const currentTime = Date.now() / 1000; // convert to seconds
                 if (decodedToken.exp < currentTime) {
                     localStorage.removeItem("userToken");
-                    navigate("/login");
+                    setIstokenValid(false);
+                    navigate("/login")
+                } else {
+                    setIstokenValid(true);
                 }
-            } else {
+            } catch (error) {
+                console.error("Error deccoding token:", error);
                 localStorage.removeItem("userToken");
-                navigate("/login");
+                setIstokenValid(false);
+                navigate("/login")
             }
-        } catch (error) {
-            console.error("Error deccoding token:", error);
-            localStorage.removeItem("userToken");
-            navigate("/login");
-        }
+        };
+
+        validateToken();
     }, []);
 
     const [abilities, setAbilities] = useState<Ability[]>([]);
@@ -42,6 +51,7 @@ const DeckBuilder: React.FC = () => {
 
     useEffect(() => {
         const fetchAbilities = async () => {
+            if (isTokenValid === false) return;
             try {
                 const response = await fetch(`${config.userBackend}/abilities`);
                 const data = await response.json();

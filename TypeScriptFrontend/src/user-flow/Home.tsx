@@ -22,24 +22,26 @@ const Home: React.FC = () => {
     const navigate = useNavigate();
     // check if login token has expired
     useEffect(() => {
-        const token = localStorage.getItem("userToken");
-        try {
-            if (token) {
+        const validateToken = () => {
+            const token = localStorage.getItem("userToken");
+            if (!token){
+                return;
+            }
+
+            try {
                 const decodedToken = jwtDecode(token);
                 const currentTime = Date.now() / 1000; // convert to seconds
                 if (decodedToken.exp < currentTime) {
                     localStorage.removeItem("userToken");
-                    navigate("/login");
+                    navigate("/login")
                 }
-            } else {
+            } catch (error) {
+                console.error("Error deccoding token:", error);
                 localStorage.removeItem("userToken");
-                navigate("/login");
             }
-        } catch (error) {
-            console.error("Error deccoding token:", error);
-            localStorage.removeItem("userToken");
-            navigate("/login");
-        }
+        };
+
+        validateToken();
     }, []);
 
     const [selectedAbilities, setSelectedAbilities] = useState<any[]>([]);
@@ -449,15 +451,6 @@ const Home: React.FC = () => {
                 </div>
             )}
             <div className="popup-container">
-                {showSalaryPopup && (
-                    <div className="popup salary-popup">
-                        <p>
-                            You cannot host a game with a leftover salary
-                            greater than 10.
-                        </p>
-                        <button onClick={handleClosePopups}>OK</button>
-                    </div>
-                )}
                 {showLoginPopup && !isLoggedIn && (
                     <div className="popup login-popup">
                         <p>You need to log in to play Ladder.</p>
