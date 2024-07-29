@@ -1,4 +1,4 @@
-import { AbstractAbility, CreditAbility } from "./ReloadAbility";
+import { AbstractAbility, CreditAbility, ElixirAbility } from "./ReloadAbility";
 import { IDItem } from "./idItem";
 import { Highlight } from "./highlight";
 import { Event } from "./event";
@@ -427,3 +427,72 @@ export class CreditAbilityManager extends AbstractAbilityManager {
     }
 }
 
+
+export class ElixirAbilityManager extends AbstractAbilityManager {
+    private _elixir: number = 0;
+    private elixirCapacity: number;
+    private elixirBar: Phaser.GameObjects.Graphics;
+    private barWidth: number = 30;
+    private barPadding: number = 10;
+
+    constructor(
+        scene: Phaser.Scene,
+        abilities: { [key: number]: ElixirAbility },
+        events: { [key: number]: Event },
+        capacity: number,
+    ) {
+        super(scene, abilities, events);
+        this.elixirCapacity = capacity;
+        this._elixir = 0;
+
+        // Create the elixir bar
+        this.elixirBar = scene.add.graphics();
+        this.updateElixirBar(scene);
+    }
+
+    get elixir(): number {
+        return this._elixir;
+    }
+
+    set elixir(value: number) {
+        this._elixir = Math.min(value, this.elixirCapacity);
+        this.updateElixirBar(this.elixirBar.scene);
+    }
+
+    clickable(key: string): boolean {
+        return this.elixir >= this.abilities[key].elixir;
+    }
+
+    private updateElixirBar(scene: Phaser.Scene): void {
+        const canvasHeight = scene.sys.canvas.height;
+        const canvasWidth = scene.sys.canvas.width;
+        const abilityTextHeight = 40; // Approximate height for ability text
+        const topPadding = 20;
+
+        const barHeight = canvasHeight - abilityTextHeight - topPadding - this.barPadding * 2;
+        const barX = canvasWidth - this.barWidth - this.barPadding;
+        const barY = topPadding;
+
+        this.elixirBar.clear();
+
+        // Draw background
+        this.elixirBar.fillStyle(0xcccccc);
+        this.elixirBar.fillRect(barX, barY, this.barWidth, barHeight);
+
+        // Draw filled portion
+        const fillHeight = (this._elixir / this.elixirCapacity) * barHeight;
+        this.elixirBar.fillStyle(0x00ff00);
+        this.elixirBar.fillRect(barX, barY + barHeight - fillHeight, this.barWidth, fillHeight);
+
+        // Draw border
+        this.elixirBar.lineStyle(2, 0x000000);
+        this.elixirBar.strokeRect(barX, barY, this.barWidth, barHeight);
+    }
+
+    delete() {
+        super.delete();
+        if (this.elixirBar) {
+            this.elixirBar.destroy();
+        }
+    }
+}

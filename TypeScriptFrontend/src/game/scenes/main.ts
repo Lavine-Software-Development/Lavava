@@ -20,7 +20,7 @@ import { AbstractAbility, CreditAbility } from "../objects/ReloadAbility";
 import { Event } from "../objects/event";
 import { AbstractAbilityManager, CreditAbilityManager } from "../objects/abilityManager";
 import { OtherPlayer } from "../objects/otherPlayer";
-import { MyPlayer } from "../objects/myPlayer";
+import { MyCreditPlayer, MyElixirPlayer } from "../objects/myPlayer";
 import {
     makeEventValidators,
     unownedNode,
@@ -55,7 +55,7 @@ export class MainScene extends Scene {
     private ps: PSE;
     private gs: GSE;
     private abilityManager: AbstractAbilityManager;
-    private mainPlayer: MyPlayer;
+    private mainPlayer: OtherPlayer;
     private otherPlayers: OtherPlayer[] = [];
     private network: Network;
     private burning: Node[] = [];
@@ -187,7 +187,7 @@ export class MainScene extends Scene {
         let y_position = 20;
         const squareSize = 150; // Size of each square
         const spacing = 15; // Spacing between squares
-        const x_position = this.scale.width - squareSize - 10;
+        const unaltered_x_position = this.scale.width - squareSize;
 
         if (this.mode == "royale") {
             //... make royale ability Manager
@@ -208,7 +208,7 @@ export class MainScene extends Scene {
                     abilityCode,
                     count, // Use the count from abilityCounts
                     1,
-                    x_position,
+                    unaltered_x_position,
                     y_position,
                     this
                 );
@@ -489,8 +489,17 @@ export class MainScene extends Scene {
         const pc = startData.player_count;
         const n = startData.board.nodes;
         const e = startData.board.edges;
+        const display = startData.display_names_list;
 
-        this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
+        this.settings = startData.settings;
+        this.mode = startData.mode;
+        
+        if (this.mode === "royale") {
+            this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
+        } else {
+            this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
+        }
+        
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
             const id = index.toString();
             return id !== pi.toString()
@@ -498,9 +507,6 @@ export class MainScene extends Scene {
                 : this.mainPlayer;
         });
 
-        const display = startData.display_names_list;
-        this.settings = startData.settings;
-        this.mode = startData.mode;
         this.displayNames(display);
 
         this.nodes = Object.fromEntries(
@@ -555,10 +561,20 @@ export class MainScene extends Scene {
                     }
                 }
 
-                if ('credits' in new_data["player"] && new_data["player"]["credits"] !== this.mainPlayer.credits) {
-                    this.mainPlayer.credits = new_data["player"]["credits"];
-                    let manager = this.abilityManager as CreditAbilityManager;
-                    manager.credits = new_data["player"]["credits"];
+                if ('credits' in new_data["player"]) {
+                    let mainPlayer = this.mainPlayer as MyCreditPlayer;
+                    if (new_data["player"]["credits"] !== mainPlayer.credits) {
+                        mainPlayer.credits = new_data["player"]["credits"];
+                        let manager = this.abilityManager as CreditAbilityManager;
+                        manager.credits = new_data["player"]["credits"];
+                    }
+                } else if ('elixir' in new_data["player"]) {
+                    let mainPlayer = this.mainPlayer as MyElixirPlayer;
+                    if (new_data["player"]["elixir"] !== mainPlayer.elixir) {
+                        mainPlayer.elixir = new_data["player"]["elixir"];
+                        let manager = this.abilityManager as ElixirAbilityManager;
+                        manager.elixir = new_data["player"]["elixir"];
+                    }
                 }
 
                 if (this.gs != new_data["gs"]) {

@@ -221,6 +221,7 @@ export class CreditAbility extends AbstractAbility {
         this.reload = reload;
         this._remaining = remaining;
         this.retext = true;
+        this.x -= 10;
     }
 
     get remaining(): number {
@@ -304,3 +305,29 @@ export class CreditAbility extends AbstractAbility {
     }
 }
 
+
+export class ElixirAbility extends AbstractAbility {
+
+    elixir: number;
+
+    constructor(
+        visual: AbilityVisual,
+        clickCount: number,
+        clickType: ClickType,
+        verificationFunc: ValidationFunction,
+        elixir: number,
+        id: number,
+        percentage: number = 1.0,
+        x: number,
+        y: number,
+        scene: Phaser.Scene,
+    ) {
+        super(visual, clickCount, clickType, verificationFunc, id, percentage, x, y, scene);
+        this.elixir = elixir;
+        this.x -= 20;
+    }
+
+    get displayNumber(): number {
+        return this.elixir;
+    }
+}
