@@ -70,7 +70,7 @@ const MatchHistory: React.FC = () => {
                 <button className="match-history-btn" onClick={handleBack}>Back to Profile</button>
                 <h2>Ladder Match History</h2>
                 <button className="sort-order-btn" onClick={toggleSortOrder}>
-                    Sort {isDescending ? "Recent Game" : "Recent Game"}
+                    Sort: Recent Game
                     <span className="sort-arrow">{isDescending ? ' ↓' : ' ↑'}</span>
                 </button>
                 {sortedMatchHistory.map((game) => (
