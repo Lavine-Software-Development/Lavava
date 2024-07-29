@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
 import config from '../env-config';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 interface Ability {
     description: string;
@@ -10,12 +11,34 @@ interface Ability {
 }
 
 const DeckBuilder: React.FC = () => {
+    const navigate = useNavigate();
+    // check if login token has expired
+    useEffect(() => {
+        const token = localStorage.getItem("userToken");
+        try {
+            if (token) {
+                const decodedToken = jwtDecode(token);
+                const currentTime = Date.now() / 1000; // convert to seconds
+                if (decodedToken.exp < currentTime) {
+                    localStorage.removeItem("userToken");
+                    navigate("/login");
+                }
+            } else {
+                localStorage.removeItem("userToken");
+                navigate("/login");
+            }
+        } catch (error) {
+            console.error("Error deccoding token:", error);
+            localStorage.removeItem("userToken");
+            navigate("/login");
+        }
+    }, []);
+
     const [abilities, setAbilities] = useState<Ability[]>([]);
     const [selectedCounts, setSelectedCounts] = useState<{ [key: string]: number }>({});
     const [initialSalary, setInitialSalary] = useState(0); // Store the initial salary
     const [salary, setSalary] = useState(0); 
     const [error, setError] = useState("");
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchAbilities = async () => {

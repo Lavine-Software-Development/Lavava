@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import config from "../env-config";
+import { jwtDecode } from 'jwt-decode';
 
 function getDeviceType() {
     const ua = navigator.userAgent;
@@ -19,6 +20,28 @@ function getDeviceType() {
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
+    // check if login token has expired
+    useEffect(() => {
+        const token = localStorage.getItem("userToken");
+        try {
+            if (token) {
+                const decodedToken = jwtDecode(token);
+                const currentTime = Date.now() / 1000; // convert to seconds
+                if (decodedToken.exp < currentTime) {
+                    localStorage.removeItem("userToken");
+                    navigate("/login");
+                }
+            } else {
+                localStorage.removeItem("userToken");
+                navigate("/login");
+            }
+        } catch (error) {
+            console.error("Error deccoding token:", error);
+            localStorage.removeItem("userToken");
+            navigate("/login");
+        }
+    }, []);
+
     const [selectedAbilities, setSelectedAbilities] = useState<any[]>([]);
     const [tab, setTab] = useState("");
     const [playerCount, setPlayerCount] = useState(() => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import config from "../env-config";
+import { jwtDecode } from "jwt-decode";
 
 interface GameData {
     game_id: number;
@@ -13,10 +14,32 @@ interface GameData {
 }
 
 const MatchHistory: React.FC = () => {
+    const navigate = useNavigate();
+    // check if login token has expired
+    useEffect(() => {
+        const token = localStorage.getItem("userToken");
+        try {
+            if (token) {
+                const decodedToken = jwtDecode(token);
+                const currentTime = Date.now() / 1000; // convert to seconds
+                if (decodedToken.exp < currentTime) {
+                    localStorage.removeItem("userToken");
+                    navigate("/login");
+                }
+            } else {
+                localStorage.removeItem("userToken");
+                navigate("/login");
+            }
+        } catch (error) {
+            console.error("Error deccoding token:", error);
+            localStorage.removeItem("userToken");
+            navigate("/login");
+        }
+    }, []);
+
     const [matchHistory, setMatchHistory] = useState<GameData[]>([]);
     const [loading, setLoading] = useState(true);
     const [isDescending, setIsDescending] = useState(true);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchMatchHistory = async () => {

@@ -115,7 +115,7 @@ def token_required(f):
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = data['user']
         except ExpiredSignatureError:
-            return jsonify({'message': 'Token has expired!'}), 401
+            return jsonify({'message': 'Login Token has expired!'}), 401
         except InvalidTokenError:
             return jsonify({'message': 'Invalid token!'}), 401
         except Exception as e:
@@ -160,7 +160,7 @@ def login():
     token = jwt.encode({
         'user_id': user.id,
         'user': user.username,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30)
     }, app.config['SECRET_KEY'], algorithm="HS256")
 
     return jsonify({"token": token}), 200
