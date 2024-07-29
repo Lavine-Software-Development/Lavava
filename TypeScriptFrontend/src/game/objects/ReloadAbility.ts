@@ -33,26 +33,25 @@ export class AbstractAbility extends IDItem {
         clickType: ClickType,
         verificationFunc: ValidationFunction,
         id: number,
-        percentage: number = 1.0,
         x: number,
         y: number,
         scene: Phaser.Scene,
+        squareSize: number,
     ) {
         super(id, ClickType.ABILITY);
         this.visual = visual;
         this.clickCount = clickCount;
         this.clickType = clickType;
         this.verificationFunc = verificationFunc;
-        this.percentage = percentage;
+        this.percentage = 0;
         this.graphics = scene.add.graphics();
         this.x = x;
         this.y = y;
         this.recolor = true;
 
-        this.squareSize = 150;
-        this.imageSize = 90;
+        this.squareSize = squareSize;
+        this.imageSize = squareSize * 3/5;
         this.addImageToScene(scene);
-        this.addTextToScene(scene);
     }
 
     get selectable(): boolean {
@@ -91,7 +90,7 @@ export class AbstractAbility extends IDItem {
 
     overlapsWithSquare(position: Phaser.Math.Vector2): boolean {
         const bounds = new Phaser.Geom.Rectangle(
-            this.x, this.y, 150, 150
+            this.x, this.y, this.squareSize, this.squareSize
         );
 
         return bounds.contains(position.x, position.y);
@@ -211,17 +210,17 @@ export class CreditAbility extends AbstractAbility {
         reload: number,
         id: number,
         remaining: number = 0,
-        percentage: number = 1.0,
         x: number,
         y: number,
         scene: Phaser.Scene,
+        squareSize: number,
     ) {
-        super(visual, clickCount, clickType, verificationFunc, id, percentage, x, y, scene);
+        super(visual, clickCount, clickType, verificationFunc, id, x - 10, y, scene, squareSize);
         this.credits = credits;
         this.reload = reload;
         this._remaining = remaining;
+        this.addTextToScene(scene);
         this.retext = true;
-        this.x -= 10;
     }
 
     get remaining(): number {
@@ -317,14 +316,14 @@ export class ElixirAbility extends AbstractAbility {
         verificationFunc: ValidationFunction,
         elixir: number,
         id: number,
-        percentage: number = 1.0,
         x: number,
         y: number,
         scene: Phaser.Scene,
+        squareSize: number,
     ) {
-        super(visual, clickCount, clickType, verificationFunc, id, percentage, x, y, scene);
+        super(visual, clickCount, clickType, verificationFunc, id, x - 35, y, scene, squareSize);
         this.elixir = elixir;
-        this.x -= 20;
+        this.addTextToScene(scene);
     }
 
     get displayNumber(): number {

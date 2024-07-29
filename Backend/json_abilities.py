@@ -13,13 +13,6 @@ def start_elixir_json(elixir_cap):
 
 def start_credit_json(credit_cap):
     return {
-        "values": {
-            code: {
-                "credits": BREAKDOWNS[code].credits,
-                "reload": BREAKDOWNS[code].reload,
-            }
-            for code in ALL_ABILITIES
-        },
         "credits": credit_cap,
     }
 

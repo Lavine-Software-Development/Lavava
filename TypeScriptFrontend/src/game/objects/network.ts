@@ -113,14 +113,16 @@ export class Network {
         console.log("setup called");
         const type = sessionStorage.getItem("type");
         const playerCount = Number(sessionStorage.getItem("player_count")) || 0;
+        const mode = sessionStorage.getItem("gameMode");
 
         const send_dict = {
             type: type,
             players: playerCount,
             abilities: abilities,
+            mode: mode,
         };
 
-        console.log("Trying to setp user with: ", send_dict);
+        console.log("Trying to setup user with: ", send_dict);
         this.sendMessage(send_dict);
     }
 

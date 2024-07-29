@@ -432,18 +432,21 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
     private _elixir: number = 0;
     private elixirCapacity: number;
     private elixirBar: Phaser.GameObjects.Graphics;
-    private barWidth: number = 30;
-    private barPadding: number = 10;
+    private barWidth: number = 20;
+    private barPadding: number = 5;
+    private bar_color: readonly [number, number, number];
 
     constructor(
         scene: Phaser.Scene,
         abilities: { [key: number]: ElixirAbility },
         events: { [key: number]: Event },
         capacity: number,
+        bar_color: readonly [number, number, number]
     ) {
         super(scene, abilities, events);
         this.elixirCapacity = capacity;
         this._elixir = 0;
+        this.bar_color = bar_color;
 
         // Create the elixir bar
         this.elixirBar = scene.add.graphics();
@@ -481,8 +484,29 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
 
         // Draw filled portion
         const fillHeight = (this._elixir / this.elixirCapacity) * barHeight;
-        this.elixirBar.fillStyle(0x00ff00);
+        this.elixirBar.fillStyle(phaserColor(this.bar_color));
         this.elixirBar.fillRect(barX, barY + barHeight - fillHeight, this.barWidth, fillHeight);
+
+        // Draw section dividers
+        const sectionHeight = barHeight / this.elixirCapacity;
+        const dividerThickness = 1;
+        const dividerSpacing = 1;
+
+        for (let i = 1; i < this.elixirCapacity; i++) {
+            const dividerY = barY + barHeight - i * sectionHeight;
+
+            // Draw first black line
+            this.elixirBar.fillStyle(0x000000);
+            this.elixirBar.fillRect(barX, dividerY - dividerThickness, this.barWidth, dividerThickness);
+
+            // Draw white space/line
+            this.elixirBar.fillStyle(0xFFFFFF);
+            this.elixirBar.fillRect(barX, dividerY - dividerThickness + dividerSpacing, this.barWidth, dividerThickness);
+
+            // Draw second black line
+            this.elixirBar.fillStyle(0x000000);
+            this.elixirBar.fillRect(barX, dividerY - dividerThickness + 2 * dividerSpacing, this.barWidth, dividerThickness);
+        }
 
         // Draw border
         this.elixirBar.lineStyle(2, 0x000000);

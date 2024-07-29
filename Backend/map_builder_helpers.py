@@ -89,5 +89,5 @@ def starter_capitals(nodes, settings):
                 return_nodes.append(node)
     return return_nodes
 
-def just_remove_lonely_nodes(nodes):
+def just_remove_lonely_nodes(nodes, settings):
     return [node for node in nodes if len(node.edges) > 0]

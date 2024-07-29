@@ -143,7 +143,7 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        outsider_choose_starter_ports(nodes, settings["ports_percentage"])
+        outsider_choose_starter_ports(nodes, settings["port_percentage"])
         nodes = self.starter_states_and_removal(settings["starting_structures"])(nodes, settings)
 
         self.edge_objects = edges

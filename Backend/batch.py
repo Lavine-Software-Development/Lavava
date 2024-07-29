@@ -30,7 +30,7 @@ class Batch:
         self.tick_dict = dict()
 
     def getSettings(self):
-        url = config.USER_BACKEND_URL + '/get_settings/' + self.mode
+        url = config.USER_BACKEND_URL + 'settings/' + self.mode
         try:
             return requests.get(url).json()
         except Exception as e:
@@ -135,7 +135,6 @@ class Batch:
         start_dict = self.game.start_json
         start_dict["player_count"] = self.player_count
         start_dict["player_id"] = player_id
-        start_dict["abilities"] = json_abilities.start_json(self.settings)
         start_dict['isFirst'] = True
         start_dict["mode"] = self.mode
         start_dict["settings"] = self.settings
@@ -179,13 +178,13 @@ class Batch:
     def ability_process(self, player, data):
         data = convert_keys_to_int(data)
         if self.settings["forced_deck"]:
-            self.game.set_abilities(player, self.settings["deck"])
+            self.game.set_abilities(player, self.settings["deck"], self.settings)
             return True
         elif json_abilities.validate_ability_selection(data, self.settings):
-            self.game.set_abilities(player, data)
+            self.game.set_abilities(player, data, self.settings)
             return True
         else:
-            self.game.set_abilities(player, {})
+            self.game.set_abilities(player, {}, self.settings)
             return 
 
     def process(self, token, data): 

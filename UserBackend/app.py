@@ -709,23 +709,24 @@ CANNON_CODE = 101
 PUMP_CODE = 117
 MINI_BRIDGE_CODE = 109
     
-@app.route('/settings/royale', methods=['GET'])
+@app.route('/settings/Royale', methods=['GET'])
 def get_royale_settings():
     settings = {
         "ability_type": "elixir",
         "elixir_cap": 7,
-        "port_percentage": 0.5,
+        "elixir_rate": 4.5,
+        "port_percentage": 2/3,
         "starting_structures": False,
         "nuke_type": "neighbor",
         "bridge_burn": False,
         "bridge_from_port_needed": True,
         "deck_size": 5,
         "forced_deck": True,
-        "deck": {FREEZE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, RAGE_CODE, NUKE_CODE}
+        "deck": [FREEZE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, RAGE_CODE, NUKE_CODE]
     }
     return jsonify(settings)
 
-@app.route('/settings/og', methods=['GET'])
+@app.route('/settings/Original', methods=['GET'])
 def get_og_settings():
     settings = {
         "ability_type": "credits",
@@ -742,7 +743,7 @@ def get_og_settings():
     }
     return jsonify(settings)
     
-@app.route('/abilities/royale', methods=['GET'])
+@app.route('/abilities/Royale', methods=['GET'])
 def get_royale_abilities():
     abilities = [
         {
@@ -774,7 +775,7 @@ def get_royale_abilities():
     ]
     return jsonify({"abilities": abilities, "options": 5})
     
-@app.route('/abilities/og', methods=['GET'])
+@app.route('/abilities/Original', methods=['GET'])
 def get_og_abilities():
     abilities = [
         {

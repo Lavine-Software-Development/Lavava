@@ -20,7 +20,7 @@ const DeckBuilder: React.FC = () => {
     useEffect(() => {
         const fetchAbilities = async () => {
             try {
-                const response = await fetch(`${config.userBackend}/abilities/og`);
+                const response = await fetch(`${config.userBackend}/abilities/Original`);
                 const data = await response.json();
                 if (response.ok) {
                     setAbilities(data.abilities);

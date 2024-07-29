@@ -11,8 +11,6 @@ from ae_validators import make_effect_validators
 from event import Event
 import sys
 
-player_types = {"credits": CreditPlayer, "elixir": RoyalePlayer}
-
 class ServerGame(JsonableTick):
     def __init__(self, player_count, gs, settings):
 
@@ -21,16 +19,21 @@ class ServerGame(JsonableTick):
         self.extra_info = []
         self.counts = [0] * player_count
         self.board = Board(self.gs)
-        self.player_dict = {
-            i: player_types[settings["ability_type"]](i) for i in range(player_count)
-        }
+        if settings["ability_type"] == "credits":
+            self.player_dict = {
+                i: CreditPlayer(i) for i in range(player_count)
+            }
+        else:
+            self.player_dict = {
+                i: RoyalePlayer(i, settings['elixir_cap'], settings['elixir_rate']) for i in range(player_count)
+            }
 
         start_values = {'board'}
         tick_values = {'countdown_timer', 'gs', 'extra_info', 'counts'}
         recurse_values = {'board'}
         super().__init__('game', start_values, recurse_values, tick_values)
 
-        self.restart()
+        self.restart(settings)
 
     @property
     def countdown_timer(self):
@@ -82,7 +85,7 @@ class ServerGame(JsonableTick):
         map_builder.build(settings)
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
 
-        self.ability_effects = make_ability_effects(self.board)
+        self.ability_effects = make_ability_effects(self.board, settings)
         self.events = self.make_events_dict()
 
         

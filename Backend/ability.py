@@ -65,11 +65,16 @@ class RoyaleAbility(AbstractAbility):
 
     def create_attributes(self):
         # Updated occasionally so the percentage is only checked on whole numbers. Same way elixir works
-        self.chop = True
+        self.chop = 0
 
     @property
     def counter(self):
         return self.player.elixir
     
     def update(self):
-        self.chop = not self.chop
+        self.chop += 1
+
+    def use(self, data):
+        super().use(data)
+        self.player.elixir -= self.in_game_cost
+        print(self.player.elixir)

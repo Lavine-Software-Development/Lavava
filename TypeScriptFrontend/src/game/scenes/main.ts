@@ -9,6 +9,7 @@ import {
     EventCodes,
     PRE_STRUCTURE_RANGES,
     AbilityCredits,
+    AbilityElixir,
     AbilityReloadTimes,
     PlayerColors,
     NUKE_OPTION_STRINGS,
@@ -16,9 +17,9 @@ import {
     MINI_BRIDGE_RANGE,
 } from "../objects/constants";
 import { PlayerStateEnum as PSE, GameStateEnum as GSE } from "../objects/enums";
-import { AbstractAbility, CreditAbility } from "../objects/ReloadAbility";
+import { AbstractAbility, CreditAbility, ElixirAbility } from "../objects/ReloadAbility";
 import { Event } from "../objects/event";
-import { AbstractAbilityManager, CreditAbilityManager } from "../objects/abilityManager";
+import { AbstractAbilityManager, CreditAbilityManager, ElixirAbilityManager } from "../objects/abilityManager";
 import { OtherPlayer } from "../objects/otherPlayer";
 import { MyCreditPlayer, MyElixirPlayer } from "../objects/myPlayer";
 import {
@@ -183,16 +184,53 @@ export class MainScene extends Scene {
             this.getEdges.bind(this)
         );
         const events: { [key: number]: Event } = {};
+        Object.values(EventCodes).forEach((eb: number) => {
+            events[eb] = new Event(
+                VISUALS[eb],
+                EVENTS[eb][0],
+                EVENTS[eb][1],
+                ev[eb]
+            );
+        });
 
         let y_position = 20;
-        const squareSize = 150; // Size of each square
         const spacing = 15; // Spacing between squares
-        const unaltered_x_position = this.scale.width - squareSize;
 
-        if (this.mode == "royale") {
-            //... make royale ability Manager
+        if (this.mode == "Royale") {
+            const squareSize = 600 / this.settings.deck.length; // Size of each square
+            const unaltered_x_position = this.scale.width - squareSize;
+            const abilities: { [key: number]: ElixirAbility } = {};
+        
+            this.settings.deck.forEach((abilityCode: number) => {
+                abilities[abilityCode] = new ElixirAbility(
+                    VISUALS[abilityCode] as AbilityVisual,
+                    CLICKS[abilityCode][0],
+                    CLICKS[abilityCode][1],
+                    ab[abilityCode],
+                    AbilityElixir[abilityCode], // Assuming this exists, replace with actual elixir cost
+                    abilityCode,
+                    unaltered_x_position,
+                    y_position,
+                    this,
+                    squareSize
+                );
+        
+                y_position += squareSize + spacing;
+            });
+        
+            this.abilityManager = new ElixirAbilityManager(
+                this,
+                abilities,
+                events,
+                this.settings.elixir_cap,
+                this.mainPlayer.color
+            );
         }
         else {
+
+            const squareSize = 150; // Size of each square
+            const unaltered_x_position = this.scale.width - squareSize;
+
             const abilities: { [key: number]: CreditAbility } = {};
             Object.entries(this.abilityCounts).forEach(([abk, count]) => {
                 // abk here is the ability code (converted from the name via NameToCode)
@@ -207,22 +245,13 @@ export class MainScene extends Scene {
                     AbilityReloadTimes[abilityCode],
                     abilityCode,
                     count, // Use the count from abilityCounts
-                    1,
                     unaltered_x_position,
                     y_position,
-                    this
+                    this,
+                    squareSize
                 );
     
                 y_position += squareSize + spacing;
-            });
-
-            Object.values(EventCodes).forEach((eb: number) => {
-                events[eb] = new Event(
-                    VISUALS[eb],
-                    EVENTS[eb][0],
-                    EVENTS[eb][1],
-                    ev[eb]
-                );
             });
 
             this.abilityManager = new CreditAbilityManager(this, abilities, events, y_position + spacing);
@@ -393,7 +422,7 @@ export class MainScene extends Scene {
             }
         }
 
-        if (this.ps === PSE.PLAY && this.mode === "original") {
+        if (this.ps === PSE.PLAY && this.mode === "Original") {
             let manager = this.abilityManager as CreditAbilityManager;
             let ability = manager.triangle_validate(position);
             if (ability) {
@@ -494,7 +523,7 @@ export class MainScene extends Scene {
         this.settings = startData.settings;
         this.mode = startData.mode;
         
-        if (this.mode === "royale") {
+        if (this.mode === "Royale") {
             this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
         } else {
             this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
@@ -568,12 +597,12 @@ export class MainScene extends Scene {
                         let manager = this.abilityManager as CreditAbilityManager;
                         manager.credits = new_data["player"]["credits"];
                     }
-                } else if ('elixir' in new_data["player"]) {
+                } else if ('a_elixir' in new_data["player"]) {
                     let mainPlayer = this.mainPlayer as MyElixirPlayer;
-                    if (new_data["player"]["elixir"] !== mainPlayer.elixir) {
-                        mainPlayer.elixir = new_data["player"]["elixir"];
+                    if (new_data["player"]["a_elixir"] !== mainPlayer.elixir) {
+                        mainPlayer.elixir = new_data["player"]["a_elixir"];
                         let manager = this.abilityManager as ElixirAbilityManager;
-                        manager.elixir = new_data["player"]["elixir"];
+                        manager.elixir = new_data["player"]["a_elixir"];
                     }
                 }
 

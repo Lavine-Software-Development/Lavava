@@ -19,6 +19,12 @@ const Home: React.FC = () => {
     const [friendlyMode, setFriendlyMode] = useState<string>(
         sessionStorage.getItem("friendlyMode") || "join"
     );
+    const [gameMode, setGameMode] = useState(() => {
+        const savedGameMode = sessionStorage.getItem("gameMode");
+        return savedGameMode || "Original";
+    });
+    const [gameModeDropdownOpen, setGameModeDropdownOpen] = useState<boolean>(false);
+    const gameModeDropdownRef = useRef<HTMLDivElement>(null);
     const [showInvalidCodePopup, setShowInvalidCodePopup] = useState(false);
 
     useEffect(() => {
@@ -76,7 +82,21 @@ const Home: React.FC = () => {
         if (storedFriendlyMode) {
             setFriendlyMode(storedFriendlyMode);
         }
+        const storedGameMode = sessionStorage.getItem("gameMode");
+        if (storedGameMode) {
+            setGameMode(storedGameMode);
+        }
     }, []);
+
+    const handleGameModeDropdownFocus = () => {
+        setGameModeDropdownOpen(!gameModeDropdownOpen);
+    };
+    
+    const handleGameModeChange = (mode: string) => {
+        setGameMode(mode);
+        sessionStorage.setItem("gameMode", mode);
+        setGameModeDropdownOpen(false);
+    };
 
     const hostTab = (e: number) => {
         setPlayerCount(e);
@@ -142,6 +162,14 @@ const Home: React.FC = () => {
         }
 
         if (
+            gameModeDropdownOpen &&
+            gameModeDropdownRef.current &&
+            !gameModeDropdownRef.current.contains(e.target as Node)
+        ) {
+            setGameModeDropdownOpen(false);
+        }
+
+        if (
             playerCountDropdownOpen &&
             playerCountDropdownRef.current &&
             !playerCountDropdownRef.current.contains(e.target)
@@ -167,7 +195,7 @@ const Home: React.FC = () => {
         return () => {
             window.removeEventListener("click", handleClickOutsideDropdown);
         };
-    }, [playDropdownOpen, playerCountDropdownOpen]);
+    }, [gameModeDropdownOpen, playDropdownOpen, playerCountDropdownOpen]);
 
     const handleClosePopups = () => {
         setShowSalaryPopup(false);
@@ -184,6 +212,7 @@ const Home: React.FC = () => {
         setFriendlyMode("join");
         sessionStorage.setItem("friendlyMode", "join");
     };
+    
 
     return (
         <div className="dashboard-container" id="home">
@@ -330,6 +359,24 @@ const Home: React.FC = () => {
                                             </ul>
                                         )}
                                     </div>
+                                    <div
+                                        className="player-count-drop-down-container"
+                                        ref={gameModeDropdownRef}
+                                    >
+                                        <button onClick={handleGameModeDropdownFocus}>
+                                            {gameMode} Mode
+                                        </button>
+                                        {gameModeDropdownOpen && (
+                                            <ul>
+                                                <li onClick={() => handleGameModeChange("Original")}>
+                                                    Original
+                                                </li>
+                                                <li onClick={() => handleGameModeChange("Royale")}>
+                                                    Royale
+                                                </li>
+                                            </ul>
+                                        )}
+                                    </div>
                                     <button
                                         className="btn"
                                         style={{ backgroundColor: "green" }}
@@ -410,6 +457,24 @@ const Home: React.FC = () => {
                                                 {count}
                                             </li>
                                         ))}
+                                    </ul>
+                                )}
+                            </div>
+                            <div
+                                className="player-count-drop-down-container"
+                                ref={gameModeDropdownRef}
+                            >
+                                <button onClick={handleGameModeDropdownFocus}>
+                                    {gameMode} Mode
+                                </button>
+                                {gameModeDropdownOpen && (
+                                    <ul>
+                                        <li onClick={() => handleGameModeChange("Original")}>
+                                            Original
+                                        </li>
+                                        <li onClick={() => handleGameModeChange("Royale")}>
+                                            Royale
+                                        </li>
                                     </ul>
                                 )}
                             </div>
