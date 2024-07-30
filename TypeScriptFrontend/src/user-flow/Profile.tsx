@@ -202,7 +202,7 @@ const Profile: React.FC = () => {
                         <p>No recent games played.</p>
                     )}
                     <div className="button-container">
-                        <button className="match-history-btn" onClick={handleMatchHistoryClick}>Match History</button>
+                        <button className="match-history-btn" onClick={handleMatchHistoryClick}>Match History</button
                     </div>
                 </div>
             </div>
