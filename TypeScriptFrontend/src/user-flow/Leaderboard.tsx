@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import '../../styles/style.css';
 import config from '../env-config';
+import { abilityColors } from "../user-flow/ability_utils";
 
 interface Player {
     userName: string;
@@ -84,13 +85,21 @@ const Leaderboard: React.FC = () => {
                             <p><strong>Username:</strong> {selectedUser.username}</p>
                         )}
                         <p><strong>ELO:</strong> {selectedUser.elo}</p>
-                        <h3>Deck:</h3>
                         {selectedUser.deck && selectedUser.deck.length > 0 ? (
-                            <ul>
+                            <div className="abilities-container-leaderboard">
                                 {selectedUser.deck.map((card, index) => (
-                                    <li key={index}>{card.name}: {card.count}</li>
+                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[card.name] }}>
+                                    <div className="ability-icon">
+                                    <img
+                                        src={`./assets/abilityIcons/${card.name}.png`}
+                                        alt={card.name}
+                                        className="ability-img"
+                                    />
+                                    </div>
+                                    <div className="ability-count">{card.count}</div>
+                                </div>
                                 ))}
-                            </ul>
+                            </div>
                         ) : (
                             <p>No deck information available</p>
                         )}

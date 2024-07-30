@@ -1,4 +1,3 @@
-
 from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED, FORFEIT_AND_LEAVE_CODE
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
@@ -9,6 +8,10 @@ from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, jso
 import requests
 from pympler import asizeof
 import json
+from config import config
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Batch:
     def __init__(self, count, mode, token, websocket, ability_data):
@@ -21,6 +24,7 @@ class Batch:
         self.mode = mode
         self.gs = GameState()
         self.game = ServerGame(self.player_count, self.gs)
+        self.token_disname = {} #just the display names to be displayed on the front end
         self.not_responsive_count = {}
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
@@ -30,7 +34,7 @@ class Batch:
         print(f"Player {player_id} did not respond {self.not_responsive_count[player_id]} times")
     
     def still_send(self, player_id):
-        return self.not_responsive_count[player_id] < 30
+        return self.not_responsive_count[player_id] < 40
         # the frontend sends a message every 1 second to ensure connectivity, and reconnects if lost
         # There are 10 ticks a second, meaning if it hasn't tried to reconnect after 15 ticks (1.5 seconds), it's gone
 
@@ -40,9 +44,14 @@ class Batch:
         connection_ranks = [item[0] for item in sorted(connection_ranks, key=lambda x: x[1])]
         # this ends up as player token, player id, in order of rank
 
-        url = 'http://localhost:5001/save_game'
+        url = config.USER_BACKEND_URL + '/save_game'
+        # url = 'http://172.17.0.2:5001/elo' comment out for local testing
         data = {"ordered_players": connection_ranks}
-        response = requests.post(url, json=data)
+        try:
+            response = requests.post(url, json=data)
+        except Exception as e:
+            print(e)
+            return
         
         if response.status_code == 200:
             try:
@@ -55,14 +64,31 @@ class Batch:
         else:
             print(f"Request failed with status code {response.status_code}: {response.text}")
 
+
+    def set_token_to_display_name(self, token):
+        # url = 'http://localhost:5001/get_display_name'
+        url = config.USER_BACKEND_URL + '/get_display_name'
+        data = {"token": token}
+        response = requests.post(url, json=data)
+
+        data = response.json()
+        display_name = data.get('display_name')
+
+        self.token_disname[token] = display_name
+        print(f"Display name set to: {display_name}")
+        return display_name
+        
     def add_player(self, token, websocket, ability_data):
+
         player_id = len(self.token_ids)
         if self.ability_process(player_id, ability_data):
             self.token_ids[token] = player_id
             self.id_sockets[player_id] = websocket
             self.not_responsive_count[player_id] = 0
+            self.set_token_to_display_name(token)
             return False
         else:
+            print(f"Invalid ability selection for player with token: {token[:10]}...")
             return "CHEATING: INVALID ABILITY SELECTION"
         
     def remove_player_from_lobby(self, token):
@@ -74,8 +100,11 @@ class Batch:
 
     def remove_player_from_game(self, id):
         self.id_sockets.pop(id)
-        self.game.eliminate(id)
-        print("Player has left")
+        if id in self.game.remaining:
+            print("Player has left")
+            self.game.eliminate(id)
+        else:
+            print("Player has already left")
 
     def reconnect_player(self, token, websocket):
         player_id = self.token_ids[token]
@@ -84,6 +113,7 @@ class Batch:
         game_dict = self.game.full_tick_json
         game_dict["player"] = self.player_tick_repr(player_id)
         game_dict["isFirst"] = False
+        game_dict["isRefresh"] = True
         return plain_json(game_dict)
         
     def start(self):
@@ -99,6 +129,8 @@ class Batch:
         start_dict["player_id"] = player_id
         start_dict["abilities"] = json_abilities.start_json()
         start_dict['isFirst'] = True
+        start_dict["display_names_list"] = list(self.token_disname.values())
+        start_dict["isRefresh"] = False
         start_json = plain_json(start_dict)
         return start_json
     
@@ -113,6 +145,7 @@ class Batch:
         if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {} and self.mode == "LADDER":
             self.tick_dict["new_elos"] = self.elo_changes[player_id]
         self.tick_dict["isFirst"] = False
+        self.tick_dict["isRefresh"] = False
         tick_json = plain_json(self.tick_dict)
         return tick_json
 
@@ -123,7 +156,6 @@ class Batch:
         return self.game.player_dict[player_id].tick_json
     
     def tick(self):
-        # print(self.game.gs.value, GS.START_SELECTION.value)
 
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
@@ -156,12 +188,9 @@ class Batch:
         #     self.game.eliminate(player_id)
         #     self.has_left[player_id] = True
         elif key in ALL_ABILITIES:
-            print("ABILITY")
             self.game.effect(key, player_id, data['items'])
         elif key in EVENTS:
-            print("EVENT")
             self.game.event(key, player_id, data['items'])
         else:
             print("NOT ALLOWED")
-        print("Done processing")
         

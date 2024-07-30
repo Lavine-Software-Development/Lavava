@@ -3,11 +3,13 @@ from typing import Optional
 from ability import ReloadAbility
 from constants import (
     GREY,
-    CAPITAL_WIN_COUNT,
     START_MONEY,
     START_MONEY_RATE,
     CAPITAL_BONUS,
     BREAKDOWNS,
+    KILL_BONUS,
+    OVERTIME_BONUS,
+    START_CREDITS
 )
 from ae_validators import make_ability_validators
 from player_state import PlayerState
@@ -17,17 +19,30 @@ class DefaultPlayer(JsonableTick):
     def __init__(self, id):
 
         recurse_values = {'abilities'}
-        tick_values = {'ps'}
+        tick_values = {'ps', 'credits'}
         # tick_values = {'ps', 'count'}
         super().__init__(id, set(), recurse_values, tick_values)
 
         self.default_values()
+
+    def killed_event(self, player):
+        self.killer = player
+        player.kill_bonus()
+
+    def kill_bonus(self):
+        self.credits += KILL_BONUS
+
+    def overtime_bonus(self):
+        self.credits += OVERTIME_BONUS
 
     def set_abilities(self, chosen_abilities, ability_effects, board):
         validators = make_ability_validators(board, self)
 
         for ab in chosen_abilities:
             self.abilities[ab] = ReloadAbility(ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].reload, self, chosen_abilities[ab])
+
+        leftover = START_CREDITS - sum(BREAKDOWNS[ab].credits * self.abilities[ab].remaining for ab in chosen_abilities)
+        self.credits += leftover
 
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
@@ -36,11 +51,12 @@ class DefaultPlayer(JsonableTick):
             print("failed to use ability, ", key)
 
     def default_values(self):
+        self.killer = None
         self.count = 0
         self.abilities = dict()
         self.ps = PlayerState()
         self.rank = 0
-        self.full_capital_count = 0
+        self.credits = 0
 
     def eliminate(self, rank):
         self.rank = rank
@@ -64,9 +80,6 @@ class DefaultPlayer(JsonableTick):
 
     def capital_handover(self, gain):
         pass
-
-    def check_capital_win(self):
-        return self.full_capital_count == CAPITAL_WIN_COUNT
 
 
 class MoneyPlayer(DefaultPlayer):

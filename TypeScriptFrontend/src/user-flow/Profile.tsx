@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
 import { Link, useNavigate } from 'react-router-dom';
 import config from '../env-config';
+import { abilityColors } from "../user-flow/ability_utils";
 
 interface PlayerData {
     username: string;
@@ -171,13 +172,23 @@ const Profile: React.FC = () => {
             </div>
             <div className="info-cards">
                 <div className="info-card linear-gradient">
-                    <h2 className="text-shadow">Default Deck</h2>
-                    {profileData.abilities.map((item, index) => (
-                        <p className="whiteText" key={index}>{item.count} {item.name}</p>
-                    ))}
+                <h2 className="text-shadow default-deck-text">Default Deck</h2>
+                <div className="abilities-container-profile">
+                {profileData.abilities.map((item, index) => (
+                    <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
+                    <div className="ability-icon">
+                        <img
+                        src={`./assets/abilityIcons/${item.name}.png`}
+                        alt={item.name}
+                        className="ability-img"
+                        />
+                    </div>
+                    <div className="ability-count">{item.count}</div>
+                    </div>
+                ))}
                 </div>
                 <div className="info-card linear-gradient">
-                    <h2><span className="text-shadow">ELO:</span> <span className="elo-value">{profileData.elo}</span></h2>
+                    <h2><span className="text-shadow elo-text">ELO:</span> <span className="elo-value">{profileData.elo}</span></h2>
                     <h2 className="text-shadow">Most Recent Ladder Game</h2>
                     {profileData.last_game ? (
                         <div className="game-history-item">
@@ -205,8 +216,12 @@ const Profile: React.FC = () => {
                         <button className="match-history-btn" onClick={handleMatchHistoryClick}>Match History</button>
                     </div>
                 </div>
+                {profileData.past_games.map((position, index) => (
+                    <p key={index}>Game {index + 1}: {position}</p>
+                ))}
             </div>
         </div>
+    </div>
     );
 };
 

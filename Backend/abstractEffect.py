@@ -21,11 +21,16 @@ class AbstractSpreadingEffect(AbstractEffect):
         super().__init__(expiry_time, effect_type)
         self.incubation_timer = incubation_timer
 
+    @property
     def past_incubation(self):
         return self.counter > self.incubation_timer
 
     @abstractmethod
-    def can_spread(self, killed, new_owner):
+    def can_spread(self, killed, new_owner) -> bool:
+        pass
+
+    @abstractmethod
+    def capture_removal(self, player) -> bool:
         pass
 
     def spread(self):

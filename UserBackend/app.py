@@ -1,4 +1,8 @@
+import os
+import re
+from mailjet_rest import Client
 import jwt
+import os
 import datetime
 import json
 from flask import Flask, jsonify, request, url_for
@@ -14,15 +18,23 @@ from sqlalchemy import or_, desc, func
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from sqlalchemy.types import Text
 from dotenv import load_dotenv
+import boto3
+from botocore.exceptions import ClientError
 load_dotenv()
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__) 
+CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
+EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
 
 if config.DB_CONNECTED:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
+    db_path = os.path.join('/app/game_data', 'game.db')
+    if config.ENV == "PROD":
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db = SQLAlchemy(app)
@@ -95,7 +107,7 @@ app.config['MAIL_USERNAME'] = 'lavavaacc@gmail.com'
 app.config['MAIL_PASSWORD'] = 'enwueidxiwivjvxn'  # Use the app password you generated
 mail = Mail(app)
 
-s = URLSafeTimedSerializer(app.config['SECRET_KEY']) # serializer
+s = URLSafeTimedSerializer(app.config['SECRET_KEY']) 
 
 def token_required(f):
     @wraps(f)
@@ -124,10 +136,26 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     
     return decorated
+@app.after_request
 
+def after_request(response):
+    # Get the origin of the request
+    origin = request.headers.get('Origin')
 
+    # List of allowed origins
+    allowed_origins = ["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"]
+
+    # Add CORS headers only if the request's origin is in the allowed list
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
+    
+    return response
 @app.route('/login', methods=['POST'])
 def login():
+    if request.method == 'OPTIONS':
+        return '', 200  # CORS preflight request
     data = request.json
     login_identifier = data.get('username').lower()  # This could be either username or email
     password = data.get('password')
@@ -139,10 +167,10 @@ def login():
         if login_identifier.lower() in ('default', 'other'):
             token = jwt.encode({
                 'user': login_identifier,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)  # Token expires in 24 hours
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72),  # Token expires in 72 hours
+                'display_name': login_identifier  # For non-DB users, use login identifier as display name
             }, app.config['SECRET_KEY'], algorithm="HS256")
             return jsonify({"token": token}), 200
-    
         return jsonify({"message": "Invalid credentials"}), 401
 
     user = User.query.filter(
@@ -160,11 +188,10 @@ def login():
     token = jwt.encode({
         'user_id': user.id,
         'user': user.username,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30)
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
     }, app.config['SECRET_KEY'], algorithm="HS256")
 
     return jsonify({"token": token}), 200
-
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -193,8 +220,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail)".format(email)}), 200
-
+    return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail). Note that it can take a while for emails to deliver. ".format(email)}), 200
 
 @app.route('/confirm_email/<token>')
 def confirm_email(token):
@@ -212,18 +238,6 @@ def confirm_email(token):
         db.session.commit()
     return '<h1>Email Confirmed!</h1><p>Proceed to login page to login.</p>' 
 
-#  sending email for registration
-def send_confirmation_email(user_email, link):
-    msg = Message("Email Confirmation!",
-                  sender='lavavaacc@gmail.com',
-                  recipients=[user_email])
-    msg.body = 'Follow the link to confirm your account: {}'.format(link)
-    try:
-        mail.send(msg)
-        return "Email sent successfully!"
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return "Error sending email."
 
 
 @app.route('/reset_password', methods=['POST'])
@@ -252,19 +266,173 @@ def reset_password():
     else:
         return jsonify({"success": False, "message": "Database connection error"}), 500
 
+def send_mailjet_email(to_email, to_name, subject, text_content, html_content=None, cc_email=None):
+    mailjet = Client(auth=(config.MJ_APIKEY_PUBLIC, config.MJ_APIKEY_PRIVATE), version='v3.1')
+    message = {
+        "From": {
+            "Email": config.EMAIL_FROM,
+            "Name": "Durb Game"
+        },
+        "To": [
+            {
+                "Email": to_email,
+                "Name": to_name
+            }
+        ],
+        "Subject": subject,
+        "TextPart": text_content,
+        "HTMLPart": html_content if html_content else None
+    }
+    
+    if cc_email:
+        message["Cc"] = [{"Email": cc_email}]
+    
+    data = {'Messages': [message]}
+    result = mailjet.send.create(data=data)
+    return result.status_code, result.json()
+
+
+def send_confirmation_email(user_email, link):
+    subject = "Confirm Your Durb Game Account"
+    text_content = f'''Welcome to Durb Game!
+
+    Please confirm your account by clicking the following link:
+    {link}
+
+    If you didn't create an account with us, you can safely ignore this email.
+
+    Best regards,
+    The Durb Game Team'''
+
+    html_content = f'''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirm Your Durb Game Account</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            .container {{
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 20px;
+            }}
+            .button {{
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 15px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Welcome to Durb Game!</h2>
+            <p>Thank you for creating an account with us. To get started, please confirm your email address by clicking the button below:</p>
+            <a href="{link}" class="button">Confirm Your Account</a>
+            <p>If the button doesn't work, you can also copy and paste the following link into your browser:</p>
+            <p>{link}</p>
+            <p>If you didn't create an account with us, you can safely ignore this email.</p>
+            <p>Best regards,<br>The Durb Game Team</p>
+        </div>
+    </body>
+    </html>
+    '''
+    
+    status_code, response = send_mailjet_email(user_email, user_email, subject, text_content, html_content)
+    
+    if status_code == 200:
+        return "Confirmation email sent successfully!"
+    else:
+        print(f"Failed to send confirmation email: {response}")
+        return "Error sending confirmation email."
 
 def send_reset_email(user_email, link):
-    msg = Message("Reset Password - Ignore if not requested!",
-                  sender='lavavaacc@gmail.com',
-                  recipients=[user_email])
-    msg.body = 'IGNORE AND DO NOT CLICK THE LINK BELOW if you did not request to change your password.\n\nIf you did request a password reset follow the link to confirm your password reset: {} \nThis link will expire in 5 minutes.'.format(link)
-    try:
-        mail.send(msg)
-        return "Email sent successfully!"
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return "Error sending email."
+    subject = "Reset Your Durb Game Password"
+    text_content = f'''You have requested to reset your Durb Game password.
+
+    To reset your password, please click on the following link:
+    {link}
+
+    This link will expire in 5 minutes.
+
+    If you didn't request a password reset, please ignore this email. Your account remains secure.
+
+    Best regards,
+    The Durb Game Team'''
+
+    html_content = f'''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Durb Game Password</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            .container {{
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 20px;
+            }}
+            .button {{
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 15px;
+            }}
+            .warning {{
+                color: #ff0000;
+                font-weight: bold;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Reset Your Durb Game Password</h2>
+            <p>You have requested to reset your Durb Game password.</p>
+            <p>To reset your password, please click the button below:</p>
+            <a href="{link}" class="button">Reset Password</a>
+            <p>If the button doesn't work, you can also copy and paste the following link into your browser:</p>
+            <p>{link}</p>
+            <p><strong>This link will expire in 5 minutes.</strong></p>
+            <p class="warning">If you didn't request a password reset, please ignore this email. Your account remains secure.</p>
+            <p>Best regards,<br>The Durb Game Team</p>
+        </div>
+    </body>
+    </html>
+    '''
     
+    status_code, response = send_mailjet_email(user_email, user_email, subject, text_content, html_content)
+    
+    if status_code == 200:
+        return "Password reset email sent successfully!"
+    else:
+        print(f"Failed to send password reset email: {response}")
+        return "Error sending password reset email."
 
 @app.route('/confirm_password_reset/<token>')
 def confirm_password_reset(token):
@@ -404,17 +572,19 @@ def send_email():
 
     if not user_email or not message_body:
         return jsonify({"error": "Missing userEmail or message"}), 400
-
-    msg = Message(
-        subject="New Message from Contact Form",
-        sender='lavavaacc@gmail.com',
-        recipients=['lavine.software@gmail.com'],
-        cc=[user_email],
-        body=message_body
-    )
+    
+    if not re.match(EMAIL_REGEX, user_email):
+        return jsonify({"error": "Invalid email format"}), 400
 
     try:
-        mail.send(msg)
+        # Send email to the main recipient with CC to the user
+        send_mailjet_email(
+            to_email='lavine.software@gmail.com',
+            to_name="Lavine Software",
+            subject="New Message from Contact Form",
+            text_content=message_body,
+            cc_email=user_email
+        )
         return jsonify({"success": "Email sent successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -531,7 +701,33 @@ def token_to_username(token: str):
         return 'Expired token'
     except jwt.InvalidTokenError:
         return 'Invalid token'
-
+    
+# get user's display name
+@app.route('/get_display_name', methods=['POST'])
+def get_display_name():
+    data = request.json
+    token = data.get('token')
+    
+    if not token:
+        return jsonify({"display_name": "guest"})
+    
+    try:
+        decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        username = decoded['user']
+        
+        if config.DB_CONNECTED:
+            user = User.query.filter_by(username=username).first()
+            if user:
+                if user.display_name != "Not Yet Specified":
+                    return jsonify({"display_name": user.display_name})
+                else:
+                    return jsonify({"display_name": user.username})
+        else:
+            return jsonify({"display_name": username})
+        
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return jsonify({"display_name": "guest"})
+    
 def username_to_elo(name: str):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=name).first()
@@ -544,10 +740,14 @@ def username_to_elo(name: str):
 def get_abilities():
     abilities = [
         {
-            "name": "Freeze", 
+            "name": "Bridge", 
+            "cost": 2,
+            "description": "Create a one-way bridge"
+        },
+        {
+            "name": "Mini-Bridge", 
             "cost": 1,
-            "description": "Convert edge to one-way"
-            
+            "description": "Create a two-way bridge with limited range"
         },
         {
             "name": "Spawn", 
@@ -555,38 +755,39 @@ def get_abilities():
             "description": "Claim unowned node anywhere"
         },
         {
-            "name": "Zombie", 
+            "name": "Freeze", 
             "cost": 1,
-            "description": "Big defensive Structure on node"
+            "description": "Convert edge to one-way"
+            
         },
         {
             "name": "Burn", 
             "cost": 1,
             "description": "Remove ports from node"
         },
-        {
-            "name": "Poison", 
-            "cost": 2,
-            "description": "Spreadable effect to shrink nodes"
-        },
+        # {
+        #     "name": "Zombie", 
+        #     "cost": 1,
+        #     "description": "Big defensive Structure on node"
+        # },
+        # {
+        #     "name": "Poison", 
+        #     "cost": 2,
+        #     "description": "Spreadable effect to shrink nodes"
+        # },
         {
             "name": "Rage", 
             "cost": 2,
             "description": "Increase energy transfer speed"
         },
-        {
-            "name": "D-Bridge", 
-            "cost": 2,
-            "description": "Create a two-way bridge"
-        },
-        {
-            "name": "Bridge", 
-            "cost": 2,
-            "description": "Create a one-way bridge"
-        },
+        # {
+        #     "name": "D-Bridge", 
+        #     "cost": 2,
+        #     "description": "Create a two-way bridge"
+        # },
         {
             "name": "Capital", 
-            "cost": 3,
+            "cost": 2,
             "description": "Create a capital" 
         },
         {
@@ -595,14 +796,14 @@ def get_abilities():
             "description": "Destroy node and edges (capital needed)"
         },
         {
-            "name": "Cannon", 
-            "cost": 4,
-            "description": "Shoot energy at nodes"
-        },
-        {
             "name": "Pump", 
             "cost": 3,
             "description": "Store energy to replenish abilities"
+        },
+        {
+            "name": "Cannon", 
+            "cost": 4,
+            "description": "Shoot energy at nodes"
         }
     ]
     return jsonify({"abilities": abilities, "salary": 20})
@@ -778,4 +979,10 @@ def get_match_history(current_user):
         })
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    if config.ENV == "PROD":
+        certfile = "fullchain.pem"
+        keyfile = "privkey.pem"
+        app.run( debug=False, host='0.0.0.0', port=5001,ssl_context=(certfile, keyfile))
+    else:
+        app.run( debug=False, host='0.0.0.0', port=5001)
+    

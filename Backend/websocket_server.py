@@ -4,6 +4,12 @@ import asyncio
 from batch import Batch
 import json
 import signal
+import ssl 
+import logging
+
+# Configure logging 
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 class WebSocketServer():
     def __init__(self, port):
@@ -11,183 +17,185 @@ class WebSocketServer():
         self.port = port
         self.waiting_players: dict[str, Batch] = {}
         self.running_games: dict[str, Batch] = {}  # Stores the active games with the game code as the key
+        logger.info(f"WebSocketServer initialized on port {port}")
 
     async def handler(self, websocket, path):
-        async for message in websocket:
-            print("message", message)
-            data = json.loads(message)
-            await self.process_message(websocket, data)
+        logger.info(f"New connection established from {websocket.remote_address}")
+        try:
+            async for message in websocket:
+                logger.debug(f"Received message: {message}")
+                data = json.loads(message)
+                await self.process_message(websocket, data)
+        except websockets.exceptions.ConnectionClosed:
+            logger.info(f"Connection closed for {websocket.remote_address}")
+        except json.JSONDecodeError:
+            logger.error(f"Invalid JSON received: {message}")
+        except Exception as e:
+            logger.exception(f"Error in handler: {str(e)}")
 
     def waiting_ladder_count(self, player_count):
-        # return the existence of a ladder code starting with player_count and 5 characters overall
-        # within self.waiting_players, or false if it doesn't exist
+        logger.debug(f"Checking for waiting ladder with player count: {player_count}")
         for code in self.waiting_players:
             if len(code) == 5 and code.startswith(player_count):
+                logger.info(f"Found waiting ladder: {code}")
                 return code
+        logger.info(f"No waiting ladder found for player count: {player_count}")
         return False
 
     async def process_message(self, websocket, data):
+        logger.debug(f"Processing message: {data}")
 
-        token = data["token"]
-        game_code = data["game_id"]
+        token = data.get("token")
+        game_code = data.get("game_id")
 
         if 'items' in data:
-            # print("yoooooo")
-
+            logger.info(f"Processing items for game {game_code}")
             try:
                 self.running_games[game_code].process(token, data)
             except KeyError:
-                print("Game key not found. Server needs better handling!")
+                logger.error(f"Game {game_code} not found in running games")
         elif 'action' in data:
-            if data['action'] == 'cancel_match':
+            action = data['action']
+            logger.info(f"Processing action: {action}")
+            if action == 'cancel_match':
                 await self.handle_cancel_match(token, game_code)
-            elif data['action'] == 'reconnect':
-                if game_code in self.running_games:
-                    batch = self.running_games[game_code]
-                    catch_me_up_json = batch.reconnect_player(token, websocket)
-                    await websocket.send(catch_me_up_json)
-                else:
-                    # game has ended
-                    print("recconection rejected! Game has ended")
-                    await websocket.send(json.dumps({"action": "leave_game"}))
+            elif action == 'reconnect':
+                await self.handle_reconnect(websocket, token, game_code)
         else:
-            player_type = data["type"]
-            player_count = data["players"]
-            abilities = data["abilities"]
-
-            game_code = data["game_id"]
-            if player_type == "LADDER":
-                # player_count + 4 random letters
-                if ladder_code := self.waiting_ladder_count(str(player_count)):
-                    game_code = ladder_code
-                else:
-                    game_code = str(player_count) + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
-            elif player_type == "HOST":
-                game_code = str(random.randint(1000, 9999))
-                
-            if player_type in ("HOST", "LADDER") and game_code not in self.waiting_players:
-                self.waiting_players[game_code] = Batch(int(player_count), player_type, token, websocket, abilities)
-            elif player_type in ("JOIN", "LADDER") and game_code in self.waiting_players:
-                if message := self.waiting_players[game_code].add_player(token, websocket, abilities):
-                    await self.problem(message)
-            else:
-                message = json.dumps({"game_id": "INVALID", "player_count": 0})
-                await websocket.send(message)
-                return
-            message = json.dumps({"game_id": game_code, "player_count": self.waiting_players[game_code].player_count})
-            await websocket.send(message)
-            
-            if self.waiting_players[game_code].is_ready():
-                print("Game is ready to start")
-                self.running_games[game_code] = self.waiting_players.pop(game_code)
-                print("created game with code ----------------------", game_code)
-                await self.start_game(game_code)
-            else:
-                print("Game is not ready to start")
+            await self.handle_game_setup(websocket, data)
 
     async def handle_cancel_match(self, token, game_id):
+        logger.info(f"Handling cancel match for game {game_id}")
         if game_id in self.waiting_players:
             batch = self.waiting_players[game_id]
             if len(batch.token_ids) == 1:
                 self.waiting_players.pop(game_id)
+                logger.info(f"Removed game {game_id} from waiting players")
             else:
                 batch.remove_player_from_lobby(token)
+                logger.info(f"Removed player {token} from game {game_id}")
         else:
-            print("Game not found. Can't be cancelled")
+            logger.warning(f"Game {game_id} not found. Can't be cancelled")
+
+    async def handle_reconnect(self, websocket, token, game_code):
+        logger.info(f"Handling reconnect for player {token} in game {game_code}")
+        if game_code in self.running_games:
+            batch = self.running_games[game_code]
+            catch_me_up_json = batch.reconnect_player(token, websocket)
+            await websocket.send(catch_me_up_json)
+            logger.info(f"Player {token} reconnected to game {game_code}")
+        else:
+            logger.warning(f"Reconnection rejected for game {game_code}. Game has ended")
+            await websocket.send(json.dumps({"action": "leave_game"}))
+
+    async def handle_game_setup(self, websocket, data):
+        player_type = data.get("type")
+        player_count = data.get("players")
+        abilities = data.get("abilities")
+        token = data.get("token")
+        game_code = data.get("game_id")
+
+        logger.info(f"Setting up game: Type={player_type}, Players={player_count}, Code={game_code}")
+
+        if player_type == "LADDER":
+            game_code = self.waiting_ladder_count(str(player_count)) or str(player_count) + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
+        elif player_type == "HOST":
+            game_code = str(random.randint(1000, 9999))
+
+        if player_type in ("HOST", "LADDER") and game_code not in self.waiting_players:
+            self.waiting_players[game_code] = Batch(int(player_count), player_type, token, websocket, abilities)
+            logger.info(f"Created new game: {game_code}")
+        elif player_type in ("JOIN", "LADDER") and game_code in self.waiting_players:
+            if message := self.waiting_players[game_code].add_player(token, websocket, abilities):
+                await self.problem(message)
+                logger.warning(f"Problem adding player to game {game_code}: {message}")
+            else:
+                logger.info(f"Added player {token} to game {game_code}")
+        else:
+            message = json.dumps({"game_id": "INVALID", "player_count": 0})
+            await websocket.send(message)
+            logger.warning(f"Invalid game setup attempt: Type={player_type}, Code={game_code}")
+            return
+
+        message = json.dumps({"game_id": game_code, "player_count": self.waiting_players[game_code].player_count})
+        await websocket.send(message)
+        
+        if self.waiting_players[game_code].is_ready():
+            self.running_games[game_code] = self.waiting_players.pop(game_code)
+            logger.info(f"Game {game_code} is ready to start")
+            await self.start_game(game_code)
+        else:
+            logger.info(f"Game {game_code} is not ready to start")
 
     async def send_ticks(self, batch_code: str):
+        logger.info(f"Starting tick sending for game {batch_code}")
         batch = self.running_games[batch_code]
         while not batch.done():
             batch.tick()
             for id in list(batch.id_sockets.keys()):
-                if id in batch.id_sockets:  # Check if the key still exists
+                if id in batch.id_sockets:
                     websocket = batch.id_sockets[id]
                     if batch.still_send(id):
                         try:
                             batch_json = batch.tick_repr_json(id)
                             await websocket.send(batch_json)
                         except websockets.exceptions.ConnectionClosed:
+                            # logger.warning(f"Connection closed for player {id} in game {batch_code}")
                             batch.did_not_respond(id)
                     else:
+                        logger.info(f"Removing player {id} from game {batch_code}")
                         batch.remove_player_from_game(id)
-                        # await websocket.send(json.dumps({"action": "player_left"}))
                 else:
-                    print("Player has left, but key remains, this should only happen once st most per player")
+                    logger.warning(f"Player {id} has left game {batch_code}, but key remains")
             batch.post_tick()
-
             await asyncio.sleep(0.1)
         
-        # should be its own delete function, but leaving for now due to async complexity
-        self.running_games.pop(batch_code,None)
+        logger.info(f"Game {batch_code} has ended. Removing from running games.")
+        self.running_games.pop(batch_code, None)
 
-    async def send_test_ticks(self, batch):
-        json_list = []
-        file_path = "/Users/akashilangovan/ian_game/Lavava/Backend/server_json.txt"
-        # Open the file and read line by line
-        with open(file_path, 'r') as file:
-            for line in file:
-                json_object = json.loads(line.strip())
-                json_list.append(json_object)
-        idx = 0
-        while True:
-
-
-            await asyncio.sleep(0.1)
-            # batch.tick()
-            for i, websocket in enumerate(batch.connections):
-                if True:
-                    batch_json = json_list[idx] if idx < len(json_list) else json_list[1]
-                    idx += 1
-                    # print(json.dumps(batch_json))
-                    await websocket.send(json.dumps(batch_json))
-            await asyncio.sleep(0.1)
-        
     async def start_game(self, batch_code):
+        logger.info(f"Starting game {batch_code}")
         batch = self.running_games[batch_code]
         batch.start()
         asyncio.create_task(self.send_ticks(batch_code))
 
         for id, websocket in batch.id_sockets.items():
              await websocket.send(batch.start_repr_json(id))
-        print("Sent start data to player")
-            # tasks.append(asyncio.create_task(self.threaded_client_in_game(i, websocket, batch)))
-        
-        # Wait for all tasks to complete and handle exceptions
-        # for task in tasks:
-        #     try:
-        #         await task
-        #     except Exception as e:
-        #         print(f"An exception occurred: {e}")
+        logger.info(f"Sent start data to all players in game {batch_code}")
 
     async def problem(self, message):
-        pass
+        logger.error(f"Problem occurred: {message}")
 
     def run(self):
         loop = asyncio.get_event_loop()
 
-        # Starting the server
-        start_server = websockets.serve(self.handler, self.server, self.port)
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        certfile = "fullchain.pem"
+        keyfile = "privkey.pem"
+        ssl_context.load_cert_chain(certfile=certfile, keyfile=keyfile)
+        
+        start_server = websockets.serve(self.handler, self.server, self.port, ssl=ssl_context)
         server = loop.run_until_complete(start_server)
 
-        # Print server running
-        print("Websocket server running on {}:{}".format(self.server, self.port))
+        logger.info(f"Websocket server running on {self.server}:{self.port}")
 
-        # Setup graceful shutdown
         for signame in ('SIGINT', 'SIGTERM'):
             loop.add_signal_handler(getattr(signal, signame),
                                     lambda: asyncio.ensure_future(self.shutdown(server, signame)))
-
         try:
             loop.run_forever()
+        except Exception as e:
+            logger.exception(f"Error in server main loop: {str(e)}")
         finally:
             loop.close()
+            logger.info("Server shutdown complete")
 
     async def shutdown(self, server, signame):
-        print(f"Received signal {signame}... shutting down")
+        logger.info(f"Received signal {signame}... shutting down")
         server.close()
         await server.wait_closed()
         asyncio.get_event_loop().stop()
-    
 
-server = WebSocketServer(5553)
-server.run() 
+if __name__ == "__main__":
+    server = WebSocketServer(5553)
+    server.run()

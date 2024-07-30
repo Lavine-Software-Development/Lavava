@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import '../../styles/style.css'; // Adjust path as needed
+import '../../styles/style.css';
 import config from '../env-config';
 
 const Register: React.FC = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState('');
     const [isRegistered, setIsRegistered] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         const token = localStorage.getItem('userToken');
         if (token) {
-            navigate('/home');  // Redirect to home if token exists
+            navigate('/home');
         }
     }, [navigate]);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        setMessage(''); // Clear previous message
+        setMessage('');
         setIsLoading(true);
 
         try {
@@ -56,6 +58,25 @@ const Register: React.FC = () => {
         }
     }, [isRegistered, navigate]);
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    useEffect(() => {
+        const ensureCustomIconVisibility = () => {
+            if (toggleButtonRef.current) {
+                toggleButtonRef.current.style.display = 'block';
+                toggleButtonRef.current.style.visibility = 'visible';
+                toggleButtonRef.current.style.pointerEvents = 'auto';
+            }
+        };
+
+        ensureCustomIconVisibility();
+        const intervalId = setInterval(ensureCustomIconVisibility, 1000);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
     return (
         <div className="container" id="register">
             <h1 className="form-title">Register</h1>
@@ -74,9 +95,40 @@ const Register: React.FC = () => {
                 </div>
                 <div className="input-group">
                     <label htmlFor="password">Password</label>
-                    <input type="password" name="password" id="password" placeholder="Password" required
-                        value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <i className="fas fa-lock"></i>
+                    <div className="password-input-wrapper">
+                        <input
+                            type="password"
+                            name="password"
+                            id="password-masked"
+                            placeholder="Password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            style={{ display: showPassword ? 'none' : 'block' }}
+                        />
+                        <input
+                            type="text"
+                            name="password-visible"
+                            id="password-visible"
+                            placeholder="Password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            style={{ display: showPassword ? 'block' : 'none' }}
+                        />
+                        <button
+                            ref={toggleButtonRef}
+                            type="button"
+                            className="password-toggle"
+                            onClick={togglePasswordVisibility}
+                        >
+                            <img 
+                                src={showPassword ? './assets/eye-off.png' : './assets/eye.png'} 
+                                alt={showPassword ? "Hide password" : "Show password"}
+                                className="eye-icon"
+                            />
+                        </button>
+                    </div>
                 </div>
                 {!isRegistered && (
                     <ul className="password-requirements">

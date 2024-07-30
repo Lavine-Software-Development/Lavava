@@ -155,7 +155,7 @@ export class Edge extends IDItem implements IEdge {
                 sprite.setTint(this.phaserColor);
             });
             if (this.dynamic) {
-                this.sprites[0].setTint(Phaser.Display.Color.GetColor(153, 255, 51));
+                if (this.sprites.length > 0) { this.sprites[0].setTint(Phaser.Display.Color.GetColor(153, 255, 51)); }   
             }
             this.recolor = false;
         }

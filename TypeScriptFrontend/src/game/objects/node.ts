@@ -66,6 +66,7 @@ export class Node extends IDItem implements INode {
     set state(state: State) {
         if (this._state) {
             this._state.removeSprites();
+            
             this.destroyCannon();
         }
         this._state = state;
@@ -88,7 +89,6 @@ export class Node extends IDItem implements INode {
     destroyCannon() {
         if (this.cannonGraphics) {
             this.cannonGraphics.clear();
-            this.cannonGraphics.destroy();
         }
     }
 
@@ -166,7 +166,7 @@ export class Node extends IDItem implements INode {
     }
 
     get full(): boolean {
-        return this.value >= GROWTH_STOP;
+        return this.value >= this.state.full_size;
     }
 
     get portCount(): number {
@@ -177,14 +177,6 @@ export class Node extends IDItem implements INode {
         this.resize();
         this.graphics = this._scene.add.graphics();
         this.cannonGraphics = this._scene.add.graphics();
-    }
-    burn(): boolean {
-        this.portPercent -= 0.01;
-        if (this.portPercent <= 0) {
-            this.ports = [];
-            return true;
-        }
-        return false;
     }
 
     draw(): void {
@@ -208,7 +200,7 @@ export class Node extends IDItem implements INode {
                 } else if (this.ports.length > 0) {
                     this.drawPorts(Colors.ORANGE);
                     if (this.portPercent > 0) {
-                        this.portPercent -= 0.05;
+                        this.portPercent -= 0.02;
                     }
                     else {
                         this.ports = [];

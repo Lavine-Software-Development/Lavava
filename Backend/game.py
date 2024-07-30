@@ -1,5 +1,5 @@
 from jsonable import JsonableTick
-from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, SECTION_LENGTHS, SPAWN_CODE, EVENT_CODES
+from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, OVERTIME_BONUS, SECTION_LENGTHS, SPAWN_CODE, EVENTS
 from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GSE
 from board import Board
@@ -9,20 +9,21 @@ from player import DefaultPlayer
 from ae_effects import make_event_effects
 from ae_validators import make_effect_validators
 from event import Event
-
+import sys
 class ServerGame(JsonableTick):
     def __init__(self, player_count, gs):
 
         self.running = True
         self.gs = gs
         self.extra_info = []
+        self.counts = [0] * player_count
         self.board = Board(self.gs)
         self.player_dict = {
             i: DefaultPlayer(i) for i in range(player_count)
         }
 
         start_values = {'board'}
-        tick_values = {'countdown_timer', 'gs', 'extra_info'}
+        tick_values = {'countdown_timer', 'gs', 'extra_info', 'counts'}
         recurse_values = {'board'}
         super().__init__('game', start_values, recurse_values, tick_values)
 
@@ -34,7 +35,6 @@ class ServerGame(JsonableTick):
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
-        print(player.ps.state, PSE.START_SELECTION)
         if player.ps.state == PSE.START_SELECTION:
             if key == SPAWN_CODE:
                 data_items = [self.board.id_dict[d] for d in data]
@@ -86,7 +86,7 @@ class ServerGame(JsonableTick):
     def make_events_dict(self):
         validators = make_effect_validators(self.board)
         effects = make_event_effects(self.board, self.update_extra_info)
-        return {code: Event(validators[code], effects[code]) for code in EVENT_CODES}
+        return {code: Event(validators[code], effects[code]) for code in EVENTS}
 
     def set_abilities(self, player, abilities):
         self.player_dict[player].set_abilities(abilities, self.ability_effects, self.board)
@@ -99,6 +99,10 @@ class ServerGame(JsonableTick):
     def all_player_starts_selected(self):
         return all([p.ps.state in (PSE.START_WAITING, PSE.ELIMINATED) for p in self.player_dict.values()])
     
+    @property 
+    def no_player_starts_selected(self):
+        return all([p.ps.state == PSE.START_SELECTION for p in self.player_dict.values()]) 
+    
     def update_timer(self):
 
         if self.countdown_timer > 0:
@@ -108,14 +112,21 @@ class ServerGame(JsonableTick):
                 self.times[self.current_section] = 3
 
             if self.countdown_timer <= 0:
-
+                if self.no_player_starts_selected:
+                    print("Neither player selected start node")
+                    for player in self.player_dict.values():
+                        player.ps.eliminate()
+                        self.update_extra_info(("Aborted"))
+                    return
+                
                 if self.gs.value < GSE.END_GAME.value:
+                    print("updating section")
                     self.current_section += 1
 
                     if self.gs.value == GSE.START_SELECTION.value:
                         self.all_player_next()
                     else:
-                        self.board.end_game()
+                        self.end_game_events()
                 else:
                     self.determine_ranks_from_capitalize_or_timeout()
                 
@@ -123,8 +134,11 @@ class ServerGame(JsonableTick):
 
     def tick(self):
         self.update_timer()
+        self.counts = [self.player_dict[i].count for i in range(len(self.player_dict))]
         # print("remaining player:", self.remaining)
         if self.gs.value >= GSE.PLAY.value:
+            # print("Gamestaet value: " + str(self.gs.value))
+            sys.stdout.flush()
             self.board.update()
             self.player_update()
 
@@ -137,21 +151,32 @@ class ServerGame(JsonableTick):
     def post_tick(self):
         self.extra_info.clear()
 
+    def end_game_events(self):
+        self.board.end_game()
+        for player in self.player_dict.values():
+            player.overtime_bonus()
+        self.update_extra_info(("End Game", OVERTIME_BONUS))
+
     def player_update(self):
         for player in self.player_dict.values():
             if player.ps.value < PSE.ELIMINATED.value:
                 player.update()
                 if player.count == 0:
                     self.eliminate(player.id, True)
+                    if player.killer:
+                        self.update_extra_info(("player_elimination", (player.id, player.killer.id)))
+                    else:
+                        self.update_extra_info(("timed_out", (player.id)))
+
+
+                    print("the killer is", player.killer)
 
     def determine_ranks_from_capitalize_or_timeout(self):
         # total owned nodes: a
         # theoretical maximum of 65
         player_nodes = {player.id: player.count for player in self.player_dict.values()}
 
-        # total owned full capitals: b
-        # maximum of 3
-        player_capitals = {player.id: player.full_capital_count for player in self.player_dict.values()}
+        player_capitals = self.only_winner_capitals_count()
 
         # score equals 100b + a
         # effectively, the player with the most full capitals wins, with total nodes as a tiebreaker
@@ -162,6 +187,15 @@ class ServerGame(JsonableTick):
             self.player_dict[sorted_scores[i][0]].lose(i + 1)
 
         self.gs.end()
+
+    def hundred_per_capital(self):
+        # total owned full capitals: b
+        # maximum of 3
+        return {player.id: self.board.full_player_capitals[player.id] for player in self.player_dict.values()}
+
+    def only_winner_capitals_count(self):
+        # 1 if having 3 full capitals, 0 otherwise
+        return {player.id: int(self.board.full_player_capitals[player.id] >= 3) for player in self.player_dict.values()}
 
     def determine_ranks_from_elimination(self, winner):
         self.player_dict[winner].win()

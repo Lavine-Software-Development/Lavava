@@ -4,9 +4,14 @@ server_constants.py
 .idea/
 new_env/
 ian_game/
+local_env/
 node_modules/
-TypeScriptFrontend/src/env-config.js
-UserBackend/.env
 backend/venv/
 UserBackend/venv/
 UserBackend/instance
+UserBackend/game_data/game.db
+Backend/.env
+.env
+.secrets
+game.db
+settings.json
