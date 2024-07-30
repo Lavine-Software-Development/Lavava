@@ -80,9 +80,11 @@ const Leaderboard: React.FC = () => {
             {selectedUser && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h2>{selectedUser.displayName || selectedUser.username}</h2>
-                        <p><strong>Username:</strong> {selectedUser.username}</p>
-                        <p><strong className="elo-text">ELO:</strong> {selectedUser.elo}</p>
+                        <h2>{selectedUser.displayName !== "Not Yet Specified" ? selectedUser.displayName : selectedUser.username}</h2>
+                        {selectedUser.displayName !== "Not Yet Specified" && (
+                            <p><strong>Username:</strong> {selectedUser.username}</p>
+                        )}
+                        <p><strong>ELO:</strong> {selectedUser.elo}</p>
                         {selectedUser.deck && selectedUser.deck.length > 0 ? (
                             <div className="abilities-container-leaderboard">
                                 {selectedUser.deck.map((card, index) => (

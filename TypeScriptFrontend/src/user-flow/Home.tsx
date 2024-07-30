@@ -1,10 +1,50 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import config from "../env-config";
+import { jwtDecode } from 'jwt-decode';
 import { abilityColors } from "../user-flow/ability_utils";
+
+function getDeviceType() {
+    const ua = navigator.userAgent;
+
+    if (/mobile/i.test(ua)) {
+        return "Mobile";
+    }
+    if (/tablet/i.test(ua)) {
+        return "Tablet";
+    }
+    if (/iPad|PlayBook/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+        return "Tablet";
+    }
+    return "Desktop";
+}
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
+    // check if login token has expired
+    useEffect(() => {
+        const validateToken = () => {
+            const token = localStorage.getItem("userToken");
+            if (!token){
+                return;
+            }
+
+            try {
+                const decodedToken = jwtDecode(token);
+                const currentTime = Date.now() / 1000; // convert to seconds
+                if (decodedToken.exp < currentTime) {
+                    localStorage.removeItem("userToken");
+                    navigate("/login")
+                }
+            } catch (error) {
+                console.error("Error deccoding token:", error);
+                localStorage.removeItem("userToken");
+            }
+        };
+
+        validateToken();
+    }, []);
+
     const [selectedAbilities, setSelectedAbilities] = useState<any[]>([]);
     const [tab, setTab] = useState("");
     const [playerCount, setPlayerCount] = useState(() => {
@@ -110,6 +150,12 @@ const Home: React.FC = () => {
     const [playDropdownOpen, setPlayDropdownOpen] = useState<boolean>(false);
     const playDropdownRef = useRef<HTMLDivElement>(null);
     const handlePlayDropdownFocus = () => {
+        const deviceType = getDeviceType();
+        if (deviceType !== "Desktop") {
+            alert("Please use a desktop to play.");
+            return;
+        }
+        setPlayDropdownOpen(!playDropdownOpen);
         if (selectedAbilities.length > 0) {
             setPlayDropdownOpen(!playDropdownOpen);
         } else {
@@ -426,15 +472,6 @@ const Home: React.FC = () => {
                 </div>
             )}
             <div className="popup-container">
-                {showSalaryPopup && (
-                    <div className="popup salary-popup">
-                        <p>
-                            You cannot host a game with a leftover salary
-                            greater than 10.
-                        </p>
-                        <button onClick={handleClosePopups}>OK</button>
-                    </div>
-                )}
                 {showLoginPopup && !isLoggedIn && (
                     <div className="popup login-popup">
                         <p>You need to log in to play Ladder.</p>

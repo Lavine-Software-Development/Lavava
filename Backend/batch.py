@@ -44,7 +44,7 @@ class Batch:
         connection_ranks = [item[0] for item in sorted(connection_ranks, key=lambda x: x[1])]
         # this ends up as player token, player id, in order of rank
 
-        url = config.USER_BACKEND_URL + '/elo'
+        url = config.USER_BACKEND_URL + '/save_game'
         # url = 'http://172.17.0.2:5001/elo' comment out for local testing
         data = {"ordered_players": connection_ranks}
         try:

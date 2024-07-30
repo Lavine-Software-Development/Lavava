@@ -279,14 +279,11 @@ input::placeholder {
 }
 
 .info-card {
-    width: 300px;
+    width: 400px;
 }
 
-.info-card .elo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
+.info-card h2 .elo-value {
+    color: white;
 }
 
 .ability-grid {
@@ -1005,6 +1002,72 @@ ul {
 .player-name {
     cursor: pointer;
     text-decoration: underline;
+}
+
+.match-history-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.game-history-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.current-user-win{
+    font-weight: bold;
+    color: rgb(46, 197, 46);
+}
+
+.current-user-lose{
+    font-weight: bold;
+    color: rgb(161, 30, 30);
+}
+
+.match-history-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.match-history-btn:hover {
+    background-color: #218838;
+}
+
+.game-history-item p {
+    margin: 5px 0;
+}
+
+.game-history-item ul {
+    list-style-type: none;
+    padding-left: 10px;
+}
+
+.game-history-item li {
+    margin: 3px 0;
+}
+
+.sort-order-btn {
+    background-color: #08190c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.sort-arrow {
+    margin-left: 5px;
+    font-size: 1.2em;
 }
 
 .abilities-container-friendly {
