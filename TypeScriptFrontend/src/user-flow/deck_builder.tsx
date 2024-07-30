@@ -210,7 +210,7 @@ const DeckBuilder: React.FC = () => {
                 <button className="custom-button ready-button" data-tooltip="Go to the home page" onClick={goHome}>Ready</button>
                 {error && <p className="error-message">{error}</p>}
                 <div className="salary-display">
-                    <h2>Salary: {salary}</h2>
+                    <h2>Credits: {salary}</h2>
                 </div>
                 <div className="click-instructions">
                     <span className="click-instruction">

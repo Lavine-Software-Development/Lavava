@@ -1,4 +1,5 @@
 import os
+import re
 from mailjet_rest import Client
 import jwt
 import os
@@ -23,7 +24,8 @@ app = Flask(__name__)
 CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
- 
+EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+
 if config.DB_CONNECTED:
     db_path = os.path.join('/app/game_data', 'game.db')
     if config.ENV == "PROD":
@@ -251,29 +253,29 @@ def reset_password():
     else:
         return jsonify({"success": False, "message": "Database connection error"}), 500
 
-def send_mailjet_email(to_email, to_name, subject, text_content, html_content=None):
+def send_mailjet_email(to_email, to_name, subject, text_content, html_content=None, cc_email=None):
     mailjet = Client(auth=(config.MJ_APIKEY_PUBLIC, config.MJ_APIKEY_PRIVATE), version='v3.1')
-    data = {
-        'Messages': [
+    message = {
+        "From": {
+            "Email": config.EMAIL_FROM,
+            "Name": "Durb Game"
+        },
+        "To": [
             {
-                "From": {
-                    "Email": config.EMAIL_FROM,
-                    "Name": "Durb Game"
-                },
-                "To": [
-                    {
-                        "Email": to_email,
-                        "Name": to_name
-                    }
-                ],
-                "Subject": subject,
-                "TextPart": text_content,
-                "HTMLPart": html_content if html_content else None
+                "Email": to_email,
+                "Name": to_name
             }
-        ]
+        ],
+        "Subject": subject,
+        "TextPart": text_content,
+        "HTMLPart": html_content if html_content else None
     }
-    result = mailjet.send.create(data=data)
     
+    if cc_email:
+        message["Cc"] = [{"Email": cc_email}]
+    
+    data = {'Messages': [message]}
+    result = mailjet.send.create(data=data)
     return result.status_code, result.json()
 
 
@@ -530,17 +532,19 @@ def send_email():
 
     if not user_email or not message_body:
         return jsonify({"error": "Missing userEmail or message"}), 400
-
-    msg = Message(
-        subject="New Message from Contact Form",
-        sender='lavavaacc@gmail.com',
-        recipients=['lavine.software@gmail.com'],
-        cc=[user_email],
-        body=message_body
-    )
+    
+    if not re.match(EMAIL_REGEX, user_email):
+        return jsonify({"error": "Invalid email format"}), 400
 
     try:
-        mail.send(msg)
+        # Send email to the main recipient with CC to the user
+        send_mailjet_email(
+            to_email='lavine.software@gmail.com',
+            to_name="Lavine Software",
+            subject="New Message from Contact Form",
+            text_content=message_body,
+            cc_email=user_email
+        )
         return jsonify({"success": "Email sent successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
