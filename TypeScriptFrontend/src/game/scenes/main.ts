@@ -347,15 +347,29 @@ export class MainScene extends Scene {
         // Iterate over the values of the dictionary to draw each node
 
         if (this.abilityManager.getMode() === KeyCodes.NUKE_CODE) {
-            const structures = Object.values(this.nodes).filter(
-                (node) =>
-                    NUKE_OPTION_STRINGS.includes(node.stateName) &&
-                    node.owner === this.mainPlayer
-            );
-
-            structures.forEach((node) => {
-                this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.BLACK);
-            });
+            if (this.settings.nuke_type == 'structure_range') {
+                const structures = Object.values(this.nodes).filter(
+                    (node) =>
+                        NUKE_OPTION_STRINGS.includes(node.stateName) &&
+                        node.owner === this.mainPlayer
+                );
+    
+                structures.forEach((node) => {
+                    this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.BLACK);
+                });
+            } else if (this.settings.nuke_type == 'neighbor') {
+                const neighbors = Object.values(this.nodes).filter(
+                    (node) => node.owner != this.mainPlayer && node.edges.some((edge) => edge.other(node).owner === this.mainPlayer)
+                );
+    
+                neighbors.forEach((node) => {
+                    this.graphics.strokeCircle(
+                        node.pos.x,
+                        node.pos.y,
+                        node.size + 4
+                    );
+                });
+            }
 
         } else if (this.highlight.usage !== null && NUKE_OPTION_CODES.includes(this.highlight.usage)) {
             const highlightedNode = this.highlight.item as Node;
