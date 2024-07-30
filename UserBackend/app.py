@@ -821,8 +821,8 @@ def save_game():
         usernames = []
         user_ranks = []
         for rank, token in enumerate(ordered_tokens, start=1):
-            #username = token_to_username(token)
-            username = token
+            username = token_to_username(token)
+            # username = token
             user = User.query.filter_by(username=username).first()
             if user:
                 usernames.append(username)
@@ -927,7 +927,7 @@ def get_user_details(username):
         
         response = {
             "username": user.username,
-            "displayName": user.display_name,
+           "displayName": user.display_name,
             "elo": user.elo,
             "deck": [{"name": card.ability, "count": card.count} for card in deck_cards]
         }
