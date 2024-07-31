@@ -1,0 +1,64 @@
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('background.png');
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    position: relative;
+    z-index: 2;
+}
+
+h1 {
+    color: #333;
+}
+
+p {
+    color: #555;
+}
+
+.button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.firework {
+    position: absolute;
+    background: rgba(255, 204, 0, 0.8); /* Default color */
+    animation: firework 1s ease-in-out infinite;
+    border-radius: 50%;
+    --size: calc(5px + 20px * var(--randomSize)); /* Random size */
+    width: var(--size);
+    height: var(--size);
+    background: var(--randomColor); /* Random color */
+}
+
+@keyframes firework {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+        left: var(--randomX); /* Random horizontal start */
+        top: var(--randomY); /* Random vertical start */
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+

@@ -20,9 +20,10 @@ from sqlalchemy.types import Text
 from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import ClientError
+from flask import render_template
 load_dotenv()
 
-app = Flask(__name__) 
+app = Flask(__name__, static_url_path='/static', static_folder='static') 
 CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
@@ -236,7 +237,7 @@ def confirm_email(token):
             return '<h1>Error!</h1>'
         user.email_confirm = True
         db.session.commit()
-    return '<h1>Email Confirmed!</h1><p>Proceed to login page to login.</p>' 
+    return render_template('email_confirmation.html', status='confirmed')
 
 
 

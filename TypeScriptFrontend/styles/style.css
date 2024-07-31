@@ -17,10 +17,7 @@
 input[type="password"]::-webkit-contacts-auto-fill-button,
 input[type="password"]::-webkit-credentials-auto-fill-button,
 input[type="password"]::-webkit-textfield-decoration-container {
-    visibility: hidden;
-    display: none !important;
-    pointer-events: none;
-    position: absolute;
+
     right: 0;
 }
 
