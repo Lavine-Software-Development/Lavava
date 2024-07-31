@@ -108,7 +108,7 @@ export const AbilityElixir = {
     [KeyCodes.BRIDGE_CODE]: 4,
     [KeyCodes.D_BRIDGE_CODE]: 3,
     [KeyCodes.RAGE_CODE]: 5,
-    [KeyCodes.NUKE_CODE]: 6,
+    [KeyCodes.NUKE_CODE]: 5,
 };
 
 export const AbilityReloadTimes = {
