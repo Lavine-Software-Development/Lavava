@@ -326,7 +326,7 @@ export class PortNode extends Node {
         value: number,
         _scene: Phaser.Scene
     ) {
-        super(id, pos, true, state, value, _scene);
+        super(id, pos, is_port, state, value, _scene);
         this.portPercent = 1;
         this.ports = random_equal_distributed_angles(PORT_COUNT);
     }

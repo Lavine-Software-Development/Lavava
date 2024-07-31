@@ -103,8 +103,10 @@ class Board(JsonableTracked):
             node.pos = (new_x, y)
             node.set_pos_per()
 
-    def end_game(self):
+    def end_game(self, make_port):
         for node in self.nodes:
+            if make_port:
+                node.is_port = True
             node.apply_modifications()
 
     def update(self):

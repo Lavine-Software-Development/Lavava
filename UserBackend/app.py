@@ -716,8 +716,9 @@ def get_royale_settings():
         "ability_type": "elixir",
         "elixir_cap": 7,
         "elixir_rate": 4.5,
-        "port_percentage": 2/3,
+        "port_percentage": 1/2,
         "walls": True,
+        'end_game_make_ports': True,
         "starting_structures": False,
         "nuke_type": "neighbor",
         "bridge_burn": False,
@@ -735,6 +736,7 @@ def get_og_settings():
         "credit_cap": 20,
         "port_percentage": 2/3,
         "walls": False,
+        'end_game_make_ports': False,
         "starting_structures": True,
         "starting_land_capitals": 3,
         "starting_island_capitals": 1,
@@ -772,7 +774,7 @@ def get_royale_abilities():
         },
         {
             "name": "Nuke", 
-            "cost": 6,
+            "cost": 5,
             "description": "Destroy nearby dot and its bridges"
         },
     ]
