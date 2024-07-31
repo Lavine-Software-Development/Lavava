@@ -1028,6 +1028,12 @@ ul {
     color: rgb(161, 30, 30);
 }
 
+.match-history-btn-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .match-history-btn {
     background-color: #28a745;
     color: white;
