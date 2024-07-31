@@ -22,6 +22,7 @@ import Leaderboard from "./user-flow/Leaderboard";
 import HowToPlay from "./user-flow/How_to_play";
 import ChangePassword from "./user-flow/change_password";
 import Lobby from "./user-flow/lobby";
+import MatchHistory from "./user-flow/MatchHistory";
 import { NetworkProvider } from "./game/NetworkContext";
 
 const router = createBrowserRouter(
@@ -41,6 +42,7 @@ const router = createBrowserRouter(
             <Route path="how-to-play" element={<HowToPlay />} />
             <Route path="team" element={<Team />} />
             <Route path="change-password" element={<ChangePassword />} />
+            <Route path="match-history" element={<MatchHistory />} />
             <Route path="*" element={<Navigate replace to="/login" />} />
         </Route>
     )

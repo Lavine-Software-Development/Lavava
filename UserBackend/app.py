@@ -4,6 +4,7 @@ from mailjet_rest import Client
 import jwt
 import os
 import datetime
+import json
 from flask import Flask, jsonify, request, url_for
 from flask_cors import CORS
 from functools import wraps
@@ -13,14 +14,16 @@ from itsdangerous import SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, func, text
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+from sqlalchemy.types import Text
 from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import ClientError
+from flask import render_template
 load_dotenv()
 
-app = Flask(__name__) 
+app = Flask(__name__, static_url_path='/static', static_folder='static') 
 CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
@@ -73,11 +76,23 @@ if config.DB_CONNECTED:
             self.ability = ability
             self.count = count
 
-    class Game(db.Model):
+    class GameHistory(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-        user_ids = db.Column(db.JSON, nullable=False)
-        user_ranks = db.Column(db.JSON, nullable=False)
+        usernames = db.Column(Text, nullable=False)
+        user_ranks = db.Column(Text, nullable=False)
+
+        def __init__(self, usernames, user_ranks):
+            self.usernames = json.dumps(usernames)
+            self.user_ranks = json.dumps(user_ranks)
+
+        @property
+        def usernames_list(self):
+            return json.loads(self.usernames)
+
+        @property
+        def user_ranks_list(self):
+            return json.loads(self.user_ranks)
 
 
     with app.app_context():
@@ -113,7 +128,7 @@ def token_required(f):
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = data['user']
         except ExpiredSignatureError:
-            return jsonify({'message': 'Token has expired!'}), 401
+            return jsonify({'message': 'Login Token has expired!'}), 401
         except InvalidTokenError:
             return jsonify({'message': 'Invalid token!'}), 401
         except Exception as e:
@@ -138,6 +153,7 @@ def after_request(response):
         response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
     
     return response
+
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'OPTIONS':
@@ -174,7 +190,6 @@ def login():
     token = jwt.encode({
         'user_id': user.id,
         'user': user.username,
-        'display_name': user.display_name if hasattr(user, 'display_name') else user.username,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=72)
     }, app.config['SECRET_KEY'], algorithm="HS256")
 
@@ -223,7 +238,7 @@ def confirm_email(token):
             return '<h1>Error!</h1>'
         user.email_confirm = True
         db.session.commit()
-    return '<h1>Email Confirmed!</h1><p>Proceed to login page to login.</p>' 
+    return render_template('email_confirmation.html', status='confirmed')
 
 
 
@@ -502,15 +517,46 @@ def get_profile(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
         if user:
-            games = Game.query.filter(Game.user_ids.contains(str(user.id))).order_by(Game.game_date.desc()).limit(3).all()
-            past_games = [game.user_ranks.get(str(user.id), "N/A") for game in games]
+            # Use a SQL query to get the most recent game containing the exact username
+            query = text("""
+                SELECT * FROM game_history
+                WHERE json_array_length(usernames) > 0
+                AND usernames LIKE :username
+                ORDER BY game_date DESC
+                LIMIT 1
+            """)
+            
+            most_recent_game = db.session.execute(query, {'username': f'%"{user.username}"%'}).fetchone()
+
+            last_game_data = None
+            if most_recent_game:
+                usernames = json.loads(most_recent_game.usernames)
+                user_ranks = json.loads(most_recent_game.user_ranks)
+                
+                if user.username in usernames:  # Extra check to ensure exact match
+                    last_game_data = {
+                        "game_id": most_recent_game.id,
+                        "game_date": most_recent_game.game_date.format(),
+                        "players": []
+                    }
+                    for username, rank in zip(usernames, user_ranks):
+                        player_data = {
+                            "username": username,
+                            "rank": int(rank),
+                            "is_current_user": (username == user.username)
+                        }
+                        last_game_data["players"].append(player_data)
+
+                    # Sort players by rank
+                    last_game_data["players"].sort(key=lambda x: x["rank"])
+
             return jsonify({
                 "userName": user.username,
                 "displayName": user.display_name,
                 "email": user.email,
                 "abilities": user_decks(current_user),
                 "elo": user.elo,
-                "past_games": past_games
+                "last_game": last_game_data
             })
         else:
             return jsonify({"error": "User not found"}), 404
@@ -521,7 +567,16 @@ def get_profile(current_user):
             "email": "john.doe@example.com",
             "abilities": user_decks(current_user),
             "elo": 1138,
-            "past_games": ["1st", "4th", "2nd"]
+            "last_game": {
+                "game_id": 12345,
+                "game_date": "2023-07-23T14:30:00",
+                "players": [
+                    {"username": "Current-User", "rank": 1, "is_current_user": True},
+                    {"username": "Player1", "rank": 2, "is_current_user": False},
+                    {"username": "Player3", "rank": 3, "is_current_user": False},
+                    {"username": "Player4", "rank": 4, "is_current_user": False}
+                ]
+            }
         })
 
 @app.route('/send-email', methods=['POST'])
@@ -587,9 +642,6 @@ def save_deck(current_user):
 
     data = request.json
     abilities = data.get('abilities')
-
-    if not abilities:
-        return jsonify({"success": False, "message": "Missing abilities"}), 400
 
     user = User.query.filter_by(username=current_user).first()
     if not user:
@@ -699,8 +751,88 @@ def username_to_elo(name: str):
         dummy = {"other": 1200, "default": 1300}
         return dummy.get(name, 1100)  # Def
     
-@app.route('/abilities', methods=['GET'])
-def get_abilities():
+SPAWN_CODE = 115
+FREEZE_CODE = 102
+BRIDGE_CODE = 97
+D_BRIDGE_CODE = 100
+ZOMBIE_CODE = 122
+RAGE_CODE = 114
+BURN_CODE = 98
+NUKE_CODE = 110
+POISON_CODE = 112
+CAPITAL_CODE = 99
+CANNON_CODE = 101
+PUMP_CODE = 117
+MINI_BRIDGE_CODE = 109
+    
+@app.route('/settings/Royale', methods=['GET'])
+def get_royale_settings():
+    settings = {
+        "ability_type": "elixir",
+        "elixir_cap": 7,
+        "elixir_rate": 4.5,
+        "port_percentage": 2/3,
+        "starting_structures": False,
+        "nuke_type": "neighbor",
+        "bridge_burn": False,
+        "bridge_from_port_needed": True,
+        "deck_size": 5,
+        "forced_deck": True,
+        "deck": [FREEZE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, RAGE_CODE, NUKE_CODE]
+    }
+    return jsonify(settings)
+
+@app.route('/settings/Original', methods=['GET'])
+def get_og_settings():
+    settings = {
+        "ability_type": "credits",
+        "credit_cap": 20,
+        "port_percentage": 2/3,
+        "starting_structures": True,
+        "starting_land_capitals": 3,
+        "starting_island_capitals": 1,
+        "nuke_type": "structure_range",
+        "bridge_burn": False,
+        "bridge_from_port_needed": False,
+        "deck_size": 4,
+        "forced_deck": False,
+    }
+    return jsonify(settings)
+    
+@app.route('/abilities/Royale', methods=['GET'])
+def get_royale_abilities():
+    abilities = [
+        {
+            "name": "Bridge", 
+            "cost": 4,
+            "description": "Create a one-way bridge"
+        },
+        {
+            "name": "D-Bridge", 
+            "cost": 3,
+            "description": "Create a two-way bridge with"
+        },
+        {
+            "name": "Freeze", 
+            "cost": 2,
+            "description": "Convert edge to one-way"
+            
+        },
+        {
+            "name": "Rage", 
+            "cost": 5,
+            "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "Nuke", 
+            "cost": 6,
+            "description": "Destroy nearby dot and its bridges"
+        },
+    ]
+    return jsonify({"abilities": abilities, "options": 5})
+    
+@app.route('/abilities/Original', methods=['GET'])
+def get_og_abilities():
     abilities = [
         {
             "name": "Bridge", 
@@ -769,9 +901,41 @@ def get_abilities():
             "description": "Shoot energy at nodes"
         }
     ]
-    return jsonify({"abilities": abilities, "salary": 20})
+    return jsonify({"abilities": abilities, "salary": 20, "options": 4})
 
-@app.route('/elo', methods=['POST'])
+
+@app.route('/save_game', methods=['POST'])
+def save_game():
+    data = request.json
+    ordered_tokens = data.get("ordered_players")
+
+    if not ordered_tokens:
+        return jsonify({"error": "Missing ordered players"}), 400
+    
+    if config.DB_CONNECTED:
+        usernames = []
+        user_ranks = []
+        for rank, token in enumerate(ordered_tokens, start=1):
+            username = token_to_username(token)
+            # username = token
+            user = User.query.filter_by(username=username).first()
+            if user:
+                usernames.append(username)
+            
+            else:
+                usernames.append("Guest")
+            user_ranks.append(rank)
+        
+        new_game = GameHistory(usernames=usernames, user_ranks=user_ranks)
+        db.session.add(new_game)
+        db.session.commit()
+
+        return update_elo()
+    
+    else:
+        return update_elo()
+
+
 def update_elo():
     # important that order is maintained throughout the process, as that preserves ranking in game
     # hence why lists are used
@@ -791,7 +955,22 @@ def update_elo():
 @app.route('/leaderboard', methods=['GET'])
 def get_leaderboard():
     if config.DB_CONNECTED:
-        confirmed_users = User.query.filter_by(email_confirm=True).order_by(desc(User.elo)).all()
+        # Subquery to count the number of games each user has participated in
+        subquery = (
+            db.session.query(User.username, func.count(GameHistory.id).label('game_count'))
+            .join(GameHistory, GameHistory.usernames.contains(User.username))
+            .group_by(User.username)
+            .subquery()
+        )
+
+        # Query to filter users based on game_count and email confirmation
+        confirmed_users = (
+            db.session.query(User)
+            .join(subquery, User.username == subquery.c.username)
+            .filter(User.email_confirm == True, subquery.c.game_count >= 3)
+            .order_by(desc(User.elo))
+            .all()
+        )
         leaderboard = [
             {
                 "userName": user.username,
@@ -826,6 +1005,29 @@ def get_leaderboard():
         ]
     })
 
+
+@app.route('/current-user', methods=['GET'])
+@token_required
+def get_current_user(current_user):
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            games = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).limit(3).all()
+            gameCount = len(games)
+            return jsonify({
+                "username": user.username,
+                "gameCount" : gameCount
+            }), 200
+        else:
+            return jsonify({"error": "User not found"}), 404
+    else:
+        # If DB is not connected, return the username from the token
+        return jsonify({
+            "username": current_user,
+            "gameCount": 3
+        }), 200
+
+
 @app.route('/user/<string:username>', methods=['GET'])
 def get_user_details(username):
     if not config.DB_CONNECTED:
@@ -851,6 +1053,62 @@ def get_user_details(username):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/match-history', methods=['GET'])
+@token_required
+def get_match_history(current_user):
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            # Use a SQL query to filter games containing the exact username
+            query = text("""
+                SELECT * FROM game_history
+                WHERE json_array_length(usernames) > 0
+                AND usernames LIKE :username
+                ORDER BY game_date DESC
+                LIMIT 20
+            """)
+            
+            games = db.session.execute(query, {'username': f'%"{user.username}"%'}).fetchall()
+
+            match_history = []
+            for game in games:
+                usernames = json.loads(game.usernames)
+                user_ranks = json.loads(game.user_ranks)
+                if user.username in usernames:  # Extra check to ensure exact match
+                    game_data = {
+                        "game_id": game.id,
+                        "game_date": game.game_date.format(),
+                        "players": []
+                    }
+                    for username, rank in zip(usernames, user_ranks):
+                        player_data = {
+                            "username": username,
+                            "rank": int(rank),
+                            "is_current_user": (username == user.username)
+                        }
+                        game_data["players"].append(player_data)
+                    game_data["players"].sort(key=lambda x: x["rank"])
+                    match_history.append(game_data)
+            
+            return jsonify({"match_history": match_history})
+        else:
+            return jsonify({"error": "User not found"}), 404
+    else:
+        # Return dummy data for testing when DB is not connected
+        return jsonify({
+            "match_history": [
+                {
+                    "game_id": i,
+                    "game_date": (datetime.datetime.now() - datetime.timedelta(days=i)).isoformat(),
+                    "players": [
+                        {"username": "Current-User", "rank": 1, "is_current_user": True},
+                    ] + [
+                        {"username": f"Player{j}", "rank": j+1, "is_current_user": False} for j in range(1, 4)
+                    ]
+                } for i in range(1, 21)
+            ]
+        })
 
 if __name__ == '__main__':
     if config.ENV == "PROD":

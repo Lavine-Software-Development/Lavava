@@ -62,7 +62,7 @@ class JsonableBasic(JsonableSkeleton):
                 elif self.is_basic_type(v):
                     final_attributes[k] = v
                 elif isinstance(v, numbers.Number):
-                    final_attributes[k] = round(v, ndigits=1)
+                    final_attributes[k] = round(v, ndigits=2)
                 else:
                     print("Error: base value not basic or a dict or JsonableSkeletable", f"Key: {k}")
 

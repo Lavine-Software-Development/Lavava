@@ -4,7 +4,7 @@ import asyncio
 from batch import Batch
 import json
 import signal
-import ssl 
+_import ssl 
 import logging
 
 # Configure logging 
@@ -33,14 +33,15 @@ class WebSocketServer():
         except Exception as e:
             logger.exception(f"Error in handler: {str(e)}")
 
-    def waiting_ladder_count(self, player_count):
+    def waiting_ladder_count(self, player_count, mode):
+        settings_add_on = mode[0] + str(player_count)
         logger.debug(f"Checking for waiting ladder with player count: {player_count}")
         for code in self.waiting_players:
-            if len(code) == 5 and code.startswith(player_count):
+            if len(code) == 6 and code.startswith(settings_add_on):
                 logger.info(f"Found waiting ladder: {code}")
                 return code
         logger.info(f"No waiting ladder found for player count: {player_count}")
-        return False
+        return settings_add_on + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
 
     async def process_message(self, websocket, data):
         logger.debug(f"Processing message: {data}")
@@ -90,20 +91,22 @@ class WebSocketServer():
 
     async def handle_game_setup(self, websocket, data):
         player_type = data.get("type")
-        player_count = data.get("players")
+        player_count = data.get("players") # will be null for player_type JOIN
         abilities = data.get("abilities")
         token = data.get("token")
-        game_code = data.get("game_id")
+        mode = data.get("mode")
 
-        logger.info(f"Setting up game: Type={player_type}, Players={player_count}, Code={game_code}")
+        logger.info(f"Setting up game: Type={player_type}, Players={player_count}")
 
         if player_type == "LADDER":
-            game_code = self.waiting_ladder_count(str(player_count)) or str(player_count) + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
+            game_code = self.waiting_ladder_count(str(player_count), mode)
         elif player_type == "HOST":
             game_code = str(random.randint(1000, 9999))
+        else:
+            game_code = data.get("game_id")
 
         if player_type in ("HOST", "LADDER") and game_code not in self.waiting_players:
-            self.waiting_players[game_code] = Batch(int(player_count), player_type, token, websocket, abilities)
+            self.waiting_players[game_code] = Batch(int(player_count), player_type == "LADDER", mode, token, websocket, abilities)
             logger.info(f"Created new game: {game_code}")
         elif player_type in ("JOIN", "LADDER") and game_code in self.waiting_players:
             if message := self.waiting_players[game_code].add_player(token, websocket, abilities):
@@ -117,7 +120,7 @@ class WebSocketServer():
             logger.warning(f"Invalid game setup attempt: Type={player_type}, Code={game_code}")
             return
 
-        message = json.dumps({"game_id": game_code, "player_count": self.waiting_players[game_code].player_count})
+        message = json.dumps({"game_id": game_code, "player_count": self.waiting_players[game_code].player_count, "mode": mode})
         await websocket.send(message)
         
         if self.waiting_players[game_code].is_ready():

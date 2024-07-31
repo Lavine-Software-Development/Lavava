@@ -174,7 +174,7 @@ class Board(JsonableTracked):
             self.nodeDict[edge2[1]],
         )
 
-    def buy_new_edge(self, node_from, node_to, edge_type, destroy_ports=False, only_to_node_port=False):
+    def buy_new_edge(self, node_from, node_to, edge_type, only_to_node_port, destroy_ports):
         new_id = self.new_edge_id()
         if edge_type == DYNAMIC_EDGE:
             newEdge = DynamicEdge(node_to, node_from, new_id)

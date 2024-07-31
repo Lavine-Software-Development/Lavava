@@ -30,14 +30,10 @@ from constants import (
     MINI_BRIDGE_CODE,
 )
 
-def make_bridge(buy_new_edge, bridge_type, only_to_node_port=False):
+def make_bridge(buy_new_edge, bridge_type, destroy_ports=False, only_to_node_port=False):
     def bridge_effect(data, player):
         id1, id2 = data
-        buy_new_edge(id1, id2, bridge_type)
-
-    def burn_bridge_effect(data, player):
-        id1, id2 = data
-        buy_new_edge(id1, id2, bridge_type, True, only_to_node_port)
+        buy_new_edge(id1, id2, bridge_type, only_to_node_port, destroy_ports)
 
     return bridge_effect
 
@@ -153,11 +149,11 @@ def pump_effect(data, player):
     node = data[0]
     node.set_state("pump")
 
-def make_ability_effects(board):
+def make_ability_effects(board, settings):
     return {
-        BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE, True),
-        D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
-        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
+        BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE, settings["bridge_burn"], settings["bridge_from_port_needed"]),
+        D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE, settings["bridge_burn"]),
+        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE, settings["bridge_burn"]),
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),

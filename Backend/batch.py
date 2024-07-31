@@ -1,4 +1,4 @@
-from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ABILITIES_SELECTED, FORFEIT_AND_LEAVE_CODE
+from constants import ALL_ABILITIES, EVENTS, FORFEIT_CODE, RESTART_GAME_VAL, ELIMINATE_VAL
 from game_state import GameState
 from gameStateEnums import GameStateEnum as GS
 from playerStateEnums import PlayerStateEnum as PS
@@ -6,28 +6,36 @@ from game import ServerGame
 import json_abilities
 from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, json_cost, plain_json
 import requests
-from pympler import asizeof
-import json
 from config import config
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class Batch:
-    def __init__(self, count, mode, token, websocket, ability_data):
+    def __init__(self, count, competitive, mode, token, websocket, ability_data):
         self.full_tick_count = 0
         self.token_ids = {}
         self.id_sockets = {}
         self.elo_changes = {}
         self.ending_count = 0
         self.player_count = count
+        self.competitive = competitive
         self.mode = mode
         self.gs = GameState()
-        self.game = ServerGame(self.player_count, self.gs)
+        self.settings = self.getSettings() 
+        self.game = ServerGame(self.player_count, self.gs, self.settings)
         self.token_disname = {} #just the display names to be displayed on the front end
         self.not_responsive_count = {}
         self.add_player(token, websocket, ability_data)
         self.tick_dict = dict()
+
+    def getSettings(self):
+        url = config.USER_BACKEND_URL + 'settings/' + self.mode
+        try:
+            return requests.get(url).json()
+        except Exception as e:
+            print(e)
+            return False
 
     def did_not_respond(self, player_id):
         self.not_responsive_count[player_id] += 1
@@ -44,7 +52,7 @@ class Batch:
         connection_ranks = [item[0] for item in sorted(connection_ranks, key=lambda x: x[1])]
         # this ends up as player token, player id, in order of rank
 
-        url = config.USER_BACKEND_URL + '/elo'
+        url = config.USER_BACKEND_URL + '/save_game'
         # url = 'http://172.17.0.2:5001/elo' comment out for local testing
         data = {"ordered_players": connection_ranks}
         try:
@@ -127,8 +135,9 @@ class Batch:
         start_dict = self.game.start_json
         start_dict["player_count"] = self.player_count
         start_dict["player_id"] = player_id
-        start_dict["abilities"] = json_abilities.start_json()
         start_dict['isFirst'] = True
+        start_dict["mode"] = self.mode
+        start_dict["settings"] = self.settings
         start_dict["display_names_list"] = list(self.token_disname.values())
         start_dict["isRefresh"] = False
         start_json = plain_json(start_dict)
@@ -138,11 +147,11 @@ class Batch:
         if self.elo_changes != {}:
             self.ending_count += 1
             return self.ending_count == 5
-        return self.mode != "LADDER" and self.gs.value == GS.GAME_OVER.value
+        return not self.competitive and self.gs.value == GS.GAME_OVER.value
     
     def tick_repr_json(self, player_id):
         self.tick_dict["player"] = self.player_tick_repr(player_id)
-        if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {} and self.mode == "LADDER":
+        if GS.GAME_OVER.value == self.game.gs.value and self.elo_changes != {} and self.competitive:
             self.tick_dict["new_elos"] = self.elo_changes[player_id]
         self.tick_dict["isFirst"] = False
         self.tick_dict["isRefresh"] = False
@@ -160,7 +169,7 @@ class Batch:
         if self.game.gs.value >= GS.START_SELECTION.value:
             self.game.tick()
         self.set_group_tick_repr()
-        if self.game.gs.value == GS.GAME_OVER.value and self.elo_changes == {} and self.mode == "LADDER":
+        if self.game.gs.value == GS.GAME_OVER.value and self.elo_changes == {} and self.competitive:
             self.update_elo()
         
     def post_tick(self):
@@ -168,11 +177,14 @@ class Batch:
 
     def ability_process(self, player, data):
         data = convert_keys_to_int(data)
-        if json_abilities.validate_ability_selection(data):
-            self.game.set_abilities(player, data)
+        if self.settings["forced_deck"]:
+            self.game.set_abilities(player, self.settings["deck"], self.settings)
+            return True
+        elif json_abilities.validate_ability_selection(data, self.settings):
+            self.game.set_abilities(player, data, self.settings)
             return True
         else:
-            self.game.set_abilities(player, {})
+            self.game.set_abilities(player, {}, self.settings)
             return 
 
     def process(self, token, data): 

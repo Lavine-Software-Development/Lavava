@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/style.css';
 import config from '../env-config';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 interface Ability {
     description: string;
@@ -10,17 +11,49 @@ interface Ability {
 }
 
 const DeckBuilder: React.FC = () => {
+    const navigate = useNavigate();
+    const [isTokenValid, setIstokenValid] = useState<boolean | null>(null);
+
+    // check if login token has expired
+    useEffect(() => {
+        const validateToken = () => {
+            const token = localStorage.getItem("userToken");
+            if (!token){
+                return;
+            }
+
+            try {
+                const decodedToken = jwtDecode(token);
+                const currentTime = Date.now() / 1000; // convert to seconds
+                if (decodedToken.exp < currentTime) {
+                    localStorage.removeItem("userToken");
+                    setIstokenValid(false);
+                    navigate("/login")
+                } else {
+                    setIstokenValid(true);
+                }
+            } catch (error) {
+                console.error("Error deccoding token:", error);
+                localStorage.removeItem("userToken");
+                setIstokenValid(false);
+                navigate("/login")
+            }
+        };
+
+        validateToken();
+    }, []);
+
     const [abilities, setAbilities] = useState<Ability[]>([]);
     const [selectedCounts, setSelectedCounts] = useState<{ [key: string]: number }>({});
     const [initialSalary, setInitialSalary] = useState(0); // Store the initial salary
     const [salary, setSalary] = useState(0); 
     const [error, setError] = useState("");
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchAbilities = async () => {
+            if (isTokenValid === false) return;
             try {
-                const response = await fetch(`${config.userBackend}/abilities`);
+                const response = await fetch(`${config.userBackend}/abilities/Original`);
                 const data = await response.json();
                 if (response.ok) {
                     setAbilities(data.abilities);
