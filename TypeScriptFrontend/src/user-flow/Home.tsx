@@ -19,10 +19,9 @@ const Home: React.FC = () => {
     const [friendlyMode, setFriendlyMode] = useState<string>(
         sessionStorage.getItem("friendlyMode") || "join"
     );
-    const [gameMode, setGameMode] = useState(() => {
-        const savedGameMode = sessionStorage.getItem("gameMode");
-        return savedGameMode || "Original";
-    });
+    const [gameMode, setGameMode] = useState<string>(
+        sessionStorage.getItem("gameMode") || "Original"
+    );
     const [gameModeDropdownOpen, setGameModeDropdownOpen] = useState<boolean>(false);
     const gameModeDropdownRef = useRef<HTMLDivElement>(null);
     const [showInvalidCodePopup, setShowInvalidCodePopup] = useState(false);
@@ -45,6 +44,13 @@ const Home: React.FC = () => {
         const token = localStorage.getItem("userToken");
         const isGuest = sessionStorage.getItem("guestToken");
         setIsLoggedIn(!!token);
+
+        let prevMode = sessionStorage.getItem("gameMode");
+        if (prevMode === "Royale") {
+            handleGameModeChange("Royale");
+        } else {
+            handleGameModeChange("Original");
+        }
 
         if (!isGuest && !token) {
             navigate("/login");

@@ -136,6 +136,7 @@ def after_request(response):
         response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
     
     return response
+
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'OPTIONS':
@@ -733,7 +734,7 @@ def get_og_settings():
         "credit_cap": 20,
         "port_percentage": 2/3,
         "starting_structures": True,
-        "staring_land_capitals": 3,
+        "starting_land_capitals": 3,
         "starting_island_capitals": 1,
         "nuke_type": "structure_range",
         "bridge_burn": False,
