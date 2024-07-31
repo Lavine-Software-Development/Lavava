@@ -4,7 +4,7 @@ import asyncio
 from batch import Batch
 import json
 import signal
-import ssl 
+_import ssl 
 import logging
 
 # Configure logging 
@@ -120,7 +120,7 @@ class WebSocketServer():
             logger.warning(f"Invalid game setup attempt: Type={player_type}, Code={game_code}")
             return
 
-        message = json.dumps({"game_id": game_code, "player_count": self.waiting_players[game_code].player_count})
+        message = json.dumps({"game_id": game_code, "player_count": self.waiting_players[game_code].player_count, "mode": mode})
         await websocket.send(message)
         
         if self.waiting_players[game_code].is_ready():
