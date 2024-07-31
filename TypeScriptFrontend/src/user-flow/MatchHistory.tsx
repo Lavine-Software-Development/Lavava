@@ -73,7 +73,7 @@ const MatchHistory: React.FC = () => {
         <div className="leaderboard-container scrollable-container">
             <div className="match-history-container">
                 <button className="match-history-btn" onClick={handleBack}>Back to Profile</button>
-                <h2>Ladder Match History</h2>
+                <h2 className="match-history-title">Ladder Match History</h2>
                 <button className="sort-order-btn" onClick={toggleSortOrder}>
                     Sort: Recent Game
                     <span className="sort-arrow">{isDescending ? ' ↓' : ' ↑'}</span>
@@ -101,7 +101,6 @@ const MatchHistory: React.FC = () => {
                                 return (
                                     <li key={index} className={className}>
                                         {player.username} - Rank: {player.rank}
-                                        {player.is_current_user && " (You)"}
                                     </li>
                                 );
                             })}

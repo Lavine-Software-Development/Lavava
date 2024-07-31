@@ -1002,6 +1002,7 @@ ul {
 .player-name {
     cursor: pointer;
     text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .match-history-container {
@@ -1026,6 +1027,12 @@ ul {
 .current-user-lose{
     font-weight: bold;
     color: rgb(161, 30, 30);
+}
+
+.match-history-btn-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .match-history-btn {
@@ -1136,4 +1143,17 @@ ul {
     color: #000; /* Adjust the text color as needed */
     padding: 2px 5px; /* Adjust the padding as needed */
     font-size: 0.8rem; /* Adjust the font size as needed */
+}
+
+.leaderboard-item.current-user {
+    background-color: #1a8cc1;
+    font-weight: bold;
+  }
+
+.leaderboard-note {
+    color: rgb(229, 37, 37);
+}
+
+.match-history-title {
+    margin: 5px 0;
 }
