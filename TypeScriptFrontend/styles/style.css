@@ -1002,6 +1002,7 @@ ul {
 .player-name {
     cursor: pointer;
     text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .match-history-container {
