@@ -42,7 +42,7 @@ def make_nuke(remove_node):
     def nuke_effect(data, player):
         node = data[0]
         remove_node(node)
-        if node.owner.count == 0:
+        if node.owner and node.owner.count == 0:
             node.owner.killed_event(player)
             print("someone is nuked out")
 

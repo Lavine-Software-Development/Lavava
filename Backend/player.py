@@ -10,7 +10,6 @@ from constants import (
     KILL_BONUS,
     OVERTIME_BONUS,
     TIME_AMOUNT,
-    ELIXIR_CAP,
 )
 from ae_validators import make_ability_validators
 from player_state import PlayerState
@@ -31,6 +30,9 @@ class DefaultPlayer(JsonableTick):
 
     def set_abilities(self, chosen_abilities, ability_effects, board, settings):
         pass
+
+        leftover = START_CREDITS - sum(BREAKDOWNS[ab].credits * self.abilities[ab].remaining for ab in chosen_abilities)
+        self.credits += leftover
 
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):

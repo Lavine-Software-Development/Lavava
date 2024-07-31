@@ -15,7 +15,7 @@ const Lobby: React.FC = () => {
     const lobbyData = (code: string, count: number, mode: string) => {
         if (code === "INVALID") {
             network?.disconnectWebSocket();
-            navigate("/home");
+            navigate("/home?invalidCode=true");
         }
         setGameID(code);
         setPlayerCount(count);

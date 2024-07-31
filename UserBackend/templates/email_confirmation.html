@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmation Success</title>
+
+</head>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-image: url("{{ url_for('static', filename='background.png') }}");
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    position: relative;
+    z-index: 2;
+}
+
+h1 {
+    color: #333;
+}
+
+p {
+    color: #555;
+}
+
+.button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.firework {
+    position: absolute;
+    background: rgba(255, 204, 0, 0.8); /* Default color */
+    animation: firework 1s ease-in-out infinite;
+    border-radius: 50%;
+    --size: calc(5px + 20px * var(--randomSize)); /* Random size */
+    width: var(--size);
+    height: var(--size);
+    background: var(--randomColor); /* Random color */
+}
+
+@keyframes firework {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+        left: var(--randomX); /* Random horizontal start */
+        top: var(--randomY); /* Random vertical start */
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+
+</style>
+<body>
+    <div class="container">
+        <h1>Email Confirmation Success!</h1>
+        <p>Your email has been successfully confirmed. Thank you for verifying your email address.</p>
+        <button class="button" onclick="window.close()">Close This Tab</button>
+    </div>
+
+    <!-- Firework Particles -->
+    <!-- Generating multiple fireworks using JavaScript -->
+    <!-- <script>
+        const fireworksCount = 12;
+        const colors = ['#FF6347', '#4682B4', '#32CD32', '#FFD700', '#FF69B4', '#00FA9A', '#800080', '#00BFFF', '#FF4500', '#D2691E', '#006400', '#8B0000'];
+        for (let i = 0; i < fireworksCount; i++) {
+            const fw = document.createElement('div');
+            fw.className = 'firework';
+            fw.style.setProperty('--randomX', `${Math.random() * 100}%`);
+            fw.style.setProperty('--randomY', `${Math.random() * 100}%`);
+            fw.style.setProperty('--randomSize', Math.random() * 0.5 + 0.5); // size ranges from 0.5 to 1
+            fw.style.setProperty('--randomColor', colors[Math.floor(Math.random() * colors.length)]);
+            document.body.appendChild(fw);
+        }
+    </script> -->
+</body>
+</html>

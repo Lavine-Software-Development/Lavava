@@ -11,8 +11,17 @@ const Login: React.FC<LoginProps> = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const [isLoading, setIsLoading] = useState(false); // New state for loading
+    const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    }
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value);
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('userToken');
@@ -83,16 +92,28 @@ const Login: React.FC<LoginProps> = () => {
                 </div>
                 <div className="input-group">
                     <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        id="password"
-                        placeholder="Password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <i className="fas fa-lock"></i>
+                    <div className="password-input-wrapper">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            id="password"
+                            placeholder="Password"
+                            required
+                            value={password}
+                            onChange={handlePasswordChange}
+                        />
+                        <button
+                            type="button"
+                            className="password-toggle"
+                            onClick={togglePasswordVisibility}
+                        >
+                            <img 
+                                src={showPassword ? './assets/eye-off.png' : './assets/eye.png'} 
+                                alt={showPassword ? "Hide password" : "Show password"}
+                                className="eye-icon"
+                            />
+                        </button>
+                    </div>
                 </div>
                 {error && <div className="error-message">{error}</div>}
                 {isLoading && <p className="loading-message">Please wait...</p>}

@@ -1,14 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../styles/style.css'; // Adjust path as needed
 import config from '../env-config';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 const ForgotPassword: React.FC = () => {
+    const navigate = useNavigate();
+    const [isTokenValid, setIstokenValid] = useState<boolean | null>(null);
+
+    // check if login token has expired
+    useEffect(() => {
+        const validateToken = () => {
+            const token = localStorage.getItem("userToken");
+            if (!token){
+                setIstokenValid(false);
+                return;
+            }
+
+            try {
+                const decodedToken = jwtDecode(token);
+                const currentTime = Date.now() / 1000; // convert to seconds
+                if (decodedToken.exp < currentTime) {
+                    localStorage.removeItem("userToken");
+                    setIstokenValid(false);
+                } else {
+                    setIstokenValid(true);
+                }
+            } catch (error) {
+                console.error("Error deccoding token:", error);
+                localStorage.removeItem("userToken");
+                setIstokenValid(false);
+            }
+        };
+
+        validateToken();
+    }, []);
+
+    useEffect(() => {
+        if (isTokenValid === false) {
+            navigate("/login")
+        }
+    }, [isTokenValid, navigate]);
+
     const [password, setPassword] = useState('');
     const [repeatPassword, setRepeatPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
-    const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();

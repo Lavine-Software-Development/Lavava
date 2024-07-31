@@ -13,6 +13,65 @@
     padding-left: 0.5rem;
 }
 
+/* Hide default reveal password icon for Webkit browsers (Chrome, Safari, newer versions of Edge) */
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+
+    right: 0;
+}
+
+/* Hide default reveal password icon for Firefox */
+input[type="password"]::-moz-reveal-password-button {
+    display: none !important;
+}
+
+/* Hide default reveal password icon for Internet Explorer and Edge (pre-Chromium) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none !important;
+}
+
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper input {
+    padding-right: 40px; /* Make room for the toggle button */
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 55%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.password-toggle:focus {
+    outline: none;
+}
+
+.eye-icon {
+    width: 20px;
+    height: 20px; 
+    opacity: 0.6;   
+}
+
+.password-toggle:hover .eye-icon {
+    opacity: 1;  /* Full opacity on hover */
+}
+
+/* Ensure the icon doesn't interfere with the input */
+.password-input-wrapper .fas.fa-lock {
+    right: 40px;
+}
+
 .password-requirements {
     list-style: none;
     padding: 0.5rem 0 0 0;
@@ -217,14 +276,11 @@ input::placeholder {
 }
 
 .info-card {
-    width: 300px;
+    width: 400px;
 }
 
-.info-card .elo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
+.info-card h2 .elo-value {
+    color: white;
 }
 
 .ability-grid {
@@ -530,6 +586,8 @@ ul {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-left: 8px;
+    margin-right: 8px;
 }
 
 .popup button:hover {
@@ -942,6 +1000,79 @@ ul {
 .player-name {
     cursor: pointer;
     text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.match-history-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.game-history-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.current-user-win{
+    font-weight: bold;
+    color: rgb(46, 197, 46);
+}
+
+.current-user-lose{
+    font-weight: bold;
+    color: rgb(161, 30, 30);
+}
+
+.match-history-btn-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.match-history-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.match-history-btn:hover {
+    background-color: #218838;
+}
+
+.game-history-item p {
+    margin: 5px 0;
+}
+
+.game-history-item ul {
+    list-style-type: none;
+    padding-left: 10px;
+}
+
+.game-history-item li {
+    margin: 3px 0;
+}
+
+.sort-order-btn {
+    background-color: #08190c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.sort-arrow {
+    margin-left: 5px;
+    font-size: 1.2em;
 }
 
 .abilities-container-friendly {
@@ -1010,4 +1141,17 @@ ul {
     color: #000; /* Adjust the text color as needed */
     padding: 2px 5px; /* Adjust the padding as needed */
     font-size: 0.8rem; /* Adjust the font size as needed */
+}
+
+.leaderboard-item.current-user {
+    background-color: #1a8cc1;
+    font-weight: bold;
+  }
+
+.leaderboard-note {
+    color: rgb(229, 37, 37);
+}
+
+.match-history-title {
+    margin: 5px 0;
 }

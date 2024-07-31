@@ -4,13 +4,25 @@ import { Link, useNavigate } from 'react-router-dom';
 import config from '../env-config';
 import { abilityColors } from "../user-flow/ability_utils";
 
+interface PlayerData {
+    username: string;
+    rank: number;
+    is_current_user: boolean;
+}
+
+interface GameData {
+    game_id: number;
+    game_date: string;
+    players: PlayerData[];
+}
+
 interface ProfileData {
     userName: string;
     displayName: string;
     email: string;
     abilities: { name: string; count: number }[];
     elo: number;
-    past_games: number[];
+    last_game: GameData | null;
 }
 
 const Profile: React.FC = () => {
@@ -21,25 +33,23 @@ const Profile: React.FC = () => {
         email: 'Loading...',
         abilities: [], // Default to at least one empty list
         elo: 1000,
-        past_games: [],
+        last_game: null,
     });
 
     const [isEditing, setIsEditing] = useState(false);
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
     const [popupMessage, setPopupMessage] = useState('');
     const [showPopup, setShowPopup] = useState(false);
-    const [showChangePassword, setShowChangePassword] = useState(false);
 
     const handleChangePassword = () => {
-        setShowChangePassword(true);
         navigate("/change-password");
-        console.log("Change password functionality to be implemented");
     };
 
+    const handleMatchHistoryClick = () => {
+        navigate("/match-history");
+    };
 
     const handleLogout = () => {
-
-        
         localStorage.removeItem("userToken");
         sessionStorage.clear();
         navigate("/login");
@@ -102,6 +112,10 @@ const Profile: React.FC = () => {
                 if (response.ok) {
                     setProfileData(data);
                 } else {
+                    if (data.message === 'Login Token has expired!') {
+                        localStorage.removeItem('userToken');
+                        navigate("/login");
+                    }
                     throw new Error(data.message);
                 }
             } catch (error) {
@@ -158,34 +172,52 @@ const Profile: React.FC = () => {
             </div>
             <div className="info-cards">
                 <div className="info-card linear-gradient">
-                <h2 className="text-shadow default-deck-text">Default Deck</h2>
-                <div className="abilities-container-profile">
-                {profileData.abilities.map((item, index) => (
-                    <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
-                    <div className="ability-icon">
-                        <img
-                        src={`./assets/abilityIcons/${item.name}.png`}
-                        alt={item.name}
-                        className="ability-img"
-                        />
+                    <h2 className="text-shadow default-deck-text">Default Deck</h2>
+                    <div className="abilities-container-friendly">
+                    {profileData.abilities.map((item, index) => (
+                        <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
+                        <div className="ability-icon">
+                            <img
+                            src={`./assets/abilityIcons/${item.name}.png`}
+                            alt={item.name}
+                            className="ability-img"
+                            />
+                        </div>
+                        <div className="ability-count">{item.count}</div>
+                        </div>
+                    ))}
                     </div>
-                    <div className="ability-count">{item.count}</div>
+                </div>
+                    <div className="info-card linear-gradient">
+                        <h2><span className="text-shadow elo-text">ELO:</span> <span className="elo-value">{profileData.elo}</span></h2>
+                        <h2 className="text-shadow">Most Recent Ladder Game</h2>
+                        {profileData.last_game ? (
+                            <div className="game-history-item">
+                                <p><strong>Date:</strong> {new Date(profileData.last_game.game_date).toLocaleDateString()} {new Date(profileData.last_game.game_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p><strong>Players:</strong></p>
+                                <ul>
+                                    {profileData.last_game.players.map((player, index) => {
+                                        let className = '';
+                                        if (player.is_current_user) {
+                                            className = player.rank === 1 ? 'current-user-win' : 'current-user-lose';
+                                            }
+                                        return (
+                                            <li key={index} className={className}>
+                                            {player.username} - Rank: {player.rank}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        ) : (
+                            <p>No recent games played.</p>
+                        )}
+                        <div className="match-history-btn-container">
+                            <button className="match-history-btn" onClick={handleMatchHistoryClick}>Match History</button>
+                        </div>
                     </div>
-                ))}
                 </div>
             </div>
-            <div className="info-card linear-gradient">
-                <div className="elo-container">
-                    <h2>
-                        <span className="text-shadow elo-text">ELO:</span> <span className="elo-value">{profileData.elo}</span>
-                    </h2>
-                </div>
-                {profileData.past_games.map((position, index) => (
-                    <p key={index}>Game {index + 1}: {position}</p>
-                ))}
-            </div>
-        </div>
-    </div>
     );
 };
 
