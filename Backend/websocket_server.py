@@ -33,14 +33,15 @@ class WebSocketServer():
         except Exception as e:
             logger.exception(f"Error in handler: {str(e)}")
 
-    def waiting_ladder_count(self, player_count):
+    def waiting_ladder_count(self, player_count, mode):
+        settings_add_on = mode[0] + str(player_count)
         logger.debug(f"Checking for waiting ladder with player count: {player_count}")
         for code in self.waiting_players:
-            if len(code) == 5 and code.startswith(player_count):
+            if len(code) == 6 and code.startswith(settings_add_on):
                 logger.info(f"Found waiting ladder: {code}")
                 return code
         logger.info(f"No waiting ladder found for player count: {player_count}")
-        return False
+        return settings_add_on + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
 
     async def process_message(self, websocket, data):
         logger.debug(f"Processing message: {data}")
@@ -93,18 +94,18 @@ class WebSocketServer():
         player_count = data.get("players") # will be null for player_type JOIN
         abilities = data.get("abilities")
         token = data.get("token")
+        mode = data.get("mode")
 
         logger.info(f"Setting up game: Type={player_type}, Players={player_count}")
 
         if player_type == "LADDER":
-            game_code = self.waiting_ladder_count(str(player_count)) or str(player_count) + ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
+            game_code = self.waiting_ladder_count(str(player_count), mode)
         elif player_type == "HOST":
             game_code = str(random.randint(1000, 9999))
         else:
             game_code = data.get("game_id")
 
         if player_type in ("HOST", "LADDER") and game_code not in self.waiting_players:
-            mode = data.get("mode")
             self.waiting_players[game_code] = Batch(int(player_count), player_type == "LADDER", mode, token, websocket, abilities)
             logger.info(f"Created new game: {game_code}")
         elif player_type in ("JOIN", "LADDER") and game_code in self.waiting_players:

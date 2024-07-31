@@ -705,13 +705,18 @@ export class MainScene extends Scene {
                 
                         const x = (position.xPercent / 100) * (this.sys.game.config.width as number);
                         const y = (position.yPercent / 100) * (this.sys.game.config.height as number);
+
+                        let count_y = y - 20;
+                        if (this.settings.starting_structures) {
+                            count_y = y -  40;
+                        }
                 
                         const playerColor = this.rgbToHex(this.otherPlayers[playerName].color);
                 
                         // Display regular count
                         const countText = this.add.text(
                             x,
-                            y - 40, // 30 pixels above the capital count
+                            count_y, // 30 pixels above the capital count
                             `Count: `,
                             {
                                 fontFamily: "Arial",
@@ -723,7 +728,7 @@ export class MainScene extends Scene {
                         
                         const countNumber = this.add.text(
                             countText.x + countText.width,
-                            y - 40,
+                            count_y,
                             `${regularCount}`,
                             {
                                 fontFamily: "Arial",
@@ -735,32 +740,35 @@ export class MainScene extends Scene {
                 
                         this.countTexts.push(countText, countNumber);
                 
-                        // Display full capital count
-                        const capitalText = this.add.text(
-                            x,
-                            y - 15,
-                            `Full Capitals: `,
-                            {
-                                fontFamily: "Arial",
-                                fontSize: "23px",
-                                color: playerColor,
-                            }
-                        );
-                        capitalText.setOrigin(0, 1);  // Align to bottom-left
-                
-                        const capitalNumber = this.add.text(
-                            capitalText.x + capitalText.width,
-                            y - 15,
-                            `${capitalCount}`,
-                            {
-                                fontFamily: "Arial",
-                                fontSize: "23px",
-                                color: '#000000', // Black color for the number
-                            }
-                        );
-                        capitalNumber.setOrigin(0, 1);
-                
-                        this.capitalTexts.push(capitalText, capitalNumber);
+                        if (this.settings.starting_structures) {
+                            // Display full capital count
+                            const capitalText = this.add.text(
+                                x,
+                                y - 15,
+                                `Full Capitals: `,
+                                {
+                                    fontFamily: "Arial",
+                                    fontSize: "23px",
+                                    color: playerColor,
+                                }
+                            );
+                            capitalText.setOrigin(0, 1);  // Align to bottom-left
+                    
+                            const capitalNumber = this.add.text(
+                                capitalText.x + capitalText.width,
+                                y - 15,
+                                `${capitalCount}`,
+                                {
+                                    fontFamily: "Arial",
+                                    fontSize: "23px",
+                                    color: '#000000', // Black color for the number
+                                }
+                            );
+                            capitalNumber.setOrigin(0, 1);
+
+                            this.capitalTexts.push(capitalText, capitalNumber);
+                        }
+
                     });
                 };
 
