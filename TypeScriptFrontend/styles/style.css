@@ -1152,3 +1152,7 @@ ul {
 .leaderboard-note {
     color: rgb(229, 37, 37);
 }
+
+.match-history-title {
+    margin: 5px 0;
+}
