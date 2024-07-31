@@ -1,4 +1,4 @@
-import { Node } from "../objects/node";
+import { Node, PortNode, WallNode } from "../objects/node";
 import { Highlight } from "../objects/highlight";
 import { CannonState, stateDict } from "../objects/States";
 import {
@@ -552,19 +552,37 @@ export class MainScene extends Scene {
 
         this.displayNames(display);
 
-        this.nodes = Object.fromEntries(
-            Object.keys(n).map((id) => [
-                id,
-                new Node(
-                    Number(id),
-                    n[id]["pos"] as [number, number],
-                    n[id]["is_port"],
-                    stateDict[n[id]["state"]](),
-                    n[id]["value"],
-                    this
-                ),
-            ])
-        );
+        this.nodes = {};
+
+        if (this.settings.walls) {
+            this.nodes = Object.fromEntries(
+                Object.keys(n).map((id) => [
+                    id,
+                    new WallNode(
+                        Number(id),
+                        n[id]["pos"] as [number, number],
+                        n[id]["is_port"],
+                        stateDict[n[id]["state"]](),
+                        n[id]["value"],
+                        this
+                    ),
+                ])
+            );
+        } else {
+            this.nodes = Object.fromEntries(
+                Object.keys(n).map((id) => [
+                    id,
+                    new PortNode(
+                        Number(id),
+                        n[id]["pos"] as [number, number],
+                        n[id]["is_port"],
+                        stateDict[n[id]["state"]](),
+                        n[id]["value"],
+                        this
+                    ),
+                ])
+            );
+        }
 
         this.parse(this.edges, e, false);
 

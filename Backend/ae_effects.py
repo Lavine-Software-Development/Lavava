@@ -152,7 +152,7 @@ def pump_effect(data, player):
 def make_ability_effects(board, settings):
     return {
         BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE, settings["bridge_burn"], settings["bridge_from_port_needed"]),
-        D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE, settings["bridge_burn"]),
+        D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE, settings["bridge_burn"], settings["bridge_from_port_needed"]),
         MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE, settings["bridge_burn"]),
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,

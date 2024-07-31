@@ -31,6 +31,7 @@ class ServerGame(JsonableTick):
         start_values = {'board'}
         tick_values = {'countdown_timer', 'gs', 'extra_info', 'counts'}
         recurse_values = {'board'}
+        self.settings = settings
         super().__init__('game', start_values, recurse_values, tick_values)
 
         self.restart(settings)
@@ -158,7 +159,7 @@ class ServerGame(JsonableTick):
         self.extra_info.clear()
 
     def end_game_events(self):
-        self.board.end_game()
+        self.board.end_game(self.settings['end_game_make_ports'])
         for player in self.player_dict.values():
             player.overtime_bonus()
         self.update_extra_info(("End Game", OVERTIME_BONUS))

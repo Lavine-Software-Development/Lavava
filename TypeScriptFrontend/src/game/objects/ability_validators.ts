@@ -263,7 +263,7 @@ function newEdgeValidator(
     };
 
     return {
-        [KeyCodes.D_BRIDGE_CODE]: fullSizeEdgeValidator,
+        [KeyCodes.D_BRIDGE_CODE]: bridgeFromPortNeeded ? fullSizeEdgeValidator : fullSizeToNodeEdgeValidator,
         [KeyCodes.MINI_BRIDGE_CODE]: miniBridgeValidator,
         [KeyCodes.BRIDGE_CODE]: bridgeFromPortNeeded ? fullSizeEdgeValidator : fullSizeToNodeEdgeValidator,
     };
