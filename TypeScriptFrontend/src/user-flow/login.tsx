@@ -11,9 +11,8 @@ const Login: React.FC<LoginProps> = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const [isLoading, setIsLoading] = useState(false); // New state for loading
+    const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [maskedPassword, setMaskedPassword] = useState("");
     const navigate = useNavigate();
 
     const togglePasswordVisibility = () => {
@@ -29,9 +28,7 @@ const Login: React.FC<LoginProps> = () => {
         if (token) {
             navigate('/home');  // Redirect to home if token exists
         }
-        // Update masked password whenever the actual password changes
-        setMaskedPassword(password.replace(/./g, '•'));
-    }, [navigate, password]);
+    }, [navigate]);
 
     const generateGuestToken = () => {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -97,24 +94,13 @@ const Login: React.FC<LoginProps> = () => {
                     <label htmlFor="password">Password</label>
                     <div className="password-input-wrapper">
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             name="password"
-                            id="password-masked"
+                            id="password"
                             placeholder="Password"
                             required
                             value={password}
                             onChange={handlePasswordChange}
-                            style={{ display: showPassword ? 'none' : 'block' }}
-                        />
-                        <input
-                            type="text"
-                            name="password-visible"
-                            id="password-visible"
-                            placeholder="Password"
-                            required
-                            value={password}
-                            onChange={handlePasswordChange}
-                            style={{ display: showPassword ? 'block' : 'none' }}
                         />
                         <button
                             type="button"
