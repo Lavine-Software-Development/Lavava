@@ -14,7 +14,7 @@ from itsdangerous import SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_, desc, func
+from sqlalchemy import or_, desc, func, text
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from sqlalchemy.types import Text
 from dotenv import load_dotenv
@@ -515,24 +515,38 @@ def get_profile(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
         if user:
-            most_recent_game = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).first()
+            # Use a SQL query to get the most recent game containing the exact username
+            query = text("""
+                SELECT * FROM game_history
+                WHERE json_array_length(usernames) > 0
+                AND usernames LIKE :username
+                ORDER BY game_date DESC
+                LIMIT 1
+            """)
+            
+            most_recent_game = db.session.execute(query, {'username': f'%"{user.username}"%'}).fetchone()
+
             last_game_data = None
             if most_recent_game:
-                last_game_data = {
-                    "game_id": most_recent_game.id,
-                    "game_date": most_recent_game.game_date.isoformat(),
-                    "players": []
-                }
-                for username, rank in zip(most_recent_game.usernames_list, most_recent_game.user_ranks_list):
-                    player_data = {
-                        "username": username,
-                        "rank": rank,
-                        "is_current_user": (username == user.username)
+                usernames = json.loads(most_recent_game.usernames)
+                user_ranks = json.loads(most_recent_game.user_ranks)
+                
+                if user.username in usernames:  # Extra check to ensure exact match
+                    last_game_data = {
+                        "game_id": most_recent_game.id,
+                        "game_date": most_recent_game.game_date.format(),
+                        "players": []
                     }
-                    last_game_data["players"].append(player_data)
+                    for username, rank in zip(usernames, user_ranks):
+                        player_data = {
+                            "username": username,
+                            "rank": int(rank),
+                            "is_current_user": (username == user.username)
+                        }
+                        last_game_data["players"].append(player_data)
 
-                # Sort players by rank
-                last_game_data["players"].sort(key=lambda x: x["rank"])
+                    # Sort players by rank
+                    last_game_data["players"].sort(key=lambda x: x["rank"])
 
             return jsonify({
                 "userName": user.username,
@@ -562,7 +576,6 @@ def get_profile(current_user):
                 ]
             }
         })
-
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
@@ -965,23 +978,37 @@ def get_match_history(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
         if user:
-            games = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).limit(20).all()
+            # Use a SQL query to filter games containing the exact username
+            query = text("""
+                SELECT * FROM game_history
+                WHERE json_array_length(usernames) > 0
+                AND usernames LIKE :username
+                ORDER BY game_date DESC
+                LIMIT 20
+            """)
+            
+            games = db.session.execute(query, {'username': f'%"{user.username}"%'}).fetchall()
+
             match_history = []
             for game in games:
-                game_data = {
-                    "game_id": game.id,
-                    "game_date": game.game_date.isoformat(),
-                    "players": []
-                }
-                for username, rank in zip(game.usernames_list, game.user_ranks_list):
-                    player_data = {
-                        "username": username,
-                        "rank": rank,
-                        "is_current_user": (username == user.username)
+                usernames = json.loads(game.usernames)
+                user_ranks = json.loads(game.user_ranks)
+                if user.username in usernames:  # Extra check to ensure exact match
+                    game_data = {
+                        "game_id": game.id,
+                        "game_date": game.game_date.format(),
+                        "players": []
                     }
-                    game_data["players"].append(player_data)
-                game_data["players"].sort(key=lambda x: x["rank"])
-                match_history.append(game_data)
+                    for username, rank in zip(usernames, user_ranks):
+                        player_data = {
+                            "username": username,
+                            "rank": int(rank),
+                            "is_current_user": (username == user.username)
+                        }
+                        game_data["players"].append(player_data)
+                    game_data["players"].sort(key=lambda x: x["rank"])
+                    match_history.append(game_data)
+            
             return jsonify({"match_history": match_history})
         else:
             return jsonify({"error": "User not found"}), 404
