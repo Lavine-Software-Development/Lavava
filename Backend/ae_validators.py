@@ -167,7 +167,7 @@ def make_new_edge_ports(check_new_edge, player, from_port_needed):
 
     return {
         BRIDGE_CODE: to_node_dict[from_port_needed],
-        D_BRIDGE_CODE: new_edge_ports,
+        D_BRIDGE_CODE: to_node_dict[from_port_needed],
         MINI_BRIDGE_CODE: mini_bridge_validator,
     }
 

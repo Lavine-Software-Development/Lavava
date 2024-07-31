@@ -13,8 +13,6 @@ export class Node extends IDItem implements INode {
     pos: Phaser.Math.Vector2;
     percents: [number, number];
     is_port: boolean;
-    portPercent: number;
-    ports: Array<number>;
     private _state: State;
     private _value: number;
     delayChange = false;
@@ -23,7 +21,7 @@ export class Node extends IDItem implements INode {
     private _effects: Set<string>;
     private _owner: OtherPlayer | null;
     private _scene: Phaser.Scene;
-    private graphics: Phaser.GameObjects.Graphics;
+    graphics: Phaser.GameObjects.Graphics;
     private cannonGraphics: Phaser.GameObjects.Graphics;
     edges: IEdge[];
 
@@ -39,8 +37,7 @@ export class Node extends IDItem implements INode {
         this.percents = [pos[0] / 1000, pos[1] / 700];
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
         this.is_port = is_port;
-        this.portPercent = 1;
-        this.ports = this.is_port ? random_equal_distributed_angles(PORT_COUNT) : [];
+
         this.state = state;
         this.value = value;
         this.edges = [];
@@ -169,14 +166,15 @@ export class Node extends IDItem implements INode {
         return this.value >= this.state.full_size;
     }
 
-    get portCount(): number {
-        return this.ports.length;
-    }
     set scene(scene: Phaser.Scene) {
         this._scene = scene;
         this.resize();
         this.graphics = this._scene.add.graphics();
         this.cannonGraphics = this._scene.add.graphics();
+    }
+
+    drawSurrounding(): void {
+        // pass
     }
 
     draw(): void {
@@ -195,17 +193,7 @@ export class Node extends IDItem implements INode {
             }
 
             if (this.owner) {
-                if (this.is_port) {
-                    this.drawPorts(Colors.BROWN);
-                } else if (this.ports.length > 0) {
-                    this.drawPorts(Colors.ORANGE);
-                    if (this.portPercent > 0) {
-                        this.portPercent -= 0.02;
-                    }
-                    else {
-                        this.ports = [];
-                    }
-                }
+                this.drawSurrounding()
             }
 
             this.graphics.fillStyle(this.phaserColor, 1);
@@ -273,14 +261,6 @@ export class Node extends IDItem implements INode {
         }
     }
 
-    drawPorts(color: readonly [number, number, number]): void {
-        const portWidth = this.size;
-        const portHeight = this.size * 1.3;
-        this.ports.forEach((angle) => {
-            this.drawRotatedRectangle(angle, portWidth * this.portPercent, portHeight * this.portPercent, color);
-        });
-    }
-
     drawRotatedRectangle(
         angle: number,
         portWidth: number,
@@ -333,3 +313,101 @@ export class Node extends IDItem implements INode {
 
 }
 
+
+export class PortNode extends Node {
+    portPercent: number;
+    ports: Array<number>;
+
+    constructor(
+        id: number,
+        pos: [number, number],
+        is_port: boolean,
+        state: State,
+        value: number,
+        _scene: Phaser.Scene
+    ) {
+        super(id, pos, true, state, value, _scene);
+        this.portPercent = 1;
+        this.ports = random_equal_distributed_angles(PORT_COUNT);
+    }
+
+    drawSurrounding(): void {
+        if (this.is_port) {
+            this.drawPorts(Colors.BROWN);
+        } else if (this.ports.length > 0) {
+            this.drawPorts(Colors.ORANGE);
+            if (this.portPercent > 0) {
+                this.portPercent -= 0.02;
+            }
+            else {
+                this.ports = [];
+            }
+        }
+    }
+
+    drawPorts(color: readonly [number, number, number]): void {
+        const portWidth = this.size;
+        const portHeight = this.size * 1.3;
+        this.ports.forEach((angle) => {
+            this.drawRotatedRectangle(angle, portWidth * this.portPercent, portHeight * this.portPercent, color);
+        });
+    }
+}
+
+export class WallNode extends Node {
+    private readonly waveCount: number = 8;
+    private readonly waveAmplitude: number = 0.1;
+    private readonly wallColor: number = phaserColor(Colors.DARK_GRAY); // Brick color
+
+    drawSurrounding(): void {
+        if (!this.is_port) {
+            this.drawWavyWall();
+        }
+    }
+
+    private drawWavyWall(): void {
+        const graphics = this.graphics;
+        const centerX = this.pos.x;
+        const centerY = this.pos.y;
+        const outerRadius = this.size * 1.3;
+        const innerRadius = this.size * 1.1;
+
+        graphics.fillStyle(this.wallColor, 1);
+
+        graphics.beginPath();
+
+        // Draw outer wavy circle
+        for (let i = 0; i <= 360; i++) {
+            const angle = Phaser.Math.DegToRad(i);
+            const waveOffset = Math.sin(angle * this.waveCount) * this.waveAmplitude;
+            const x = centerX + (outerRadius + waveOffset * outerRadius) * Math.cos(angle);
+            const y = centerY + (outerRadius + waveOffset * outerRadius) * Math.sin(angle);
+
+            if (i === 0) {
+                graphics.moveTo(x, y);
+            } else {
+                graphics.lineTo(x, y);
+            }
+        }
+
+        // Draw inner circle (counterclockwise)
+        for (let i = 360; i >= 0; i--) {
+            const angle = Phaser.Math.DegToRad(i);
+            const x = centerX + innerRadius * Math.cos(angle);
+            const y = centerY + innerRadius * Math.sin(angle);
+            graphics.lineTo(x, y);
+        }
+
+        graphics.closePath();
+        graphics.fillPath();
+
+        // Add a stroke to the outer edge for definition
+        graphics.lineStyle(2, phaserColor(Colors.BROWN), 1);
+        graphics.strokePath();
+    }
+
+    draw(): void {
+        this.drawWavyWall(); // Draw the wall first
+        super.draw(); // Then draw the node on top
+    }
+}
