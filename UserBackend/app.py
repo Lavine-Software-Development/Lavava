@@ -153,6 +153,7 @@ def after_request(response):
         response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
     
     return response
+
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'OPTIONS':
@@ -750,8 +751,88 @@ def username_to_elo(name: str):
         dummy = {"other": 1200, "default": 1300}
         return dummy.get(name, 1100)  # Def
     
-@app.route('/abilities', methods=['GET'])
-def get_abilities():
+SPAWN_CODE = 115
+FREEZE_CODE = 102
+BRIDGE_CODE = 97
+D_BRIDGE_CODE = 100
+ZOMBIE_CODE = 122
+RAGE_CODE = 114
+BURN_CODE = 98
+NUKE_CODE = 110
+POISON_CODE = 112
+CAPITAL_CODE = 99
+CANNON_CODE = 101
+PUMP_CODE = 117
+MINI_BRIDGE_CODE = 109
+    
+@app.route('/settings/Royale', methods=['GET'])
+def get_royale_settings():
+    settings = {
+        "ability_type": "elixir",
+        "elixir_cap": 7,
+        "elixir_rate": 4.5,
+        "port_percentage": 2/3,
+        "starting_structures": False,
+        "nuke_type": "neighbor",
+        "bridge_burn": False,
+        "bridge_from_port_needed": True,
+        "deck_size": 5,
+        "forced_deck": True,
+        "deck": [FREEZE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, RAGE_CODE, NUKE_CODE]
+    }
+    return jsonify(settings)
+
+@app.route('/settings/Original', methods=['GET'])
+def get_og_settings():
+    settings = {
+        "ability_type": "credits",
+        "credit_cap": 20,
+        "port_percentage": 2/3,
+        "starting_structures": True,
+        "starting_land_capitals": 3,
+        "starting_island_capitals": 1,
+        "nuke_type": "structure_range",
+        "bridge_burn": False,
+        "bridge_from_port_needed": False,
+        "deck_size": 4,
+        "forced_deck": False,
+    }
+    return jsonify(settings)
+    
+@app.route('/abilities/Royale', methods=['GET'])
+def get_royale_abilities():
+    abilities = [
+        {
+            "name": "Bridge", 
+            "cost": 4,
+            "description": "Create a one-way bridge"
+        },
+        {
+            "name": "D-Bridge", 
+            "cost": 3,
+            "description": "Create a two-way bridge with"
+        },
+        {
+            "name": "Freeze", 
+            "cost": 2,
+            "description": "Convert edge to one-way"
+            
+        },
+        {
+            "name": "Rage", 
+            "cost": 5,
+            "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "Nuke", 
+            "cost": 6,
+            "description": "Destroy nearby dot and its bridges"
+        },
+    ]
+    return jsonify({"abilities": abilities, "options": 5})
+    
+@app.route('/abilities/Original', methods=['GET'])
+def get_og_abilities():
     abilities = [
         {
             "name": "Bridge", 
@@ -820,7 +901,7 @@ def get_abilities():
             "description": "Shoot energy at nodes"
         }
     ]
-    return jsonify({"abilities": abilities, "salary": 20})
+    return jsonify({"abilities": abilities, "salary": 20, "options": 4})
 
 
 @app.route('/save_game', methods=['POST'])

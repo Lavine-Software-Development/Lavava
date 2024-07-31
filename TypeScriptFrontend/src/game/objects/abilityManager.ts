@@ -1,4 +1,4 @@
-import { ReloadAbility } from "./ReloadAbility";
+import { AbstractAbility, CreditAbility, ElixirAbility } from "./ReloadAbility";
 import { IDItem } from "./idItem";
 import { Highlight } from "./highlight";
 import { Event } from "./event";
@@ -7,22 +7,23 @@ import { phaserColor } from "./utilities";
 import { Colors } from "./constants";
 import { ClickType } from "./enums";
 
+/**
+ * Represents an abstract class for managing abilities in a game.
+ * Child classes must implement the `clickable` method.
+ */
 export class AbstractAbilityManager {
-    abilities: { [key: number]: ReloadAbility };
+    abilities: { [key: number]: AbstractAbility };
     private events: { [key: number]: Event };
     private mode: number | null = null;
     private backupMode: number | null = null;
     clicks: IDItem[] = [];
     abilityText: Phaser.GameObjects.Text;
     BridgeGraphics: Phaser.GameObjects.Graphics;
-    _credits: number = 0;
-    bonusCreditsText: Phaser.GameObjects.Text;
 
     constructor(
         scene: Phaser.Scene,
-        abilities: { [key: number]: ReloadAbility },
+        abilities: { [key: number]: AbstractAbility },
         events: { [key: number]: Event },
-        bonusTextY: number
     ) {
         this.abilities = abilities;
         this.events = events;
@@ -37,33 +38,8 @@ export class AbstractAbilityManager {
             color: "#000000",
         });
 
-        this.bonusCreditsText = scene.add.text(x - 110, bonusTextY, "", {
-            fontSize: "60px",
-            align: "right",
-            color: "#000000",
-        });
-
         // Set origin to (1, 1) to align text to the bottom right
         this.abilityText.setOrigin(1, 1);
-    }
-
-    get credits(): number {
-        return this._credits;
-    }
-
-    set credits(value: number) {
-        this._credits = value;
-        if (value == 0) {
-            this.bonusCreditsText.setText("");
-            return
-        }
-        else {
-            this.updateBonusCreditsText(value);
-        }
-    }
-
-    updateBonusCreditsText(value: number): void {
-        this.bonusCreditsText.setText(`+${value}`);
     }
 
     forfeit(): void {
@@ -82,10 +58,6 @@ export class AbstractAbilityManager {
         // Remove the ability text if it exists
         if (this.abilityText) {
             this.abilityText.destroy();
-        }
-
-        if (this.bonusCreditsText) {
-            this.bonusCreditsText.destroy();
         }
     
         // Call delete on each ability
@@ -236,21 +208,7 @@ export class AbstractAbilityManager {
         return false;
     }
 
-    triangle_validate(position: Phaser.Math.Vector2): [IDItem, number] | false {
-        // loop through all the abilities values, and pass them into validate
-        for (const key in this.abilities) {
-            const ability = this.abilities[key];
-            if (ability.overlapsWithTriangle(position)) {
-                const item = this.validate(ability);
-                if (item) {
-                    return item;
-                }
-            }
-        }
-        return false;
-    }
-
-    get ability(): ReloadAbility | null {
+    get ability(): AbstractAbility | null {
         if (this.mode !== null && this.abilities[this.mode]) {
             return this.abilities[this.mode];
         }
@@ -279,9 +237,15 @@ export class AbstractAbilityManager {
     
         for (let key in this.abilities) {
             const isSelected = this.mode === parseInt(key);
-            let clickable = this.credits >= this.abilities[key].credits;
+            let clickable = this.clickable(key);
             this.abilities[key].draw(scene, isSelected, clickable);
         }
+    }
+
+    // make abstract method
+
+    clickable(key): boolean {
+        throw new Error("Method not implemented.");
     }
 
     private drawBridge(scene: Phaser.Scene) {
@@ -397,3 +361,162 @@ export class AbstractAbilityManager {
     
 }
 
+export class CreditAbilityManager extends AbstractAbilityManager {
+
+    _credits: number = 0;
+    bonusCreditsText: Phaser.GameObjects.Text;
+
+    constructor(
+        scene: Phaser.Scene,
+        abilities: { [key: number]: CreditAbility },
+        events: { [key: number]: Event },
+        bonusTextY: number
+    ) {
+        super(scene, abilities, events);
+
+        this.bonusCreditsText = scene.add.text(scene.sys.canvas.width - 90, bonusTextY, "", {
+            fontSize: "60px",
+            align: "right",
+            color: "#000000",
+        });
+    }
+
+    clickable(key): boolean {
+        return this.credits >= this.abilities[key].credits;
+    }
+
+    get credits(): number {
+        return this._credits;
+    }
+
+    set credits(value: number) {
+        this._credits = value;
+        if (value == 0) {
+            this.bonusCreditsText.setText("");
+            return
+        }
+        else {
+            this.updateBonusCreditsText(value);
+        }
+    }
+
+    updateBonusCreditsText(value: number): void {
+        this.bonusCreditsText.setText(`+${value}`);
+    }
+
+    triangle_validate(position: Phaser.Math.Vector2): [IDItem, number] | false {
+        // loop through all the abilities values, and pass them into validate
+        for (const key in this.abilities) {
+            const ability = this.abilities[key] as CreditAbility;
+            if (ability.overlapsWithTriangle(position)) {
+                const item = this.validate(ability);
+                if (item) {
+                    return item;
+                }
+            }
+        }
+        return false;
+    }
+
+    delete() {
+        super.delete();
+        
+        if (this.bonusCreditsText) {
+            this.bonusCreditsText.destroy();
+        }
+    }
+}
+
+
+export class ElixirAbilityManager extends AbstractAbilityManager {
+    private _elixir: number = 0;
+    private elixirCapacity: number;
+    private elixirBar: Phaser.GameObjects.Graphics;
+    private barWidth: number = 20;
+    private barPadding: number = 5;
+    private bar_color: readonly [number, number, number];
+
+    constructor(
+        scene: Phaser.Scene,
+        abilities: { [key: number]: ElixirAbility },
+        events: { [key: number]: Event },
+        capacity: number,
+        bar_color: readonly [number, number, number]
+    ) {
+        super(scene, abilities, events);
+        this.elixirCapacity = capacity;
+        this._elixir = 0;
+        this.bar_color = bar_color;
+
+        // Create the elixir bar
+        this.elixirBar = scene.add.graphics();
+        this.updateElixirBar(scene);
+    }
+
+    get elixir(): number {
+        return this._elixir;
+    }
+
+    set elixir(value: number) {
+        this._elixir = Math.min(value, this.elixirCapacity);
+        this.updateElixirBar(this.elixirBar.scene);
+    }
+
+    clickable(key: string): boolean {
+        return this.elixir >= this.abilities[key].elixir;
+    }
+
+    private updateElixirBar(scene: Phaser.Scene): void {
+        const canvasHeight = scene.sys.canvas.height;
+        const canvasWidth = scene.sys.canvas.width;
+        const abilityTextHeight = 40; // Approximate height for ability text
+        const topPadding = 20;
+
+        const barHeight = canvasHeight - abilityTextHeight - topPadding - this.barPadding * 2;
+        const barX = canvasWidth - this.barWidth - this.barPadding;
+        const barY = topPadding;
+
+        this.elixirBar.clear();
+
+        // Draw background
+        this.elixirBar.fillStyle(0xcccccc);
+        this.elixirBar.fillRect(barX, barY, this.barWidth, barHeight);
+
+        // Draw filled portion
+        const fillHeight = (this._elixir / this.elixirCapacity) * barHeight;
+        this.elixirBar.fillStyle(phaserColor(this.bar_color));
+        this.elixirBar.fillRect(barX, barY + barHeight - fillHeight, this.barWidth, fillHeight);
+
+        // Draw section dividers
+        const sectionHeight = barHeight / this.elixirCapacity;
+        const dividerThickness = 1;
+        const dividerSpacing = 1;
+
+        for (let i = 1; i < this.elixirCapacity; i++) {
+            const dividerY = barY + barHeight - i * sectionHeight;
+
+            // Draw first black line
+            this.elixirBar.fillStyle(0x000000);
+            this.elixirBar.fillRect(barX, dividerY - dividerThickness, this.barWidth, dividerThickness);
+
+            // Draw white space/line
+            this.elixirBar.fillStyle(0xFFFFFF);
+            this.elixirBar.fillRect(barX, dividerY - dividerThickness + dividerSpacing, this.barWidth, dividerThickness);
+
+            // Draw second black line
+            this.elixirBar.fillStyle(0x000000);
+            this.elixirBar.fillRect(barX, dividerY - dividerThickness + 2 * dividerSpacing, this.barWidth, dividerThickness);
+        }
+
+        // Draw border
+        this.elixirBar.lineStyle(2, 0x000000);
+        this.elixirBar.strokeRect(barX, barY, this.barWidth, barHeight);
+    }
+
+    delete() {
+        super.delete();
+        if (this.elixirBar) {
+            this.elixirBar.destroy();
+        }
+    }
+}

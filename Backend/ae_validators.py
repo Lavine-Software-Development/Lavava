@@ -32,7 +32,7 @@ def standard_node_attack(data, player):
     )
 
 
-def attack_validators(get_structures, player):
+def attack_validators(get_structures, player, nuke_type):
 
     def capital_ranged_node_attack(data):
         node = data[0]
@@ -46,7 +46,18 @@ def attack_validators(get_structures, player):
             return distance <= structure_nuke_range
 
         return default_node([node]) and any(in_structure_range(structure) for structure in structures)
+    
+    def neighbor_attack(data):
+        node = data[0]
+        if node.owner == player:
+            return True
+        for neighbor in node.neighbors:
+            if neighbor.owner == player:
+                return True
+        return False
 
+    if nuke_type == "neighbor":
+        return neighbor_attack
     return capital_ranged_node_attack
 
 
@@ -134,7 +145,7 @@ def valid_ability_for_credits(player, data):
     ability_code = data[0]
     return ability_code in player.abilities and BREAKDOWNS[ability_code].credits <= player.credits
 
-def make_new_edge_ports(check_new_edge, player):
+def make_new_edge_ports(check_new_edge, player, from_port_needed):
     def new_edge_ports(data):
         if all([node.is_port for node in data]):
             return no_crossovers(check_new_edge, data, player)
@@ -147,25 +158,27 @@ def make_new_edge_ports(check_new_edge, player):
     def check_mini_bridge_range(data):
         first_node, second_node = data
         distance = dist(first_node.pos, second_node.pos)
-        return distance <= MINI_BRIDGE_RANGE  # Adjust the range as needed
+        return distance <= MINI_BRIDGE_RANGE 
 
     def mini_bridge_validator(data):
         return check_mini_bridge_range(data) and new_edge_ports(data)
+    
+    to_node_dict = {False: only_to_node_port, True: new_edge_ports}
 
     return {
-        BRIDGE_CODE: only_to_node_port,
+        BRIDGE_CODE: to_node_dict[from_port_needed],
         D_BRIDGE_CODE: new_edge_ports,
-        MINI_BRIDGE_CODE: mini_bridge_validator,  # Add mini bridge validator
+        MINI_BRIDGE_CODE: mini_bridge_validator,
     }
 
 
-def make_ability_validators(board, player):
+def make_ability_validators(board, player, settings):
     return {
         SPAWN_CODE: unowned_node,
         BURN_CODE: owned_burnable_node,
         RAGE_CODE: no_click,
-        NUKE_CODE: attack_validators(board.get_player_structures, player),
-    } | validators_needing_player(player) | make_new_edge_ports(board.check_new_edge, player)
+        NUKE_CODE: attack_validators(board.get_player_structures, player, settings["nuke_type"]),
+    } | validators_needing_player(player) | make_new_edge_ports(board.check_new_edge, player, settings["bridge_from_port_needed"])
 
 
 def make_effect_validators(board):

@@ -11,13 +11,15 @@ const Lobby: React.FC = () => {
     const navigate = useNavigate();
     const network = useContext(NetworkContext);
     const [first, setFirst] = useState(true);
-    const lobbyData = (code: string, count: number) => {
+    const [gameMode, setGameMode] = useState("");
+    const lobbyData = (code: string, count: number, mode: string) => {
         if (code === "INVALID") {
             network?.disconnectWebSocket();
             navigate("/home?invalidCode=true");
         }
         setGameID(code);
         setPlayerCount(count);
+        setGameMode(mode);
         sessionStorage.setItem("key_code", code);
     };
 
@@ -79,12 +81,12 @@ const Lobby: React.FC = () => {
                     <div>
                         <h2 className="whiteText">Game Code: {gameID}</h2>
                         <h2 className="whiteText">
-                            {playerCount} Player Friendly Match
+                            {playerCount} Player {gameMode} Friendly Match
                         </h2>
                     </div>
                 ) : (
                     <h2 className="whiteText">
-                        {playerCount} Player Ladder Match
+                        {playerCount} Player {gameMode} Ladder Match
                     </h2>
                 )}
             </div>

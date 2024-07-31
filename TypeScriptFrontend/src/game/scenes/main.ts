@@ -9,6 +9,7 @@ import {
     EventCodes,
     PRE_STRUCTURE_RANGES,
     AbilityCredits,
+    AbilityElixir,
     AbilityReloadTimes,
     PlayerColors,
     NUKE_OPTION_STRINGS,
@@ -16,11 +17,11 @@ import {
     MINI_BRIDGE_RANGE,
 } from "../objects/constants";
 import { PlayerStateEnum as PSE, GameStateEnum as GSE } from "../objects/enums";
-import { ReloadAbility } from "../objects/ReloadAbility";
+import { AbstractAbility, CreditAbility, ElixirAbility } from "../objects/ReloadAbility";
 import { Event } from "../objects/event";
-import { AbstractAbilityManager } from "../objects/abilityManager";
+import { AbstractAbilityManager, CreditAbilityManager, ElixirAbilityManager } from "../objects/abilityManager";
 import { OtherPlayer } from "../objects/otherPlayer";
-import { MyPlayer } from "../objects/myPlayer";
+import { MyCreditPlayer, MyElixirPlayer } from "../objects/myPlayer";
 import {
     makeEventValidators,
     unownedNode,
@@ -55,7 +56,7 @@ export class MainScene extends Scene {
     private ps: PSE;
     private gs: GSE;
     private abilityManager: AbstractAbilityManager;
-    private mainPlayer: MyPlayer;
+    private mainPlayer: OtherPlayer;
     private otherPlayers: OtherPlayer[] = [];
     private network: Network;
     private burning: Node[] = [];
@@ -78,6 +79,8 @@ export class MainScene extends Scene {
     private navigate: Function;
     private reconnectionEvent: Phaser.Time.TimerEvent | null = null;
     private ratio: [number, number];
+    private settings: any;
+    private mode: string;
 
     private rainbowColors: string[] = [
         "#B8860B", // Dark Goldenrod
@@ -162,7 +165,6 @@ export class MainScene extends Scene {
         this.scale.on("resize", this.handleResize, this);
 
         this.startReconnectionCheck();
-        // this.setupNavigationHandlers();
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
@@ -177,11 +179,11 @@ export class MainScene extends Scene {
         const ab = makeAbilityValidators(
             this.mainPlayer,
             this.ratio,
+            this.settings,
             Object.values(this.nodes),
             this.getEdges.bind(this)
         );
         const events: { [key: number]: Event } = {};
-        const abilities: { [key: number]: ReloadAbility } = {};
         Object.values(EventCodes).forEach((eb: number) => {
             events[eb] = new Event(
                 VISUALS[eb],
@@ -192,38 +194,69 @@ export class MainScene extends Scene {
         });
 
         let y_position = 20;
-        const squareSize = 150; // Size of each square
         const spacing = 15; // Spacing between squares
-        const x_position = this.scale.width - squareSize - 10;
 
-        Object.entries(this.abilityCounts).forEach(([abk, count]) => {
-            // abk here is the ability code (converted from the name via NameToCode)
-            const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
-
-            abilities[abilityCode] = new ReloadAbility(
-                VISUALS[abilityCode] as AbilityVisual,
-                CLICKS[abilityCode][0],
-                CLICKS[abilityCode][1],
-                ab[abilityCode],
-                AbilityCredits[abilityCode],
-                AbilityReloadTimes[abilityCode],
-                abilityCode,
-                count, // Use the count from abilityCounts
-                1,
-                x_position,
-                y_position,
-                this
+        if (this.mode == "Royale") {
+            const squareSize = 600 / this.settings.deck.length; // Size of each square
+            const unaltered_x_position = this.scale.width - squareSize;
+            const abilities: { [key: number]: ElixirAbility } = {};
+        
+            this.settings.deck.forEach((abilityCode: number) => {
+                abilities[abilityCode] = new ElixirAbility(
+                    VISUALS[abilityCode] as AbilityVisual,
+                    CLICKS[abilityCode][0],
+                    CLICKS[abilityCode][1],
+                    ab[abilityCode],
+                    AbilityElixir[abilityCode], // Assuming this exists, replace with actual elixir cost
+                    abilityCode,
+                    unaltered_x_position,
+                    y_position,
+                    this,
+                    squareSize
+                );
+        
+                y_position += squareSize + spacing;
+            });
+        
+            this.abilityManager = new ElixirAbilityManager(
+                this,
+                abilities,
+                events,
+                this.settings.elixir_cap,
+                this.mainPlayer.color
             );
+        }
+        else {
 
-            y_position += squareSize + spacing;
-        });
+            const squareSize = 150; // Size of each square
+            const unaltered_x_position = this.scale.width - squareSize;
 
-        this.abilityManager = new AbstractAbilityManager(
-            this,
-            abilities,
-            events,
-            y_position + spacing,
-        );
+            const abilities: { [key: number]: CreditAbility } = {};
+            Object.entries(this.abilityCounts).forEach(([abk, count]) => {
+                // abk here is the ability code (converted from the name via NameToCode)
+                const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
+    
+                abilities[abilityCode] = new CreditAbility(
+                    VISUALS[abilityCode] as AbilityVisual,
+                    CLICKS[abilityCode][0],
+                    CLICKS[abilityCode][1],
+                    ab[abilityCode],
+                    AbilityCredits[abilityCode],
+                    AbilityReloadTimes[abilityCode],
+                    abilityCode,
+                    count, // Use the count from abilityCounts
+                    unaltered_x_position,
+                    y_position,
+                    this,
+                    squareSize
+                );
+    
+                y_position += squareSize + spacing;
+            });
+
+            this.abilityManager = new CreditAbilityManager(this, abilities, events, y_position + spacing);
+        }
+
     }
 
     private getRainbowColor(): string {
@@ -314,15 +347,29 @@ export class MainScene extends Scene {
         // Iterate over the values of the dictionary to draw each node
 
         if (this.abilityManager.getMode() === KeyCodes.NUKE_CODE) {
-            const structures = Object.values(this.nodes).filter(
-                (node) =>
-                    NUKE_OPTION_STRINGS.includes(node.stateName) &&
-                    node.owner === this.mainPlayer
-            );
-
-            structures.forEach((node) => {
-                this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.BLACK);
-            });
+            if (this.settings.nuke_type == 'structure_range') {
+                const structures = Object.values(this.nodes).filter(
+                    (node) =>
+                        NUKE_OPTION_STRINGS.includes(node.stateName) &&
+                        node.owner === this.mainPlayer
+                );
+    
+                structures.forEach((node) => {
+                    this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.BLACK);
+                });
+            } else if (this.settings.nuke_type == 'neighbor') {
+                const neighbors = Object.values(this.nodes).filter(
+                    (node) => node.owner != this.mainPlayer && node.edges.some((edge) => edge.other(node).owner === this.mainPlayer)
+                );
+    
+                neighbors.forEach((node) => {
+                    this.graphics.strokeCircle(
+                        node.pos.x,
+                        node.pos.y,
+                        node.size + 4
+                    );
+                });
+            }
 
         } else if (this.highlight.usage !== null && NUKE_OPTION_CODES.includes(this.highlight.usage)) {
             const highlightedNode = this.highlight.item as Node;
@@ -389,8 +436,9 @@ export class MainScene extends Scene {
             }
         }
 
-        if (this.ps === PSE.PLAY) {
-            let ability = this.abilityManager.triangle_validate(position);
+        if (this.ps === PSE.PLAY && this.mode === "Original") {
+            let manager = this.abilityManager as CreditAbilityManager;
+            let ability = manager.triangle_validate(position);
             if (ability) {
                 return ability;
             }
@@ -447,17 +495,6 @@ export class MainScene extends Scene {
         this.network.sendMessage({ code: code, items: {} });
     }
 
-    // private setupNavigationHandlers(): void {
-    // Handles both back navigation and tab close events
-    // window.addEventListener('popstate', this.handleNavigationEvent.bind(this));
-    // window.addEventListener('beforeunload', this.handleNavigationEvent.bind(this));
-    // }
-
-    // private handleNavigationEvent(event: PopStateEvent | BeforeUnloadEvent): void {
-    //     event.preventDefault();
-    //     this.leaveMatchDirect();
-    // }
-
     private createLeaveMatchButton(): void {
         this.leaveMatchButton = this.add.text(10, 10, "Forfeit", {
             fontFamily: "Arial",
@@ -495,8 +532,17 @@ export class MainScene extends Scene {
         const pc = startData.player_count;
         const n = startData.board.nodes;
         const e = startData.board.edges;
+        const display = startData.display_names_list;
 
-        this.mainPlayer = new MyPlayer(String(pi), PlayerColors[pi]);
+        this.settings = startData.settings;
+        this.mode = startData.mode;
+        
+        if (this.mode === "Royale") {
+            this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
+        } else {
+            this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
+        }
+        
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
             const id = index.toString();
             return id !== pi.toString()
@@ -504,7 +550,6 @@ export class MainScene extends Scene {
                 : this.mainPlayer;
         });
 
-        const display = startData.display_names_list;
         this.displayNames(display);
 
         this.nodes = Object.fromEntries(
@@ -559,9 +604,20 @@ export class MainScene extends Scene {
                     }
                 }
 
-                if ('credits' in new_data["player"] && new_data["player"]["credits"] !== this.mainPlayer.credits) {
-                    this.mainPlayer.credits = new_data["player"]["credits"];
-                    this.abilityManager.credits = new_data["player"]["credits"];
+                if ('credits' in new_data["player"]) {
+                    let mainPlayer = this.mainPlayer as MyCreditPlayer;
+                    if (new_data["player"]["credits"] !== mainPlayer.credits) {
+                        mainPlayer.credits = new_data["player"]["credits"];
+                        let manager = this.abilityManager as CreditAbilityManager;
+                        manager.credits = new_data["player"]["credits"];
+                    }
+                } else if ('a_elixir' in new_data["player"]) {
+                    let mainPlayer = this.mainPlayer as MyElixirPlayer;
+                    if (new_data["player"]["a_elixir"] !== mainPlayer.elixir) {
+                        mainPlayer.elixir = new_data["player"]["a_elixir"];
+                        let manager = this.abilityManager as ElixirAbilityManager;
+                        manager.elixir = new_data["player"]["a_elixir"];
+                    }
                 }
 
                 if (this.gs != new_data["gs"]) {
@@ -649,13 +705,18 @@ export class MainScene extends Scene {
                 
                         const x = (position.xPercent / 100) * (this.sys.game.config.width as number);
                         const y = (position.yPercent / 100) * (this.sys.game.config.height as number);
+
+                        let count_y = y - 20;
+                        if (this.settings.starting_structures) {
+                            count_y = y -  40;
+                        }
                 
                         const playerColor = this.rgbToHex(this.otherPlayers[playerName].color);
                 
                         // Display regular count
                         const countText = this.add.text(
                             x,
-                            y - 40, // 30 pixels above the capital count
+                            count_y, // 30 pixels above the capital count
                             `Count: `,
                             {
                                 fontFamily: "Arial",
@@ -667,7 +728,7 @@ export class MainScene extends Scene {
                         
                         const countNumber = this.add.text(
                             countText.x + countText.width,
-                            y - 40,
+                            count_y,
                             `${regularCount}`,
                             {
                                 fontFamily: "Arial",
@@ -679,32 +740,35 @@ export class MainScene extends Scene {
                 
                         this.countTexts.push(countText, countNumber);
                 
-                        // Display full capital count
-                        const capitalText = this.add.text(
-                            x,
-                            y - 15,
-                            `Full Capitals: `,
-                            {
-                                fontFamily: "Arial",
-                                fontSize: "23px",
-                                color: playerColor,
-                            }
-                        );
-                        capitalText.setOrigin(0, 1);  // Align to bottom-left
-                
-                        const capitalNumber = this.add.text(
-                            capitalText.x + capitalText.width,
-                            y - 15,
-                            `${capitalCount}`,
-                            {
-                                fontFamily: "Arial",
-                                fontSize: "23px",
-                                color: '#000000', // Black color for the number
-                            }
-                        );
-                        capitalNumber.setOrigin(0, 1);
-                
-                        this.capitalTexts.push(capitalText, capitalNumber);
+                        if (this.settings.starting_structures) {
+                            // Display full capital count
+                            const capitalText = this.add.text(
+                                x,
+                                y - 15,
+                                `Full Capitals: `,
+                                {
+                                    fontFamily: "Arial",
+                                    fontSize: "23px",
+                                    color: playerColor,
+                                }
+                            );
+                            capitalText.setOrigin(0, 1);  // Align to bottom-left
+                    
+                            const capitalNumber = this.add.text(
+                                capitalText.x + capitalText.width,
+                                y - 15,
+                                `${capitalCount}`,
+                                {
+                                    fontFamily: "Arial",
+                                    fontSize: "23px",
+                                    color: '#000000', // Black color for the number
+                                }
+                            );
+                            capitalNumber.setOrigin(0, 1);
+
+                            this.capitalTexts.push(capitalText, capitalNumber);
+                        }
+
                     });
                 };
 
