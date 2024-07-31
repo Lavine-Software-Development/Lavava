@@ -910,6 +910,29 @@ def get_leaderboard():
         ]
     })
 
+
+@app.route('/current-user', methods=['GET'])
+@token_required
+def get_current_user(current_user):
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            games = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).limit(3).all()
+            gameCount = len(games)
+            return jsonify({
+                "username": user.username,
+                "gameCount" : gameCount
+            }), 200
+        else:
+            return jsonify({"error": "User not found"}), 404
+    else:
+        # If DB is not connected, return the username from the token
+        return jsonify({
+            "username": current_user,
+            "gameCount": 3
+        }), 200
+
+
 @app.route('/user/<string:username>', methods=['GET'])
 def get_user_details(username):
     if not config.DB_CONNECTED:
@@ -927,7 +950,7 @@ def get_user_details(username):
         
         response = {
             "username": user.username,
-           "displayName": user.display_name,
+            "displayName": user.display_name,
             "elo": user.elo,
             "deck": [{"name": card.ability, "count": card.count} for card in deck_cards]
         }

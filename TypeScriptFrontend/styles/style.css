@@ -1137,3 +1137,12 @@ ul {
     padding: 2px 5px; /* Adjust the padding as needed */
     font-size: 0.8rem; /* Adjust the font size as needed */
 }
+
+.leaderboard-item.current-user {
+    background-color: #1a8cc1;
+    font-weight: bold;
+  }
+
+.leaderboard-note {
+    color: rgb(229, 37, 37);
+}

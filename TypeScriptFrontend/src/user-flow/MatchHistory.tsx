@@ -101,7 +101,6 @@ const MatchHistory: React.FC = () => {
                                 return (
                                     <li key={index} className={className}>
                                         {player.username} - Rank: {player.rank}
-                                        {player.is_current_user && " (You)"}
                                     </li>
                                 );
                             })}
