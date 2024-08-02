@@ -176,7 +176,7 @@ export class MainScene extends Scene {
 
     private createAbilityManager() {
         const ev = makeEventValidators(this.mainPlayer, this.getEdges.bind(this));
-        const ab = makeAbilityValidators(
+        const ab_validators = makeAbilityValidators(
             this.mainPlayer,
             this.ratio,
             this.settings,
@@ -193,68 +193,18 @@ export class MainScene extends Scene {
             );
         });
 
-        let y_position = 20;
-        const spacing = 15; // Spacing between squares
-
         if (this.mode == "Royale") {
-            const squareSize = 600 / this.settings.deck.length; // Size of each square
-            const unaltered_x_position = this.scale.width - squareSize;
-            const abilities: { [key: number]: ElixirAbility } = {};
-        
-            this.settings.deck.forEach((abilityCode: number) => {
-                abilities[abilityCode] = new ElixirAbility(
-                    VISUALS[abilityCode] as AbilityVisual,
-                    CLICKS[abilityCode][0],
-                    CLICKS[abilityCode][1],
-                    ab[abilityCode],
-                    AbilityElixir[abilityCode], // Assuming this exists, replace with actual elixir cost
-                    abilityCode,
-                    unaltered_x_position,
-                    y_position,
-                    this,
-                    squareSize
-                );
-        
-                y_position += squareSize + spacing;
-            });
-        
             this.abilityManager = new ElixirAbilityManager(
                 this,
-                abilities,
+                this.settings.deck,
+                ab_validators,
                 events,
                 this.settings.elixir_cap,
                 this.mainPlayer.color
             );
         }
         else {
-
-            const squareSize = 150; // Size of each square
-            const unaltered_x_position = this.scale.width - squareSize;
-
-            const abilities: { [key: number]: CreditAbility } = {};
-            Object.entries(this.abilityCounts).forEach(([abk, count]) => {
-                // abk here is the ability code (converted from the name via NameToCode)
-                const abilityCode = parseInt(abk); // Ensure the key is treated as a number if needed
-    
-                abilities[abilityCode] = new CreditAbility(
-                    VISUALS[abilityCode] as AbilityVisual,
-                    CLICKS[abilityCode][0],
-                    CLICKS[abilityCode][1],
-                    ab[abilityCode],
-                    AbilityCredits[abilityCode],
-                    AbilityReloadTimes[abilityCode],
-                    abilityCode,
-                    count, // Use the count from abilityCounts
-                    unaltered_x_position,
-                    y_position,
-                    this,
-                    squareSize
-                );
-    
-                y_position += squareSize + spacing;
-            });
-
-            this.abilityManager = new CreditAbilityManager(this, abilities, events, y_position + spacing);
+            this.abilityManager = new CreditAbilityManager(this, this.abilityCounts, ab_validators, events);
         }
 
     }
@@ -790,14 +740,14 @@ export class MainScene extends Scene {
                     });
                 };
 
-                if ("full_player_capitals" in new_data["board"] &&
-                    JSON.stringify(this.full_capitals) !== JSON.stringify(new_data["board"]["full_player_capitals"])) {
-                    this.full_capitals = new_data["board"]["full_player_capitals"];
+                if (JSON.stringify(this.lastCounts) !== JSON.stringify(new_data["counts"])) {
+                    this.lastCounts = {...new_data["counts"]};
                     updateDisplays();
                 }
 
-                if (JSON.stringify(this.lastCounts) !== JSON.stringify(new_data["counts"])) {
-                    this.lastCounts = {...new_data["counts"]};
+                if ("full_player_capitals" in new_data["board"] &&
+                    JSON.stringify(this.full_capitals) !== JSON.stringify(new_data["board"]["full_player_capitals"])) {
+                    this.full_capitals = new_data["board"]["full_player_capitals"];
                     updateDisplays();
                 }
 

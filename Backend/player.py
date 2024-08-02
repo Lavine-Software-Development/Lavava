@@ -31,9 +31,6 @@ class DefaultPlayer(JsonableTick):
     def set_abilities(self, chosen_abilities, ability_effects, board, settings):
         pass
 
-        leftover = START_CREDITS - sum(BREAKDOWNS[ab].credits * self.abilities[ab].remaining for ab in chosen_abilities)
-        self.credits += leftover
-
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
             self.abilities[key].use(data)

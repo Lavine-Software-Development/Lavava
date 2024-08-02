@@ -328,7 +328,7 @@ export class PortNode extends Node {
     ) {
         super(id, pos, is_port, state, value, _scene);
         this.portPercent = 1;
-        this.ports = random_equal_distributed_angles(PORT_COUNT);
+        this.ports = is_port ? random_equal_distributed_angles(PORT_COUNT) : [];
     }
 
     drawSurrounding(): void {
