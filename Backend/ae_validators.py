@@ -1,5 +1,5 @@
 from math import dist
-from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINI_BRIDGE_RANGE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, PUMP_CODE, CREDIT_USAGE_CODE, STRUCTURE_RANGES
+from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINI_BRIDGE_RANGE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, PUMP_CODE, CREDIT_USAGE_CODE, STRUCTURE_RANGES, WORMHOLE_CODE
 
 
 def no_click(data):
@@ -113,6 +113,32 @@ def no_crossovers(check_new_edge, data, player):
         first_node.id, second_node.id
     )
 
+def wormhole_validator(player):
+    def validator(data):
+        structure_validators = {
+            "capital": validators_needing_player(player)[CAPITAL_CODE],
+            "cannon": validators_needing_player(player)[CANNON_CODE],
+            "pump": validators_needing_player(player)[PUMP_CODE],
+        }
+        
+        if len(data) == 1:
+            # First click: validate source node
+            source_node = data[0]
+            return source_node.owner == player and source_node.state_name in STRUCTURE_RANGES
+        
+        elif len(data) == 2:
+            # Second click: validate target node
+            source_node, target_node = data
+            if source_node.state_name in STRUCTURE_RANGES:
+                validator_func = structure_validators[source_node.state_name]
+                if validator_func:
+                    return validator_func([target_node])  # Pass target_node as a list
+            return False
+        
+        return False  # Invalid number of nodes
+
+    return validator
+
 def make_cannon_shot_check(check_new_edge, id_dict):
     def cannon_shot_check(player, data):
         cannon, target = id_dict[data[0]], id_dict[data[1]]
@@ -120,7 +146,6 @@ def make_cannon_shot_check(check_new_edge, id_dict):
         can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (target.owner != player or not target.full())
         return can_shoot and can_accept and no_crossovers(check_new_edge, [id_dict[data[0]], id_dict[data[1]]], player)
     return cannon_shot_check
-
 
 def make_pump_drain_check(id_dict):
 
@@ -165,6 +190,7 @@ def make_ability_validators(board, player):
         BURN_CODE: owned_burnable_node,
         RAGE_CODE: no_click,
         NUKE_CODE: attack_validators(board.get_player_structures, player),
+        WORMHOLE_CODE: wormhole_validator(player),
     } | validators_needing_player(player) | make_new_edge_ports(board.check_new_edge, player)
 
 

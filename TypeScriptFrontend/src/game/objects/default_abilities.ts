@@ -77,7 +77,7 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.RAGE_CODE]: [0, ClickType.BLANK],
     [KeyCodes.CANNON_CODE]: [1, ClickType.NODE],
     [KeyCodes.PUMP_CODE]: [1, ClickType.NODE],
-    [KeyCodes.WORMHOLE_CODE]: [1, ClickType.NODE],
+    [KeyCodes.WORMHOLE_CODE]: [2, ClickType.NODE],
 };
 
 interface EventParameters {

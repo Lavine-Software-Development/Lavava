@@ -137,9 +137,9 @@ function capitalValidator(getEdges: () => Edge[], player: OtherPlayer): Validato
 
 const wormholeValidator = (data: IDItem[], player: OtherPlayer, getEdges: () => Edge[]): boolean => {
     const structureValidators = {
-        "capital": (node: Node) => capitalValidator(getEdges, player)([node]),
-        "cannon": (node: Node) => playerValidators(player)[KeyCodes.CANNON_CODE]([node]),
-        "pump": (node: Node) => playerValidators(player)[KeyCodes.PUMP_CODE]([node]),
+        "capital": capitalValidator(getEdges, player),
+        "cannon": playerValidators(player)[KeyCodes.CANNON_CODE],
+        "pump": playerValidators(player)[KeyCodes.PUMP_CODE],
     };
 
     if (data.length === 1) {
@@ -147,8 +147,10 @@ const wormholeValidator = (data: IDItem[], player: OtherPlayer, getEdges: () => 
         return node.owner === player && NUKE_OPTION_STRINGS.includes(node.stateName);
     } else if (data.length === 2) {
         const [sourceNode, targetNode] = data as Node[];
+        console.log(sourceNode.stateName);
+        console.log(structureValidators[sourceNode.stateName]);
         return NUKE_OPTION_STRINGS.includes(sourceNode.stateName) && 
-               structureValidators[sourceNode.stateName]?.(targetNode);
+               structureValidators[sourceNode.stateName]?.([targetNode]);
     }
     return false;
 };

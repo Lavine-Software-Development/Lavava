@@ -154,4 +154,3 @@ export const stateDict: { [key: number]: () => State } = {
     5: () => new CannonState("cannon"),
     6: () => new PumpState("pump", PUMP_NUKE_RANGE),
 };
-

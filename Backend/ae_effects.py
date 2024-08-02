@@ -28,7 +28,24 @@ from constants import (
     GROWTH_STOP,
     NODE_MINIMUM_VALUE,
     MINI_BRIDGE_CODE,
+    WORMHOLE_CODE,
 )
+
+def make_wormhole_effect(data, player):
+    structure_effects = {
+        "capital": capital_effect,
+        "cannon": cannon_effect,
+        "pump": pump_effect,
+    }
+    source_node, target_node = data
+    source_value = source_node.value
+    source_owner = source_node.owner
+    structure = source_node.state_name
+    structure_effects[structure]([target_node], player)
+    source_node.set_state("default")  
+    target_node.value = source_value
+    target_node.owner = source_owner  
+    print(f"Wormhole effect: {structure} moved from node {source_node.id} to {target_node.id}")
 
 def make_bridge(buy_new_edge, bridge_type, only_to_node_port=False):
     def bridge_effect(data, player):
@@ -168,6 +185,7 @@ def make_ability_effects(board):
         RAGE_CODE: make_rage(board.board_wide_effect),
         CANNON_CODE: cannon_effect,
         PUMP_CODE: pump_effect,
+        WORMHOLE_CODE: make_wormhole_effect,
     }
 
 
