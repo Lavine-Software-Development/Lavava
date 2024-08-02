@@ -769,8 +769,8 @@ MINI_BRIDGE_CODE = 109
 def get_royale_settings():
     settings = {
         "ability_type": "elixir",
-        "elixir_cap": 7,
-        "elixir_rate": 4.5,
+        "elixir_cap": 10,
+        "elixir_rate": 3.6,
         "port_percentage": 1/2,
         "walls": True,
         'end_game_make_ports': True,
@@ -829,11 +829,15 @@ def get_royale_abilities():
         },
         {
             "name": "Nuke", 
-            "cost": 5,
+            "cost": 7,
             "description": "Destroy nearby dot and its bridges"
         },
+        {
+            "name": "Over-Grow",
+            "cost": 4,
+        }
     ]
-    return jsonify({"abilities": abilities, "options": 5})
+    return jsonify({"abilities": abilities, "options": 6})
     
 @app.route('/abilities/Original', methods=['GET'])
 def get_og_abilities():
