@@ -110,7 +110,6 @@ export class AbstractAbility extends IDItem {
     
         // Draw the background square with darker color
         if (this.recolor) {
-            console.log(this._percentage);
             this.graphics.fillStyle (this.darkerColor, 1);
             this.graphics.fillRect(this.x, this.y, this.squareSize, this.squareSize);
     
@@ -222,8 +221,6 @@ export class CreditAbility extends AbstractAbility {
         this._remaining = remaining;
         this.addTextToScene(scene);
         this.retext = true;
-        console.log(scene.sys.canvas.height, scene.sys.canvas.width);
-        console.log(x, y);
     }
 
     get remaining(): number {

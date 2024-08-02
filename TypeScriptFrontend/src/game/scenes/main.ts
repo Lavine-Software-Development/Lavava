@@ -740,14 +740,14 @@ export class MainScene extends Scene {
                     });
                 };
 
-                if ("full_player_capitals" in new_data["board"] &&
-                    JSON.stringify(this.full_capitals) !== JSON.stringify(new_data["board"]["full_player_capitals"])) {
-                    this.full_capitals = new_data["board"]["full_player_capitals"];
+                if (JSON.stringify(this.lastCounts) !== JSON.stringify(new_data["counts"])) {
+                    this.lastCounts = {...new_data["counts"]};
                     updateDisplays();
                 }
 
-                if (JSON.stringify(this.lastCounts) !== JSON.stringify(new_data["counts"])) {
-                    this.lastCounts = {...new_data["counts"]};
+                if ("full_player_capitals" in new_data["board"] &&
+                    JSON.stringify(this.full_capitals) !== JSON.stringify(new_data["board"]["full_player_capitals"])) {
+                    this.full_capitals = new_data["board"]["full_player_capitals"];
                     updateDisplays();
                 }
 

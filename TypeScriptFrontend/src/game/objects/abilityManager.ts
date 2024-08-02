@@ -380,6 +380,11 @@ export class CreditAbilityManager extends AbstractAbilityManager {
         events: { [key: number]: Event },
     ) {
         super(scene, ability_values, validators, events);
+        this.bonusCreditsText = scene.add.text(scene.sys.canvas.width - 90, 35 + (165 * ability_values.length), "", {
+            fontSize: "60px",
+            align: "right",
+            color: "#000000",
+        });
     }
 
     makeAbilities(abilityCounts: { [x: string]: number }, validators: { [key: string]: ValidatorFunc }, scene: Phaser.Scene): void {
@@ -408,12 +413,6 @@ export class CreditAbilityManager extends AbstractAbilityManager {
             );
     
             y_position += squareSize + spacing;
-        });
-
-        this.bonusCreditsText = scene.add.text(scene.sys.canvas.width - 90, y_position + spacing, "", {
-            fontSize: "60px",
-            align: "right",
-            color: "#000000",
         });
     }
 
@@ -529,6 +528,14 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
     set elixir(value: number) {
         this._elixir = Math.min(value, this.elixirCapacity);
         this.updateElixirBar(this.elixirBar.scene);
+
+        // garbage code right here. Do better
+        for (const key in this.abilities) {
+            const ability = this.abilities[key] as ElixirAbility;
+            if (ability.percentage === 0) {
+                ability.percentage = Math.min(this._elixir / AbilityElixir[key], 1);
+            }
+        }
     }
 
     clickable(key: string): boolean {
@@ -579,11 +586,6 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
         // Draw border
         this.elixirBar.lineStyle(2, 0x000000);
         this.elixirBar.strokeRect(barX, barY, this.barWidth, barHeight);
-
-        // set recolor to true for all abilities
-        for (const key in this.abilities) {
-            this.abilities[key].recolor = true;
-        }
     }
 
     delete() {
