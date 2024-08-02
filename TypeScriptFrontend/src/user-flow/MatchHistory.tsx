@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import config from "../env-config";
-import { jwtDecode } from "jwt-decode";
 
 interface GameData {
     game_id: number;
@@ -82,10 +81,13 @@ const MatchHistory: React.FC = () => {
                     <div key={game.game_id} className="game-history-item">
                         <p>
                             <strong>Date:</strong>{" "}
-                            {new Date(game.game_date).toLocaleDateString()}{" "}
-                            {new Date(game.game_date).toLocaleTimeString([], {
+                            {new Date(game.game_date + "Z").toLocaleString([], {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
                                 hour: "2-digit",
                                 minute: "2-digit",
+                                hour12: true,
                             })}
                         </p>
                         <p>

@@ -193,7 +193,17 @@ const Profile: React.FC = () => {
                         <h2 className="text-shadow">Most Recent Ladder Game</h2>
                         {profileData.last_game ? (
                             <div className="game-history-item">
-                                <p><strong>Date:</strong> {new Date(profileData.last_game.game_date).toLocaleDateString()} {new Date(profileData.last_game.game_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p>
+                                    <strong>Date:</strong>{" "}
+                                    {new Date(profileData.last_game.game_date + "Z").toLocaleString([], {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: true,
+                                    })}
+                                </p>
                                 <p><strong>Players:</strong></p>
                                 <ul>
                                     {profileData.last_game.players.map((player, index) => {
