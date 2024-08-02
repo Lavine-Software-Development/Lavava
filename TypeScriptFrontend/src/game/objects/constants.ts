@@ -48,6 +48,7 @@ export const KeyCodes = {
     CANNON_CODE: 101,
     PUMP_CODE: 117,
     MINI_BRIDGE_CODE: 109,
+    WORMHOLE_CODE: 119,
 };
 
 export const EventCodes = {
@@ -84,6 +85,7 @@ export const NameToCode = {
     "Cannon": KeyCodes.CANNON_CODE,
     "Pump": KeyCodes.PUMP_CODE,
     "Mini-Bridge": KeyCodes.MINI_BRIDGE_CODE,
+    "Wormhole": KeyCodes.WORMHOLE_CODE,
 };
 
 
@@ -101,6 +103,7 @@ export const AbilityCredits = {
     [KeyCodes.NUKE_CODE]: 3,
     [KeyCodes.PUMP_CODE]: 3,
     [KeyCodes.CANNON_CODE]: 4,
+    [KeyCodes.WORMHOLE_CODE]: 5,
 };
 
 export const AbilityReloadTimes = {
@@ -115,6 +118,7 @@ export const AbilityReloadTimes = {
     [KeyCodes.POISON_CODE]: 5,
     [KeyCodes.CAPITAL_CODE]: 20,
     [KeyCodes.CANNON_CODE]: 3,
+    [KeyCodes.WORMHOLE_CODE]: 20,
 };
 
 export const GROWTH_STOP = 250;

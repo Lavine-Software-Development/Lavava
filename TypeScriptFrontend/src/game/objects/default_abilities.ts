@@ -21,6 +21,7 @@ const RAGE_V = createAbilityVisual("Rage", "cross", Colors.LIGHT_GREEN);
 const CANNON_V = createAbilityVisual("Cannon", "cannon", Colors.GREY, "E");
 const PUMP_V = createAbilityVisual("Pump", "circle", Colors.DARK_PURPLE, "U");
 const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", "circle", Colors.YELLOW, "M");
+const WORMHOLE_V = createAbilityVisual("Wormhole", "circle", Colors.BLACK, "W");
 
 // Create instances of EventVisual using the factory function
 const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.PINK);
@@ -48,6 +49,7 @@ export const VISUALS: EventVisualParameters = {
     [KeyCodes.CANNON_CODE]: CANNON_V,
     [KeyCodes.PUMP_CODE]: PUMP_V,
     [KeyCodes.MINI_BRIDGE_CODE]: MINI_BRIDGE_V,
+    [KeyCodes.WORMHOLE_CODE]: WORMHOLE_V,
 
     [EventCodes.CANNON_SHOT_CODE]: CANNON_SHOT_V,
     [EventCodes.PUMP_DRAIN_CODE]: PUMP_DRAIN_V,
@@ -75,6 +77,7 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.RAGE_CODE]: [0, ClickType.BLANK],
     [KeyCodes.CANNON_CODE]: [1, ClickType.NODE],
     [KeyCodes.PUMP_CODE]: [1, ClickType.NODE],
+    [KeyCodes.WORMHOLE_CODE]: [1, ClickType.NODE],
 };
 
 interface EventParameters {

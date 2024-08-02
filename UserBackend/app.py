@@ -765,6 +765,11 @@ def get_abilities():
             "cost": 1,
             "description": "Remove ports from node"
         },
+        {
+            "name": "Wormhole",
+            "cost": 2,
+            "description": "Move structures between nodes"
+        },
         # {
         #     "name": "Zombie", 
         #     "cost": 1,
