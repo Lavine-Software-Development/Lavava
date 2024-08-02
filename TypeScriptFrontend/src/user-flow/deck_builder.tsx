@@ -13,6 +13,7 @@ interface Ability {
 const DeckBuilder: React.FC = () => {
     const navigate = useNavigate();
     const [isTokenValid, setIstokenValid] = useState<boolean | null>(null);
+    const [showPopup, setShowPopup] = useState(false);
 
     // check if login token has expired
     useEffect(() => {
@@ -28,15 +29,15 @@ const DeckBuilder: React.FC = () => {
                 if (decodedToken.exp < currentTime) {
                     localStorage.removeItem("userToken");
                     setIstokenValid(false);
-                    navigate("/login")
+                    navigate("/login");
                 } else {
                     setIstokenValid(true);
                 }
             } catch (error) {
-                console.error("Error deccoding token:", error);
+                console.error("Error decoding token:", error);
                 localStorage.removeItem("userToken");
                 setIstokenValid(false);
-                navigate("/login")
+                navigate("/login");
             }
         };
 
@@ -113,6 +114,10 @@ const DeckBuilder: React.FC = () => {
                     },
                     body: JSON.stringify({ abilities: selectedAbilities }),
                 });
+                setShowPopup(true);
+                setTimeout(() => {
+                    setShowPopup(false);
+                }, 1000);
             } catch (error) {
                 console.error('Error saving deck:', error);
             }
@@ -256,6 +261,11 @@ const DeckBuilder: React.FC = () => {
                     </span>
                 </div>
             </div>
+            {showPopup && (
+                <div className="popup">
+                    Deck saved successfully!
+                </div>
+            )}
         </div>
     );
 };
