@@ -23,7 +23,7 @@ class WebSocketServer():
         logger.info(f"New connection established from {websocket.remote_address}")
         try:
             async for message in websocket:
-                print(f"Received message: {message}")
+                logger.debug(f"Received message: {message}")
                 data = json.loads(message)
                 await self.process_message(websocket, data)
         except websockets.exceptions.ConnectionClosed:
