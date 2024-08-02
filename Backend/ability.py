@@ -10,7 +10,7 @@ class AbstractAbility(JsonableTracked):
         self.in_game_cost = in_game_cost
         self.player = player
 
-        super().__init__(id)
+        super().__init__(id, set(), set(), {'percentage'})
 
         self.create_attributes()
 

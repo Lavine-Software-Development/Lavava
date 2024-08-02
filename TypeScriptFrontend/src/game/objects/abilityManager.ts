@@ -4,12 +4,15 @@ import { Highlight } from "./highlight";
 import { Event } from "./event";
 import { Node } from "./node";
 import { phaserColor } from "./utilities";
-import { Colors } from "./constants";
+import { Colors, AbilityElixir, AbilityCredits, AbilityReloadTimes } from "./constants";
 import { ClickType } from "./enums";
+import { VISUALS, CLICKS, } from "./default_abilities";
+import { AbilityVisual } from "../objects/immutable_visuals";
+import { ValidationFunction as ValidatorFunc}  from "./types";
 
 /**
  * Represents an abstract class for managing abilities in a game.
- * Child classes must implement the `clickable` method.
+ * Child classes must implement the `clickable`, and `makeAbilities` method.
  */
 export class AbstractAbilityManager {
     abilities: { [key: number]: AbstractAbility };
@@ -22,10 +25,12 @@ export class AbstractAbilityManager {
 
     constructor(
         scene: Phaser.Scene,
-        abilities: { [key: number]: AbstractAbility },
+        ability_values: any,
+        validators: { [key: string]: ValidatorFunc },
         events: { [key: number]: Event },
     ) {
-        this.abilities = abilities;
+        this.abilities = {};
+        this.makeAbilities(ability_values, validators, scene);
         this.events = events;
         this.BridgeGraphics = scene.add.graphics();
 
@@ -40,6 +45,10 @@ export class AbstractAbilityManager {
 
         // Set origin to (1, 1) to align text to the bottom right
         this.abilityText.setOrigin(1, 1);
+    }
+
+    makeAbilities(ability_values: any, validators: { [key: string]: ValidatorFunc }, scene: Phaser.Scene): void {
+        throw new Error("Method not implemented.");
     }
 
     forfeit(): void {
@@ -242,8 +251,6 @@ export class AbstractAbilityManager {
         }
     }
 
-    // make abstract method
-
     clickable(key): boolean {
         throw new Error("Method not implemented.");
     }
@@ -368,13 +375,42 @@ export class CreditAbilityManager extends AbstractAbilityManager {
 
     constructor(
         scene: Phaser.Scene,
-        abilities: { [key: number]: CreditAbility },
+        ability_values: { [x: string]: number },
+        validators:  { [key: string]: ValidatorFunc } ,
         events: { [key: number]: Event },
-        bonusTextY: number
     ) {
-        super(scene, abilities, events);
+        super(scene, ability_values, validators, events);
+    }
 
-        this.bonusCreditsText = scene.add.text(scene.sys.canvas.width - 90, bonusTextY, "", {
+    makeAbilities(abilityCounts: { [x: string]: number }, validators: { [key: string]: ValidatorFunc }, scene: Phaser.Scene): void {
+
+        let y_position = 20;
+        const spacing = 15; // Spacing between squares
+        const squareSize = 150; // Size of each square
+        const unaltered_x_position = scene.scale.width - squareSize - 10;
+
+        Object.entries(abilityCounts).forEach(([abk, count]) => {
+            // abk here is the ability code (converted from the name via NameToCode)
+            const abilityCode = parseInt(abk);
+            this.abilities[abilityCode] = new CreditAbility(
+                VISUALS[abilityCode] as AbilityVisual,
+                CLICKS[abilityCode][0],
+                CLICKS[abilityCode][1],
+                validators[abilityCode],
+                AbilityCredits[abilityCode],
+                AbilityReloadTimes[abilityCode],
+                abilityCode,
+                count, // Use the count from abilityCounts
+                unaltered_x_position,
+                y_position,
+                scene,
+                squareSize
+            );
+    
+            y_position += squareSize + spacing;
+        });
+
+        this.bonusCreditsText = scene.add.text(scene.sys.canvas.width - 90, y_position + spacing, "", {
             fontSize: "60px",
             align: "right",
             color: "#000000",
@@ -432,25 +468,58 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
     private _elixir: number = 0;
     private elixirCapacity: number;
     private elixirBar: Phaser.GameObjects.Graphics;
-    private barWidth: number = 20;
-    private barPadding: number = 5;
+    private barWidth: number;
+    private barPadding: number;
     private bar_color: readonly [number, number, number];
 
     constructor(
         scene: Phaser.Scene,
-        abilities: { [key: number]: ElixirAbility },
+        ability_values: number [],
+        validators:  { [key: string]: ValidatorFunc } ,
         events: { [key: number]: Event },
         capacity: number,
         bar_color: readonly [number, number, number]
     ) {
-        super(scene, abilities, events);
+        super(scene, ability_values, validators, events);
         this.elixirCapacity = capacity;
         this._elixir = 0;
         this.bar_color = bar_color;
 
         // Create the elixir bar
         this.elixirBar = scene.add.graphics();
+        this.barWidth = 30;
+        this.barPadding = 5;
         this.updateElixirBar(scene);
+    }
+
+    makeAbilities(ability_values: number[], validators: { [key: string]: ValidatorFunc }, scene: Phaser.Scene): void {
+
+        this.barWidth = 30;
+        this.barPadding = 5;
+
+        let y_position = 20;
+        const spacing = 15; // Spacing between squares
+        const topPadding = 20;
+        const absHeight = scene.sys.canvas.height - topPadding - 60 - this.barPadding * 2;
+        const squareSize = (absHeight - (spacing * (ability_values.length - 1))) / ability_values.length; // Size of each square
+        const unaltered_x_position = scene.scale.width - squareSize - this.barWidth - this.barPadding - 10;
+
+        ability_values.forEach((abilityCode: number) => {
+            this.abilities[abilityCode] = new ElixirAbility(
+                VISUALS[abilityCode] as AbilityVisual,
+                CLICKS[abilityCode][0],
+                CLICKS[abilityCode][1],
+                validators[abilityCode],
+                AbilityElixir[abilityCode], // Assuming this exists, replace with actual elixir cost
+                abilityCode,
+                unaltered_x_position,
+                y_position,
+                scene,
+                squareSize
+            );
+    
+            y_position += squareSize + spacing;
+        });
     }
 
     get elixir(): number {
@@ -469,10 +538,9 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
     private updateElixirBar(scene: Phaser.Scene): void {
         const canvasHeight = scene.sys.canvas.height;
         const canvasWidth = scene.sys.canvas.width;
-        const abilityTextHeight = 40; // Approximate height for ability text
         const topPadding = 20;
 
-        const barHeight = canvasHeight - abilityTextHeight - topPadding - this.barPadding * 2;
+        const barHeight = canvasHeight - topPadding - 60 - this.barPadding * 2;
         const barX = canvasWidth - this.barWidth - this.barPadding;
         const barY = topPadding;
 
@@ -511,6 +579,11 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
         // Draw border
         this.elixirBar.lineStyle(2, 0x000000);
         this.elixirBar.strokeRect(barX, barY, this.barWidth, barHeight);
+
+        // set recolor to true for all abilities
+        for (const key in this.abilities) {
+            this.abilities[key].recolor = true;
+        }
     }
 
     delete() {

@@ -110,6 +110,7 @@ export class AbstractAbility extends IDItem {
     
         // Draw the background square with darker color
         if (this.recolor) {
+            console.log(this._percentage);
             this.graphics.fillStyle (this.darkerColor, 1);
             this.graphics.fillRect(this.x, this.y, this.squareSize, this.squareSize);
     
@@ -215,12 +216,14 @@ export class CreditAbility extends AbstractAbility {
         scene: Phaser.Scene,
         squareSize: number,
     ) {
-        super(visual, clickCount, clickType, verificationFunc, id, x - 10, y, scene, squareSize);
+        super(visual, clickCount, clickType, verificationFunc, id, x, y, scene, squareSize);
         this.credits = credits;
         this.reload = reload;
         this._remaining = remaining;
         this.addTextToScene(scene);
         this.retext = true;
+        console.log(scene.sys.canvas.height, scene.sys.canvas.width);
+        console.log(x, y);
     }
 
     get remaining(): number {
@@ -321,7 +324,7 @@ export class ElixirAbility extends AbstractAbility {
         scene: Phaser.Scene,
         squareSize: number,
     ) {
-        super(visual, clickCount, clickType, verificationFunc, id, x - 35, y, scene, squareSize);
+        super(visual, clickCount, clickType, verificationFunc, id, x, y, scene, squareSize);
         this.elixir = elixir;
         this.addTextToScene(scene);
     }
