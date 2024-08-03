@@ -1,5 +1,5 @@
 from math import dist
-from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINI_BRIDGE_RANGE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, PUMP_CODE, CREDIT_USAGE_CODE, STRUCTURE_RANGES
+from constants import BREAKDOWNS, CANNON_SHOT_CODE, MINI_BRIDGE_COST, MINI_BRIDGE_RANGE, MINIMUM_TRANSFER_VALUE, PUMP_DRAIN_CODE, SPAWN_CODE, BRIDGE_CODE, D_BRIDGE_CODE, MINI_BRIDGE_CODE, POISON_CODE, NUKE_CODE, CAPITAL_CODE, BURN_CODE, FREEZE_CODE, RAGE_CODE, OVER_GROW_CODE, STANDARD_LEFT_CLICK, STANDARD_RIGHT_CLICK, ZOMBIE_CODE, CANNON_CODE, PUMP_CODE, CREDIT_USAGE_CODE, STRUCTURE_RANGES
 
 
 def no_click(data):
@@ -177,6 +177,7 @@ def make_ability_validators(board, player, settings):
         SPAWN_CODE: unowned_node,
         BURN_CODE: owned_burnable_node,
         RAGE_CODE: no_click,
+        OVER_GROW_CODE: no_click,
         NUKE_CODE: attack_validators(board.get_player_structures, player, settings["nuke_type"]),
     } | validators_needing_player(player) | make_new_edge_ports(board.check_new_edge, player, settings["bridge_from_port_needed"])
 

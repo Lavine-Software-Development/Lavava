@@ -22,12 +22,10 @@ from constants import (
     ZOMBIE_CODE,
     EDGE,
     DYNAMIC_EDGE,
-    ZOMBIE_FULL_SIZE,
     PUMP_CODE,
     MINIMUM_TRANSFER_VALUE,
-    GROWTH_STOP,
-    NODE_MINIMUM_VALUE,
     MINI_BRIDGE_CODE,
+    OVER_GROW_CODE,
 )
 
 def make_bridge(buy_new_edge, bridge_type, destroy_ports=False, only_to_node_port=False):
@@ -48,6 +46,17 @@ def make_nuke(remove_node):
 
     return nuke_effect
 
+def make_board_wide_effect(board_wide_effect):
+    def rage_effect(data, player):
+        board_wide_effect('rage', player)
+
+    def over_grow_effect(data, player):
+        board_wide_effect('over_grow', player)
+
+    return {
+        RAGE_CODE: rage_effect,
+        OVER_GROW_CODE: over_grow_effect
+    }
 
 def make_rage(board_wide_effect):
     def rage_effect(data, player):
@@ -161,10 +170,9 @@ def make_ability_effects(board, settings):
         POISON_CODE: poison_effect,
         CAPITAL_CODE: capital_effect,
         ZOMBIE_CODE: zombie_effect,
-        RAGE_CODE: make_rage(board.board_wide_effect),
         CANNON_CODE: cannon_effect,
         PUMP_CODE: pump_effect,
-    }
+    } | make_board_wide_effect(board.board_wide_effect)
 
 
 def make_event_effects(board, update_method):
