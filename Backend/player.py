@@ -141,9 +141,10 @@ class RoyalePlayer(DefaultPlayer):
 
     def update(self):
         if self.elixir < self.elixir_cap:
-            self.mini_counter = round(self.mini_counter + TIME_AMOUNT, 1)
-            if round(self.mini_counter % self.elixir_rate, 1) == 0:
+            self.mini_counter += TIME_AMOUNT
+            if self.mini_counter >= self.elixir_rate:
                 self.elixir += 1
+                self.mini_counter = 0
 
 
 class MoneyPlayer(DefaultPlayer):
