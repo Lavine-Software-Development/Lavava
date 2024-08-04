@@ -46,10 +46,10 @@ class OverGrown(AbstractSpreadingEffect):
         super().__init__(OVER_GROW_TICKS, EffectType.GROW)
     
     def effect(self, amount):
-        return amount
+        return amount * 5
     
     def can_spread(self, killed, new_owner):
-        return killed
+        return killed and new_owner.state_name == "default"
 
     def capture_removal(self, player):
         return False

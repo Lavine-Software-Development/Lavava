@@ -771,11 +771,16 @@ def get_royale_settings():
         "ability_type": "elixir",
         "elixir_cap": 10,
         "elixir_rate": 3.6,
-        "port_percentage": 1/2,
+        "growth_rate": 0.13,
+        "main_time": 360,
+        "overtime": 60,
+        "full_size": 150,
+        "accessible_percentage": 1/2,
         "walls": True,
+        "wall_counts": [1, 2],
         'end_game_make_ports': True,
         "starting_structures": False,
-        "nuke_type": "neighbor",
+        "attack_type": "neighbor",
         "bridge_burn": False,
         "bridge_from_port_needed": False,
         "deck_size": 5,
@@ -789,13 +794,17 @@ def get_og_settings():
     settings = {
         "ability_type": "credits",
         "credit_cap": 20,
-        "port_percentage": 2/3,
+        "growth_rate": 0.15,
+        "main_time": 300,
+        "overtime": 60,
+        "full_size": 250,
+        "accessible_percentage": 2/3,
         "walls": False,
         'end_game_make_ports': False,
         "starting_structures": True,
         "starting_land_capitals": 3,
         "starting_island_capitals": 1,
-        "nuke_type": "structure_range",
+        "attack_type": "structure_range",
         "bridge_burn": False,
         "bridge_from_port_needed": False,
         "deck_size": 4,
@@ -835,6 +844,14 @@ def get_royale_abilities():
         {
             "name": "Over-Grow",
             "cost": 4,
+        },
+        {
+            "name": "Wall-Breaker",
+            "cost": 3,
+        },
+        {
+            "name": "Poison",
+            "cost": 5,
         }
     ]
     return jsonify({"abilities": abilities, "options": 6})

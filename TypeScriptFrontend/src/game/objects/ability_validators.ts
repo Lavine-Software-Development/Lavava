@@ -1,6 +1,6 @@
 import { IDItem } from "./idItem";
-import { OtherPlayer } from "./otherPlayer";
-import { MyPlayer } from "./myPlayer";
+import { OtherPlayer} from "./otherPlayer";
+import { MyCreditPlayer } from "./myPlayer";
 import {
     KeyCodes,
     MINIMUM_TRANSFER_VALUE,
@@ -84,34 +84,43 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
     return true;
 };
 
-function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number], nukeType: string) {
-    return function structureRangedNodeAttack(data: IDItem[]): boolean {
+function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number], attackType: string): { [key: string]: ValidatorFunc }  {
+
+    const isNeighborOrOwner = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return (node1.owner === player) || isNeighbor(data);
+    }
+
+    const isNeighbor = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return node1.edges.some((edge) => edge.other(node1).owner === player);
+    }
+
+    const defaultStructureRangedNodeAttack = (data: IDItem[]): boolean => {
+        const node = data[0] as Node;
+        return defaultNode(node) && structureRangedNodeAttack(data);
+    }
+
+    const structureRangedNodeAttack = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
 
         const structures = nodes.filter(
             (node) => NUKE_OPTION_STRINGS.includes(node.stateName) && node.owner === player
         );
 
-        // get the nodes neighbors
-        const isNeighborOrOwner = (node1: Node): boolean => {
-            if (node1.owner === player) return true;
-            return node1.edges.some((edge) => edge.other(node1).owner === player);
-        }
-
         const inStructureRange = (structure: Node): boolean => {
             const nukeRange = structure.state.nuke_range * structure.value;
             return isWithinScaledRange(node.pos, structure.pos, ratio, nukeRange);
         };
 
-        if (nukeType === "neighbor") {
-            return isNeighborOrOwner(node);
-        }
-        else {
-            return (
-                defaultNode(node) &&
-                structures.some((structure) => inStructureRange(structure))
-            );
-        }
+        return (
+            structures.some((structure) => inStructureRange(structure))
+        );
+    }
+
+    return {
+        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
+        [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNeighbor : structureRangedNodeAttack,
     };
 }
 
@@ -270,7 +279,7 @@ function newEdgeValidator(
 }
 
 export function makeAbilityValidators(
-    player: MyPlayer,
+    player: OtherPlayer,
     ratio: [number, number],
     settings: any,
     nodes: Node[],
@@ -281,16 +290,16 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
-        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player, ratio, settings.nuke_type),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
     const playerValidatorsMap = playerValidators(player);
     const newEdgeValidators = newEdgeValidator(getEdges, player, ratio, settings.bridge_from_port_needed);
-    return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators };
+    const attackValidatorsMap = attackValidators(nodes, player, ratio, settings.attack_type);
+    return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators, ...attackValidatorsMap };
 }
 
-export function makeEventValidators(player: MyPlayer, getEdges: () => Edge[]): {
+export function makeEventValidators(player: MyCreditPlayer, getEdges: () => Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {

@@ -10,8 +10,16 @@ from constants import (
     AUTO_EXPAND,
     BLACK,
 )
-from nodeState import DefaultState, MineState, StartingCapitalState, ZombieState, CapitalState, CannonState, PumpState
-from nodeEffect import Poisoned, Enraged
+from nodeState import (
+    DefaultState,
+    MineState,
+    StartingCapitalState,
+    ZombieState,
+    CapitalState,
+    CannonState,
+    PumpState,
+)
+from nodeEffect import Poisoned, Enraged, OverGrown
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
 from method_mulitplier import method_multipliers
@@ -19,12 +27,10 @@ from end_game_methods import stall, freeAttack, shrink
 from playerStateEnums import PlayerStateEnum as PSE
 
 
-@track_changes('owner', 'state', 'value', 'effects')
-@method_multipliers({('lost_amount', freeAttack)})
+@track_changes("owner", "state", "value", "effects")
+@method_multipliers({("lost_amount", freeAttack)})
 class Node(JsonableTracked):
-
-    def __init__(self, id, pos):
-
+    def __init__(self, id, pos, growth_rate, default_full_size):
         self.value: float = 0
         self.owner = None
         self.item_type = NODE
@@ -34,10 +40,12 @@ class Node(JsonableTracked):
         self.effects: dict[str, AbstractSpreadingEffect] = dict()
         self.expel_multiplier = 1
         self.intake_multiplier = 1
-        self.grow_multiplier = 1
+        self.grow_maximum = 1
+        self.growth_rate = growth_rate
+        self.default_full_size = default_full_size
 
-        start_values = {'pos', 'state', 'value'}
-        full_values = {'state', 'value', 'effects', 'owner'}
+        start_values = {"pos", "state", "value"}
+        full_values = {"state", "value", "effects", "owner"}
         super().__init__(id, start_values, set(), full_values)
 
         self.set_default_state()
@@ -79,11 +87,13 @@ class Node(JsonableTracked):
             return DefaultState(self)
 
     def new_effect(self, effect_name, data=[]):
-        if effect_name == 'poison':
+        if effect_name == "poison":
             originator, length = data
             return Poisoned(originator, length)
-        elif effect_name == 'rage':
+        elif effect_name == "rage":
             return Enraged()
+        elif effect_name == "over_grow":
+            return OverGrown()
         else:
             return None
 
@@ -96,12 +106,15 @@ class Node(JsonableTracked):
                 inter_intake *= effect.effect(inter_intake)
             elif effect.effect_type == EffectType.EXPEL:
                 inter_expel *= effect.effect(inter_expel)
-        self.grow_multiplier = inter_grow
+        self.grow_maximum = inter_grow
         self.intake_multiplier = inter_intake
         self.expel_multiplier = inter_expel
 
     def set_default_state(self):
         self.set_state("default")
+
+    def bridge_access(self):
+        pass
 
     def expand(self):
         for edge in self.outgoing:
@@ -122,7 +135,7 @@ class Node(JsonableTracked):
 
     def relocate(self, width, height):
         self.pos = (self.pos_x_per * width, self.pos_y_per * height)
-        
+
     def owned_and_alive(self):
         return self.owner is not None and self.owner.ps.value < PSE.ELIMINATED.value
 
@@ -135,14 +148,18 @@ class Node(JsonableTracked):
 
     def effects_update(self, condition_func):
         original_length = len(self.effects)
-        self.effects = {key: effect for key, effect in self.effects.items() if condition_func(effect)}
+        self.effects = {
+            key: effect
+            for key, effect in self.effects.items()
+            if condition_func(effect)
+        }
         if len(self.effects) < original_length:
             self.calculate_interactions()
 
     def delivery(self, amount, player):
         self.value += self.state.intake(amount, player)
         return self.delivery_status_update(player)
-        
+
     def delivery_status_update(self, player):
         if self.state.flow_ownership:
             self.owner = player
@@ -153,7 +170,7 @@ class Node(JsonableTracked):
 
     def send_amount(self):
         return self.state.expel()
-    
+
     def lost_amount(self, amount, contested):
         return amount
 
@@ -192,15 +209,15 @@ class Node(JsonableTracked):
 
     def full(self):
         return self.value >= self.full_size
-    
+
     @property
     def full_size(self):
         return self.state.full_size
-    
+
     @property
     def incoming(self):
         return {edge for edge in self.edges if edge.to_node == self}
-    
+
     @property
     def outgoing(self):
         return {edge for edge in self.edges if edge.from_node == self}
@@ -214,9 +231,7 @@ class Node(JsonableTracked):
         if self.owner:
             return self.owner.color
         return BLACK
-    
+
     @property
     def effect_keys(self):
         return self.effects.keys()
-
-    

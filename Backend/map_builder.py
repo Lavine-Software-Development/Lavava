@@ -134,7 +134,7 @@ class MapBuilder:
     def convert_to_objects(self, settings):
         edges = []
 
-        nodes = create_nodes(self.nodes)
+        nodes = create_nodes(self.nodes, settings["growth_rate"], settings["full_size"])
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
@@ -143,7 +143,7 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        outsider_choose_starter_ports(nodes, settings["port_percentage"])
+        outsider_choose_starter_ports(nodes, settings["accessible_percentage"])
         nodes = self.starter_states_and_removal(settings["starting_structures"])(nodes, settings)
 
         self.edge_objects = edges

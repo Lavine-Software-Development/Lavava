@@ -297,7 +297,7 @@ export class MainScene extends Scene {
         // Iterate over the values of the dictionary to draw each node
 
         if (this.abilityManager.getMode() === KeyCodes.NUKE_CODE) {
-            if (this.settings.nuke_type == 'structure_range') {
+            if (this.settings.attack_type == 'structure_range') {
                 const structures = Object.values(this.nodes).filter(
                     (node) =>
                         NUKE_OPTION_STRINGS.includes(node.stateName) &&
@@ -307,7 +307,7 @@ export class MainScene extends Scene {
                 structures.forEach((node) => {
                     this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.BLACK);
                 });
-            } else if (this.settings.nuke_type == 'neighbor') {
+            } else if (this.settings.attack_type == 'neighbor') {
                 const neighbors = Object.values(this.nodes).filter(
                     (node) => node.owner != this.mainPlayer && node.edges.some((edge) => edge.other(node).owner === this.mainPlayer)
                 );

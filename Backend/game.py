@@ -1,5 +1,5 @@
 from jsonable import JsonableTick
-from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, OVERTIME_BONUS, SECTION_LENGTHS, SPAWN_CODE, EVENTS
+from constants import COUNTDOWN_LENGTH, OVERTIME_BONUS, SPAWN_CODE, EVENTS
 from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GSE
 from board import Board
@@ -79,7 +79,7 @@ class ServerGame(JsonableTick):
             player.default_values()
         self.remaining = {i for i in range(len(self.player_dict))}
 
-        self.times = SECTION_LENGTHS.copy()
+        self.times = [COUNTDOWN_LENGTH, settings["main_time"], settings["overtime"]]
         self.current_section = 0
 
         map_builder = MapBuilder()

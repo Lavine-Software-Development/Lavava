@@ -26,6 +26,7 @@ from constants import (
     MINIMUM_TRANSFER_VALUE,
     MINI_BRIDGE_CODE,
     OVER_GROW_CODE,
+    WALL_BREAKER_CODE,
 )
 
 def make_bridge(buy_new_edge, bridge_type, destroy_ports=False, only_to_node_port=False):
@@ -158,6 +159,10 @@ def pump_effect(data, player):
     node = data[0]
     node.set_state("pump")
 
+def wall_breaker_effect(data, player):
+    node = data[0]
+    node.wall_count -= 1
+
 def make_ability_effects(board, settings):
     return {
         BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE, settings["bridge_burn"], settings["bridge_from_port_needed"]),
@@ -172,6 +177,7 @@ def make_ability_effects(board, settings):
         ZOMBIE_CODE: zombie_effect,
         CANNON_CODE: cannon_effect,
         PUMP_CODE: pump_effect,
+        WALL_BREAKER_CODE: wall_breaker_effect
     } | make_board_wide_effect(board.board_wide_effect)
 
 
