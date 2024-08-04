@@ -41,6 +41,10 @@ class Board(JsonableTracked):
             if (not player) or node.owner == player:
                 node.set_state(effect)
 
+    def make_accessible(self):
+        for node in self.nodes:
+            node.make_accessible()
+
     def track_starting_states(self):
         for node in self.nodes:
             # if node.state_name != "default":
@@ -103,10 +107,8 @@ class Board(JsonableTracked):
             node.pos = (new_x, y)
             node.set_pos_per()
 
-    def end_game(self, make_port):
+    def end_game(self):
         for node in self.nodes:
-            if make_port:
-                node.is_port = True
             node.apply_modifications()
 
     def update(self):

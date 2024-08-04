@@ -1,13 +1,10 @@
 from jsonable import JsonableSkeleton
 from constants import (
-    GROWTH_RATE,
     MINIMUM_TRANSFER_VALUE,
     PUMP_INTAKE_MULTIPLIER,
     STANDARD_SHRINK_SPEED,
     MINE_DICT,
-    GROWTH_STOP,
     GREY,
-    TRANSFER_RATE,
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
     ZOMBIE_FULL_SIZE,
@@ -18,7 +15,9 @@ import math
 
 
 class AbstractState(JsonableSkeleton):
-    def __init__(self, node, reset_on_capture, flow_ownership, update_on_new_owner, visual_id):
+    def __init__(
+        self, node, reset_on_capture, flow_ownership, update_on_new_owner, visual_id
+    ):
         self.node = node
         self.id = node.id
         self.reset_on_capture = reset_on_capture
@@ -29,11 +28,11 @@ class AbstractState(JsonableSkeleton):
         self.visual_id = visual_id
 
     def grow(self):
-        change = GROWTH_RATE * self.node.grow_multiplier
+        change = self.node.growth_rate * self.node.grow_maximum
         if self.node.value >= self.full_size or self.node.value + change < 0:
             return 0
         return change
-    
+
     def can_grow(self, change):
         return 0 < self.node.value + change < self.full_size
 
@@ -45,7 +44,7 @@ class AbstractState(JsonableSkeleton):
         return self.node.value < self.full_size or self.contested(incoming_player)
 
     def expel(self):
-        return TRANSFER_RATE * self.node.expel_multiplier * self.node.value
+        return self.node.transfer_rate * self.node.expel_multiplier * self.node.value
 
     @abstractmethod
     def capture_event(self):
@@ -59,17 +58,18 @@ class AbstractState(JsonableSkeleton):
         if value < 5:
             return 0
         return max(math.log10(value / 10) / 2 + value / 1000 + 0.15, 0)
-    
+
     def contested(self, incoming_player):
         return incoming_player != self.node.owner
-    
+
     @property
     def json_repr(self):
         return self.visual_id
 
     @property
     def full_size(self):
-        return GROWTH_STOP
+        return self.node.default_full_size * self.node.grow_maximum
+
 
 class DefaultState(AbstractState):
     def __init__(self, node):
@@ -89,10 +89,9 @@ class DefaultState(AbstractState):
 
 
 class ZombieState(DefaultState):
-
     def __init__(self, node):
         node.capture(None)
-        AbstractState.__init__(self, node, True, False, False, 1) # default on capture
+        AbstractState.__init__(self, node, True, False, False, 1)  # default on capture
         self.node.value = ZOMBIE_FULL_SIZE
 
     def grow(self):
@@ -100,51 +99,56 @@ class ZombieState(DefaultState):
 
     def intake(self, amount, incoming_player):
         return super().intake(amount, incoming_player) / 2
-    
+
 
 class CannonState(DefaultState):
-    
     def __init__(self, node):
-        AbstractState.__init__(self, node, True, False, False, 5) # does not stay on capture
+        AbstractState.__init__(
+            self, node, True, False, False, 5
+        )  # does not stay on capture
 
     def grow(self):
         return 0
 
-class PumpState(DefaultState):
 
+class PumpState(DefaultState):
     def __init__(self, node):
-        AbstractState.__init__(self, node, True, False, False, 6) # does not stay on capture
+        AbstractState.__init__(
+            self, node, True, False, False, 6
+        )  # does not stay on capture
         self.prep_shrink()
 
     def prep_shrink(self):
         self.draining = False
         self.shrink_count = math.floor(
-            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
+            (self.full_size - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
         )
 
     def grow(self):
         if self.draining:
             return self.drain()
         return 0
-    
+
     def drain(self):
         if self.shrink_count == 0:
             self.prep_shrink()
             return 0
         self.shrink_count -= 1
         return STANDARD_SHRINK_SPEED
-    
+
     def intake(self, amount, incoming_player):
         return super().intake(amount, incoming_player) * PUMP_INTAKE_MULTIPLIER
 
 
 class CapitalState(DefaultState):
     def __init__(self, node, reset=True, update_on_new_owner=False):
-        AbstractState.__init__(self, node, reset, False, update_on_new_owner, 2) # default on capture
+        AbstractState.__init__(
+            self, node, reset, False, update_on_new_owner, 2
+        )  # default on capture
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
-            (GROWTH_STOP - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
+            (self.full_size - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
         )
 
     def grow(self):
@@ -158,16 +162,16 @@ class CapitalState(DefaultState):
             return 0
         self.shrink_count -= 1
         return STANDARD_SHRINK_SPEED
-    
+
     def accept_intake(self, incoming_player):
         return self.capitalized and super().accept_intake(incoming_player)
-    
+
     @property
     def full_size(self):
         return CAPITAL_FULL_SIZE
 
 
-class StartingCapitalState(CapitalState): # stays on capture
+class StartingCapitalState(CapitalState):  # stays on capture
     def __init__(self, node, is_owned=False):
         super().__init__(node, False, True)
         self.capitalized = True
@@ -177,7 +181,7 @@ class StartingCapitalState(CapitalState): # stays on capture
         return 0
 
 
-class MineState(AbstractState): # default on capture
+class MineState(AbstractState):  # default on capture
     def __init__(self, node, absorbing_func, island):
         node.port_count = 3
         self.bonus, self.bubble, self.ring_color, visual_id = MINE_DICT[island]

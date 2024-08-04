@@ -501,7 +501,7 @@ const Home: React.FC = () => {
                                 </button>
                                 {playerCountDropdownOpen && (
                                     <ul>
-                                        {[2, 3, 4, 5].map((count) => (
+                                        {[2, 3, 4].map((count) => (
                                             <li
                                                 key={count}
                                                 onClick={() => hostTab(count)}
