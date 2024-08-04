@@ -23,7 +23,6 @@ def random_choose_accessible_nodes(node_list, percentage, settings):
     
     for i, node in enumerate(node_list):
         node.bridge_access(i < ports_count, settings)
-        print (i < ports_count)
 
 def outsider_choose_accessible_nodes(node_list, percentage, settings):
     # Calculate possible_incoming_count for each node

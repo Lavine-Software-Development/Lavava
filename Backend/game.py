@@ -16,6 +16,7 @@ class ServerGame(JsonableTick):
 
         self.running = True
         self.gs = gs
+        self.settings = settings
         self.extra_info = []
         self.counts = [0] * player_count
         self.board = Board(self.gs)
@@ -31,7 +32,6 @@ class ServerGame(JsonableTick):
         start_values = {'board'}
         tick_values = {'countdown_timer', 'gs', 'extra_info', 'counts'}
         recurse_values = {'board'}
-        self.settings = settings
         super().__init__('game', start_values, recurse_values, tick_values)
 
         self.restart()
@@ -121,6 +121,7 @@ class ServerGame(JsonableTick):
                 if self.times[self.current_section] <= self.settings['main_time'] - self.accessibility_times[0]:  
                     self.board.make_accessible()
                     self.accessibility_times.pop(0)
+                    self.update_extra_info(("Walls Down"))
 
             if self.gs.value == GSE.START_SELECTION.value and self.countdown_timer > 3 and self.all_player_starts_selected:
                 self.times[self.current_section] = 3

@@ -8,9 +8,6 @@ import {
     stateCodes,
     EventCodes,
     PRE_STRUCTURE_RANGES,
-    AbilityCredits,
-    AbilityElixir,
-    AbilityReloadTimes,
     PlayerColors,
     NUKE_OPTION_STRINGS,
     NUKE_OPTION_CODES, 
@@ -34,11 +31,9 @@ import {
     abilityCountsConversion,
     cannonAngle,
     phaserColor,
-    random_equal_distributed_angles,
 } from "../objects/utilities";
-import { AbilityVisual } from "../objects/immutable_visuals";
 
-import { NONE, Scene } from "phaser";
+import { Scene } from "phaser";
 
 import { Edge } from "../objects/edge";
 
@@ -84,8 +79,12 @@ export class MainScene extends Scene {
 
     private progressBar: Phaser.GameObjects.Graphics;
     private progressLine: Phaser.GameObjects.Graphics;
-    private mainTimeColor: number = 0x0000FF; // Blue
-    private overtimeColor: number = 0xFF0000; // Red
+    private overtimeColor: number = 0xFF69B4; // Hot Pink
+    private mainTimeColor: number;
+    private barWidth: number;
+    private barHeight: number = 20; // Increased height
+    private barY: number = 10; // Space from the top
+    private markerTexts: Phaser.GameObjects.Text[] = [];
 
     private rainbowColors: string[] = [
         "#B8860B", // Dark Goldenrod
@@ -174,6 +173,8 @@ export class MainScene extends Scene {
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
 
+        // main time is color is light purple
+        this.mainTimeColor = 0x9370DB;
         this.createProgressBar();
     }
 
@@ -182,28 +183,63 @@ export class MainScene extends Scene {
     }
 
     private createProgressBar(): void {
-        const width = this.sys.game.config.width as number;
-        const height = 20; // Height of the progress bar
-        const y = 0; // Position at the top of the screen
+        const gameWidth = this.sys.game.config.width as number;
+        this.barWidth = gameWidth * 0.5; // Half the screen width
+        const barX = gameWidth * 0.6 - this.barWidth / 2; // Centered at 60%
     
         this.progressBar = this.add.graphics();
         this.progressLine = this.add.graphics();
     
         // Draw the main time portion of the bar
         this.progressBar.fillStyle(this.mainTimeColor, 1);
-        this.progressBar.fillRect(0, y, width * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)), height);
+        this.progressBar.fillRect(barX, this.barY, this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)), this.barHeight);
     
         // Draw the overtime portion of the bar
         this.progressBar.fillStyle(this.overtimeColor, 1);
-        this.progressBar.fillRect(width * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)), y, width * (this.settings.overtime / (this.settings.main_time + this.settings.overtime)), height);
+        this.progressBar.fillRect(
+            barX + this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)), 
+            this.barY, 
+            this.barWidth * (this.settings.overtime / (this.settings.main_time + this.settings.overtime)), 
+            this.barHeight
+        );
     
-        // Initialize the progress line
+        // Draw accessibility marks if needed
+        if (this.settings.iterative_make_accessible) {
+            this.drawAccessibilityMarks(barX);
+        }
+    
+        // Initialize the progress line (taller than the bar)
         this.progressLine.fillStyle(0x000000, 1); // Black line
-        this.progressLine.fillRect(0, y, 2, height); // 2 pixels wide
+        this.progressLine.fillRect(barX, this.barY - 5, 4, this.barHeight + 10); // 2 pixels wide, extending beyond the bar
+
+
+        const overtimeWidth = this.barWidth * (this.settings.overtime / (this.settings.main_time + this.settings.overtime));
+        const overtimeX = barX + this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime));
+        this.add.text(overtimeX + overtimeWidth / 2, this.barY + this.barHeight / 2, "Overtime", {
+            fontFamily: 'Arial',
+            fontSize: '14px',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+    }
+    
+    private drawAccessibilityMarks(barX: number): void {
+        this.progressBar.fillStyle(0x000000, 0.5); // Semi-transparent black
+        this.settings.accessibility_times.forEach(time => {
+            const markX = barX + (time / this.settings.main_time) * this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime));
+            this.progressBar.fillRect(markX, this.barY - 5, 2, this.barHeight + 10) ; // 2-pixel wide marks
+            this.markerTexts.push(
+                this.add.text(markX, this.barY + this.barHeight + 5, "Walls Down", {
+                    fontFamily: 'Arial',
+                    fontSize: '10px',
+                    color: '#000000'
+                }).setOrigin(0.5, 0)
+            );
+        });
     }
     
     private updateProgressBar(): void {
-        const width = this.sys.game.config.width as number;
+        const gameWidth = this.sys.game.config.width as number;
+        const barX = gameWidth * 0.6 - this.barWidth / 2;
         const totalTime = this.settings.main_time + this.settings.overtime;
         let progress = 0;
     
@@ -221,7 +257,7 @@ export class MainScene extends Scene {
         // Update the position of the progress line
         this.progressLine.clear();
         this.progressLine.fillStyle(0x000000, 1);
-        this.progressLine.fillRect(width * progress, 0, 2, 20);
+        this.progressLine.fillRect(barX + this.barWidth * progress, this.barY - 5, 4, this.barHeight + 10);
     }
 
     private createAbilityManager() {
@@ -366,7 +402,7 @@ export class MainScene extends Scene {
                     this.graphics.strokeCircle(
                         node.pos.x,
                         node.pos.y,
-                        node.size + 4
+                        node.size + 8
                     );
                 });
             }
@@ -593,8 +629,13 @@ export class MainScene extends Scene {
         Object.values(this.nodes).forEach((node) => node.delete());
         Object.values(this.edges).forEach((edge) => edge.delete());
         this.abilityManager.delete();
+        this.progressBar.destroy();
+        this.progressLine.destroy();
+        this.timerText.destroy();
         this.nodes = {};
         this.edges = {};
+        // destroy all the texts in markerTexts
+        this.markerTexts.forEach(text => text.destroy());
     }
 
     update_data(new_data) {
@@ -909,10 +950,31 @@ export class MainScene extends Scene {
             
         } else if (tuple[0] == "End Game") {
             let bonus = tuple[1] as number;
+            let text = this.settings.ability_type == "credits" ? `Overtime - Free Attack - ${bonus} credits available` : `Overtime - Free Attack`;
             let bonusText = this.add.text(
                 this.sys.game.config.width as number / 2,
-                20,
-                `Overtime - Free Attack - ${bonus} credits available`,
+                60,
+                text,
+                { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
+            );
+
+            bonusText.setOrigin(0.5);
+
+            this.tweens.add({
+                targets: bonusText,
+                alpha: 0,
+                duration: 6000,
+                ease: "Power2",
+                onComplete: () => {
+                    bonusText.destroy();
+                },
+            });
+        } else if (tuple[0] == "Walls Down") {
+            let text = "Walls Down";
+            let bonusText = this.add.text(
+                this.sys.game.config.width as number / 2,
+                40,
+                text,
                 { fontFamily: 'Arial', fontSize: '32px', color: '#000000' }
             );
 

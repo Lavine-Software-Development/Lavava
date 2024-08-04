@@ -243,10 +243,19 @@ function newEdgeValidator(
         }
     };
 
+    const defenseEdge = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        const node2 = data[1] as Node;
+        return (
+            node1.owner === node2.owner && (node1.accessible || node2.accessible)
+        );
+    }
+        
+
     const fullSizeToNodeEdgeValidator = (data: IDItem[]): boolean => {
         const nodes = data as Node[]; // Assert all data items are Nodes
         return (
-            (nodes.length < 2 || nodes[1].accessible) && newEdgeStandard(nodes)
+            (nodes.length < 2 || defenseEdge(data) || nodes[1].accessible) && newEdgeStandard(nodes)
         );
     };
 

@@ -47,7 +47,6 @@ class WallNode(Node):
     def bridge_access(self, accessibile, settings):
         if not accessibile:
             self.wall_count = random.choice(settings["wall_counts"])
-        print(self.wall_count)
 
     def make_accessible(self):
         if self.wall_count > 0:

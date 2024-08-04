@@ -214,9 +214,12 @@ def make_new_edge_ports(check_new_edge, player, from_port_needed):
         if all([node.accessible for node in data]):
             return no_crossovers(check_new_edge, data, player)
         return False
+    
+    def defense_bridge(data):
+        return data[1].owner == data[0].owner and (data[1].accessible or data[0].accessible)
 
     def only_to_node_port(data):
-        return data[1].accessible and no_crossovers(check_new_edge, data, player)
+        return (defense_bridge(data) or data[1].accessible) and no_crossovers(check_new_edge, data, player)
 
     # Check if the nodes are within the range of a mini bridge
     def check_mini_bridge_range(data):
