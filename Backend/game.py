@@ -34,7 +34,7 @@ class ServerGame(JsonableTick):
         self.settings = settings
         super().__init__('game', start_values, recurse_values, tick_values)
 
-        self.restart(settings)
+        self.restart()
 
     @property
     def countdown_timer(self):
@@ -73,20 +73,22 @@ class ServerGame(JsonableTick):
     def update_extra_info(self, data):
         self.extra_info.append(data)
 
-    def restart(self, settings):
+    def restart(self):
+
+        self.accessibility_times = self.settings['accessibility_times'] if self.settings['iterative_make_accessible'] else []
 
         for player in self.player_dict.values():
             player.default_values()
         self.remaining = {i for i in range(len(self.player_dict))}
 
-        self.times = [COUNTDOWN_LENGTH, settings["main_time"], settings["overtime"]]
+        self.times = [COUNTDOWN_LENGTH, self.settings["main_time"], self.settings["overtime"]]
         self.current_section = 0
 
         map_builder = MapBuilder()
-        map_builder.build(settings)
+        map_builder.build(self.settings)
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
 
-        self.ability_effects = make_ability_effects(self.board, settings)
+        self.ability_effects = make_ability_effects(self.board, self.settings)
         self.events = self.make_events_dict()
 
         
@@ -114,6 +116,11 @@ class ServerGame(JsonableTick):
 
         if self.countdown_timer > 0:
             self.times[self.current_section] -= 0.1
+
+            if self.accessibility_times and self.gs.value == GSE.PLAY.value:
+                if self.times[self.current_section] <= self.settings['main_time'] - self.accessibility_times[0]:  
+                    self.board.make_accessible()
+                    self.accessibility_times.pop(0)
 
             if self.gs.value == GSE.START_SELECTION.value and self.countdown_timer > 3 and self.all_player_starts_selected:
                 self.times[self.current_section] = 3
@@ -159,7 +166,7 @@ class ServerGame(JsonableTick):
         self.extra_info.clear()
 
     def end_game_events(self):
-        self.board.end_game(self.settings['end_game_make_ports'])
+        self.board.end_game()
         for player in self.player_dict.values():
             player.overtime_bonus()
         self.update_extra_info(("End Game", OVERTIME_BONUS))

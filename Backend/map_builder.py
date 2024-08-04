@@ -12,8 +12,15 @@ from constants import (
 from helpers import do_intersect, angle_between_edges
 from edge import Edge
 from dynamicEdge import DynamicEdge
-from map_builder_helpers import create_nodes, starter_capitals, just_remove_lonely_nodes, outsider_choose_starter_ports
+from map_builder_helpers import create_nodes, starter_capitals, just_remove_lonely_nodes, outsider_choose_accessible_nodes
 from random import randint
+from portNode import PortNode, WallNode
+
+
+nodeClassDict = {
+    True: WallNode,
+    False: PortNode
+}
 
 
 class MapBuilder:
@@ -134,7 +141,7 @@ class MapBuilder:
     def convert_to_objects(self, settings):
         edges = []
 
-        nodes = create_nodes(self.nodes, settings["growth_rate"], settings["full_size"])
+        nodes = create_nodes(nodeClassDict[settings["walls"]], self.nodes, settings["growth_rate"], settings["transfer_rate"], settings["full_size"])
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
@@ -143,7 +150,7 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        outsider_choose_starter_ports(nodes, settings["accessible_percentage"])
+        outsider_choose_accessible_nodes(nodes, settings["accessible_percentage"], settings)
         nodes = self.starter_states_and_removal(settings["starting_structures"])(nodes, settings)
 
         self.edge_objects = edges

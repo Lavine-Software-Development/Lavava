@@ -5,7 +5,6 @@ from constants import (
     STANDARD_SHRINK_SPEED,
     MINE_DICT,
     GREY,
-    TRANSFER_RATE,
     STANDARD_SWAP_STATUS,
     BELOW_SWAP_STATUS,
     ZOMBIE_FULL_SIZE,
@@ -45,7 +44,7 @@ class AbstractState(JsonableSkeleton):
         return self.node.value < self.full_size or self.contested(incoming_player)
 
     def expel(self):
-        return TRANSFER_RATE * self.node.expel_multiplier * self.node.value
+        return self.node.transfer_rate * self.node.expel_multiplier * self.node.value
 
     @abstractmethod
     def capture_event(self):

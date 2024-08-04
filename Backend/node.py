@@ -30,7 +30,7 @@ from playerStateEnums import PlayerStateEnum as PSE
 @track_changes("owner", "state", "value", "effects")
 @method_multipliers({("lost_amount", freeAttack)})
 class Node(JsonableTracked):
-    def __init__(self, id, pos, growth_rate, default_full_size):
+    def __init__(self, id, pos, growth_rate, transfer_rate, default_full_size):
         self.value: float = 0
         self.owner = None
         self.item_type = NODE
@@ -42,6 +42,7 @@ class Node(JsonableTracked):
         self.intake_multiplier = 1
         self.grow_maximum = 1
         self.growth_rate = growth_rate
+        self.transfer_rate = transfer_rate
         self.default_full_size = default_full_size
 
         start_values = {"pos", "state", "value"}

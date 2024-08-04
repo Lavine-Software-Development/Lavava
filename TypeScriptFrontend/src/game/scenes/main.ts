@@ -82,6 +82,11 @@ export class MainScene extends Scene {
     private settings: any;
     private mode: string;
 
+    private progressBar: Phaser.GameObjects.Graphics;
+    private progressLine: Phaser.GameObjects.Graphics;
+    private mainTimeColor: number = 0x0000FF; // Blue
+    private overtimeColor: number = 0xFF0000; // Red
+
     private rainbowColors: string[] = [
         "#B8860B", // Dark Goldenrod
         "#8B4513", // Saddle Brown
@@ -168,10 +173,55 @@ export class MainScene extends Scene {
 
         Object.values(this.nodes).forEach((node) => node.draw());
         Object.values(this.edges).forEach((edge) => edge.draw());
+
+        this.createProgressBar();
     }
 
     getEdges(): Edge[] {
         return Object.values(this.edges);
+    }
+
+    private createProgressBar(): void {
+        const width = this.sys.game.config.width as number;
+        const height = 20; // Height of the progress bar
+        const y = 0; // Position at the top of the screen
+    
+        this.progressBar = this.add.graphics();
+        this.progressLine = this.add.graphics();
+    
+        // Draw the main time portion of the bar
+        this.progressBar.fillStyle(this.mainTimeColor, 1);
+        this.progressBar.fillRect(0, y, width * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)), height);
+    
+        // Draw the overtime portion of the bar
+        this.progressBar.fillStyle(this.overtimeColor, 1);
+        this.progressBar.fillRect(width * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)), y, width * (this.settings.overtime / (this.settings.main_time + this.settings.overtime)), height);
+    
+        // Initialize the progress line
+        this.progressLine.fillStyle(0x000000, 1); // Black line
+        this.progressLine.fillRect(0, y, 2, height); // 2 pixels wide
+    }
+    
+    private updateProgressBar(): void {
+        const width = this.sys.game.config.width as number;
+        const totalTime = this.settings.main_time + this.settings.overtime;
+        let progress = 0;
+    
+        if (this.gs < GSE.PLAY) {
+            progress = 0;
+        } else if (this.gs === GSE.PLAY) {
+            progress = (this.settings.main_time - this.countdown) / totalTime;
+        } else if (this.gs >= GSE.END_GAME) {
+            progress = (this.settings.main_time + (this.settings.overtime - this.countdown)) / totalTime;
+        }
+    
+        // Ensure progress doesn't exceed 1
+        progress = Math.min(progress, 1);
+    
+        // Update the position of the progress line
+        this.progressLine.clear();
+        this.progressLine.fillStyle(0x000000, 1);
+        this.progressLine.fillRect(width * progress, 0, 2, 20);
     }
 
     private createAbilityManager() {
@@ -511,8 +561,8 @@ export class MainScene extends Scene {
                     new WallNode(
                         Number(id),
                         n[id]["pos"] as [number, number],
-                        n[id]["is_port"],
-                        stateDict[n[id]["state"]](),
+                        n[id]["wall_count"],
+                        stateDict[n[id]["state"]](this.settings.full_size),
                         n[id]["value"],
                         this
                     ),
@@ -526,7 +576,7 @@ export class MainScene extends Scene {
                         Number(id),
                         n[id]["pos"] as [number, number],
                         n[id]["is_port"],
-                        stateDict[n[id]["state"]](),
+                        stateDict[n[id]["state"]](this.settings.full_size),
                         n[id]["value"],
                         this
                     ),
@@ -590,6 +640,7 @@ export class MainScene extends Scene {
 
                 if (this.gs != new_data["gs"]) {
                     this.gs = new_data["gs"] as GSE;
+                    this.updateProgressBar();
                 }
 
                 if (!this.eloText && new_data.hasOwnProperty("new_elos")) {
@@ -647,6 +698,8 @@ export class MainScene extends Scene {
                         color: timerColor,
                     });
                     this.timerText.setOrigin(1, 0);
+
+                    this.updateProgressBar();
                 }
 
                 const updateDisplays = () => {
@@ -1010,7 +1063,7 @@ export class MainScene extends Scene {
         } else if (attribute === "owner") {
             return this.otherPlayers[value] || null;
         } else if (attribute === "state") {
-            return stateDict[value]();
+            return stateDict[value](this.settings.full_size);
         } else if (attribute === "effects") {
             return new Set(value);
         } else {

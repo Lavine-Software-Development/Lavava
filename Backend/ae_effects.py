@@ -161,7 +161,7 @@ def pump_effect(data, player):
 
 def wall_breaker_effect(data, player):
     node = data[0]
-    node.wall_count -= 1
+    node.make_accessible()
 
 def make_ability_effects(board, settings):
     return {
