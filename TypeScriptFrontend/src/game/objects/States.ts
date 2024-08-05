@@ -1,4 +1,4 @@
-import { CANNON_NUKE_RANGE, CAPITAL_NUKE_RANGE, Colors, GROWTH_STOP, CAPITAL_FULL_SIZE, MineVisuals, PUMP_NUKE_RANGE, } from "./constants";
+import { CANNON_NUKE_RANGE, CAPITAL_NUKE_RANGE, Colors, CAPITAL_FULL_SIZE, MineVisuals, PUMP_NUKE_RANGE, ZOMBIE_FULL_SIZE, CANNON_FULL_SIZE, PUMP_FULL_SIZE, } from "./constants";
 import { random_equal_distributed_angles } from "./utilities"; // Ensure you import the angles function
 import * as Phaser from "phaser";
 
@@ -8,7 +8,7 @@ export class State {
     nuke_range: number;
     full_size: number;
 
-    constructor(name: string, nuke_range: number = 0, full_size: number = GROWTH_STOP, gaphic_override: boolean = false) {
+    constructor(name: string, full_size: number, nuke_range: number = 0, gaphic_override: boolean = false) {
         this.name = name;
         this.nuke_range = nuke_range;
         this.full_size = full_size;
@@ -32,7 +32,7 @@ export class ZombieState extends State {
     zombieSprite: Phaser.GameObjects.Image | null = null;
 
     constructor(name: string) {
-        super(name, 0, GROWTH_STOP, true);
+        super(name, 0, ZOMBIE_FULL_SIZE, true);
     }
 
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
@@ -63,7 +63,7 @@ export class MineState extends State {
         ringColor: readonly [number, number, number],
         unfilledColor: readonly [number, number, number] = Colors.GREY
     ) {
-        super(name);
+        super(name, MINE_FULL_SIZE);
         this.bubble = bubble;
         this.ringColor = ringColor;
         this.unfilledColor = unfilledColor;
@@ -75,7 +75,7 @@ export class CapitalState extends State {
     private starSprite: Phaser.GameObjects.Image | null = null;
 
     constructor(name: string, capitalized: boolean = false) {
-        super(name, CAPITAL_NUKE_RANGE, CAPITAL_FULL_SIZE);
+        super(name, CAPITAL_FULL_SIZE, CAPITAL_NUKE_RANGE);
         this.capitalized = capitalized;
     }
 
@@ -109,7 +109,7 @@ export class CannonState extends State {
         name: string,
         angle: number = random_equal_distributed_angles(1)[0]
     ) {
-        super(name, CANNON_NUKE_RANGE);
+        super(name, CANNON_FULL_SIZE, CANNON_NUKE_RANGE);
         this.angle = angle;
         this.selected = false;
     }
@@ -121,6 +121,10 @@ export class CannonState extends State {
 
 export class PumpState extends State {
     private plusSprite: Phaser.GameObjects.Image | null = null;
+
+    constructor(name: string) {
+        super(name, PUMP_FULL_SIZE, PUMP_NUKE_RANGE);
+    }
 
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
         if (!this.plusSprite) {
@@ -139,18 +143,19 @@ export class PumpState extends State {
 
 }
 
-export const stateDict: { [key: number]: () => State } = {
-    0: () => new State("default"),
-    1: () => new ZombieState("zombie"),
-    2: () => new CapitalState("capital", true),
-    3: () =>
+export const stateDict: { [key: number]: (full_size: number) => State } = {
+    0: (full_size) => new State("default", full_size),
+    1: (full_size) => new ZombieState("zombie"),
+    2: (full_size) => new CapitalState("capital", true),
+    3: (full_size) =>
         new MineState("mine", MineVisuals.RESOURCE_BUBBLE, Colors.DARK_YELLOW),
-    4: () =>
+    4: (full_size) =>
         new MineState(
             "mine",
             MineVisuals.ISLAND_RESOURCE_BUBBLE,
             Colors.YELLOW
         ),
-    5: () => new CannonState("cannon"),
-    6: () => new PumpState("pump", PUMP_NUKE_RANGE),
+    5: (full_size) => new CannonState("cannon"),
+    6: (full_size) => new PumpState("pump"),
 };
+

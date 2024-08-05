@@ -8,20 +8,22 @@ import { Colors, KeyCodes, EventCodes } from "./constants";
 import { ClickType } from "./enums";
 
 // Create instances of AbilityVisual using the factory function
-const SPAWN_V = createAbilityVisual("Spawn", "circle");
-const BRIDGE_V = createAbilityVisual("Bridge", "triangle", Colors.YELLOW, "A");
-const D_BRIDGE_V = createAbilityVisual("D-Bridge", "circle", Colors.YELLOW);
-const NUKE_V = createAbilityVisual("Nuke", "x", Colors.GREY);
-const POISON_V = createAbilityVisual("Poison", "circle", Colors.PURPLE);
-const FREEZE_V = createAbilityVisual("Freeze", "triangle", Colors.LIGHT_BLUE);
-const CAPITAL_V = createAbilityVisual("Capital", "star", Colors.PINK);
-const ZOMBIE_V = createAbilityVisual("Zombie", "square", Colors.DARK_RED);
-const BURN_V = createAbilityVisual("Burn", "square", Colors.DARK_ORANGE);
-const RAGE_V = createAbilityVisual("Rage", "cross", Colors.LIGHT_GREEN);
-const CANNON_V = createAbilityVisual("Cannon", "cannon", Colors.GREY, "E");
-const PUMP_V = createAbilityVisual("Pump", "circle", Colors.DARK_PURPLE, "U");
-const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", "circle", Colors.YELLOW, "M");
-const WORMHOLE_V = createAbilityVisual("Wormhole", "circle", Colors.BLACK, "W");
+const SPAWN_V = createAbilityVisual("Spawn");
+const BRIDGE_V = createAbilityVisual("Bridge", Colors.YELLOW, "A");
+const D_BRIDGE_V = createAbilityVisual("D-Bridge", Colors.YELLOW);
+const NUKE_V = createAbilityVisual("Nuke", Colors.GREY);
+const POISON_V = createAbilityVisual("Poison", Colors.PURPLE);
+const FREEZE_V = createAbilityVisual("Freeze", Colors.LIGHT_BLUE);
+const CAPITAL_V = createAbilityVisual("Capital", Colors.PINK);
+const ZOMBIE_V = createAbilityVisual("Zombie", Colors.DARK_RED);
+const BURN_V = createAbilityVisual("Burn", Colors.DARK_ORANGE);
+const RAGE_V = createAbilityVisual("Rage", Colors.LIGHT_GREEN);
+const CANNON_V = createAbilityVisual("Cannon", Colors.GREY, "E");
+const PUMP_V = createAbilityVisual("Pump", Colors.DARK_PURPLE, "U");
+const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", Colors.YELLOW, "M");
+const OVER_GROW_V = createAbilityVisual("Over-Grow", Colors.GREEN);
+const WALL_BREAKER_V = createAbilityVisual("Wall-Breaker", Colors.DARK_GREEN, "V");
+const WORMHOLE_V = createAbilityVisual("Wormhole", Colors.BLACK, "W");
 
 // Create instances of EventVisual using the factory function
 const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.PINK);
@@ -49,6 +51,8 @@ export const VISUALS: EventVisualParameters = {
     [KeyCodes.CANNON_CODE]: CANNON_V,
     [KeyCodes.PUMP_CODE]: PUMP_V,
     [KeyCodes.MINI_BRIDGE_CODE]: MINI_BRIDGE_V,
+    [KeyCodes.OVER_GROW_CODE]: OVER_GROW_V,
+    [KeyCodes.WALL_BREAKER_CODE]: WALL_BREAKER_V,
     [KeyCodes.WORMHOLE_CODE]: WORMHOLE_V,
 
     [EventCodes.CANNON_SHOT_CODE]: CANNON_SHOT_V,
@@ -69,7 +73,7 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.D_BRIDGE_CODE]: [2, ClickType.NODE],
     [KeyCodes.MINI_BRIDGE_CODE]: [2, ClickType.NODE],
     [KeyCodes.NUKE_CODE]: [1, ClickType.NODE],
-    [KeyCodes.POISON_CODE]: [1, ClickType.EDGE],
+    [KeyCodes.POISON_CODE]: [1, ClickType.NODE],
     [KeyCodes.FREEZE_CODE]: [1, ClickType.EDGE],
     [KeyCodes.CAPITAL_CODE]: [1, ClickType.NODE],
     [KeyCodes.ZOMBIE_CODE]: [1, ClickType.NODE],
@@ -77,6 +81,8 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.RAGE_CODE]: [0, ClickType.BLANK],
     [KeyCodes.CANNON_CODE]: [1, ClickType.NODE],
     [KeyCodes.PUMP_CODE]: [1, ClickType.NODE],
+    [KeyCodes.OVER_GROW_CODE]: [0, ClickType.BLANK],
+    [KeyCodes.WALL_BREAKER_CODE]: [1, ClickType.NODE],
     [KeyCodes.WORMHOLE_CODE]: [2, ClickType.NODE],
 };
 

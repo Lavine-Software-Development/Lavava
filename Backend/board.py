@@ -41,6 +41,10 @@ class Board(JsonableTracked):
             if (not player) or node.owner == player:
                 node.set_state(effect)
 
+    def make_accessible(self):
+        for node in self.nodes:
+            node.make_accessible()
+
     def track_starting_states(self):
         for node in self.nodes:
             # if node.state_name != "default":
@@ -174,7 +178,7 @@ class Board(JsonableTracked):
             self.nodeDict[edge2[1]],
         )
 
-    def buy_new_edge(self, node_from, node_to, edge_type, destroy_ports=False, only_to_node_port=False):
+    def buy_new_edge(self, node_from, node_to, edge_type, only_to_node_port, destroy_ports):
         new_id = self.new_edge_id()
         if edge_type == DYNAMIC_EDGE:
             newEdge = DynamicEdge(node_to, node_from, new_id)

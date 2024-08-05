@@ -1,6 +1,6 @@
 import { IDItem } from "./idItem";
-import { OtherPlayer } from "./otherPlayer";
-import { MyPlayer } from "./myPlayer";
+import { OtherPlayer} from "./otherPlayer";
+import { MyCreditPlayer } from "./myPlayer";
 import {
     KeyCodes,
     MINIMUM_TRANSFER_VALUE,
@@ -11,7 +11,7 @@ import {
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
 import { Node } from "./node";
 import { Edge } from "./edge";
-import { ReloadAbility } from "./ReloadAbility";
+import { AbstractAbility, CreditAbility } from "./ReloadAbility";
 
 function hasAnySame(
     num1: number,
@@ -34,7 +34,7 @@ function ownedBurnableNode(data: IDItem[]): boolean {
 // Option for improved Burn, allowing preemptive burns before a node is owned
 function burnableNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
-    return node.is_port && node.edges.length != 0;
+    return node.accessible && node.edges.length != 0;
 }
 
 const standardNodeAttack = (data: IDItem, player: OtherPlayer): boolean => {
@@ -84,11 +84,33 @@ const checkNewEdge = (nodeFrom: Node, nodeTo: Node, edges: Edge[]): boolean => {
     return true;
 };
 
-function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number]) {
-    return function structureRangedNodeAttack(data: IDItem[]): boolean {
+function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, number], attackType: string): { [key: string]: ValidatorFunc }  {
+
+    const isNeighborOrOwner = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return (node1.owner === player) || isNeighbor(data);
+    }
+
+    const isNeighbor = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return node1.edges.some((edge) => edge.other(node1).owner === player);
+    }
+
+    const defaultStructureRangedNodeAttack = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
+        return defaultNode(node) && structureRangedNodeAttack(data);
+    }
+
+    const opposingStructureRangedNodeAttack = (data: IDItem[]): boolean => {
+        const node = data[0] as Node;
+        return !myNode(node, player) && structureRangedNodeAttack(data)
+    }
+
+    const structureRangedNodeAttack = (data: IDItem[]): boolean => {
+        const node = data[0] as Node;
+
         const structures = nodes.filter(
-            (node) =>  NUKE_OPTION_STRINGS.includes(node.stateName) && node.owner === player
+            (node) => NUKE_OPTION_STRINGS.includes(node.stateName) && node.owner === player
         );
 
         const inStructureRange = (structure: Node): boolean => {
@@ -97,9 +119,13 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
         };
 
         return (
-            defaultNode(node) &&
             structures.some((structure) => inStructureRange(structure))
         );
+    }
+
+    return {
+        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
+        [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNeighbor : opposingStructureRangedNodeAttack,
     };
 }
 
@@ -155,7 +181,10 @@ const wormholeValidator = (data: IDItem[], player: OtherPlayer, getEdges: () => 
     return false;
 };
 
-    
+const myNode = (node: Node, player: OtherPlayer): boolean => {
+    return node.owner === player;
+};
+
 
 export function unownedNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
@@ -165,21 +194,17 @@ export function unownedNode(data: IDItem[]): boolean {
 function playerValidators(player: OtherPlayer): {
     [key: string]: ValidatorFunc;
 } {
-    const myNode = (data: IDItem[]): boolean => {
-        const node = data[0] as Node; // Type casting to Node for TypeScript
-        return node.owner === player;
-    };
 
     // Option for improved cannon, not requiring ports. Harder for bridge players to counter
     // Option for worsened Zombie, not allowing cannon/pump deletion before opponent takeover
     const myDefaultNode = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
-        return node.stateName === "default" && myNode(data);
+        return node.stateName === "default" && myNode(node, player);
     }
 
     const myDefaultPortNode = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
-        return node.is_port && myDefaultNode(data);
+        return node.accessible && myDefaultNode(data);
     }
 
     // Weakest Freeze.
@@ -221,7 +246,8 @@ function playerValidators(player: OtherPlayer): {
 function newEdgeValidator(
     getEdges: () => Edge[],
     player: OtherPlayer,
-    ratio: [number, number]
+    ratio: [number, number],
+    bridgeFromPortNeeded: boolean
 ): { [key: string]: ValidatorFunc } {
 
     const newEdgeStandard = (data: Node[], ): boolean => {
@@ -238,17 +264,26 @@ function newEdgeValidator(
         }
     };
 
+    const defenseEdge = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        const node2 = data[1] as Node;
+        return (
+            node1.owner === node2.owner && (node1.accessible || node2.accessible)
+        );
+    }
+        
+
     const fullSizeToNodeEdgeValidator = (data: IDItem[]): boolean => {
         const nodes = data as Node[]; // Assert all data items are Nodes
         return (
-            (nodes.length < 2 || nodes[1].is_port) && newEdgeStandard(nodes)
+            (nodes.length < 2 || defenseEdge(data) || nodes[1].accessible) && newEdgeStandard(nodes)
         );
     };
 
     const fullSizeEdgeValidator = (data: IDItem[]): boolean => {
         const nodes = data as Node[]; // Assert all data items are Nodes
         return (
-            nodes.every((node) => node.is_port) && newEdgeStandard(nodes)
+            nodes.every((node) => node.accessible) && newEdgeStandard(nodes)
         );
     };
 
@@ -272,15 +307,16 @@ function newEdgeValidator(
     };
 
     return {
-        [KeyCodes.BRIDGE_CODE]: fullSizeToNodeEdgeValidator,
-        [KeyCodes.D_BRIDGE_CODE]: fullSizeEdgeValidator,
+        [KeyCodes.D_BRIDGE_CODE]: bridgeFromPortNeeded ? fullSizeEdgeValidator : fullSizeToNodeEdgeValidator,
         [KeyCodes.MINI_BRIDGE_CODE]: miniBridgeValidator,
+        [KeyCodes.BRIDGE_CODE]: bridgeFromPortNeeded ? fullSizeEdgeValidator : fullSizeToNodeEdgeValidator,
     };
 }
 
 export function makeAbilityValidators(
-    player: MyPlayer,
+    player: OtherPlayer,
     ratio: [number, number],
+    settings: any,
     nodes: Node[],
     getEdges: () => Edge[],
 ): { [key: string]: ValidatorFunc } {
@@ -289,17 +325,17 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
-        [KeyCodes.NUKE_CODE]: attackValidators(nodes, player, ratio),
         [KeyCodes.WORMHOLE_CODE]: (data: IDItem[]) => wormholeValidator(data, player, getEdges),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
     const playerValidatorsMap = playerValidators(player);
-    const newEdgeValidators = newEdgeValidator(getEdges, player, ratio);
-    return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators };
+    const newEdgeValidators = newEdgeValidator(getEdges, player, ratio, settings.bridge_from_port_needed);
+    const attackValidatorsMap = attackValidators(nodes, player, ratio, settings.attack_type);
+    return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators, ...attackValidatorsMap };
 }
 
-export function makeEventValidators(player: MyPlayer, getEdges: () => Edge[]): {
+export function makeEventValidators(player: MyCreditPlayer, getEdges: () => Edge[]): {
     [key: number]: (data: IDItem[]) => boolean;
 } {
     function cannonShotValidator(data: IDItem[]): boolean {
@@ -329,7 +365,7 @@ export function makeEventValidators(player: MyPlayer, getEdges: () => Edge[]): {
     }
 
     function creditUsageValidator(data: IDItem[]): boolean {
-        const ability = data[0] as ReloadAbility;
+        const ability = data[0] as CreditAbility;
         return player.credits >= ability.credits;
     }
 

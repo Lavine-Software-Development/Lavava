@@ -22,12 +22,11 @@ from constants import (
     ZOMBIE_CODE,
     EDGE,
     DYNAMIC_EDGE,
-    ZOMBIE_FULL_SIZE,
     PUMP_CODE,
     MINIMUM_TRANSFER_VALUE,
-    GROWTH_STOP,
-    NODE_MINIMUM_VALUE,
     MINI_BRIDGE_CODE,
+    OVER_GROW_CODE,
+    WALL_BREAKER_CODE,
     WORMHOLE_CODE,
 )
 
@@ -38,23 +37,14 @@ def make_wormhole_effect(data, player):
         "pump": pump_effect,
     }
     source_node, target_node = data
-    source_value = source_node.value
-    source_owner = source_node.owner
     structure = source_node.state_name
     structure_effects[structure]([target_node], player)
-    source_node.set_state("default")  
-    target_node.value = source_value
-    target_node.owner = source_owner  
-    print(f"Wormhole effect: {structure} moved from node {source_node.id} to {target_node.id}")
+    source_node.set_state("default")   
 
-def make_bridge(buy_new_edge, bridge_type, only_to_node_port=False):
+def make_bridge(buy_new_edge, bridge_type, destroy_ports=False, only_to_node_port=False):
     def bridge_effect(data, player):
         id1, id2 = data
-        buy_new_edge(id1, id2, bridge_type)
-
-    def burn_bridge_effect(data, player):
-        id1, id2 = data
-        buy_new_edge(id1, id2, bridge_type, True, only_to_node_port)
+        buy_new_edge(id1, id2, bridge_type, only_to_node_port, destroy_ports)
 
     return bridge_effect
 
@@ -69,6 +59,17 @@ def make_nuke(remove_node):
 
     return nuke_effect
 
+def make_board_wide_effect(board_wide_effect):
+    def rage_effect(data, player):
+        board_wide_effect('rage', player)
+
+    def over_grow_effect(data, player):
+        board_wide_effect('over_grow', player)
+
+    return {
+        RAGE_CODE: rage_effect,
+        OVER_GROW_CODE: over_grow_effect
+    }
 
 def make_rage(board_wide_effect):
     def rage_effect(data, player):
@@ -170,11 +171,15 @@ def pump_effect(data, player):
     node = data[0]
     node.set_state("pump")
 
-def make_ability_effects(board):
+def wall_breaker_effect(data, player):
+    node = data[0]
+    node.make_accessible()
+
+def make_ability_effects(board, settings):
     return {
-        BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE, True),
-        D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
-        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE),
+        BRIDGE_CODE: make_bridge(board.buy_new_edge, EDGE, settings["bridge_burn"], settings["bridge_from_port_needed"]),
+        D_BRIDGE_CODE: make_bridge(board.buy_new_edge, DYNAMIC_EDGE, settings["bridge_burn"], settings["bridge_from_port_needed"]),
+        MINI_BRIDGE_CODE : make_bridge(board.buy_new_edge, DYNAMIC_EDGE, settings["bridge_burn"]),
         SPAWN_CODE: spawn_effect,
         FREEZE_CODE: freeze_effect,
         NUKE_CODE: make_nuke(board.remove_node),
@@ -182,11 +187,11 @@ def make_ability_effects(board):
         POISON_CODE: poison_effect,
         CAPITAL_CODE: capital_effect,
         ZOMBIE_CODE: zombie_effect,
-        RAGE_CODE: make_rage(board.board_wide_effect),
         CANNON_CODE: cannon_effect,
         PUMP_CODE: pump_effect,
         WORMHOLE_CODE: make_wormhole_effect,
-    }
+        WALL_BREAKER_CODE: wall_breaker_effect
+    } | make_board_wide_effect(board.board_wide_effect)
 
 
 def make_event_effects(board, update_method):

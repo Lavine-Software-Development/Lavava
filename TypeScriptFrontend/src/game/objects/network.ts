@@ -5,7 +5,7 @@ export class Network {
     public socket: WebSocket | null = null;
     serverURL: string;
     updateCallback: (board_data) => void;
-    gameIDEtcCallback: (game_id: string, player_count: number) => void;
+    gameIDEtcCallback: (game_id: string, player_count: number, data: string) => void;
     leaveGameCallback: () => void;  
     messageQueue: Record<any, any> = [];
     private boardDataPromise: Promise<any> | null = null;
@@ -42,7 +42,7 @@ export class Network {
                 console.log("Player was kicked out, game is over");
 
             } else if (data.hasOwnProperty("game_id")) {
-                this.gameIDEtcCallback(data.game_id, data.player_count);
+                this.gameIDEtcCallback(data.game_id, data.player_count, data.mode);
                 console.log("Game ID received: ", data.game_id);
             
             } else {
@@ -113,14 +113,16 @@ export class Network {
         console.log("setup called");
         const type = sessionStorage.getItem("type");
         const playerCount = Number(sessionStorage.getItem("player_count")) || 0;
+        const mode = sessionStorage.getItem("gameMode");
 
         const send_dict = {
             type: type,
             players: playerCount,
             abilities: abilities,
+            mode: mode,
         };
 
-        console.log("Trying to setp user with: ", send_dict);
+        console.log("Trying to setup user with: ", send_dict);
         this.sendMessage(send_dict);
     }
 

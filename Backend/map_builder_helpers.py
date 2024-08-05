@@ -1,9 +1,6 @@
 from constants import (
     ISLAND_RESOURCE_COUNT,
     NETWORK_RESOURCE_COUNT,
-    CAPITAL_START_COUNT,
-    CAPITAL_ISLAND_COUNT,
-    PORT_PERCENTAGE,
     NODE,
     DYNAMIC_EDGE,
     CAPITAL_START_SIZE
@@ -17,17 +14,17 @@ def starter_default_nodes(node_list):
         nodes.append(Node(node[0], node[1]))
     return nodes
 
-def create_nodes(node_list: list[tuple]) -> list[PortNode]:
-    return [PortNode(node[0], node[1]) for node in node_list]
+def create_nodes(node_class, node_list: list[tuple], growth_rate, transfer_rate, default_full_size) -> list[PortNode]:
+    return [node_class(node[0], node[1], growth_rate, transfer_rate, default_full_size) for node in node_list]
 
-def random_choose_starter_ports(node_list):
+def random_choose_accessible_nodes(node_list, percentage, settings):
     total_nodes = len(node_list)
-    ports_count = round(total_nodes * PORT_PERCENTAGE)
+    ports_count = round(total_nodes * percentage)
     
     for i, node in enumerate(node_list):
-        node.is_port = i < ports_count
+        node.bridge_access(i < ports_count, settings)
 
-def outsider_choose_starter_ports(node_list):
+def outsider_choose_accessible_nodes(node_list, percentage, settings):
     # Calculate possible_incoming_count for each node
     incoming_counts = {}
     for node in node_list:
@@ -40,7 +37,7 @@ def outsider_choose_starter_ports(node_list):
     sorted_nodes = sorted(node_list, key=lambda node: incoming_counts[node])
     
     # Calculate the number of ports needed
-    random_choose_starter_ports(sorted_nodes)
+    random_choose_accessible_nodes(sorted_nodes, percentage, settings)
 
 
 def starter_mines(nodes):
@@ -66,7 +63,7 @@ def starter_mines(nodes):
     return return_nodes
 
 
-def starter_capitals(nodes):
+def starter_capitals(nodes, settings):
     return_nodes = []
     capitals = 0
     islands = 0
@@ -75,7 +72,7 @@ def starter_capitals(nodes):
             if (
                 (node.item_type == NODE or not node.is_port)
                 and sum(1 for edge in node.edges if (edge.dynamic or edge.to_node == node))
-                and capitals < CAPITAL_START_COUNT
+                and capitals < settings["starting_land_capitals"]
                 and not any(
                     1 for neigh in node.neighbors if neigh.state_name == "capital"
                 )
@@ -85,9 +82,12 @@ def starter_capitals(nodes):
                 capitals += 1
             return_nodes.append(node)
         else:
-            if islands < CAPITAL_ISLAND_COUNT and (node.item_type == NODE or node.is_port):
+            if islands < settings["starting_island_capitals"] and (node.item_type == NODE or node.is_port):
                 node.set_state("capital", True)
                 node.value = CAPITAL_START_SIZE
                 islands += 1
                 return_nodes.append(node)
     return return_nodes
+
+def just_remove_lonely_nodes(nodes, settings):
+    return [node for node in nodes if len(node.edges) > 0]

@@ -2,6 +2,7 @@ from constants import (
     BURN_SPREAD_DELAY,
     BURN_TICKS,
     RAGE_TICKS,
+    OVER_GROW_TICKS,
     RAGE_MULTIPLIER,
     POISON_SPREAD_DELAY,
 )
@@ -36,6 +37,20 @@ class Enraged(AbstractSpreadingEffect):
     def can_spread(self, killed, new_owner):
         return killed
     
+    def capture_removal(self, player):
+        return False
+    
+
+class OverGrown(AbstractSpreadingEffect):
+    def __init__(self):
+        super().__init__(OVER_GROW_TICKS, EffectType.GROW)
+    
+    def effect(self, amount):
+        return amount * 5
+    
+    def can_spread(self, killed, new_owner):
+        return killed and new_owner.state_name == "default"
+
     def capture_removal(self, player):
         return False
     

@@ -14,15 +14,16 @@ from itsdangerous import SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_, desc, func
+from sqlalchemy import or_, desc, func, text
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from sqlalchemy.types import Text
 from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import ClientError
+from flask import render_template
 load_dotenv()
 
-app = Flask(__name__) 
+app = Flask(__name__, static_url_path='/static', static_folder='static') 
 CORS(app, origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"], allow_headers=["Content-Type"])
 app.config['SECRET_KEY'] = 'your_secret_key'
 
@@ -152,6 +153,7 @@ def after_request(response):
         response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
     
     return response
+
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'OPTIONS':
@@ -236,7 +238,7 @@ def confirm_email(token):
             return '<h1>Error!</h1>'
         user.email_confirm = True
         db.session.commit()
-    return '<h1>Email Confirmed!</h1><p>Proceed to login page to login.</p>' 
+    return render_template('email_confirmation.html', status='confirmed')
 
 
 
@@ -515,24 +517,38 @@ def get_profile(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
         if user:
-            most_recent_game = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).first()
+            # Use a SQL query to get the most recent game containing the exact username
+            query = text("""
+                SELECT * FROM game_history
+                WHERE json_array_length(usernames) > 0
+                AND usernames LIKE :username
+                ORDER BY game_date DESC
+                LIMIT 1
+            """)
+            
+            most_recent_game = db.session.execute(query, {'username': f'%"{user.username}"%'}).fetchone()
+
             last_game_data = None
             if most_recent_game:
-                last_game_data = {
-                    "game_id": most_recent_game.id,
-                    "game_date": most_recent_game.game_date.isoformat(),
-                    "players": []
-                }
-                for username, rank in zip(most_recent_game.usernames_list, most_recent_game.user_ranks_list):
-                    player_data = {
-                        "username": username,
-                        "rank": rank,
-                        "is_current_user": (username == user.username)
+                usernames = json.loads(most_recent_game.usernames)
+                user_ranks = json.loads(most_recent_game.user_ranks)
+                
+                if user.username in usernames:  # Extra check to ensure exact match
+                    last_game_data = {
+                        "game_id": most_recent_game.id,
+                        "game_date": most_recent_game.game_date.format(),
+                        "players": []
                     }
-                    last_game_data["players"].append(player_data)
+                    for username, rank in zip(usernames, user_ranks):
+                        player_data = {
+                            "username": username,
+                            "rank": int(rank),
+                            "is_current_user": (username == user.username)
+                        }
+                        last_game_data["players"].append(player_data)
 
-                # Sort players by rank
-                last_game_data["players"].sort(key=lambda x: x["rank"])
+                    # Sort players by rank
+                    last_game_data["players"].sort(key=lambda x: x["rank"])
 
             return jsonify({
                 "userName": user.username,
@@ -562,7 +578,6 @@ def get_profile(current_user):
                 ]
             }
         })
-
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
@@ -736,8 +751,116 @@ def username_to_elo(name: str):
         dummy = {"other": 1200, "default": 1300}
         return dummy.get(name, 1100)  # Def
     
-@app.route('/abilities', methods=['GET'])
-def get_abilities():
+SPAWN_CODE = 115
+FREEZE_CODE = 102
+BRIDGE_CODE = 97
+D_BRIDGE_CODE = 100
+ZOMBIE_CODE = 122
+RAGE_CODE = 114
+BURN_CODE = 98
+NUKE_CODE = 110
+POISON_CODE = 112
+CAPITAL_CODE = 99
+CANNON_CODE = 101
+PUMP_CODE = 117
+MINI_BRIDGE_CODE = 109
+    
+@app.route('/settings/Royale', methods=['GET'])
+def get_royale_settings():
+    settings = {
+        "ability_type": "elixir",
+        "elixir_cap": 10,
+        "elixir_rate": 4,
+        "growth_rate": 0.13,
+        "transfer_rate": 0.012,
+        "main_time": 360,
+        "overtime": 60,
+        "full_size": 200,
+        "accessible_percentage": 1/2,
+        "walls": True,
+        "wall_counts": [2, 1, 2],
+        'iterative_make_accessible': True,
+        "accessibility_times": [180, 359],
+        "starting_structures": False,
+        "attack_type": "neighbor",
+        "bridge_burn": False,
+        "bridge_from_port_needed": False,
+        "deck_size": 5,
+        "forced_deck": True,
+        "deck": [FREEZE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, RAGE_CODE, NUKE_CODE]
+    }
+    return jsonify(settings)
+
+@app.route('/settings/Original', methods=['GET'])
+def get_og_settings():
+    settings = {
+        "ability_type": "credits",
+        "credit_cap": 20,
+        "growth_rate": 0.15,
+        "transfer_rate": 0.012,
+        "main_time": 300,
+        "overtime": 60,
+        "full_size": 250,
+        "accessible_percentage": 2/3,
+        "walls": False,
+        'iterative_make_accessible': False,
+        "starting_structures": True,
+        "starting_land_capitals": 3,
+        "starting_island_capitals": 1,
+        "attack_type": "structure_range",
+        "bridge_burn": False,
+        "bridge_from_port_needed": False,
+        "deck_size": 4,
+        "forced_deck": False,
+    }
+    return jsonify(settings)
+    
+@app.route('/abilities/Royale', methods=['GET'])
+def get_royale_abilities():
+    abilities = [
+        {
+            "name": "Bridge", 
+            "cost": 4,
+            "description": "Create a one-way bridge"
+        },
+        {
+            "name": "D-Bridge", 
+            "cost": 3,
+            "description": "Create a two-way bridge with"
+        },
+        {
+            "name": "Freeze", 
+            "cost": 2,
+            "description": "Convert edge to one-way"
+            
+        },
+        {
+            "name": "Rage", 
+            "cost": 5,
+            "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "Nuke", 
+            "cost": 7,
+            "description": "Destroy nearby dot and its bridges"
+        },
+        {
+            "name": "Over-Grow",
+            "cost": 4,
+        },
+        {
+            "name": "Wall-Breaker",
+            "cost": 3,
+        },
+        {
+            "name": "Poison",
+            "cost": 5,
+        }
+    ]
+    return jsonify({"abilities": abilities, "options": 6})
+    
+@app.route('/abilities/Original', methods=['GET'])
+def get_og_abilities():
     abilities = [
         {
             "name": "Bridge", 
@@ -767,23 +890,23 @@ def get_abilities():
         },
         {
             "name": "Wormhole",
-            "cost": 2,
-            "description": "Move structures between nodes"
+            "cost": 1,
+            "description": "Teleport structure to another node"
         },
-        # {
-        #     "name": "Zombie", 
-        #     "cost": 1,
-        #     "description": "Big defensive Structure on node"
-        # },
-        # {
-        #     "name": "Poison", 
-        #     "cost": 2,
-        #     "description": "Spreadable effect to shrink nodes"
-        # },
+        {
+            "name": "Poison", 
+            "cost": 2,
+            "description": "Spreadable effect to shrink nodes"
+        },
         {
             "name": "Rage", 
             "cost": 2,
             "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "Zombomb",
+            "cost": 2,
+            "description": "Create controllable apocalypse"
         },
         # {
         #     "name": "D-Bridge", 
@@ -811,7 +934,7 @@ def get_abilities():
             "description": "Shoot energy at nodes"
         }
     ]
-    return jsonify({"abilities": abilities, "salary": 20})
+    return jsonify({"abilities": abilities, "salary": 20, "options": 4})
 
 
 @app.route('/save_game', methods=['POST'])
@@ -915,6 +1038,29 @@ def get_leaderboard():
         ]
     })
 
+
+@app.route('/current-user', methods=['GET'])
+@token_required
+def get_current_user(current_user):
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=current_user).first()
+        if user:
+            games = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).limit(3).all()
+            gameCount = len(games)
+            return jsonify({
+                "username": user.username,
+                "gameCount" : gameCount
+            }), 200
+        else:
+            return jsonify({"error": "User not found"}), 404
+    else:
+        # If DB is not connected, return the username from the token
+        return jsonify({
+            "username": current_user,
+            "gameCount": 3
+        }), 200
+
+
 @app.route('/user/<string:username>', methods=['GET'])
 def get_user_details(username):
     if not config.DB_CONNECTED:
@@ -932,7 +1078,7 @@ def get_user_details(username):
         
         response = {
             "username": user.username,
-           "displayName": user.display_name,
+            "displayName": user.display_name,
             "elo": user.elo,
             "deck": [{"name": card.ability, "count": card.count} for card in deck_cards]
         }
@@ -947,23 +1093,37 @@ def get_match_history(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
         if user:
-            games = GameHistory.query.filter(GameHistory.usernames.like(f'%{user.username}%')).order_by(GameHistory.game_date.desc()).limit(20).all()
+            # Use a SQL query to filter games containing the exact username
+            query = text("""
+                SELECT * FROM game_history
+                WHERE json_array_length(usernames) > 0
+                AND usernames LIKE :username
+                ORDER BY game_date DESC
+                LIMIT 20
+            """)
+            
+            games = db.session.execute(query, {'username': f'%"{user.username}"%'}).fetchall()
+
             match_history = []
             for game in games:
-                game_data = {
-                    "game_id": game.id,
-                    "game_date": game.game_date.isoformat(),
-                    "players": []
-                }
-                for username, rank in zip(game.usernames_list, game.user_ranks_list):
-                    player_data = {
-                        "username": username,
-                        "rank": rank,
-                        "is_current_user": (username == user.username)
+                usernames = json.loads(game.usernames)
+                user_ranks = json.loads(game.user_ranks)
+                if user.username in usernames:  # Extra check to ensure exact match
+                    game_data = {
+                        "game_id": game.id,
+                        "game_date": game.game_date.format(),
+                        "players": []
                     }
-                    game_data["players"].append(player_data)
-                game_data["players"].sort(key=lambda x: x["rank"])
-                match_history.append(game_data)
+                    for username, rank in zip(usernames, user_ranks):
+                        player_data = {
+                            "username": username,
+                            "rank": int(rank),
+                            "is_current_user": (username == user.username)
+                        }
+                        game_data["players"].append(player_data)
+                    game_data["players"].sort(key=lambda x: x["rank"])
+                    match_history.append(game_data)
+            
             return jsonify({"match_history": match_history})
         else:
             return jsonify({"error": "User not found"}), 404

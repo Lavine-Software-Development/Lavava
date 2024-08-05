@@ -1,26 +1,33 @@
 from jsonable import JsonableTick
-from constants import COUNTDOWN_LENGTH, END_GAME_LENGTH, MAIN_GAME_LENGTH, OVERTIME_BONUS, SECTION_LENGTHS, SPAWN_CODE, EVENTS
+from constants import COUNTDOWN_LENGTH, OVERTIME_BONUS, SPAWN_CODE, EVENTS
 from playerStateEnums import PlayerStateEnum as PSE
 from gameStateEnums import GameStateEnum as GSE
 from board import Board
 from map_builder import MapBuilder
 from ae_effects import make_ability_effects
-from player import DefaultPlayer
+from player import CreditPlayer, RoyalePlayer
 from ae_effects import make_event_effects
 from ae_validators import make_effect_validators
 from event import Event
 import sys
+
 class ServerGame(JsonableTick):
-    def __init__(self, player_count, gs):
+    def __init__(self, player_count, gs, settings):
 
         self.running = True
         self.gs = gs
+        self.settings = settings
         self.extra_info = []
         self.counts = [0] * player_count
         self.board = Board(self.gs)
-        self.player_dict = {
-            i: DefaultPlayer(i) for i in range(player_count)
-        }
+        if settings["ability_type"] == "credits":
+            self.player_dict = {
+                i: CreditPlayer(i) for i in range(player_count)
+            }
+        else:
+            self.player_dict = {
+                i: RoyalePlayer(i, settings['elixir_cap'], settings['elixir_rate']) for i in range(player_count)
+            }
 
         start_values = {'board'}
         tick_values = {'countdown_timer', 'gs', 'extra_info', 'counts'}
@@ -68,18 +75,20 @@ class ServerGame(JsonableTick):
 
     def restart(self):
 
+        self.accessibility_times = self.settings['accessibility_times'] if self.settings['iterative_make_accessible'] else []
+
         for player in self.player_dict.values():
             player.default_values()
         self.remaining = {i for i in range(len(self.player_dict))}
 
-        self.times = SECTION_LENGTHS.copy()
+        self.times = [COUNTDOWN_LENGTH, self.settings["main_time"], self.settings["overtime"]]
         self.current_section = 0
 
         map_builder = MapBuilder()
-        map_builder.build()
+        map_builder.build(self.settings)
         self.board.reset(map_builder.node_objects, map_builder.edge_objects)
 
-        self.ability_effects = make_ability_effects(self.board)
+        self.ability_effects = make_ability_effects(self.board, self.settings)
         self.events = self.make_events_dict()
 
         
@@ -88,8 +97,8 @@ class ServerGame(JsonableTick):
         effects = make_event_effects(self.board, self.update_extra_info)
         return {code: Event(validators[code], effects[code]) for code in EVENTS}
 
-    def set_abilities(self, player, abilities):
-        self.player_dict[player].set_abilities(abilities, self.ability_effects, self.board)
+    def set_abilities(self, player, abilities, settings):
+        self.player_dict[player].set_abilities(abilities, self.ability_effects, self.board, settings)
 
     def all_player_next(self):
         for player in self.player_dict.values():
@@ -107,6 +116,12 @@ class ServerGame(JsonableTick):
 
         if self.countdown_timer > 0:
             self.times[self.current_section] -= 0.1
+
+            if self.accessibility_times and self.gs.value == GSE.PLAY.value:
+                if self.times[self.current_section] <= self.settings['main_time'] - self.accessibility_times[0]:  
+                    self.board.make_accessible()
+                    self.accessibility_times.pop(0)
+                    self.update_extra_info(("Walls Down"))
 
             if self.gs.value == GSE.START_SELECTION.value and self.countdown_timer > 3 and self.all_player_starts_selected:
                 self.times[self.current_section] = 3
