@@ -148,7 +148,7 @@ class CapitalState(DefaultState):
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
-            (self.full_size - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
+            (self.node.value - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
         )
 
     def grow(self):
