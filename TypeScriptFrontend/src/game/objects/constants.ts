@@ -92,6 +92,18 @@ export const NameToCode = {
     "Wall-Breaker": KeyCodes.WALL_BREAKER_CODE,
 };
 
+export const AbilityElixir = {
+    [KeyCodes.FREEZE_CODE]: 2,
+    [KeyCodes.MINI_BRIDGE_CODE]: 2,
+    [KeyCodes.D_BRIDGE_CODE]: 3,
+    [KeyCodes.WALL_BREAKER_CODE]: 3,
+    [KeyCodes.BRIDGE_CODE]: 4,
+    [KeyCodes.OVER_GROW_CODE]: 4,
+    [KeyCodes.RAGE_CODE]: 5,
+    [KeyCodes.POISON_CODE]: 5,
+    [KeyCodes.NUKE_CODE]: 7,
+};
+
 
 export const AbilityCredits = {
     [KeyCodes.SPAWN_CODE]: 1,

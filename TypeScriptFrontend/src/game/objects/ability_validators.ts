@@ -126,6 +126,7 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
     return {
         [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
         [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNeighbor : opposingStructureRangedNodeAttack,
+        [KeyCodes.ZOMBIE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
     };
 }
 
@@ -173,8 +174,6 @@ const wormholeValidator = (data: IDItem[], player: OtherPlayer, getEdges: () => 
         return node.owner === player && NUKE_OPTION_STRINGS.includes(node.stateName);
     } else if (data.length === 2) {
         const [sourceNode, targetNode] = data as Node[];
-        console.log(sourceNode.stateName);
-        console.log(structureValidators[sourceNode.stateName]);
         return NUKE_OPTION_STRINGS.includes(sourceNode.stateName) && 
                structureValidators[sourceNode.stateName]?.([targetNode]);
     }
@@ -237,7 +236,6 @@ function playerValidators(player: OtherPlayer): {
     return {
         [KeyCodes.POISON_CODE]: attackingEdge,
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEitherButNotFlowing,
-        [KeyCodes.ZOMBIE_CODE]: myDefaultNode,
         [KeyCodes.CANNON_CODE]: myDefaultPortNode,
         [KeyCodes.PUMP_CODE]: myDefaultNode,
     };

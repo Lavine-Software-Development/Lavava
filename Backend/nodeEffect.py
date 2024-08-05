@@ -41,6 +41,23 @@ class Enraged(AbstractSpreadingEffect):
         return False
     
 
+class Zombified(AbstractSpreadingEffect):
+    def __init__(self, length):
+        super().__init__(length, EffectType.NONE)
+    
+    def can_spread(self, killed, new_owner):
+        return killed
+    
+    def capture_removal(self, player):
+        return True
+    
+    def spread_key(self, key):
+        return "zombie"
+        
+    def spread(self):
+        return self.length - self.counter
+    
+
 class OverGrown(AbstractSpreadingEffect):
     def __init__(self):
         super().__init__(OVER_GROW_TICKS, EffectType.GROW)

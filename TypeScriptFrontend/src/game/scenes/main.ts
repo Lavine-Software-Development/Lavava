@@ -135,7 +135,6 @@ export class MainScene extends Scene {
 
         this.load.image('Pump', 'Pump.png');
 
-        this.load.image("Zombomb", "Zombie.png");
         this.load.image("Over-grow", "Overgrow.png");
         this.load.image("Catapult", "Catapult.png");
         this.load.image("Wormhole", "Wormhole.png");

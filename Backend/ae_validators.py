@@ -24,6 +24,7 @@ from constants import (
     CREDIT_USAGE_CODE,
     STRUCTURE_RANGES,
     WALL_BREAKER_CODE,
+    WORMHOLE_CODE
 )
 
 
@@ -102,6 +103,7 @@ def attack_validators(get_structures, player, attack_type):
     return {
         POISON_CODE: neighbor_attack if attack_type == "neighbor" else opposing_structure_ranged_attack,
         NUKE_CODE: neighbor_or_owner_attack if attack_type == "neighbor" else structure_ranged_default_attack,
+        ZOMBIE_CODE: neighbor_or_owner_attack if attack_type == "neighbor" else structure_ranged_default_attack,
     }
 
 
@@ -156,14 +158,30 @@ def validators_needing_player(player):
         return edge.dynamic and (
             edge.from_node.owner == player or edge.to_node.owner == player
         )
-
-    return {
+    
+    structure_validators = {
         CAPITAL_CODE: capital_logic,
-        FREEZE_CODE: dynamic_edge_own_either_but_not_flowing,
-        ZOMBIE_CODE: my_default_node,
         CANNON_CODE: my_default_port_node,
         PUMP_CODE: my_default_node,
     }
+
+    def wormhole_validator(data):
+        name_to_code = {
+            "capital": CAPITAL_CODE,
+            "cannon": CANNON_CODE,
+            "pump": PUMP_CODE,
+        }
+        source_node, target_node = data
+        if source_node.state_name in STRUCTURE_RANGES:
+            validator_func = structure_validators[name_to_code[source_node.state_name]]
+            if validator_func:
+                return validator_func([target_node])  # Pass target_node as a list
+        return False
+
+    return {
+        FREEZE_CODE: dynamic_edge_own_either_but_not_flowing,
+        WORMHOLE_CODE: wormhole_validator,
+    } | structure_validators
 
 
 def no_crossovers(check_new_edge, data, player):

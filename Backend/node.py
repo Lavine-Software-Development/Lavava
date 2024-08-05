@@ -19,7 +19,7 @@ from nodeState import (
     CannonState,
     PumpState,
 )
-from nodeEffect import Poisoned, Enraged, OverGrown
+from nodeEffect import Poisoned, Enraged, OverGrown, Zombified
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
 from method_mulitplier import method_multipliers
@@ -75,7 +75,7 @@ class Node(JsonableTracked):
             # if data is True and mode.MODE == 3:
             return MineState(self, self.absorbing, data)
         elif state_name == "zombie":
-            return ZombieState(self)
+            return ZombieState(self, data)
         elif state_name == "capital":
             if data:
                 return StartingCapitalState(self)
@@ -95,6 +95,9 @@ class Node(JsonableTracked):
             return Enraged()
         elif effect_name == "over_grow":
             return OverGrown()
+        elif effect_name == "zombified":
+            length = data
+            return Zombified(length)
         else:
             return None
 

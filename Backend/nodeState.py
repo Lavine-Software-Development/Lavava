@@ -9,6 +9,7 @@ from constants import (
     BELOW_SWAP_STATUS,
     ZOMBIE_FULL_SIZE,
     CAPITAL_FULL_SIZE,
+    ZOMBIE_TICKS,
 )
 from abc import abstractmethod
 import math
@@ -78,7 +79,7 @@ class DefaultState(AbstractState):
     def intake(self, amount, incoming_player):
         change = amount * self.node.intake_multiplier
         if self.contested(incoming_player):
-            change *= -1
+            change = abs(change) * -1
         return change
 
     def capture_event(self):
@@ -89,16 +90,49 @@ class DefaultState(AbstractState):
 
 
 class ZombieState(DefaultState):
-    def __init__(self, node):
-        node.capture(None)
+    def __init__(self, node, player_or_length):
+        # check if player_or_length is a number (int or double or whatever)
         AbstractState.__init__(self, node, True, False, False, 1)  # default on capture
-        self.node.value = ZOMBIE_FULL_SIZE
+        if isinstance(player_or_length, (int, float)):
+            length = player_or_length
+            self.node.set_state("zombified", length)
+            self.first_capture = True
+        else:
+            player = player_or_length
+            self.self_capture = self.node.owner in (player, None)
+            self.first_capture = False
+            self.node.capture(player)
+            self.node.set_state("zombified", ZOMBIE_TICKS)
+        
+        self.node.owner.count -= 1
+        self.reset_on_capture = True
+        
+    def capture_event(self):
+        if self.first_capture:
+            return super().capture_event()
+        else:
+            self.first_capture = True
+            if self.self_capture:
+                return ZOMBIE_FULL_SIZE
+            else:
+                return max(ZOMBIE_FULL_SIZE - self.node.value, 10)
+
+    @property
+    def full_size(self):
+        return ZOMBIE_FULL_SIZE * 2
 
     def grow(self):
         return 0
 
     def intake(self, amount, incoming_player):
-        return super().intake(amount, incoming_player) / 2
+        pre_change = amount * self.node.intake_multiplier
+        if pre_change < 0:
+            return pre_change * 1/2 # this would mean it recieved it from another zombie
+        else:
+            return amount * self.node.intake_multiplier * -2 # not a zombie
+    
+    def expel(self):
+        return super().expel() * -2
 
 
 class CannonState(DefaultState):

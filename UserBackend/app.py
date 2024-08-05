@@ -904,7 +904,7 @@ def get_og_abilities():
             "description": "Increase energy transfer speed"
         },
         {
-            "name": "Zombomb",
+            "name": "Zombie",
             "cost": 2,
             "description": "Create controllable apocalypse"
         },

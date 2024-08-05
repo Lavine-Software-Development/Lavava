@@ -35,3 +35,6 @@ class AbstractSpreadingEffect(AbstractEffect):
 
     def spread(self):
         return None
+    
+    def spread_key(self, key):
+        return key
