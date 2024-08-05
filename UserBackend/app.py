@@ -888,20 +888,25 @@ def get_og_abilities():
             "cost": 1,
             "description": "Remove ports from node"
         },
-        # {
-        #     "name": "Zombie", 
-        #     "cost": 1,
-        #     "description": "Big defensive Structure on node"
-        # },
-        # {
-        #     "name": "Poison", 
-        #     "cost": 2,
-        #     "description": "Spreadable effect to shrink nodes"
-        # },
+        {
+            "name": "Wormhole",
+            "cost": 1,
+            "description": "Teleport structure to another node"
+        },
+        {
+            "name": "Poison", 
+            "cost": 2,
+            "description": "Spreadable effect to shrink nodes"
+        },
         {
             "name": "Rage", 
             "cost": 2,
             "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "Zombomb",
+            "cost": 2,
+            "description": "Create controllable apocalypse"
         },
         # {
         #     "name": "D-Bridge", 
