@@ -53,6 +53,8 @@ export const KeyCodes = {
     WALL_BREAKER_CODE: 118,
 };
 
+export const attackCodes = [KeyCodes.NUKE_CODE, KeyCodes.POISON_CODE, KeyCodes.ZOMBIE_CODE];
+
 export const EventCodes = {
     CANNON_SHOT_CODE: 4,
     PUMP_DRAIN_CODE: 5,
@@ -143,14 +145,14 @@ export const CANNON_FULL_SIZE = 250;
 export const ZOMBIE_FULL_SIZE = 250;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
-export const CAPITAL_NUKE_RANGE = 0.7;
-export const PUMP_NUKE_RANGE = 0.7;
-export const CANNON_NUKE_RANGE = 0.5;
+export const CAPITAL_ATTACK_RANGE = 0.7;
+export const PUMP_ATTACK_RANGE = 0.7;
+export const CANNON_ATTACK_RANGE = 0.5;
 
 export const NUKE_OPTION_STRINGS = ["cannon", "pump", "capital"];
 export const NUKE_OPTION_CODES = [KeyCodes.CANNON_CODE, KeyCodes.PUMP_CODE, KeyCodes.CAPITAL_CODE];
-export const PRE_STRUCTURE_RANGES = {[KeyCodes.CANNON_CODE]: CANNON_FULL_SIZE * CANNON_NUKE_RANGE,
-                                    [KeyCodes.PUMP_CODE]: PUMP_FULL_SIZE * PUMP_NUKE_RANGE,
-                                    [KeyCodes.CAPITAL_CODE]: CAPITAL_FULL_SIZE * CAPITAL_NUKE_RANGE};
+export const PRE_STRUCTURE_RANGES = {[KeyCodes.CANNON_CODE]: CANNON_FULL_SIZE * CANNON_ATTACK_RANGE,
+                                    [KeyCodes.PUMP_CODE]: PUMP_FULL_SIZE * PUMP_ATTACK_RANGE,
+                                    [KeyCodes.CAPITAL_CODE]: CAPITAL_FULL_SIZE * CAPITAL_ATTACK_RANGE};
 
 export const MINI_BRIDGE_RANGE = 150;

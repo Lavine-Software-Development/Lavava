@@ -75,7 +75,7 @@ class Node(JsonableTracked):
             # if data is True and mode.MODE == 3:
             return MineState(self, self.absorbing, data)
         elif state_name == "zombie":
-            return ZombieState(self, data)
+            return ZombieState(self)
         elif state_name == "capital":
             if data:
                 return StartingCapitalState(self)
@@ -97,7 +97,7 @@ class Node(JsonableTracked):
             return OverGrown()
         elif effect_name == "zombified":
             length = data
-            return Zombified(length)
+            return Zombified()
         else:
             return None
 
@@ -176,7 +176,7 @@ class Node(JsonableTracked):
         return self.state.expel()
 
     def lost_amount(self, amount, contested):
-        return amount
+        return self.state.lost_amount(amount, contested)
 
     def update_ownerships(self, player=None):
         if self.owner is not None and self.owner != player:

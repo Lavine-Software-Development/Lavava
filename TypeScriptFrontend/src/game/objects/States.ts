@@ -1,16 +1,16 @@
-import { CANNON_NUKE_RANGE, CAPITAL_NUKE_RANGE, Colors, CAPITAL_FULL_SIZE, MineVisuals, PUMP_NUKE_RANGE, ZOMBIE_FULL_SIZE, CANNON_FULL_SIZE, PUMP_FULL_SIZE, } from "./constants";
+import { CANNON_ATTACK_RANGE, CAPITAL_ATTACK_RANGE, Colors, CAPITAL_FULL_SIZE, MineVisuals, PUMP_ATTACK_RANGE, ZOMBIE_FULL_SIZE, CANNON_FULL_SIZE, PUMP_FULL_SIZE, } from "./constants";
 import { random_equal_distributed_angles } from "./utilities"; // Ensure you import the angles function
 import * as Phaser from "phaser";
 
 export class State {
     name: string;
     graphic_override: boolean;
-    nuke_range: number;
+    attack_range: number;
     full_size: number;
 
-    constructor(name: string, full_size: number, nuke_range: number = 0, gaphic_override: boolean = false) {
+    constructor(name: string, full_size: number, attack_range: number = 0, gaphic_override: boolean = false) {
         this.name = name;
-        this.nuke_range = nuke_range;
+        this.attack_range = attack_range;
         this.full_size = full_size;
         this.graphic_override = gaphic_override;
     }
@@ -75,7 +75,7 @@ export class CapitalState extends State {
     private starSprite: Phaser.GameObjects.Image | null = null;
 
     constructor(name: string, capitalized: boolean = false) {
-        super(name, CAPITAL_FULL_SIZE, CAPITAL_NUKE_RANGE);
+        super(name, CAPITAL_FULL_SIZE, CAPITAL_ATTACK_RANGE);
         this.capitalized = capitalized;
     }
 
@@ -109,7 +109,7 @@ export class CannonState extends State {
         name: string,
         angle: number = random_equal_distributed_angles(1)[0]
     ) {
-        super(name, CANNON_FULL_SIZE, CANNON_NUKE_RANGE);
+        super(name, CANNON_FULL_SIZE, CANNON_ATTACK_RANGE);
         this.angle = angle;
         this.selected = false;
     }
@@ -123,7 +123,7 @@ export class PumpState extends State {
     private plusSprite: Phaser.GameObjects.Image | null = null;
 
     constructor(name: string) {
-        super(name, PUMP_FULL_SIZE, PUMP_NUKE_RANGE);
+        super(name, PUMP_FULL_SIZE, PUMP_ATTACK_RANGE);
     }
 
     draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {

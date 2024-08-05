@@ -114,7 +114,7 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
         );
 
         const inStructureRange = (structure: Node): boolean => {
-            const nukeRange = structure.state.nuke_range * structure.value;
+            const nukeRange = structure.state.attack_range * structure.value;
             return isWithinScaledRange(node.pos, structure.pos, ratio, nukeRange);
         };
 

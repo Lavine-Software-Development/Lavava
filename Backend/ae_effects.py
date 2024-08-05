@@ -9,6 +9,8 @@ from constants import (
     CREDIT_USAGE_CODE,
     D_BRIDGE_CODE,
     POISON_TICKS,
+    ZOMBIE_TICKS,
+    ZOMBIE_FULL_SIZE,
     PUMP_DRAIN_CODE,
     SPAWN_CODE,
     FREEZE_CODE,
@@ -48,14 +50,12 @@ def make_bridge(buy_new_edge, bridge_type, destroy_ports=False, only_to_node_por
 
     return bridge_effect
 
-
 def make_nuke(remove_node):
     def nuke_effect(data, player):
         node = data[0]
         remove_node(node)
         if node.owner and node.owner.count == 0:
             node.owner.killed_event(player)
-            print("someone is nuked out")
 
     return nuke_effect
 
@@ -135,11 +135,19 @@ def spawn_effect(data, player):
 
 def zombie_effect(data, player):
     node = data[0]
-    node.set_state("zombie")
+    if node.owner != player:
+        node.owner = player
+        node.value = max(ZOMBIE_FULL_SIZE - node.value, 10)
+        # nodes captured by zombie do not go to the player and thus count is by default reduced
+        player.count += 1 # so we add 1 to counteract this the first time
+    else:
+        node.value = ZOMBIE_FULL_SIZE
+
+    node.set_state("zombie", ZOMBIE_TICKS)
 
 def poison_effect(data, player):
-    edge = data[0]
-    edge.to_node.set_state("poison", (player, POISON_TICKS))
+    node = data[0]
+    node.set_state("poison", (player, POISON_TICKS))
 
 # weak burn, only gets one node
 def burn_effect(data, player):

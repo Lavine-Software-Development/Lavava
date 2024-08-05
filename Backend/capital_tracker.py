@@ -16,7 +16,7 @@ class CapitalTracker:
                 
     def remove(self, node):
         del self.tracked_id_states[node.id]
-        self.capital_owners[node.id].capital_handover(False)
+        # self.capital_owners[node.id].capital_handover(False)
         del self.capital_owners[node.id]
 
     def add(self, node):
@@ -25,9 +25,11 @@ class CapitalTracker:
 
     def update(self, node):
         if self.capital_owners[node.id]:
-            self.capital_owners[node.id].capital_handover(False)
+            # self.capital_owners[node.id].capital_handover(False)
+            pass
         if node.owner:
-            node.owner.capital_handover(True)
+            # node.owner.capital_handover(True)
+            pass
         self.capital_owners[node.id] = node.owner
 
     def reset(self):

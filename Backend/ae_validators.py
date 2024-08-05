@@ -24,7 +24,7 @@ from constants import (
     CREDIT_USAGE_CODE,
     STRUCTURE_RANGES,
     WALL_BREAKER_CODE,
-    WORMHOLE_CODE
+    WORMHOLE_CODE,
 )
 
 
@@ -66,7 +66,6 @@ def standard_node_attack(data, player):
 
 
 def attack_validators(get_structures, player, attack_type):
-
     def structure_ranged_default_attack(data):
         return default_node(data) and structure_ranged_node_attack(data)
 
@@ -82,10 +81,10 @@ def attack_validators(get_structures, player, attack_type):
             x1, y1 = node.pos
             x2, y2 = structure.pos
             distance = (x1 - x2) ** 2 + (y1 - y2) ** 2
-            structure_nuke_range = (
+            structure_attack_range = (
                 STRUCTURE_RANGES[structure.state_name] * structure.value
             ) ** 2
-            return distance <= structure_nuke_range
+            return distance <= structure_attack_range
 
         return any(in_structure_range(structure) for structure in structures)
 
@@ -101,9 +100,15 @@ def attack_validators(get_structures, player, attack_type):
         return False
 
     return {
-        POISON_CODE: neighbor_attack if attack_type == "neighbor" else opposing_structure_ranged_attack,
-        NUKE_CODE: neighbor_or_owner_attack if attack_type == "neighbor" else structure_ranged_default_attack,
-        ZOMBIE_CODE: neighbor_or_owner_attack if attack_type == "neighbor" else structure_ranged_default_attack,
+        POISON_CODE: neighbor_attack
+        if attack_type == "neighbor"
+        else opposing_structure_ranged_attack,
+        NUKE_CODE: neighbor_or_owner_attack
+        if attack_type == "neighbor"
+        else structure_ranged_default_attack,
+        ZOMBIE_CODE: neighbor_or_owner_attack
+        if attack_type == "neighbor"
+        else structure_ranged_default_attack,
     }
 
 
@@ -158,7 +163,7 @@ def validators_needing_player(player):
         return edge.dynamic and (
             edge.from_node.owner == player or edge.to_node.owner == player
         )
-    
+
     structure_validators = {
         CAPITAL_CODE: capital_logic,
         CANNON_CODE: my_default_port_node,
@@ -234,10 +239,14 @@ def make_new_edge_ports(check_new_edge, player, from_port_needed):
         return False
 
     def defense_bridge(data):
-        return data[1].owner == data[0].owner and (data[1].accessible or data[0].accessible)
+        return data[1].owner == data[0].owner and (
+            data[1].accessible or data[0].accessible
+        )
 
     def only_to_node_port(data):
-        return (defense_bridge(data) or data[1].accessible) and no_crossovers(check_new_edge, data, player)
+        return (defense_bridge(data) or data[1].accessible) and no_crossovers(
+            check_new_edge, data, player
+        )
 
     # Check if the nodes are within the range of a mini bridge
     def check_mini_bridge_range(data):
@@ -269,8 +278,10 @@ def make_ability_validators(board, player, settings):
         | validators_needing_player(player)
         | make_new_edge_ports(
             board.check_new_edge, player, settings["bridge_from_port_needed"]
-        ) 
-        | attack_validators(board.get_player_structures, player, settings["attack_type"])
+        )
+        | attack_validators(
+            board.get_player_structures, player, settings["attack_type"]
+        )
     )
 
 

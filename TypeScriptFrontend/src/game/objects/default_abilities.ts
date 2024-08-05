@@ -15,15 +15,15 @@ const NUKE_V = createAbilityVisual("Nuke", Colors.GREY);
 const POISON_V = createAbilityVisual("Poison", Colors.PURPLE);
 const FREEZE_V = createAbilityVisual("Freeze", Colors.LIGHT_BLUE);
 const CAPITAL_V = createAbilityVisual("Capital", Colors.PINK);
-const ZOMBIE_V = createAbilityVisual("Zombie", Colors.DARK_RED);
+const ZOMBIE_V = createAbilityVisual("Zombie", Colors.DARK_GRAY);
 const BURN_V = createAbilityVisual("Burn", Colors.DARK_ORANGE);
 const RAGE_V = createAbilityVisual("Rage", Colors.LIGHT_GREEN);
 const CANNON_V = createAbilityVisual("Cannon", Colors.GREY, "E");
 const PUMP_V = createAbilityVisual("Pump", Colors.DARK_PURPLE, "U");
 const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", Colors.YELLOW, "M");
-const OVER_GROW_V = createAbilityVisual("Over-Grow", Colors.GREEN);
-const WALL_BREAKER_V = createAbilityVisual("Wall-Breaker", Colors.DARK_GREEN, "V");
-const WORMHOLE_V = createAbilityVisual("Wormhole", Colors.BLACK, "W");
+const OVER_GROW_V = createAbilityVisual("Over-Grow", Colors.DARK_GREEN);
+const WALL_BREAKER_V = createAbilityVisual("Wall-Breaker", Colors.DARK_RED, "V");
+const WORMHOLE_V = createAbilityVisual("Wormhole", Colors.DARK_PINK, "W");
 
 // Create instances of EventVisual using the factory function
 const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.PINK);

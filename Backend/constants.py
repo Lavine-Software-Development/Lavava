@@ -36,7 +36,7 @@ DYNAMIC_EDGE = 'dynamic edge'
 MODES = {1: "Money", 2: "Reload", 3: "Ports"}
 
 STATE_NAMES = {"default", "capital", "mine", "zombie", "cannon", "pump"}
-EFFECT_NAMES = {"burn", "poison", "rage"}
+EFFECT_NAMES = {"burn", "poison", "rage", "zombified"}
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 700
@@ -124,7 +124,7 @@ CREDIT_USAGE_CODE = 6
 BURN_TICKS = 50
 POISON_TICKS = 200
 RAGE_TICKS = 200
-ZOMBIE_TICKS = 400
+ZOMBIE_TICKS = float("inf")
 OVER_GROW_TICKS = 150
 
 MINI_BRIDGE_RANGE = 150

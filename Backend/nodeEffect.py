@@ -5,6 +5,7 @@ from constants import (
     OVER_GROW_TICKS,
     RAGE_MULTIPLIER,
     POISON_SPREAD_DELAY,
+    ZOMBIE_TICKS,
 )
 from effectEnums import EffectType
 from abstractEffect import AbstractSpreadingEffect
@@ -42,21 +43,21 @@ class Enraged(AbstractSpreadingEffect):
     
 
 class Zombified(AbstractSpreadingEffect):
-    def __init__(self, length):
-        super().__init__(length, EffectType.NONE)
+    def __init__(self):
+        super().__init__(ZOMBIE_TICKS, EffectType.INTAKE)
     
     def can_spread(self, killed, new_owner):
         return killed
     
     def capture_removal(self, player):
-        return True
+        return False
+    
+    def effect(self, amount):
+        return amount * -2
     
     def spread_key(self, key):
         return "zombie"
-        
-    def spread(self):
-        return self.length - self.counter
-    
+
 
 class OverGrown(AbstractSpreadingEffect):
     def __init__(self):
