@@ -68,7 +68,7 @@ def attack_validators(get_structures, player, attack_type):
 
     def structure_ranged_default_attack(data):
         return default_node(data) and structure_ranged_node_attack(data)
-    
+
     def opposing_structure_ranged_attack(data):
         node = data[0]
         return node.owner != player and structure_ranged_node_attack(data)
@@ -87,7 +87,7 @@ def attack_validators(get_structures, player, attack_type):
             return distance <= structure_nuke_range
 
         return any(in_structure_range(structure) for structure in structures)
-    
+
     def neighbor_or_owner_attack(data):
         node = data[0]
         return node.owner == player or neighbor_attack(data)
@@ -214,7 +214,7 @@ def make_new_edge_ports(check_new_edge, player, from_port_needed):
         if all([node.accessible for node in data]):
             return no_crossovers(check_new_edge, data, player)
         return False
-    
+
     def defense_bridge(data):
         return data[1].owner == data[0].owner and (data[1].accessible or data[0].accessible)
 

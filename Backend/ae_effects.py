@@ -27,7 +27,19 @@ from constants import (
     MINI_BRIDGE_CODE,
     OVER_GROW_CODE,
     WALL_BREAKER_CODE,
+    WORMHOLE_CODE,
 )
+
+def make_wormhole_effect(data, player):
+    structure_effects = {
+        "capital": capital_effect,
+        "cannon": cannon_effect,
+        "pump": pump_effect,
+    }
+    source_node, target_node = data
+    structure = source_node.state_name
+    structure_effects[structure]([target_node], player)
+    source_node.set_state("default")   
 
 def make_bridge(buy_new_edge, bridge_type, destroy_ports=False, only_to_node_port=False):
     def bridge_effect(data, player):
@@ -177,6 +189,7 @@ def make_ability_effects(board, settings):
         ZOMBIE_CODE: zombie_effect,
         CANNON_CODE: cannon_effect,
         PUMP_CODE: pump_effect,
+        WORMHOLE_CODE: make_wormhole_effect,
         WALL_BREAKER_CODE: wall_breaker_effect
     } | make_board_wide_effect(board.board_wide_effect)
 

@@ -48,6 +48,7 @@ export const KeyCodes = {
     CANNON_CODE: 101,
     PUMP_CODE: 117,
     MINI_BRIDGE_CODE: 109,
+    WORMHOLE_CODE: 119,
     OVER_GROW_CODE: 111,
     WALL_BREAKER_CODE: 118,
 };
@@ -86,6 +87,7 @@ export const NameToCode = {
     "Cannon": KeyCodes.CANNON_CODE,
     "Pump": KeyCodes.PUMP_CODE,
     "Mini-Bridge": KeyCodes.MINI_BRIDGE_CODE,
+    "Wormhole": KeyCodes.WORMHOLE_CODE,
     "Over-Grow": KeyCodes.OVER_GROW_CODE,
     "Wall-Breaker": KeyCodes.WALL_BREAKER_CODE,
 };
@@ -97,6 +99,7 @@ export const AbilityCredits = {
     [KeyCodes.BURN_CODE]: 1,
     [KeyCodes.ZOMBIE_CODE]: 1,
     [KeyCodes.MINI_BRIDGE_CODE]: 1,
+    [KeyCodes.WORMHOLE_CODE]: 1,
     [KeyCodes.BRIDGE_CODE]: 2,
     [KeyCodes.D_BRIDGE_CODE]: 2,
     [KeyCodes.RAGE_CODE]: 2,
@@ -105,18 +108,6 @@ export const AbilityCredits = {
     [KeyCodes.NUKE_CODE]: 3,
     [KeyCodes.PUMP_CODE]: 3,
     [KeyCodes.CANNON_CODE]: 4,
-};
-
-export const AbilityElixir = {
-    [KeyCodes.FREEZE_CODE]: 2,
-    [KeyCodes.MINI_BRIDGE_CODE]: 2,
-    [KeyCodes.D_BRIDGE_CODE]: 3,
-    [KeyCodes.WALL_BREAKER_CODE]: 3,
-    [KeyCodes.BRIDGE_CODE]: 4,
-    [KeyCodes.OVER_GROW_CODE]: 4,
-    [KeyCodes.RAGE_CODE]: 5,
-    [KeyCodes.POISON_CODE]: 5,
-    [KeyCodes.NUKE_CODE]: 7,
 };
 
 export const AbilityReloadTimes = {
@@ -131,6 +122,7 @@ export const AbilityReloadTimes = {
     [KeyCodes.POISON_CODE]: 5,
     [KeyCodes.CAPITAL_CODE]: 20,
     [KeyCodes.CANNON_CODE]: 3,
+    [KeyCodes.WORMHOLE_CODE]: 20,
 };
 
 export const CAPITAL_FULL_SIZE = 350;

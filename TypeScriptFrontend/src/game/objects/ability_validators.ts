@@ -161,9 +161,30 @@ function capitalValidator(getEdges: () => Edge[], player: OtherPlayer): Validato
     };
 }
 
+const wormholeValidator = (data: IDItem[], player: OtherPlayer, getEdges: () => Edge[]): boolean => {
+    const structureValidators = {
+        "capital": capitalValidator(getEdges, player),
+        "cannon": playerValidators(player)[KeyCodes.CANNON_CODE],
+        "pump": playerValidators(player)[KeyCodes.PUMP_CODE],
+    };
+
+    if (data.length === 1) {
+        const node = data[0] as Node;
+        return node.owner === player && NUKE_OPTION_STRINGS.includes(node.stateName);
+    } else if (data.length === 2) {
+        const [sourceNode, targetNode] = data as Node[];
+        console.log(sourceNode.stateName);
+        console.log(structureValidators[sourceNode.stateName]);
+        return NUKE_OPTION_STRINGS.includes(sourceNode.stateName) && 
+               structureValidators[sourceNode.stateName]?.([targetNode]);
+    }
+    return false;
+};
+
 const myNode = (node: Node, player: OtherPlayer): boolean => {
     return node.owner === player;
 };
+
 
 export function unownedNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
@@ -304,6 +325,7 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
+        [KeyCodes.WORMHOLE_CODE]: (data: IDItem[]) => wormholeValidator(data, player, getEdges),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
