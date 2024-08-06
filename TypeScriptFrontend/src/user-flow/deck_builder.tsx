@@ -46,9 +46,30 @@ const DeckBuilder: React.FC = () => {
 
     const [abilities, setAbilities] = useState<Ability[]>([]);
     const [selectedCounts, setSelectedCounts] = useState<{ [key: string]: number }>({});
+    const [selectedRoyaleCounts, setSelectedRoyaleCounts] = useState<{ [key: string]: number }>({});
     const [initialSalary, setInitialSalary] = useState(0); // Store the initial salary
     const [salary, setSalary] = useState(0); 
     const [error, setError] = useState("");
+    const [royalAbilities, setRoyalAbilities] = useState<Ability[]>([]);
+    const [deckMode, setDeckMode] = useState("Original");
+
+    useEffect(() => {
+        const fetchRoyaleAbilities = async () => {
+            if (isTokenValid === false) return;
+            try {
+                const response = await fetch(`${config.userBackend}/abilities/Royale`);
+                const data = await response.json();
+                if (response.ok) {
+                    setRoyalAbilities(data.abilities);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching abilities:', error);
+            }
+        };
+        fetchRoyaleAbilities();
+    }, []);
 
     useEffect(() => {
         const fetchAbilities = async () => {
@@ -89,15 +110,22 @@ const DeckBuilder: React.FC = () => {
     }, [selectedCounts, abilities, initialSalary]);
 
     const handleStartFresh = () => {
+        setError("");
         setSelectedCounts(abilities.reduce((counts: { [key: string]: number }, ability: Ability) => {
             counts[ability.name] = 0;
             return counts;
         }, {}));
+        setSelectedRoyaleCounts(abilities.reduce((counts: { [key: string]: number }, ability: Ability) => {
+            counts[ability.name] = 0;
+            return counts;
+        }, {}));
         sessionStorage.setItem('selectedAbilities', JSON.stringify({ abilities: [] }));
+        sessionStorage.setItem('SelectedRoyaleAbilites', JSON.stringify({ abilities: [] }));
         setSalary(abilities.reduce((total, ability) => total + (ability.cost * 0), salary)); // Reset salary to full amount
     };
 
     const handleSaveDeck = async () => {
+        setError("");
         const token = localStorage.getItem('userToken');
         if (token) {
             const selectedAbilities = Object.entries(selectedCounts)
@@ -112,7 +140,7 @@ const DeckBuilder: React.FC = () => {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ abilities: selectedAbilities }),
+                    body: JSON.stringify({ abilities: selectedAbilities , mode: deckMode}),
                 });
                 setShowPopup(true);
                 setTimeout(() => {
@@ -134,8 +162,17 @@ const DeckBuilder: React.FC = () => {
                     },
                 });
                 const data = await response.json();
+                //console.log(data);
+                const decks = data.decks;
+                const modes = decks.map((deck: any[]) => deck[deck.length - 1]);
+                //console.log('Modes:', modes);
+                const index = modes.findIndex((mode: string) => mode === deckMode);
+
+                const updatedDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+
+                //console.log('Updated Decks:', updatedDecks);
                 if (response.ok) {
-                    const userAbilities = data.abilities;
+                    const userAbilities = updatedDecks[index];
                     const initialCounts = userAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
                         counts[ability.name] = ability.count;
                         return counts;
@@ -195,43 +232,96 @@ const DeckBuilder: React.FC = () => {
             return newCounts;
         });
     };
+
+    const handleRoyaleButtonClick = (abilityName: string, increment: boolean) => {
+        setError(""); // Clear previous errors
+        setSelectedRoyaleCounts(prevCounts => {
+            const abilityCost = abilities.find(a => a.name === abilityName)?.cost || 0;
+            const currentCount = prevCounts[abilityName] || 0;
+    
+            // Prevent decrementing below zero
+            if (!increment && currentCount === 0) {
+                return prevCounts; // Return early if trying to decrement an ability at zero
+            }
+    
+            const newCount = increment ? currentCount + 1 : Math.max(currentCount - 1, 0);
+            const distinctAbilities = Object.keys(prevCounts).filter(name => prevCounts[name] > 0).length;
+    
+            // Check if adding a new distinct ability and already at max
+            if (increment && newCount === 1 && distinctAbilities >= 4) {
+                setError("You cannot select more than 4 distinct abilities.");
+                return prevCounts;
+            }
+
+            if (increment && newCount === 2) {
+                setError("You can select an ability once in Royale decks.");
+                return prevCounts;
+            }
+    
+            // Check if salary allows for this increment
+            if (increment && (salary - abilityCost < 0)) {
+                setError(`You cannot afford the ${abilityName} ability.`);
+                return prevCounts;
+            }
+    
+            const newCounts = {
+                ...prevCounts,
+                [abilityName]: newCount
+            };
+    
+            // Update session storage
+            const selectedAbilities = Object.entries(newCounts)
+                .filter(([, count]) => count > 0)
+                .map(([name, count]) => ({ name, count }));
+            sessionStorage.setItem('selectedRoyaleAbilities', JSON.stringify(selectedAbilities));
+    
+            return newCounts;
+        });
+    };
     
     
 
     return (
         <div className="container" id="deck-builder-container">
             <h1>Deck Builder</h1>
+            <p>Original</p>
             <div className="ability-grid">
                 {abilities.map((ability, index) => (
                     <button
                         key={index}
                         className={`ability-button ${selectedCounts[ability.name] > 0 ? 'selected' : ''}`}
                         onClick={() => handleButtonClick(ability.name, true)}
-                        data-tooltip = {ability.description}
+                        data-tooltip={ability.description}
                         onContextMenu={(e) => {
                             e.preventDefault();
                             handleButtonClick(ability.name, false);
                         }}
                     >
-                        {/* icon in background 
-                        <div style={{zIndex: 0, opacity: 0.25}}>
-                            <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
-                            style={{objectFit: 'contain', width: '90%', height: '90%'}}/>
-                        </div>
-
-                        <div style={{position: 'absolute', zIndex: 1}}>
-                            <div className="ability-name">{ability.name}</div>
-                            <div className="ability-cost">Cost: {ability.cost}</div>
-                            <div className="ability-count">{selectedCounts[ability.name] || 0}</div>
-                        </div>*/}
-
-                        {/* icon placement on top of text */}
                         <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
                         style={{ width: '70%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
-
                         <div className="ability-name">{ability.name}</div>
                         <div className="ability-cost">Cost: {ability.cost}</div>
                         <div className="ability-count">{selectedCounts[ability.name] || 0}</div>
+                    </button>
+                ))}
+            </div>
+            <p>Royale</p>
+            <div className="ability-grid">
+                {royalAbilities.map((ability, index) => (
+                    <button
+                        key={index}
+                        className={`ability-button ${selectedRoyaleCounts[ability.name] > 0 ? 'selected' : ''}`}
+                        onClick={() => handleRoyaleButtonClick(ability.name, true)}
+                        data-tooltip={ability.description}
+                        onContextMenu={(e) => {
+                            e.preventDefault();
+                            handleRoyaleButtonClick(ability.name, false);
+                        }}
+                    >
+                        <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
+                        style={{ width: '70%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
+                        <div className="ability-name">{ability.name}</div>
+                        <div className="ability-count">{selectedRoyaleCounts[ability.name] || 0}</div>
                     </button>
                 ))}
             </div>
@@ -247,9 +337,11 @@ const DeckBuilder: React.FC = () => {
                 </div>
                 <button className="custom-button ready-button" data-tooltip="Go to the home page" onClick={goHome}>Ready</button>
                 {error && <p className="error-message">{error}</p>}
-                <div className="salary-display">
-                    <h2>Credits: {salary}</h2>
-                </div>
+                {deckMode === "Original" && (
+                    <div className="salary-display">
+                        <h2>Credits: {salary}</h2>
+                    </div>
+                )}
                 <div className="click-instructions">
                     <span className="click-instruction">
                         <img src="/assets/left_click.png" alt="Left click" className="click-icon" />

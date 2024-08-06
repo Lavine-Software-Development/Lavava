@@ -498,14 +498,14 @@ def get_home(current_user):
         user = User.query.filter_by(username=current_user).first()
         if user:
             return jsonify({
-                "abilities": user_decks(current_user)
+                "decks": user_decks(current_user)
             })
         else:
             return jsonify({"error": "User not found or no deck assigned"}), 404
     
     elif current_user in {"default", "other"}:
         return jsonify({
-            "abilities": user_decks(current_user),
+            "decks": user_decks(current_user),
         })
     else:
         return jsonify({"error": "User not found"}), 404
@@ -624,11 +624,17 @@ def update_display_name(current_user):
 def user_decks(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
+        allDecks = []
         if user:
-            deck = Deck.query.filter_by(user_id=user.id).first()
-            if deck:
-                cards = DeckCard.query.filter_by(deck_id=deck.id).all()
-                return [{"name": card.ability, "count": card.count} for card in cards]
+            decks = Deck.query.filter_by(user_id=user.id).all()
+            if decks:
+                for deck in decks:
+                    mode = deck.name
+                    cards = DeckCard.query.filter_by(deck_id=deck.id).all()
+                    deck = [{"name": card.ability, "count": card.count} for card in cards]
+                    deck.append(mode)
+                    allDecks.append(deck)
+                return allDecks
         return []  # Return empty list if no user or no deck
     else:
         return [{"name": "Capital", "count": 1}, {"name": "Cannon", "count": 1}, {"name": "Rage", "count": 2}, {"name": "Poison", "count": 1}]
@@ -642,6 +648,7 @@ def save_deck(current_user):
 
     data = request.json
     abilities = data.get('abilities')
+    mode = data.get('mode')
 
     user = User.query.filter_by(username=current_user).first()
     if not user:
@@ -649,9 +656,9 @@ def save_deck(current_user):
 
     try:
         # Get or create the user's deck
-        deck = Deck.query.filter_by(user_id=user.id).first()
+        deck = Deck.query.filter_by(user_id=user.id, name = mode).first()
         if not deck:
-            deck = Deck(user_id=user.id, name="Default Deck")
+            deck = Deck(user_id=user.id, name=mode)
             db.session.add(deck)
             db.session.flush()  # This assigns an ID to the deck if it's new
 
