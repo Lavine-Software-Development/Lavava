@@ -61,7 +61,7 @@ class Zombified(AbstractSpreadingEffect):
 
 class OverGrown(AbstractSpreadingEffect):
     def __init__(self):
-        super().__init__(OVER_GROW_TICKS, EffectType.GROW)
+        super().__init__(OVER_GROW_TICKS, EffectType.GROW_CAP)
     
     def effect(self, amount):
         return amount * 5

@@ -139,15 +139,15 @@ export const AbilityReloadTimes = {
     [KeyCodes.WORMHOLE_CODE]: 20,
 };
 
-export const CAPITAL_FULL_SIZE = 350;
-export const PUMP_FULL_SIZE = 250;
-export const CANNON_FULL_SIZE = 250;
-export const ZOMBIE_FULL_SIZE = 250;
+export const CAPITAL_FULL_SIZE = 300;
+export const PUMP_FULL_SIZE = 200;
+export const CANNON_FULL_SIZE = 200;
+export const ZOMBIE_FULL_SIZE = 300;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
-export const CAPITAL_ATTACK_RANGE = 0.7;
-export const PUMP_ATTACK_RANGE = 0.7;
-export const CANNON_ATTACK_RANGE = 0.5;
+export const CAPITAL_ATTACK_RANGE = 0.8;
+export const PUMP_ATTACK_RANGE = 0.8;
+export const CANNON_ATTACK_RANGE = 0.6;
 
 export const NUKE_OPTION_STRINGS = ["cannon", "pump", "capital"];
 export const NUKE_OPTION_CODES = [KeyCodes.CANNON_CODE, KeyCodes.PUMP_CODE, KeyCodes.CAPITAL_CODE];

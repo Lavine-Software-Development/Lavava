@@ -41,6 +41,7 @@ class Node(JsonableTracked):
         self.expel_multiplier = 1
         self.intake_multiplier = 1
         self.grow_maximum = 1
+        self.grow_multiplier = 1
         self.growth_rate = growth_rate
         self.transfer_rate = transfer_rate
         self.default_full_size = default_full_size
@@ -102,15 +103,18 @@ class Node(JsonableTracked):
             return None
 
     def calculate_interactions(self):
-        inter_grow, inter_intake, inter_expel = 1, 1, 1
+        inter_grow, inter_grow_cap, inter_intake, inter_expel = 1, 1, 1, 1
         for effect in self.effects.values():
             if effect.effect_type == EffectType.GROW:
                 inter_grow *= effect.effect(inter_grow)
+            elif effect.effect_type == EffectType.GROW_CAP:
+                inter_grow *= effect.effect(inter_grow_cap)
             elif effect.effect_type == EffectType.INTAKE:
                 inter_intake *= effect.effect(inter_intake)
             elif effect.effect_type == EffectType.EXPEL:
                 inter_expel *= effect.effect(inter_expel)
-        self.grow_maximum = inter_grow
+        self.grow_maximum = inter_grow_cap
+        self.grow_multiplier = inter_grow
         self.intake_multiplier = inter_intake
         self.expel_multiplier = inter_expel
 

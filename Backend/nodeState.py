@@ -28,7 +28,7 @@ class AbstractState(JsonableSkeleton):
         self.visual_id = visual_id
 
     def grow(self):
-        change = self.node.growth_rate * self.node.grow_maximum
+        change = self.node.growth_rate * self.node.grow_multiplier
         if self.node.value >= self.full_size or self.node.value + change < 0:
             return 0
         return change
@@ -95,7 +95,7 @@ class ZombieState(DefaultState):
     def __init__(self, node):
         AbstractState.__init__(self, node, True, False, False, 1)  # default on capture
         self.node.set_state("zombified")
-        self.node.owner.count -= 1
+        # self.node.owner.count -= 1
 
     @property
     def full_size(self):
@@ -120,7 +120,7 @@ class ZombieState(DefaultState):
     
     def capture_event(self):
         # to counteract the loss they're about to receive when the node is taken from them
-        self.node.owner.count += 1 # a node which, as a zombie, they technically never owned
+        # self.node.owner.count += 1 # a node which, as a zombie, they technically never owned
         return super().capture_event()
 
 
