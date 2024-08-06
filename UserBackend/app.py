@@ -769,18 +769,18 @@ MINI_BRIDGE_CODE = 109
 def get_royale_settings():
     settings = {
         "ability_type": "elixir",
-        "elixir_cap": 10,
+        "elixir_cap": 8,
         "elixir_rate": 4,
         "growth_rate": 0.13,
         "transfer_rate": 0.012,
-        "main_time": 360,
+        "main_time": 420,
         "overtime": 60,
         "full_size": 200,
         "accessible_percentage": 1/2,
         "walls": True,
         "wall_counts": [2, 1, 2],
         'iterative_make_accessible': True,
-        "accessibility_times": [180, 359],
+        "accessibility_times": [240],
         "starting_structures": False,
         "attack_type": "neighbor",
         "bridge_burn": False,
@@ -841,7 +841,7 @@ def get_royale_abilities():
         },
         {
             "name": "Nuke", 
-            "cost": 7,
+            "cost": 6,
             "description": "Destroy nearby dot and its bridges"
         },
         {

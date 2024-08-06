@@ -368,7 +368,7 @@ export class PortNode extends Node {
 export class WallNode extends Node {
     private readonly waveCount: number = 8;
     private readonly waveAmplitude: number = 0.1;
-    private readonly innerWallColor: number = phaserColor(Colors.GREY);
+    private readonly innerWallColor: number = phaserColor(Colors.LIGHT_GREY);
     private readonly outerWallColor: number = phaserColor(Colors.DARK_GRAY);
     private _wall_count: number;
     private wallPercent: number;
@@ -418,25 +418,49 @@ export class WallNode extends Node {
         return this.wall_count === 0;
     }
 
+    // private drawWalls(): void {
+    //     const graphics = this.graphics;
+    //     const centerX = this.pos.x;
+    //     const centerY = this.pos.y;
+
+    //     if (this.wall_count === 0) {
+    //         // Draw a partial inner wall if wall_count is 0 but wallPercent > 0
+    //         if (this.wallPercent > 0) {
+    //             this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.3, this.innerWallColor, this.wallPercent);
+    //         }
+    //     } else {
+    //         // Draw inner wall if wall_count is at least 1
+    //         this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.3, this.innerWallColor);
+
+    //         // Draw outer wall if wall_count is 2 or if there's a partial wall
+    //         if (this.wall_count === 2 || (this.wall_count === 1 && this.wallPercent > 0)) {
+    //             const outerWallPercent = this.wall_count === 2 ? 1 : this.wallPercent;
+    //             this.drawWavyWall(centerX, centerY, this.size * 1.3, this.size * 1.5, this.outerWallColor, outerWallPercent);
+    //         }
+    //     }
+    // }
+
     private drawWalls(): void {
         const graphics = this.graphics;
         const centerX = this.pos.x;
         const centerY = this.pos.y;
-
+    
         if (this.wall_count === 0) {
             // Draw a partial inner wall if wall_count is 0 but wallPercent > 0
             if (this.wallPercent > 0) {
                 this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.3, this.innerWallColor, this.wallPercent);
             }
-        } else {
-            // Draw inner wall if wall_count is at least 1
+        } else if (this.wall_count === 1) {
+            // Draw inner wall if wall_count is 1
             this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.3, this.innerWallColor);
-
-            // Draw outer wall if wall_count is 2 or if there's a partial wall
-            if (this.wall_count === 2 || (this.wall_count === 1 && this.wallPercent > 0)) {
-                const outerWallPercent = this.wall_count === 2 ? 1 : this.wallPercent;
-                this.drawWavyWall(centerX, centerY, this.size * 1.3, this.size * 1.5, this.outerWallColor, outerWallPercent);
+    
+            // Draw partial outer wall if there's a partial wall
+            if (this.wallPercent > 0) {
+                this.drawWavyWall(centerX, centerY, this.size * 1.3, this.size * 1.5, this.outerWallColor, this.wallPercent);
             }
+        } else if (this.wall_count === 2) {
+            // Draw a single dark wall for wall_count 2
+            this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.5, this.outerWallColor);
         }
     }
 
