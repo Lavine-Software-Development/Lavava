@@ -19,7 +19,7 @@ export class State {
         
     }
 
-    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
+    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2, owner_color) {
         // Draw the state
     }
 
@@ -35,7 +35,7 @@ export class ZombieState extends State {
         super(name, 0, ZOMBIE_FULL_SIZE, true);
     }
 
-    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
+    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2, owner_color) {
         if (!this.zombieSprite) {
             this.zombieSprite = scene.add.image(pos.x, pos.y, "blackSquare");
             this.zombieSprite.setOrigin(0.5, 0.5); // Set origin to center for proper scaling
@@ -79,7 +79,7 @@ export class CapitalState extends State {
         this.capitalized = capitalized;
     }
 
-    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
+    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2, owner_color) {
         if (this.capitalized) {
             if (!this.starSprite) {
                 this.starSprite = scene.add.image(pos.x, pos.y, "star");
@@ -126,7 +126,7 @@ export class PumpState extends State {
         super(name, PUMP_FULL_SIZE, PUMP_ATTACK_RANGE);
     }
 
-    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2) {
+    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2, owner_color) {
         if (!this.plusSprite) {
             this.plusSprite = scene.add.image(pos.x, pos.y, 'plus');
             this.plusSprite.setOrigin(0.5, 0.5); // Set origin to center for proper scaling

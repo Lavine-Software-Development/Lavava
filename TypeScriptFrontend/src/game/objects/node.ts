@@ -178,7 +178,7 @@ export class Node extends IDItem implements INode {
     draw(): void {
         this.graphics.clear();
         if (this.state.graphic_override) {
-            this.state.draw(this._scene, this.size, this.pos);
+            this.state.draw(this._scene, this.size, this.pos, this.owner?.color);
             return;
         } else {
             if (this.effects.has("poison")) {
