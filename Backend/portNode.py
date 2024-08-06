@@ -49,7 +49,7 @@ class WallNode(Node):
             self.wall_count = random.choice(settings["wall_counts"])
 
     def make_accessible(self):
-        if self.wall_count > 0:
+        if self.wall_count == 1:
             self.wall_count -= 1
 
     @property
