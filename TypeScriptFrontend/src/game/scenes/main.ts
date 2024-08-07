@@ -12,6 +12,7 @@ import {
     NUKE_OPTION_STRINGS,
     NUKE_OPTION_CODES, 
     MINI_BRIDGE_RANGE,
+    attackCodes,
 } from "../objects/constants";
 import { PlayerStateEnum as PSE, GameStateEnum as GSE } from "../objects/enums";
 import { AbstractAbility, CreditAbility, ElixirAbility } from "../objects/ReloadAbility";
@@ -134,6 +135,11 @@ export class MainScene extends Scene {
         this.load.image("Zombie", "Zombie.png");
 
         this.load.image('Pump', 'Pump.png');
+
+        this.load.image("Over-Grow", "Over-Grow.png");
+        this.load.image("Catapult", "Catapult.png");
+        this.load.image("Wormhole", "Wormhole.png");
+        this.load.image("Wallbreaker", "Wallbreaker.png");
     }
 
     create(): void {
@@ -382,7 +388,7 @@ export class MainScene extends Scene {
 
         // Iterate over the values of the dictionary to draw each node
 
-        if (this.abilityManager.getMode() === KeyCodes.NUKE_CODE) {
+        if ( attackCodes.includes(this.abilityManager.getMode()) ) {
             if (this.settings.attack_type == 'structure_range') {
                 const structures = Object.values(this.nodes).filter(
                     (node) =>
@@ -391,7 +397,7 @@ export class MainScene extends Scene {
                 );
     
                 structures.forEach((node) => {
-                    this.drawScaledCircle(node, node.value * node.state.nuke_range, Colors.BLACK);
+                    this.drawScaledCircle(node, node.value * node.state.attack_range, Colors.BLACK);
                 });
             } else if (this.settings.attack_type == 'neighbor') {
                 const neighbors = Object.values(this.nodes).filter(
