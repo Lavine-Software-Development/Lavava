@@ -36,7 +36,7 @@ DYNAMIC_EDGE = 'dynamic edge'
 MODES = {1: "Money", 2: "Reload", 3: "Ports"}
 
 STATE_NAMES = {"default", "capital", "mine", "zombie", "cannon", "pump"}
-EFFECT_NAMES = {"burn", "poison", "rage", "zombified"}
+EFFECT_NAMES = {"burn", "poison", "rage", "zombified", "over_grow"}
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 700

@@ -10,7 +10,7 @@ export const abilityColors: { [key: string]: string } = {
     "Capital": `rgb(${Colors.PINK.slice().join(', ')})`,
     "Zombie": `rgb(${Colors.DARK_GRAY.slice().join(', ')})`,
     "Burn": `rgb(${Colors.DARK_ORANGE.slice().join(', ')})`,
-    "Rage": `rgb(${Colors.LIGHT_GREEN.slice().join(', ')})`,
+    "Rage": `rgb(${Colors.DARK_RED.slice().join(', ')})`,
     "Cannon": `rgb(${Colors.GREY.slice().join(', ')})`,
     "Pump": `rgb(${Colors.DARK_PURPLE.slice().join(', ')})`,
     "Mini-Bridge": `rgb(${Colors.YELLOW.slice().join(', ')})`,

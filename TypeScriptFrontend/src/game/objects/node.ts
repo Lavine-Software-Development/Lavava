@@ -198,11 +198,19 @@ export class Node extends IDItem implements INode {
             this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
 
             if (this.effects.has("rage")) {
-                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
+                this.graphics.lineStyle(3, phaserColor(Colors.DARK_RED), 1);
                 this.graphics.strokeCircle(
                     this.pos.x,
                     this.pos.y,
                     this.size - 2
+                );
+            }
+            if (this.effects.has("over_grow")) {
+                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size - 1
                 );
             }
             if (this.full) {

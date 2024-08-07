@@ -67,11 +67,11 @@ def standard_node_attack(data, player):
 
 def attack_validators(get_structures, player, attack_type):
     def structure_ranged_default_attack(data):
-        return default_node(data) and structure_ranged_node_attack(data)
+        return default_node(data) and (structure_ranged_node_attack(data) or not_attacking_neighbor_or_owner_attack(data))
 
     def opposing_structure_ranged_attack(data):
         node = data[0]
-        return node.owner != player and structure_ranged_node_attack(data)
+        return node.owner != player and (structure_ranged_node_attack(data) or not_attacking_neighbor_attack(data))
 
     def structure_ranged_node_attack(data):
         node = data[0]
@@ -87,26 +87,44 @@ def attack_validators(get_structures, player, attack_type):
             return distance <= structure_attack_range
 
         return any(in_structure_range(structure) for structure in structures)
-
-    def neighbor_or_owner_attack(data):
+    
+    def not_attacking_edge(edge):
+        return edge.from_node == player or not edge.flowing
+    
+    def not_attacking_neighbor_attack(data):
         node = data[0]
-        return node.owner == player or neighbor_attack(data)
-
+        if node.owner == player:
+            return False
+        for edge in node.edges:
+            if edge.opposite(node).owner == player and not_attacking_edge(edge):
+                return True
+        return False
+    
     def neighbor_attack(data):
         node = data[0]
+        if node.owner == player:
+            return False
         for neighbor in node.neighbors:
             if neighbor.owner == player:
                 return True
         return False
 
+    def neighbor_or_owner_attack(data):
+        node = data[0]
+        return node.owner == player or neighbor_attack(data)
+    
+    def not_attacking_neighbor_or_owner_attack(data):
+        node = data[0]
+        return node.owner == player or not_attacking_neighbor_attack(data)
+
     return {
-        POISON_CODE: neighbor_attack
+        POISON_CODE: not_attacking_neighbor_attack
         if attack_type == "neighbor"
         else opposing_structure_ranged_attack,
-        NUKE_CODE: neighbor_or_owner_attack
+        NUKE_CODE: not_attacking_neighbor_or_owner_attack
         if attack_type == "neighbor"
         else structure_ranged_default_attack,
-        ZOMBIE_CODE: neighbor_or_owner_attack
+        ZOMBIE_CODE: not_attacking_neighbor_or_owner_attack
         if attack_type == "neighbor"
         else structure_ranged_default_attack,
     }

@@ -88,22 +88,36 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
 
     const isNeighborOrOwner = (data: IDItem[]): boolean => {
         const node1 = data[0] as Node;
-        return (node1.owner === player) || isNeighbor(data);
+        return myNode(node1, player) || isNeighbor(data);
+    }
+
+    const isNotAttackingNeighborOrOwner = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return myNode(node1, player) || isNotAttackingNeighbor(data);
+    }
+
+    const notAttacking = (edge: Edge): boolean => {
+        return edge.from_node.owner === player || !edge.flowing;
     }
 
     const isNeighbor = (data: IDItem[]): boolean => {
         const node1 = data[0] as Node;
-        return node1.edges.some((edge) => edge.other(node1).owner === player);
+        return !myNode(node1, player) && node1.edges.some((edge) => edge.other(node1).owner === player);
+    }
+
+    const isNotAttackingNeighbor  = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return !myNode(node1, player) && node1.edges.some((edge) => edge.other(node1).owner === player && notAttacking(edge));
     }
 
     const defaultStructureRangedNodeAttack = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
-        return defaultNode(node) && structureRangedNodeAttack(data);
+        return defaultNode(node) && (structureRangedNodeAttack(data) || isNotAttackingNeighborOrOwner(data));
     }
 
     const opposingStructureRangedNodeAttack = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
-        return !myNode(node, player) && structureRangedNodeAttack(data)
+        return !myNode(node, player) && (structureRangedNodeAttack(data) || isNotAttackingNeighbor(data));
     }
 
     const structureRangedNodeAttack = (data: IDItem[]): boolean => {
@@ -124,8 +138,8 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
     }
 
     return {
-        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
-        [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNeighbor : opposingStructureRangedNodeAttack,
+        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNotAttackingNeighborOrOwner : defaultStructureRangedNodeAttack,
+        [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNotAttackingNeighbor : opposingStructureRangedNodeAttack,
         [KeyCodes.ZOMBIE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
     };
 }
