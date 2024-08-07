@@ -285,7 +285,7 @@ input::placeholder {
 
 .ability-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); /* Changed from 4 to 5 */
+    grid-template-columns: repeat(7, 1fr); /* Changed from 4 to 5 */
     gap: 10px;
     /* margin-top: 20px; Add some space below the title */
 }
@@ -656,8 +656,8 @@ ul {
 }
 
 .container#deck-builder-container {
-    max-width: 1200px; /* Increased from typical 960px or 1024px */
-    width: 90%; /* Use percentage for responsiveness */
+    max-width: 24000px; /* Increased from typical 960px or 1024px */
+    width: 100%; /* Use percentage for responsiveness */
     /* margin: 0 auto; Center the container */
     padding: 20px;
     display: flex;
@@ -669,7 +669,7 @@ ul {
 /* Add a media query for responsiveness */
 @media (max-width: 1200px) {
     .container#deck-builder-container {
-        width: 95%;
+        width: 100%;
     }
 }
 

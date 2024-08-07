@@ -48,9 +48,12 @@ export const KeyCodes = {
     CANNON_CODE: 101,
     PUMP_CODE: 117,
     MINI_BRIDGE_CODE: 109,
+    WORMHOLE_CODE: 119,
     OVER_GROW_CODE: 111,
     WALL_BREAKER_CODE: 118,
 };
+
+export const attackCodes = [KeyCodes.NUKE_CODE, KeyCodes.POISON_CODE, KeyCodes.ZOMBIE_CODE];
 
 export const EventCodes = {
     CANNON_SHOT_CODE: 4,
@@ -86,25 +89,9 @@ export const NameToCode = {
     "Cannon": KeyCodes.CANNON_CODE,
     "Pump": KeyCodes.PUMP_CODE,
     "Mini-Bridge": KeyCodes.MINI_BRIDGE_CODE,
+    "Wormhole": KeyCodes.WORMHOLE_CODE,
     "Over-Grow": KeyCodes.OVER_GROW_CODE,
     "Wall-Breaker": KeyCodes.WALL_BREAKER_CODE,
-};
-
-
-export const AbilityCredits = {
-    [KeyCodes.SPAWN_CODE]: 1,
-    [KeyCodes.FREEZE_CODE]: 1,
-    [KeyCodes.BURN_CODE]: 1,
-    [KeyCodes.ZOMBIE_CODE]: 1,
-    [KeyCodes.MINI_BRIDGE_CODE]: 1,
-    [KeyCodes.BRIDGE_CODE]: 2,
-    [KeyCodes.D_BRIDGE_CODE]: 2,
-    [KeyCodes.RAGE_CODE]: 2,
-    [KeyCodes.POISON_CODE]: 2,
-    [KeyCodes.CAPITAL_CODE]: 2,
-    [KeyCodes.NUKE_CODE]: 3,
-    [KeyCodes.PUMP_CODE]: 3,
-    [KeyCodes.CANNON_CODE]: 4,
 };
 
 export const AbilityElixir = {
@@ -119,6 +106,24 @@ export const AbilityElixir = {
     [KeyCodes.NUKE_CODE]: 6,
 };
 
+
+export const AbilityCredits = {
+    [KeyCodes.SPAWN_CODE]: 1,
+    [KeyCodes.FREEZE_CODE]: 1,
+    [KeyCodes.BURN_CODE]: 1,
+    [KeyCodes.ZOMBIE_CODE]: 1,
+    [KeyCodes.MINI_BRIDGE_CODE]: 1,
+    [KeyCodes.WORMHOLE_CODE]: 1,
+    [KeyCodes.BRIDGE_CODE]: 2,
+    [KeyCodes.D_BRIDGE_CODE]: 2,
+    [KeyCodes.RAGE_CODE]: 2,
+    [KeyCodes.POISON_CODE]: 2,
+    [KeyCodes.CAPITAL_CODE]: 2,
+    [KeyCodes.NUKE_CODE]: 3,
+    [KeyCodes.PUMP_CODE]: 3,
+    [KeyCodes.CANNON_CODE]: 4,
+};
+
 export const AbilityReloadTimes = {
     [KeyCodes.SPAWN_CODE]: 30,
     [KeyCodes.FREEZE_CODE]: 8,
@@ -131,22 +136,23 @@ export const AbilityReloadTimes = {
     [KeyCodes.POISON_CODE]: 5,
     [KeyCodes.CAPITAL_CODE]: 20,
     [KeyCodes.CANNON_CODE]: 3,
+    [KeyCodes.WORMHOLE_CODE]: 20,
 };
 
-export const CAPITAL_FULL_SIZE = 350;
-export const PUMP_FULL_SIZE = 250;
-export const CANNON_FULL_SIZE = 250;
-export const ZOMBIE_FULL_SIZE = 250;
+export const CAPITAL_FULL_SIZE = 300;
+export const PUMP_FULL_SIZE = 200;
+export const CANNON_FULL_SIZE = 200;
+export const ZOMBIE_FULL_SIZE = 300;
 export const MINIMUM_TRANSFER_VALUE = 8;
 export const PORT_COUNT = 3;
-export const CAPITAL_NUKE_RANGE = 0.7;
-export const PUMP_NUKE_RANGE = 0.7;
-export const CANNON_NUKE_RANGE = 0.5;
+export const CAPITAL_ATTACK_RANGE = 0.8;
+export const PUMP_ATTACK_RANGE = 0.8;
+export const CANNON_ATTACK_RANGE = 0.6;
 
 export const NUKE_OPTION_STRINGS = ["cannon", "pump", "capital"];
 export const NUKE_OPTION_CODES = [KeyCodes.CANNON_CODE, KeyCodes.PUMP_CODE, KeyCodes.CAPITAL_CODE];
-export const PRE_STRUCTURE_RANGES = {[KeyCodes.CANNON_CODE]: CANNON_FULL_SIZE * CANNON_NUKE_RANGE,
-                                    [KeyCodes.PUMP_CODE]: PUMP_FULL_SIZE * PUMP_NUKE_RANGE,
-                                    [KeyCodes.CAPITAL_CODE]: CAPITAL_FULL_SIZE * CAPITAL_NUKE_RANGE};
+export const PRE_STRUCTURE_RANGES = {[KeyCodes.CANNON_CODE]: CANNON_FULL_SIZE * CANNON_ATTACK_RANGE,
+                                    [KeyCodes.PUMP_CODE]: PUMP_FULL_SIZE * PUMP_ATTACK_RANGE,
+                                    [KeyCodes.CAPITAL_CODE]: CAPITAL_FULL_SIZE * CAPITAL_ATTACK_RANGE};
 
 export const MINI_BRIDGE_RANGE = 150;

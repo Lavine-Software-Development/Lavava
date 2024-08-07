@@ -60,9 +60,6 @@ class DefaultPlayer(JsonableTick):
             self.rank = rank
         self.ps.defeat()
 
-    def capital_handover(self, gain):
-        pass
-
     def overtime_bonus(self):
         pass
 
@@ -156,12 +153,12 @@ class MoneyPlayer(DefaultPlayer):
     def change_tick(self, amount):
         self.tick_production += amount
 
-    def capital_handover(self, gain):
-        if gain:
-            self.tick_production += CAPITAL_BONUS
-        else:
-            self.tick_production -= CAPITAL_BONUS
-        super().capital_handover(gain)
+    # def capital_handover(self, gain):
+    #     if gain:
+    #         self.tick_production += CAPITAL_BONUS
+    #     else:
+    #         self.tick_production -= CAPITAL_BONUS
+    #     super().capital_handover(gain)
 
     # def eliminate(self):
     #     self.money = 0

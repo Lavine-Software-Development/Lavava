@@ -88,22 +88,36 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
 
     const isNeighborOrOwner = (data: IDItem[]): boolean => {
         const node1 = data[0] as Node;
-        return (node1.owner === player) || isNeighbor(data);
+        return myNode(node1, player) || isNeighbor(data);
+    }
+
+    const isNotAttackingNeighborOrOwner = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return myNode(node1, player) || isNotAttackingNeighbor(data);
+    }
+
+    const notAttacking = (edge: Edge): boolean => {
+        return edge.from_node.owner === player || !edge.flowing;
     }
 
     const isNeighbor = (data: IDItem[]): boolean => {
         const node1 = data[0] as Node;
-        return node1.edges.some((edge) => edge.other(node1).owner === player);
+        return !myNode(node1, player) && node1.edges.some((edge) => edge.other(node1).owner === player);
+    }
+
+    const isNotAttackingNeighbor  = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return !myNode(node1, player) && node1.edges.some((edge) => edge.other(node1).owner === player && notAttacking(edge));
     }
 
     const defaultStructureRangedNodeAttack = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
-        return defaultNode(node) && structureRangedNodeAttack(data);
+        return defaultNode(node) && (structureRangedNodeAttack(data) || isNotAttackingNeighborOrOwner(data));
     }
 
     const opposingStructureRangedNodeAttack = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
-        return !myNode(node, player) && structureRangedNodeAttack(data)
+        return !myNode(node, player) && (structureRangedNodeAttack(data) || isNotAttackingNeighbor(data));
     }
 
     const structureRangedNodeAttack = (data: IDItem[]): boolean => {
@@ -114,7 +128,7 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
         );
 
         const inStructureRange = (structure: Node): boolean => {
-            const nukeRange = structure.state.nuke_range * structure.value;
+            const nukeRange = structure.state.attack_range * structure.value;
             return isWithinScaledRange(node.pos, structure.pos, ratio, nukeRange);
         };
 
@@ -124,8 +138,9 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
     }
 
     return {
-        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
-        [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNeighbor : opposingStructureRangedNodeAttack,
+        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNotAttackingNeighborOrOwner : defaultStructureRangedNodeAttack,
+        [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNotAttackingNeighbor : opposingStructureRangedNodeAttack,
+        [KeyCodes.ZOMBIE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
     };
 }
 
@@ -161,9 +176,28 @@ function capitalValidator(getEdges: () => Edge[], player: OtherPlayer): Validato
     };
 }
 
+const wormholeValidator = (data: IDItem[], player: OtherPlayer, getEdges: () => Edge[]): boolean => {
+    const structureValidators = {
+        "capital": capitalValidator(getEdges, player),
+        "cannon": playerValidators(player)[KeyCodes.CANNON_CODE],
+        "pump": playerValidators(player)[KeyCodes.PUMP_CODE],
+    };
+
+    if (data.length === 1) {
+        const node = data[0] as Node;
+        return node.owner === player && NUKE_OPTION_STRINGS.includes(node.stateName);
+    } else if (data.length === 2) {
+        const [sourceNode, targetNode] = data as Node[];
+        return NUKE_OPTION_STRINGS.includes(sourceNode.stateName) && 
+               structureValidators[sourceNode.stateName]?.([targetNode]);
+    }
+    return false;
+};
+
 const myNode = (node: Node, player: OtherPlayer): boolean => {
     return node.owner === player;
 };
+
 
 export function unownedNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
@@ -216,7 +250,6 @@ function playerValidators(player: OtherPlayer): {
     return {
         [KeyCodes.POISON_CODE]: attackingEdge,
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEitherButNotFlowing,
-        [KeyCodes.ZOMBIE_CODE]: myDefaultNode,
         [KeyCodes.CANNON_CODE]: myDefaultPortNode,
         [KeyCodes.PUMP_CODE]: myDefaultNode,
     };
@@ -304,6 +337,7 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
+        [KeyCodes.WORMHOLE_CODE]: (data: IDItem[]) => wormholeValidator(data, player, getEdges),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`

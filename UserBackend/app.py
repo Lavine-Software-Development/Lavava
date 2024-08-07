@@ -776,11 +776,11 @@ def get_royale_settings():
         "main_time": 420,
         "overtime": 60,
         "full_size": 200,
-        "accessible_percentage": 1/2,
+        "accessible_percentage": 2/5,
         "walls": True,
-        "wall_counts": [2, 1, 2],
+        "wall_counts": [2, 2, 1, 2],
         'iterative_make_accessible': True,
-        "accessibility_times": [240],
+        "accessibility_times": [300],
         "starting_structures": False,
         "attack_type": "neighbor",
         "bridge_burn": False,
@@ -798,8 +798,8 @@ def get_og_settings():
         "credit_cap": 20,
         "growth_rate": 0.15,
         "transfer_rate": 0.012,
-        "main_time": 300,
-        "overtime": 60,
+        "main_time": 390,
+        "overtime": 90,
         "full_size": 250,
         "accessible_percentage": 2/3,
         "walls": False,
@@ -810,7 +810,7 @@ def get_og_settings():
         "attack_type": "structure_range",
         "bridge_burn": False,
         "bridge_from_port_needed": False,
-        "deck_size": 4,
+        "deck_size": 5,
         "forced_deck": False,
     }
     return jsonify(settings)
@@ -863,11 +863,6 @@ def get_royale_abilities():
 def get_og_abilities():
     abilities = [
         {
-            "name": "Bridge", 
-            "cost": 2,
-            "description": "Create a one-way bridge"
-        },
-        {
             "name": "Mini-Bridge", 
             "cost": 1,
             "description": "Create a two-way bridge with limited range"
@@ -888,16 +883,31 @@ def get_og_abilities():
             "cost": 1,
             "description": "Remove ports from node"
         },
-        # {
-        #     "name": "Zombie", 
-        #     "cost": 1,
-        #     "description": "Big defensive Structure on node"
-        # },
-        # {
-        #     "name": "Poison", 
-        #     "cost": 2,
-        #     "description": "Spreadable effect to shrink nodes"
-        # },
+        {
+            "name": "Wormhole",
+            "cost": 1,
+            "description": "Teleport structure to another node"
+        },
+        {
+            "name": "Zombie",
+            "cost": 3,
+            "description": "Create controllable apocalypse"
+        },
+        {
+            "name": "Nuke", 
+            "cost": 3,
+            "description": "Destroy node and edges (capital needed)"
+        },
+        {
+            "name": "Bridge", 
+            "cost": 2,
+            "description": "Create a one-way bridge"
+        },
+        {
+            "name": "Poison", 
+            "cost": 2,
+            "description": "Spreadable effect to shrink nodes"
+        },
         {
             "name": "Rage", 
             "cost": 2,
@@ -909,14 +919,14 @@ def get_og_abilities():
         #     "description": "Create a two-way bridge"
         # },
         {
+            "name": "Over-Grow",
+            "cost": 2,
+            "description": "nodes can grow to any size for short period"
+        },
+        {
             "name": "Capital", 
             "cost": 2,
             "description": "Create a capital" 
-        },
-        {
-            "name": "Nuke", 
-            "cost": 3,
-            "description": "Destroy node and edges (capital needed)"
         },
         {
             "name": "Pump", 
@@ -929,7 +939,7 @@ def get_og_abilities():
             "description": "Shoot energy at nodes"
         }
     ]
-    return jsonify({"abilities": abilities, "salary": 20, "options": 4})
+    return jsonify({"abilities": abilities, "credits": 22, "options": 5})
 
 
 @app.route('/save_game', methods=['POST'])

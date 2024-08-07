@@ -75,7 +75,9 @@ export class Edge extends IDItem implements IEdge {
 
     get color(): readonly [number, number, number] {
         if (this._fromNode.effects.has("rage")) {
-            return Colors.DARK_GREEN;
+            return Colors.DARK_RED;
+        } else if (this._fromNode.effects.has("zombified")) {
+            return Colors.BLACK;
         }
         return this.on ? this._fromNode.color : [50, 50, 50];
     }

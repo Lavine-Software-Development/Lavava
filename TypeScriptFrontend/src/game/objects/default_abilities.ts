@@ -15,14 +15,15 @@ const NUKE_V = createAbilityVisual("Nuke", Colors.GREY);
 const POISON_V = createAbilityVisual("Poison", Colors.PURPLE);
 const FREEZE_V = createAbilityVisual("Freeze", Colors.LIGHT_BLUE);
 const CAPITAL_V = createAbilityVisual("Capital", Colors.PINK);
-const ZOMBIE_V = createAbilityVisual("Zombie", Colors.DARK_RED);
+const ZOMBIE_V = createAbilityVisual("Zombie", Colors.DARK_GRAY);
 const BURN_V = createAbilityVisual("Burn", Colors.DARK_ORANGE);
-const RAGE_V = createAbilityVisual("Rage", Colors.LIGHT_GREEN);
+const RAGE_V = createAbilityVisual("Rage", Colors.DARK_RED);
 const CANNON_V = createAbilityVisual("Cannon", Colors.GREY, "E");
 const PUMP_V = createAbilityVisual("Pump", Colors.DARK_PURPLE, "U");
 const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", Colors.YELLOW, "M");
-const OVER_GROW_V = createAbilityVisual("Over-Grow", Colors.GREEN);
-const WALL_BREAKER_V = createAbilityVisual("Wall-Breaker", Colors.DARK_GREEN, "V");
+const OVER_GROW_V = createAbilityVisual("Over-Grow", Colors.DARK_GREEN);
+const WALL_BREAKER_V = createAbilityVisual("Wall-Breaker", Colors.DARK_RED, "V");
+const WORMHOLE_V = createAbilityVisual("Wormhole", Colors.DARK_PINK, "W");
 
 // Create instances of EventVisual using the factory function
 const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.PINK);
@@ -52,6 +53,7 @@ export const VISUALS: EventVisualParameters = {
     [KeyCodes.MINI_BRIDGE_CODE]: MINI_BRIDGE_V,
     [KeyCodes.OVER_GROW_CODE]: OVER_GROW_V,
     [KeyCodes.WALL_BREAKER_CODE]: WALL_BREAKER_V,
+    [KeyCodes.WORMHOLE_CODE]: WORMHOLE_V,
 
     [EventCodes.CANNON_SHOT_CODE]: CANNON_SHOT_V,
     [EventCodes.PUMP_DRAIN_CODE]: PUMP_DRAIN_V,
@@ -81,6 +83,7 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.PUMP_CODE]: [1, ClickType.NODE],
     [KeyCodes.OVER_GROW_CODE]: [0, ClickType.BLANK],
     [KeyCodes.WALL_BREAKER_CODE]: [1, ClickType.NODE],
+    [KeyCodes.WORMHOLE_CODE]: [2, ClickType.NODE],
 };
 
 interface EventParameters {
