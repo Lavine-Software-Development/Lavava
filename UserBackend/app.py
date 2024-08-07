@@ -801,7 +801,7 @@ def get_og_settings():
         "main_time": 390,
         "overtime": 90,
         "full_size": 250,
-        "accessible_percentage": 2/3,
+        "accessible_percentage": 4/7,
         "walls": False,
         'iterative_make_accessible': False,
         "starting_structures": True,

@@ -108,7 +108,7 @@ class Node(JsonableTracked):
             if effect.effect_type == EffectType.GROW:
                 inter_grow *= effect.effect(inter_grow)
             elif effect.effect_type == EffectType.GROW_CAP:
-                inter_grow *= effect.effect(inter_grow_cap)
+                inter_grow_cap *= effect.effect(inter_grow_cap)
             elif effect.effect_type == EffectType.INTAKE:
                 inter_intake *= effect.effect(inter_intake)
             elif effect.effect_type == EffectType.EXPEL:
@@ -148,7 +148,8 @@ class Node(JsonableTracked):
         return self.owner is not None and self.owner.ps.value < PSE.ELIMINATED.value
 
     def tick(self):
-        self.value = min(self.value + self.grow(), self.full_size)
+        if self.value - 10 < self.full_size:
+            self.value = min(self.value + self.grow(), self.full_size)
         self.effects_update(lambda effect: effect.count())
 
     def grow(self):
