@@ -795,7 +795,7 @@ def get_royale_settings():
 def get_og_settings():
     settings = {
         "ability_type": "credits",
-        "credit_cap": 20,
+        "credit_cap": 22,
         "growth_rate": 0.15,
         "transfer_rate": 0.012,
         "main_time": 390,
