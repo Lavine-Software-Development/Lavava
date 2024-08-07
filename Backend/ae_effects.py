@@ -136,6 +136,7 @@ def spawn_effect(data, player):
 def zombie_effect(data, player):
     node = data[0]
     if node.owner != player:
+        node.owner.count -= 1
         node.owner = player
         node.value = max(ZOMBIE_FULL_SIZE - node.value, 10)
         # nodes captured by zombie do not go to the player and thus count is by default reduced

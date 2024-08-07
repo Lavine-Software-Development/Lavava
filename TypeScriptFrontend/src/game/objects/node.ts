@@ -206,11 +206,11 @@ export class Node extends IDItem implements INode {
                 );
             }
             if (this.effects.has("over_grow")) {
-                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
+                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 2);
                 this.graphics.strokeCircle(
                     this.pos.x,
                     this.pos.y,
-                    this.size - 1
+                    this.size - 3
                 );
             }
             if (this.full) {

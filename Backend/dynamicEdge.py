@@ -30,7 +30,7 @@ class DynamicEdge(Edge):
             self.from_node = temp
 
     def valid_right_click(self, clicker):
-        return self.to_node.owner == clicker and (self.owned or self.to_node.full())
+        return self.to_node.owner == clicker and (self.owned or self.to_node.full() or self.to_node.value > self.from_node.value)
 
     def check_status(self):
         if self.dynamic and self.from_node.owner is None and self.to_node.owner is not None:

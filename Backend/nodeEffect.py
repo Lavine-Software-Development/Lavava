@@ -67,7 +67,7 @@ class OverGrown(AbstractSpreadingEffect):
         return amount * 5
     
     def can_spread(self, killed, new_owner):
-        return killed and new_owner.state_name == "default"
+        return killed
 
     def capture_removal(self, player):
         return False

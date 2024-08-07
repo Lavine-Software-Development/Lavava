@@ -30,25 +30,50 @@ export class State {
 
 export class ZombieState extends State {
     zombieSprite: Phaser.GameObjects.Image | null = null;
+    zombieText: Phaser.GameObjects.Text | null = null;
 
     constructor(name: string) {
         super(name, 0, ZOMBIE_FULL_SIZE, true);
     }
 
-    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2, owner_color) {
+    draw(scene: Phaser.Scene, size: number, pos: Phaser.Math.Vector2, owner_color: number[]) {
         if (!this.zombieSprite) {
             this.zombieSprite = scene.add.image(pos.x, pos.y, "blackSquare");
-            this.zombieSprite.setOrigin(0.5, 0.5); // Set origin to center for proper scaling
+            this.zombieSprite.setOrigin(0.5, 0.5);
         }
-        let currentScale = size / 20; // displayWidth considers current scale
+
+        if (!this.zombieText) {
+            this.zombieText = scene.add.text(pos.x, pos.y, 'Z', {
+                fontSize: '16px',
+                fontStyle: 'bold'
+            });
+            this.zombieText.setOrigin(0.5, 0.5);
+        }
+
+        let currentScale = size / 30;
         if (Math.abs(this.zombieSprite.scaleX - currentScale) > 0.01) {
-            // threshold to avoid minor changes
             this.zombieSprite.setScale(currentScale);
+            
+            // Scale the 'Z' text proportionally
+            let textScale = currentScale * 2.5; // Adjust this factor as needed
+            this.zombieText.setScale(textScale);
+
+            // Update text size to maintain readability
+            this.zombieText.setFontSize(16 * textScale);
         }
+
+        // Update position of both sprite and text
+        this.zombieSprite.setPosition(pos.x, pos.y);
+        this.zombieText.setPosition(pos.x, pos.y);
+
+        // Set the color of the 'Z' text
+        let colorString = `rgb(${owner_color[0]},${owner_color[1]},${owner_color[2]})`;
+        this.zombieText.setColor(colorString);
     }
 
     removeSprites() {
-        this.zombieSprite?.destroy()
+        this.zombieSprite?.destroy();
+        this.zombieText?.destroy();
     }
 }
 
