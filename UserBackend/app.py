@@ -1258,9 +1258,10 @@ def get_match_history(current_user):
 
 
 if __name__ == "__main__":
-    if config.ENV == "PROD":
+    port_num = 5002 if config.ENV == "STAGING" else 5001
+    if config.ENV == "PROD" or config.ENV == "STAGING":
         certfile = "fullchain.pem"
         keyfile = "privkey.pem"
-        app.run(debug=False, host="0.0.0.0", port=5001, ssl_context=(certfile, keyfile))
+        app.run(debug=False, host="0.0.0.0", port=port_num, ssl_context=(certfile, keyfile))
     else:
-        app.run(debug=False, host="0.0.0.0", port=5001)
+        app.run(debug=False, host="0.0.0.0", port=port_num)
