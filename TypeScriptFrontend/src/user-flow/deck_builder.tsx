@@ -3,6 +3,7 @@ import '../../styles/style.css';
 import config from '../env-config';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { abilityColors } from "../user-flow/ability_utils";
 
 interface Ability {
     description: string;
@@ -52,6 +53,8 @@ const DeckBuilder: React.FC = () => {
     const [error, setError] = useState("");
     const [royalAbilities, setRoyalAbilities] = useState<Ability[]>([]);
     const [deckMode, setDeckMode] = useState("Original");
+    const [deckIndex, setDeckIndex] = useState(0);
+    const [userDecks, setUserDecks] = useState([]);
 
     useEffect(() => {
         const fetchRoyaleAbilities = async () => {
@@ -140,12 +143,18 @@ const DeckBuilder: React.FC = () => {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ abilities: selectedAbilities , mode: deckMode}),
+                    body: JSON.stringify({ abilities: selectedAbilities, mode: deckMode }),
                 });
                 setShowPopup(true);
                 setTimeout(() => {
                     setShowPopup(false);
                 }, 1000);
+                // Dynamically expand the userDecks array if necessary
+                setUserDecks(prevDecks => {
+                    const newDecks = [...prevDecks];
+                    newDecks[deckIndex] = selectedAbilities;
+                    return newDecks;
+                });
             } catch (error) {
                 console.error('Error saving deck:', error);
             }
@@ -166,13 +175,15 @@ const DeckBuilder: React.FC = () => {
                 const decks = data.decks;
                 const modes = decks.map((deck: any[]) => deck[deck.length - 1]);
                 //console.log('Modes:', modes);
-                const index = modes.findIndex((mode: string) => mode === deckMode);
+                setDeckIndex(modes.findIndex((mode: string) => mode === deckMode));
 
-                const updatedDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+                setUserDecks(decks.map((deck: any[]) => deck.slice(0, -1)));
+                //console.log(userDecks);
+                //console.log(deckIndex);
 
                 //console.log('Updated Decks:', updatedDecks);
                 if (response.ok) {
-                    const userAbilities = updatedDecks[index];
+                    const userAbilities = userDecks[deckIndex];
                     const initialCounts = userAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
                         counts[ability.name] = ability.count;
                         return counts;
@@ -352,6 +363,23 @@ const DeckBuilder: React.FC = () => {
                         Deselect
                     </span>
                 </div>
+                <p>Your Deck:</p>
+                {deckMode === "Original" && (
+                    <div className="abilities-container-friendly">
+                        {userDecks[deckIndex].map((item, index) => (
+                            <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
+                            <div className="ability-icon">
+                                <img
+                                src={`./assets/abilityIcons/${item.name}.png`}
+                                alt={item.name}
+                                className="ability-img"
+                                />
+                            </div>
+                            <div className="ability-count">{item.count}</div>
+                            </div>
+                        ))}
+                    </div> 
+                )}
             </div>
             {showPopup && (
                 <div className="popup">
