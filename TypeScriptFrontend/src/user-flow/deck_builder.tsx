@@ -54,7 +54,6 @@ const DeckBuilder: React.FC = () => {
     const [royalAbilities, setRoyalAbilities] = useState<Ability[]>([]);
     const [deckMode, setDeckMode] = useState("Original");
     const [deckIndex, setDeckIndex] = useState(0);
-    const [userDecks, setUserDecks] = useState([]);
 
     useEffect(() => {
         const fetchRoyaleAbilities = async () => {
@@ -156,12 +155,6 @@ const DeckBuilder: React.FC = () => {
                 setTimeout(() => {
                     setShowPopup(false);
                 }, 1000);
-                // Dynamically expand the userDecks array if necessary
-                setUserDecks(prevDecks => {
-                    const newDecks = [...prevDecks];
-                    newDecks[deckIndex] = selectedAbilities;
-                    return newDecks;
-                });
             } catch (error) {
                 console.error('Error saving deck:', error);
             }
@@ -185,26 +178,20 @@ const DeckBuilder: React.FC = () => {
                     const decks = data.decks;
                     const modes = decks.map((deck: any[]) => deck[deck.length - 1]);
                     const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
-
-                    setUserDecks(prevDecks => {
-                        const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
-                        const userAbilities = newDecks[newDeckIndex];
-                        const initialCounts = userAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
-                            counts[ability.name] = ability.count;
-                            return counts;
-                        }, {});
-
-                        if (deckMode === "Original") {
-                            setSelectedCounts(initialCounts);
-                            sessionStorage.setItem('selectedAbilities', JSON.stringify(userAbilities));
-                        } else {
-                            setSelectedRoyaleCounts(initialCounts);
-                            sessionStorage.setItem('SelectedRoyaleAbilites', JSON.stringify(userAbilities));
-                        }
-
-                        setDeckIndex(newDeckIndex);
-                        return newDecks;
-                    });
+                    const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+                    const userAbilities = newDecks[newDeckIndex];
+                    const initialCounts = userAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
+                        counts[ability.name] = ability.count;
+                        return counts;
+                    }, {});
+                    if (deckMode === "Original") {
+                        setSelectedCounts(initialCounts);
+                        sessionStorage.setItem('selectedAbilities', JSON.stringify(userAbilities));
+                    } else {
+                        setSelectedRoyaleCounts(initialCounts);
+                        sessionStorage.setItem('SelectedRoyaleAbilites', JSON.stringify(userAbilities));
+                    }
+                    setDeckIndex(newDeckIndex);
                 } else {
                     throw new Error(data.message);
                 }
