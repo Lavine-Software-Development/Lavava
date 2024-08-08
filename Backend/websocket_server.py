@@ -200,5 +200,5 @@ class WebSocketServer():
 
 if __name__ == "__main__":
     port_number = 5554 if config.ENV == 'STAGING' else 5553
-    server = WebSocketServer(5553)
+    server = WebSocketServer(port_number)
     server.run()
