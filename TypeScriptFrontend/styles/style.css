@@ -301,10 +301,12 @@ input::placeholder {
     border-radius: 5px;
     cursor: pointer;
     position: relative;
+    min-height: 135px;
 }
 
 .ability-button.selected {
     background-color: #e0e0e0;
+    border-color: #999;
 }
 
 .ability-name {
@@ -907,7 +909,7 @@ ul {
 .button-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 60px;
+    margin-top: 10px;
     width: 100%;
 }
 
@@ -1154,4 +1156,38 @@ ul {
 
 .match-history-title {
     margin: 5px 0;
+}
+
+.tab-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #f1f3f4;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: #e8eaed;
+}
+
+.tab-button.active {
+    background-color: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#deck-builder-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 800px;
+    box-sizing: border-box;
 }

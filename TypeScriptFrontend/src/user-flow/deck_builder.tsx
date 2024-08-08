@@ -131,9 +131,16 @@ const DeckBuilder: React.FC = () => {
         setError("");
         const token = localStorage.getItem('userToken');
         if (token) {
-            const selectedAbilities = Object.entries(selectedCounts)
-                .filter(([, count]) => count > 0)
-                .map(([name, count]) => ({ name, count }));
+            let selectedAbilities;
+            if (deckMode === "Original") {
+                selectedAbilities = Object.entries(selectedCounts)
+                    .filter(([, count]) => count > 0)
+                    .map(([name, count]) => ({ name, count }));
+            } else {
+                selectedAbilities = Object.entries(selectedRoyaleCounts)
+                    .filter(([, count]) => count > 0)
+                    .map(([name, count]) => ({ name, count }));
+            }
 
             try {
                 // Make a dummy backend call to save the user's deck
@@ -160,6 +167,9 @@ const DeckBuilder: React.FC = () => {
             }
         }
     };
+    useEffect(() => {
+        handleResetDeck();
+    }, [deckMode]);
 
     const handleResetDeck = async () => {
         const token = localStorage.getItem('userToken');
@@ -171,25 +181,30 @@ const DeckBuilder: React.FC = () => {
                     },
                 });
                 const data = await response.json();
-                //console.log(data);
-                const decks = data.decks;
-                const modes = decks.map((deck: any[]) => deck[deck.length - 1]);
-                //console.log('Modes:', modes);
-                setDeckIndex(modes.findIndex((mode: string) => mode === deckMode));
-
-                setUserDecks(decks.map((deck: any[]) => deck.slice(0, -1)));
-                //console.log(userDecks);
-                //console.log(deckIndex);
-
-                //console.log('Updated Decks:', updatedDecks);
                 if (response.ok) {
-                    const userAbilities = userDecks[deckIndex];
-                    const initialCounts = userAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
-                        counts[ability.name] = ability.count;
-                        return counts;
-                    }, {});
-                    setSelectedCounts(initialCounts);
-                    sessionStorage.setItem('selectedAbilities', JSON.stringify(userAbilities));
+                    const decks = data.decks;
+                    const modes = decks.map((deck: any[]) => deck[deck.length - 1]);
+                    const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+
+                    setUserDecks(prevDecks => {
+                        const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+                        const userAbilities = newDecks[newDeckIndex];
+                        const initialCounts = userAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
+                            counts[ability.name] = ability.count;
+                            return counts;
+                        }, {});
+
+                        if (deckMode === "Original") {
+                            setSelectedCounts(initialCounts);
+                            sessionStorage.setItem('selectedAbilities', JSON.stringify(userAbilities));
+                        } else {
+                            setSelectedRoyaleCounts(initialCounts);
+                            sessionStorage.setItem('SelectedRoyaleAbilites', JSON.stringify(userAbilities));
+                        }
+
+                        setDeckIndex(newDeckIndex);
+                        return newDecks;
+                    });
                 } else {
                     throw new Error(data.message);
                 }
@@ -289,50 +304,53 @@ const DeckBuilder: React.FC = () => {
             return newCounts;
         });
     };
-    
-    
+
+    const getCurrentSelections = () => {
+        if (deckMode === "Original") {
+            return Object.entries(selectedCounts)
+                .filter(([, count]) => count > 0)
+                .map(([name, count]) => ({ name, count }));
+        } else {
+            return Object.entries(selectedRoyaleCounts)
+                .filter(([, count]) => count > 0)
+                .map(([name, count]) => ({ name, count }));
+        }
+    };
 
     return (
         <div className="container" id="deck-builder-container">
             <h1>Deck Builder</h1>
-            <p>Original</p>
-            <div className="ability-grid">
-                {abilities.map((ability, index) => (
-                    <button
-                        key={index}
-                        className={`ability-button ${selectedCounts[ability.name] > 0 ? 'selected' : ''}`}
-                        onClick={() => handleButtonClick(ability.name, true)}
-                        data-tooltip={ability.description}
-                        onContextMenu={(e) => {
-                            e.preventDefault();
-                            handleButtonClick(ability.name, false);
-                        }}
-                    >
-                        <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
-                        style={{ width: '70%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
-                        <div className="ability-name">{ability.name}</div>
-                        <div className="ability-cost">Cost: {ability.cost}</div>
-                        <div className="ability-count">{selectedCounts[ability.name] || 0}</div>
-                    </button>
-                ))}
+            <div className="tab-container">
+                <button 
+                    className={`tab-button ${deckMode === "Original" ? "active" : ""}`}
+                    onClick={() => setDeckMode("Original")}
+                >
+                    Original
+                </button>
+                <button 
+                    className={`tab-button ${deckMode === "Royale" ? "active" : ""}`}
+                    onClick={() => setDeckMode("Royale")}
+                >
+                    Royale
+                </button>
             </div>
-            <p>Royale</p>
             <div className="ability-grid">
-                {royalAbilities.map((ability, index) => (
+                {(deckMode === "Original" ? abilities : royalAbilities).map((ability, index) => (
                     <button
                         key={index}
-                        className={`ability-button ${selectedRoyaleCounts[ability.name] > 0 ? 'selected' : ''}`}
-                        onClick={() => handleRoyaleButtonClick(ability.name, true)}
+                        className={`ability-button ${(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] > 0 ? 'selected' : ''}`}
+                        onClick={() => deckMode === "Original" ? handleButtonClick(ability.name, true) : handleRoyaleButtonClick(ability.name, true)}
                         data-tooltip={ability.description}
                         onContextMenu={(e) => {
                             e.preventDefault();
-                            handleRoyaleButtonClick(ability.name, false);
+                            deckMode === "Original" ? handleButtonClick(ability.name, false) : handleRoyaleButtonClick(ability.name, false);
                         }}
                     >
                         <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
                         style={{ width: '70%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
                         <div className="ability-name">{ability.name}</div>
-                        <div className="ability-count">{selectedRoyaleCounts[ability.name] || 0}</div>
+                        {deckMode === "Original" && <div className="ability-cost">Cost: {ability.cost}</div>}
+                        <div className="ability-count">{(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] || 0}</div>
                     </button>
                 ))}
             </div>
@@ -364,22 +382,24 @@ const DeckBuilder: React.FC = () => {
                     </span>
                 </div>
                 <p>Your Deck:</p>
-                {deckMode === "Original" && (
-                    <div className="abilities-container-friendly">
-                        {userDecks[deckIndex].map((item, index) => (
+                <div className="abilities-container-friendly">
+                    {getCurrentSelections().length > 0 ? (
+                        getCurrentSelections().map((item, index) => (
                             <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
-                            <div className="ability-icon">
-                                <img
-                                src={`./assets/abilityIcons/${item.name}.png`}
-                                alt={item.name}
-                                className="ability-img"
-                                />
+                                <div className="ability-icon">
+                                    <img
+                                        src={`./assets/abilityIcons/${item.name}.png`}
+                                        alt={item.name}
+                                        className="ability-img"
+                                    />
+                                </div>
+                                <div className="ability-count">{item.count}</div>
                             </div>
-                            <div className="ability-count">{item.count}</div>
-                            </div>
-                        ))}
-                    </div> 
-                )}
+                        ))
+                    ) : (
+                        <p>No abilities selected for {deckMode} mode</p>
+                    )}
+                </div>
             </div>
             {showPopup && (
                 <div className="popup">
