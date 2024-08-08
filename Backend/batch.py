@@ -10,7 +10,11 @@ from config import config
 from dotenv import load_dotenv
 
 load_dotenv()
-
+USER_BACKEND = config.USER_BACKEND_LOCAL_URL
+if (config.ENV == 'PROD'):
+    USER_BACKEND = config.USER_BACKEND_URL
+elif (config.ENV == 'STAGING'):
+    USER_BACKEND = config.USER_BACKEND_STAGING_URL
 class Batch:
     def __init__(self, count, competitive, mode, token, websocket, ability_data):
         self.full_tick_count = 0
@@ -30,7 +34,7 @@ class Batch:
         self.tick_dict = dict()
 
     def getSettings(self):
-        url = config.USER_BACKEND_URL + 'settings/' + self.mode
+        url = USER_BACKEND + 'settings/' + self.mode
         try:
             return requests.get(url).json()
         except Exception as e:
@@ -52,7 +56,7 @@ class Batch:
         connection_ranks = [item[0] for item in sorted(connection_ranks, key=lambda x: x[1])]
         # this ends up as player token, player id, in order of rank
 
-        url = config.USER_BACKEND_URL + '/save_game'
+        url = USER_BACKEND + '/save_game'
         # url = 'http://172.17.0.2:5001/elo' comment out for local testing
         data = {"ordered_players": connection_ranks}
         try:
@@ -75,7 +79,7 @@ class Batch:
 
     def set_token_to_display_name(self, token):
         # url = 'http://localhost:5001/get_display_name'
-        url = config.USER_BACKEND_URL + '/get_display_name'
+        url = USER_BACKEND + '/get_display_name'
         data = {"token": token}
         response = requests.post(url, json=data)
 
