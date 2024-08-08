@@ -148,7 +148,7 @@ class Node(JsonableTracked):
         return self.owner is not None and self.owner.ps.value < PSE.ELIMINATED.value
 
     def tick(self):
-        if self.value - 10 < self.full_size:
+        if self.value - 10 < self.full_size or self.grow_multiplier < 0:
             self.value = min(self.value + self.grow(), self.full_size)
         self.effects_update(lambda effect: effect.count())
 
