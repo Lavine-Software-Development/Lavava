@@ -7,7 +7,6 @@ import signal
 import ssl 
 import logging
 from config import config
-# Configure logging 
 # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
