@@ -113,4 +113,4 @@ jobs:
             sudo docker pull akashilangovan/userbackend:staging
             sudo docker stop userbackend_staging || true
             sudo docker rm userbackend_staging || true
-            sudo docker run -e ENV=STAGING -e MJ_APIKEY_PUBLIC=${{ secrets.STAGING_MJ_APIKEY_PUBLIC }} -e MJ_APIKEY_PRIVATE=${{ secrets.STAGING_MJ_APIKEY_PRIVATE }} -d -p 5002:5002 -v /home/ec2-user/staging_game_data:/app/game_data --name userbackend_staging akashilangovan/userbackend:staging
+            sudo docker run -e ENV=STAGING -e MJ_APIKEY_PUBLIC=${{ secrets.MJ_APIKEY_PUBLIC }} -e MJ_APIKEY_PRIVATE=${{ secrets.MJ_APIKEY_PRIVATE }} -d -p 5002:5002 -v /home/ec2-user/staging_game_data:/app/game_data --name userbackend_staging akashilangovan/userbackend:staging
