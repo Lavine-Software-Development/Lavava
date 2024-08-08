@@ -21,6 +21,7 @@ export const Colors = {
     DARK_PINK: [255, 0, 127] as const,
     LIGHT_BLUE: [173, 216, 230] as const,
     BROWN: [150, 75, 0] as const,
+    LIGHT_BROWN: [205, 133, 63] as const,
     DARK_GRAY: [64, 64, 64] as const,
     DARK_RED: [139, 0, 0] as const,
 };
@@ -50,7 +51,7 @@ export const KeyCodes = {
     MINI_BRIDGE_CODE: 109,
     WORMHOLE_CODE: 119,
     OVER_GROW_CODE: 111,
-    WALL_BREAKER_CODE: 118,
+    WALL_CODE: 118,
 };
 
 export const attackCodes = [KeyCodes.NUKE_CODE, KeyCodes.POISON_CODE, KeyCodes.ZOMBIE_CODE];
@@ -91,14 +92,14 @@ export const NameToCode = {
     "Mini-Bridge": KeyCodes.MINI_BRIDGE_CODE,
     "Wormhole": KeyCodes.WORMHOLE_CODE,
     "Over-Grow": KeyCodes.OVER_GROW_CODE,
-    "Wall-Breaker": KeyCodes.WALL_BREAKER_CODE,
+    "Wall": KeyCodes.WALL_CODE,
 };
 
 export const AbilityElixir = {
     [KeyCodes.FREEZE_CODE]: 2,
     [KeyCodes.MINI_BRIDGE_CODE]: 2,
     [KeyCodes.D_BRIDGE_CODE]: 3,
-    [KeyCodes.WALL_BREAKER_CODE]: 3,
+    [KeyCodes.WALL_CODE]: 3,
     [KeyCodes.BRIDGE_CODE]: 4,
     [KeyCodes.OVER_GROW_CODE]: 4,
     [KeyCodes.RAGE_CODE]: 5,

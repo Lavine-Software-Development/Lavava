@@ -81,9 +81,12 @@ class Edge(JsonableTracked):
 
     def spread_effects(self, killed):
         for key, effect in self.from_node.effects.items():
-            if key not in self.to_node.effects and effect.past_incubation:
-                if effect.can_spread(killed, self.to_node.owner):
-                    self.to_node.set_state(effect.spread_key(key), effect.spread())
+            if key not in self.to_node.effects and effect.past_incubation and effect.can_spread(killed, self.to_node.owner):
+                self.to_node.set_state(effect.spread_key(key), effect.spread())
+
+        for key, effect in self.to_node.effects.items():
+            if effect.back_spread and key not in self.from_node.effects and effect.past_incubation and effect.can_spread(False, self.from_node.owner):
+                    self.from_node.set_state(effect.spread_key(key), effect.spread())
 
     def check_status(self):
         pass

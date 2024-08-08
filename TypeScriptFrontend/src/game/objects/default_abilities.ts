@@ -22,7 +22,7 @@ const CANNON_V = createAbilityVisual("Cannon", Colors.GREY, "E");
 const PUMP_V = createAbilityVisual("Pump", Colors.DARK_PURPLE, "U");
 const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", Colors.YELLOW, "M");
 const OVER_GROW_V = createAbilityVisual("Over-Grow", Colors.DARK_GREEN);
-const WALL_BREAKER_V = createAbilityVisual("Wall-Breaker", Colors.DARK_RED, "V");
+const WALL_V = createAbilityVisual("Wall", Colors.LIGHT_BROWN, "V");
 const WORMHOLE_V = createAbilityVisual("Wormhole", Colors.DARK_PINK, "W");
 
 // Create instances of EventVisual using the factory function
@@ -52,7 +52,7 @@ export const VISUALS: EventVisualParameters = {
     [KeyCodes.PUMP_CODE]: PUMP_V,
     [KeyCodes.MINI_BRIDGE_CODE]: MINI_BRIDGE_V,
     [KeyCodes.OVER_GROW_CODE]: OVER_GROW_V,
-    [KeyCodes.WALL_BREAKER_CODE]: WALL_BREAKER_V,
+    [KeyCodes.WALL_CODE]: WALL_V,
     [KeyCodes.WORMHOLE_CODE]: WORMHOLE_V,
 
     [EventCodes.CANNON_SHOT_CODE]: CANNON_SHOT_V,
@@ -82,7 +82,7 @@ export const CLICKS: ClickParameters = {
     [KeyCodes.CANNON_CODE]: [1, ClickType.NODE],
     [KeyCodes.PUMP_CODE]: [1, ClickType.NODE],
     [KeyCodes.OVER_GROW_CODE]: [0, ClickType.BLANK],
-    [KeyCodes.WALL_BREAKER_CODE]: [1, ClickType.NODE],
+    [KeyCodes.WALL_CODE]: [1, ClickType.NODE],
     [KeyCodes.WORMHOLE_CODE]: [2, ClickType.NODE],
 };
 

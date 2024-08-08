@@ -17,8 +17,9 @@ class AbstractEffect(ABC):
 
 class AbstractSpreadingEffect(AbstractEffect):
 
-    def __init__(self, expiry_time, effect_type, incubation_timer=0):
+    def __init__(self, expiry_time, effect_type, back_spread, incubation_timer=0):
         super().__init__(expiry_time, effect_type)
+        self.back_spread = back_spread
         self.incubation_timer = incubation_timer
 
     @property

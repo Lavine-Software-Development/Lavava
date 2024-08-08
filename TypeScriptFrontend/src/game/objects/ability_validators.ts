@@ -9,7 +9,7 @@ import {
     MINI_BRIDGE_RANGE,
 } from "./constants";
 import { ValidationFunction as ValidatorFunc, Point } from "./types";
-import { Node } from "./node";
+import { Node, WallNode } from "./node";
 import { Edge } from "./edge";
 import { AbstractAbility, CreditAbility } from "./ReloadAbility";
 
@@ -29,6 +29,11 @@ function noClick(data: IDItem[]): boolean {
 function ownedBurnableNode(data: IDItem[]): boolean {
     const node = data[0] as Node;
     return node.owner != null && burnableNode(data);
+}
+
+function nonWallNode(data: IDItem[]): boolean {
+    const node = data[0] as WallNode;
+    return node.wall_count === 0;
 }
 
 // Option for improved Burn, allowing preemptive burns before a node is owned
@@ -337,6 +342,7 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
+        [KeyCodes.WALL_CODE]: nonWallNode,
         [KeyCodes.WORMHOLE_CODE]: (data: IDItem[]) => wormholeValidator(data, player, getEdges),
     };
 

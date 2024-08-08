@@ -23,7 +23,7 @@ from constants import (
     PUMP_CODE,
     CREDIT_USAGE_CODE,
     STRUCTURE_RANGES,
-    WALL_BREAKER_CODE,
+    WALL_CODE,
     WORMHOLE_CODE,
 )
 
@@ -37,9 +37,9 @@ def owned_burnable_node(data):
     return node.owner is not None and burnable_node(data)
 
 
-def walled_node(data):
+def non_walled_node(data):
     node = data[0]
-    return node.wall_count > 0
+    return node.wall_count == 0
 
 
 # option for slightly improved burn, allowing preemptive burns before ownership
@@ -67,11 +67,16 @@ def standard_node_attack(data, player):
 
 def attack_validators(get_structures, player, attack_type):
     def structure_ranged_default_attack(data):
-        return default_node(data) and (structure_ranged_node_attack(data) or not_attacking_neighbor_or_owner_attack(data))
+        return default_node(data) and (
+            structure_ranged_node_attack(data)
+            or not_attacking_neighbor_or_owner_attack(data)
+        )
 
     def opposing_structure_ranged_attack(data):
         node = data[0]
-        return node.owner != player and (structure_ranged_node_attack(data) or not_attacking_neighbor_attack(data))
+        return node.owner != player and (
+            structure_ranged_node_attack(data) or not_attacking_neighbor_attack(data)
+        )
 
     def structure_ranged_node_attack(data):
         node = data[0]
@@ -87,10 +92,10 @@ def attack_validators(get_structures, player, attack_type):
             return distance <= structure_attack_range
 
         return any(in_structure_range(structure) for structure in structures)
-    
+
     def not_attacking_edge(edge):
         return edge.from_node == player or not edge.flowing
-    
+
     def not_attacking_neighbor_attack(data):
         node = data[0]
         if node.owner == player:
@@ -99,7 +104,7 @@ def attack_validators(get_structures, player, attack_type):
             if edge.opposite(node).owner == player and not_attacking_edge(edge):
                 return True
         return False
-    
+
     def neighbor_attack(data):
         node = data[0]
         if node.owner == player:
@@ -112,7 +117,7 @@ def attack_validators(get_structures, player, attack_type):
     def neighbor_or_owner_attack(data):
         node = data[0]
         return node.owner == player or neighbor_attack(data)
-    
+
     def not_attacking_neighbor_or_owner_attack(data):
         node = data[0]
         return node.owner == player or not_attacking_neighbor_attack(data)
@@ -291,7 +296,7 @@ def make_ability_validators(board, player, settings):
             BURN_CODE: owned_burnable_node,
             RAGE_CODE: no_click,
             OVER_GROW_CODE: no_click,
-            WALL_BREAKER_CODE: walled_node,
+            WALL_CODE: non_walled_node,
         }
         | validators_needing_player(player)
         | make_new_edge_ports(

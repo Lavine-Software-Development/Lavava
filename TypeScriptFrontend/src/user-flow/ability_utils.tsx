@@ -15,7 +15,7 @@ export const abilityColors: { [key: string]: string } = {
     "Pump": `rgb(${Colors.DARK_PURPLE.slice().join(', ')})`,
     "Mini-Bridge": `rgb(${Colors.YELLOW.slice().join(', ')})`,
     "Over-Grow": `rgb(${Colors.DARK_GREEN.slice().join(', ')})`,
-    "Wall-Breaker": `rgb(${Colors.DARK_RED.slice().join(', ')})`,
+    "Wall": `rgb(${Colors.LIGHT_BROWN.slice().join(', ')})`,
     "Wormhole": `rgb(${Colors.DARK_PINK.slice().join(', ')})`,
 };
 
