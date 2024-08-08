@@ -6,7 +6,7 @@ import json
 import signal
 import ssl 
 import logging
-
+from config import config
 # Configure logging 
 # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -200,5 +200,6 @@ class WebSocketServer():
         asyncio.get_event_loop().stop()
 
 if __name__ == "__main__":
+    port_number = 5554 if config.ENV == 'STAGING' else 5553
     server = WebSocketServer(5553)
     server.run()
