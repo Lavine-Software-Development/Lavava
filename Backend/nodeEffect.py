@@ -19,7 +19,7 @@ class Poisoned(AbstractSpreadingEffect):
         return self.originator != new_owner
 
     def effect(self, amount):
-        return amount * -1
+        return amount * -2
     
     def spread(self):
         return (self.originator, self.length - self.counter)
