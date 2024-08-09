@@ -183,7 +183,7 @@ const DeckBuilder: React.FC = () => {
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    const fetchedDecks: any[][] = data.decks;
+                    const fetchedDecks: any[][] = data.decks || [];
                     const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
                     const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
                     const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
@@ -194,7 +194,8 @@ const DeckBuilder: React.FC = () => {
                     throw new Error(data.message);
                 }
             } catch (error) {
-                console.error('Error resetting deck:', error);
+                console.error('Error fetching decks:', error);
+                setUsersDecks([]); // Set to empty array in case of error
             }
         }
     };
@@ -372,21 +373,25 @@ const DeckBuilder: React.FC = () => {
                 </div>
                 <h2 style={{ marginTop: '20px' }}>Your {deckMode} Mode Deck:</h2>
                 <div className="abilities-container-friendly">
-                {usersDecks[deckIndex].length > 0 ? (
-                    usersDecks[deckIndex].map((item: { name: string; count: number }, index: number) => (
-                        <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name], width: '100px', height: '100px' }}>
-                            <div className="ability-icon">
-                                <img
-                                    src={`./assets/abilityIcons/${item.name}.png`}
-                                    alt={item.name}
-                                    className="ability-img"
-                                />
+                {usersDecks && usersDecks[deckIndex] ? (
+                    usersDecks[deckIndex].length > 0 ? (
+                        usersDecks[deckIndex].map((item: { name: string; count: number }, index: number) => (
+                            <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name], width: '100px', height: '100px' }}>
+                                <div className="ability-icon">
+                                    <img
+                                        src={`./assets/abilityIcons/${item.name}.png`}
+                                        alt={item.name}
+                                        className="ability-img"
+                                    />
+                                </div>
+                                <div className="ability-count" style={{fontSize: '1.2rem'}}>{item.count}</div>
                             </div>
-                            <div className="ability-count" style={{fontSize: '1.2rem'}}>{item.count}</div>
-                        </div>
-                    ))
+                        ))
+                    ) : (
+                        <p>You have no saved abilities for {deckMode} mode</p>
+                    )
                 ) : (
-                    <p>You have no saved abilities for {deckMode} mode</p>
+                    <p>Loading your deck...</p>
                 )}
                 </div>
             </div>
