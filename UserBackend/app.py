@@ -37,7 +37,7 @@ EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
 if config.DB_CONNECTED:
     db_path = os.path.join("/app/game_data", "game.db")
-    if config.ENV == "PROD":
+    if config.ENV == "PROD" or config.ENV == "STAGING":
         app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
     else:
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///game.db"
