@@ -947,26 +947,42 @@ def get_og_settings():
 @app.route("/abilities/Royale", methods=["GET"])
 def get_royale_abilities():
     abilities = [
-        {"name": "Bridge", "cost": 4, "description": "Create a one-way bridge"},
-        {"name": "D-Bridge", "cost": 3, "description": "Create a two-way bridge with"},
-        {"name": "Freeze", "cost": 2, "description": "Convert edge to one-way"},
-        {"name": "Rage", "cost": 5, "description": "Increase energy transfer speed"},
         {
-            "name": "Nuke",
-            "cost": 6,
-            "description": "Destroy nearby dot and its bridges",
-        },
-        {
-            "name": "Over-Grow",
-            "cost": 4,
+            "name": "D-Bridge", 
+            "cost": 3,
+            "description": "Create a two-way bridge with"
         },
         {
             "name": "Wall",
             "cost": 3,
         },
         {
+            "name": "Over-Grow",
+            "cost": 3,
+        },
+        {
+            "name": "Freeze", 
+            "cost": 2,
+            "description": "Convert edge to one-way"
+            
+        },
+        {
+            "name": "Bridge", 
+            "cost": 4,
+        },
+        {
             "name": "Poison",
             "cost": 5,
+        },
+        {
+            "name": "Rage", 
+            "cost": 5,
+            "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "Nuke",
+            "cost": 6,
+            "description": "Destroy nearby dot and its bridges",
         },
     ]
     return jsonify({"abilities": abilities, "options": 6})
