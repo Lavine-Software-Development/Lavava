@@ -25,13 +25,23 @@ from flask import render_template
 load_dotenv()
 
 app = Flask(__name__, static_url_path="/static", static_folder="static")
+
 CORS(
     app,
-    #TODO: fix this
-    # origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"],
-    origins='*',
-    allow_headers=["Content-Type"],
+    origins=[
+        'https://www.durb.ca',
+        'http://localhost:8080',
+        'http://localhost:8081',
+        'https://localhost:8080',
+        'https://localhost:8081',
+        # For Vercel preview URLs, we need to use a regex pattern
+        r'https://lavava-[a-z0-9]{8}-durb-477e2271\.vercel\.app'
+    ],
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+    supports_credentials=True
 )
+
 app.config["SECRET_KEY"] = "your_secret_key"
 
 EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
@@ -148,28 +158,25 @@ def token_required(f):
 
     return decorated
 
-
 @app.after_request
 def after_request(response):
-    # Get the origin of the request
     origin = request.headers.get("Origin")
 
-    # List of allowed origins
-    allowed_origins = [
-        "https://www.durb.ca",
-        "https://localhost:8080",
-        "https://localhost:8081",
+    allowed_patterns = [
+        r'^https://www\.durb\.ca$',
+        r'^https?://localhost(:\d+)?$',
+        r'^https://lavava-[a-z0-9]{8}-durb-477e2271\.vercel\.app$'
     ]
 
-    # Add CORS headers only if the request's origin is in the allowed list
-    # if origin in allowed_origins:
-    response.headers.add("Access-Control-Allow-Origin", origin)
-    response.headers.add(
-        "Access-Control-Allow-Headers", "Content-Type,Authorization"
-    )
-    response.headers.add(
-        "Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE"
-    )
+    if origin and any(re.match(pattern, origin) for pattern in allowed_patterns):
+        response.headers.add("Access-Control-Allow-Origin", origin)
+        response.headers.add(
+            "Access-Control-Allow-Headers", "Content-Type,Authorization"
+        )
+        response.headers.add(
+            "Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE"
+        )
+        response.headers.add("Access-Control-Allow-Credentials", "true")
 
     return response
 
