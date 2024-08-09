@@ -52,12 +52,15 @@ const DeckBuilder: React.FC = () => {
     const [salary, setSalary] = useState(0); 
     const [error, setError] = useState("");
     const [royalAbilities, setRoyalAbilities] = useState<Ability[]>([]);
-    const [deckMode, setDeckMode] = useState("Original");
-    const [deckIndex, setDeckIndex] = useState(0);
-
+    const [deckMode, setDeckMode] = useState<string>("Original");
+    const [deckIndex, setDeckIndex] = useState<number>(0);
+    const [usersDecks, setUsersDecks] = useState<any[][]>([]);
+    const [decks, setDecks] = useState<any[][]>([]);
+    
     useEffect(() => {
         const fetchRoyaleAbilities = async () => {
             if (isTokenValid === false) return;
+            handleGetDecks();
             try {
                 const response = await fetch(`${config.userBackend}/abilities/Royale`);
                 const data = await response.json();
@@ -82,15 +85,6 @@ const DeckBuilder: React.FC = () => {
                 if (response.ok) {
                     setAbilities(data.abilities);
                     setInitialSalary(data.salary);
-                    const storedAbilities = sessionStorage.getItem('selectedAbilities');
-                    if (storedAbilities) {
-                        const parsedAbilities = JSON.parse(storedAbilities);
-                        const initialCounts = parsedAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
-                            counts[ability.name] = ability.count;
-                            return counts;
-                        }, {});
-                        setSelectedCounts(initialCounts);
-                    }
                 } else {
                     throw new Error(data.message);
                 }
@@ -98,7 +92,6 @@ const DeckBuilder: React.FC = () => {
                 console.error('Error fetching abilities:', error);
             }
         };
-
         fetchAbilities();
     }, []);
 
@@ -121,8 +114,6 @@ const DeckBuilder: React.FC = () => {
             counts[ability.name] = 0;
             return counts;
         }, {}));
-        sessionStorage.setItem('selectedAbilities', JSON.stringify({ abilities: [] }));
-        sessionStorage.setItem('SelectedRoyaleAbilites', JSON.stringify({ abilities: [] }));
         setSalary(abilities.reduce((total, ability) => total + (ability.cost * 0), salary)); // Reset salary to full amount
     };
 
@@ -155,16 +146,33 @@ const DeckBuilder: React.FC = () => {
                 setTimeout(() => {
                     setShowPopup(false);
                 }, 1000);
+                handleGetDecks();
             } catch (error) {
                 console.error('Error saving deck:', error);
             }
         }
     };
-    useEffect(() => {
-        handleResetDeck();
-    }, [deckMode]);
 
-    const handleResetDeck = async () => {
+    useEffect(() => {
+        handleMyDeck();
+    }, [deckMode]);
+    
+    const handleMyDeck = () => {
+        if (!decks || decks.length === 0) {
+            console.warn('Decks is empty or undefined');
+            return;
+        }
+    
+        const modes = decks.map((deck: any[]) => (deck && deck.length > 0 ? deck[deck.length - 1] : undefined));
+        const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+        const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+    
+        setDeckIndex(newDeckIndex);
+        setUsersDecks(newDecks);
+    };
+    
+
+    const handleGetDecks = async () => {
         const token = localStorage.getItem('userToken');
         if (token) {
             try {
@@ -175,23 +183,13 @@ const DeckBuilder: React.FC = () => {
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    const decks = data.decks;
-                    const modes = decks.map((deck: any[]) => deck[deck.length - 1]);
+                    const fetchedDecks: any[][] = data.decks;
+                    const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
                     const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
-                    const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
-                    const userAbilities = newDecks[newDeckIndex];
-                    const initialCounts = userAbilities.reduce((counts: { [key: string]: number }, ability: { name: string; count: number }) => {
-                        counts[ability.name] = ability.count;
-                        return counts;
-                    }, {});
-                    if (deckMode === "Original") {
-                        setSelectedCounts(initialCounts);
-                        sessionStorage.setItem('selectedAbilities', JSON.stringify(userAbilities));
-                    } else {
-                        setSelectedRoyaleCounts(initialCounts);
-                        sessionStorage.setItem('SelectedRoyaleAbilites', JSON.stringify(userAbilities));
-                    }
+                    const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
                     setDeckIndex(newDeckIndex);
+                    setUsersDecks(newDecks);
+                    setDecks(fetchedDecks);
                 } else {
                     throw new Error(data.message);
                 }
@@ -235,13 +233,6 @@ const DeckBuilder: React.FC = () => {
                 ...prevCounts,
                 [abilityName]: newCount
             };
-    
-            // Update session storage
-            const selectedAbilities = Object.entries(newCounts)
-                .filter(([, count]) => count > 0)
-                .map(([name, count]) => ({ name, count }));
-            sessionStorage.setItem('selectedAbilities', JSON.stringify(selectedAbilities));
-    
             return newCounts;
         });
     };
@@ -281,13 +272,6 @@ const DeckBuilder: React.FC = () => {
                 ...prevCounts,
                 [abilityName]: newCount
             };
-    
-            // Update session storage
-            const selectedAbilities = Object.entries(newCounts)
-                .filter(([, count]) => count > 0)
-                .map(([name, count]) => ({ name, count }));
-            sessionStorage.setItem('selectedRoyaleAbilities', JSON.stringify(selectedAbilities));
-    
             return newCounts;
         });
     };
@@ -347,7 +331,6 @@ const DeckBuilder: React.FC = () => {
                     {localStorage.getItem('userToken') && (
                         <>
                             <button className="custom-button save-button" data-tooltip="Update your default deck" onClick={handleSaveDeck}>Save</button>
-                            <button className="custom-button my-deck-button" data-tooltip="Use your default deck" onClick={handleResetDeck}>My Deck</button>
                         </>
                     )}
                 </div>
@@ -388,6 +371,24 @@ const DeckBuilder: React.FC = () => {
                     )}
                 </div>
                 <h2 style={{ marginTop: '20px' }}>Your {deckMode} Mode Deck:</h2>
+                <div className="abilities-container-friendly">
+                {usersDecks[deckIndex].length > 0 ? (
+                    usersDecks[deckIndex].map((item: { name: string; count: number }, index: number) => (
+                        <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name], width: '100px', height: '100px' }}>
+                            <div className="ability-icon">
+                                <img
+                                    src={`./assets/abilityIcons/${item.name}.png`}
+                                    alt={item.name}
+                                    className="ability-img"
+                                />
+                            </div>
+                            <div className="ability-count" style={{fontSize: '1.2rem'}}>{item.count}</div>
+                        </div>
+                    ))
+                ) : (
+                    <p>You have no saved abilities for {deckMode} mode</p>
+                )}
+                </div>
             </div>
             {showPopup && (
                 <div className="popup">
