@@ -27,6 +27,7 @@ load_dotenv()
 app = Flask(__name__, static_url_path="/static", static_folder="static")
 CORS(
     app,
+    #TODO: fix this
     # origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"],
     origins='*',
     allow_headers=["Content-Type"],
