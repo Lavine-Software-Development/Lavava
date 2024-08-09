@@ -334,7 +334,7 @@ const DeckBuilder: React.FC = () => {
                         }}
                     >
                         <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
-                        style={{ width: '70%', height: '50%', objectFit: 'contain', marginBottom: '15%'}}/>
+                        style={{ width: '70%', height: 'auto', marginBottom: '15%' }}/>
                         <div className="ability-name">{ability.name}</div>
                         {deckMode === "Original" && <div className="ability-cost">Cost: {ability.cost}</div>}
                         <div className="ability-count">{(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] || 0}</div>
@@ -368,11 +368,11 @@ const DeckBuilder: React.FC = () => {
                         Deselect
                     </span>
                 </div>
-                <p>Your Deck:</p>
+                <h2 style={{ marginTop: '20px' }}>Selected abilities:</h2>
                 <div className="abilities-container-friendly">
                     {getCurrentSelections().length > 0 ? (
                         getCurrentSelections().map((item, index) => (
-                            <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
+                            <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] , width: '100px', height: '100px'}}>
                                 <div className="ability-icon">
                                     <img
                                         src={`./assets/abilityIcons/${item.name}.png`}
@@ -380,13 +380,14 @@ const DeckBuilder: React.FC = () => {
                                         className="ability-img"
                                     />
                                 </div>
-                                <div className="ability-count">{item.count}</div>
+                                <div className="ability-count" style={{fontSize: '1.2rem'}}>{item.count}</div>
                             </div>
                         ))
                     ) : (
                         <p>No abilities selected for {deckMode} mode</p>
                     )}
                 </div>
+                <h2 style={{ marginTop: '20px' }}>Your {deckMode} Mode Deck:</h2>
             </div>
             {showPopup && (
                 <div className="popup">

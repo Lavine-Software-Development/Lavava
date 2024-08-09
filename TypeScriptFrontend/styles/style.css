@@ -285,9 +285,8 @@ input::placeholder {
 
 .ability-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); /* Changed from 4 to 5 */
+    grid-template-columns: repeat(5, 1fr); 
     gap: 10px;
-    /* margin-top: 20px; Add some space below the title */
 }
 
 .ability-button {
@@ -297,7 +296,7 @@ input::placeholder {
     justify-content: center;
     padding: 10px;
     background-color: #f0f0f0;
-    border: none;
+    border: 2px solid transparent;
     border-radius: 5px;
     cursor: pointer;
     position: relative;
@@ -1181,13 +1180,4 @@ ul {
 .tab-button.active {
     background-color: #fff;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-}
-
-#deck-builder-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    min-height: 800px;
-    box-sizing: border-box;
 }
