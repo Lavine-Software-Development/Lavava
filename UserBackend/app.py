@@ -161,14 +161,14 @@ def after_request(response):
     ]
 
     # Add CORS headers only if the request's origin is in the allowed list
-    if origin in allowed_origins:
-        response.headers.add("Access-Control-Allow-Origin", origin)
-        response.headers.add(
-            "Access-Control-Allow-Headers", "Content-Type,Authorization"
-        )
-        response.headers.add(
-            "Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE"
-        )
+    # if origin in allowed_origins:
+    response.headers.add("Access-Control-Allow-Origin", origin)
+    response.headers.add(
+        "Access-Control-Allow-Headers", "Content-Type,Authorization"
+    )
+    response.headers.add(
+        "Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE"
+    )
 
     return response
 
