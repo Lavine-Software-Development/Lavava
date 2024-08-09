@@ -13,7 +13,7 @@ services:
     networks:
       - game_network1
     volumes:
-      - ./data:/app/data
+      - ./data:/app/game_data
 volumes:
   data:
 networks:

@@ -28,30 +28,18 @@ app = Flask(__name__, static_url_path="/static", static_folder="static")
 
 CORS(
     app,
-    origins=[
-        'https://www.durb.ca',
-        'http://localhost:8080',
-        'http://localhost:8081',
-        'https://localhost:8080',
-        'https://localhost:8081',
-        # For Vercel preview URLs, we need to use a regex pattern
-        r'https://lavava-[a-z0-9]{8}-durb-477e2271\.vercel\.app'
-    ],
     allow_headers=["Content-Type", "Authorization"],
     methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
     supports_credentials=True
 )
 
-app.config["SECRET_KEY"] = "your_secret_key"
+app.config["SECRET_KEY"] = "secret_phrase_durb"
 
 EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
 if config.DB_CONNECTED:
     db_path = os.path.join("/app/game_data", "game.db")
-    if config.ENV == "PROD" or config.ENV == "STAGING":
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
-    else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///game.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db = SQLAlchemy(app)
@@ -165,7 +153,7 @@ def after_request(response):
     allowed_patterns = [
         r'^https://www\.durb\.ca$',
         r'^https?://localhost(:\d+)?$',
-        r'^https://lavava-[a-z0-9]{8}-durb-477e2271\.vercel\.app$'
+         r'https://lavava-.*-durb-477e2271\.vercel\.app'
     ]
 
     if origin and any(re.match(pattern, origin) for pattern in allowed_patterns):
