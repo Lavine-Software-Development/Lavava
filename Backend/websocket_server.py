@@ -27,10 +27,10 @@ class WebSocketServer():
                 await self.process_message(websocket, data)
         except websockets.exceptions.ConnectionClosed:
             logger.info(f"Connection closed for {websocket.remote_address}")
-        except json.JSONDecodeError:
-            logger.error(f"Invalid JSON received: {message}")
-        except Exception as e:
-            logger.exception(f"Error in handler: {str(e)}")
+        # except json.JSONDecodeError:
+        #     logger.error(f"Invalid JSON received: {message}")
+        # except Exception as e:
+        #     logger.exception(f"Error in handler: {str(e)}")
 
     def waiting_ladder_count(self, player_count, mode):
         settings_add_on = mode[0] + str(player_count)

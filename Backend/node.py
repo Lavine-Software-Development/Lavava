@@ -6,8 +6,6 @@ from constants import (
     SCREEN_HEIGHT,
     STATE_NAMES,
     EFFECT_NAMES,
-    AUTO_ATTACK,
-    AUTO_EXPAND,
     BLACK,
 )
 from nodeState import (
@@ -127,10 +125,10 @@ class Node(JsonableTracked):
     def expand(self):
         for edge in self.outgoing:
             if edge.contested:
-                if AUTO_ATTACK:
+                if self.owner.auto_attack:
                     edge.switch(True)
                     edge.popped = True
-            elif not edge.owned and AUTO_EXPAND and not edge.popped:
+            elif not edge.owned and self.owner.auto_spread and not edge.popped:
                 edge.switch(True)
 
     def check_edge_stati(self):

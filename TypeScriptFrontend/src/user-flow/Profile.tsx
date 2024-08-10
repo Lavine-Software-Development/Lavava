@@ -16,6 +16,12 @@ interface GameData {
     players: PlayerData[];
 }
 
+interface UserSettings {
+    auto_attack: boolean;
+    auto_spread: boolean;
+    popups: boolean;
+}
+
 interface ProfileData {
     userName: string;
     displayName: string;
@@ -34,6 +40,12 @@ const Profile: React.FC = () => {
         abilities: [], // Default to at least one empty list
         elo: 1000,
         last_game: null,
+    });
+
+    const [userSettings, setUserSettings] = useState<UserSettings>({
+        auto_attack: false,
+        auto_spread: false,
+        popups: true,
     });
 
     const [isEditing, setIsEditing] = useState(false);
@@ -98,6 +110,48 @@ const Profile: React.FC = () => {
         setIsEditing(false);
     }
 
+    const fetchUserSettings = async () => {
+        const token = localStorage.getItem('userToken');
+        try {
+            const response = await fetch(`${config.userBackend}/frontend_get_user_settings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setUserSettings(data);
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching user settings:', error);
+        }
+    };
+
+    const updateUserSetting = async (setting: keyof UserSettings) => {
+        const token = localStorage.getItem('userToken');
+        try {
+            const response = await fetch(`${config.userBackend}/update_user_settings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ [setting]: !userSettings[setting] })
+            });
+            if (response.ok) {
+                setUserSettings(prev => ({ ...prev, [setting]: !prev[setting] }));
+            } else {
+                throw new Error('Failed to update setting');
+            }
+        } catch (error) {
+            console.error('Error updating user setting:', error);
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem('userToken');
@@ -109,6 +163,7 @@ const Profile: React.FC = () => {
                     }
                 });
                 const data = await response.json();
+                await fetchUserSettings();
                 if (response.ok) {
                     setProfileData(data);
                 } else {
@@ -165,6 +220,42 @@ const Profile: React.FC = () => {
                     )}
                 </div>
                 <p className="whiteText"><span className="text-shadow">Email:</span> {profileData.email}</p>
+                <div className="user-settings">
+                    <p className="whiteText"><h3 className="text-shadow">User Settings</h3></p>
+                    <div className="setting-toggle">
+                    <p className="whiteText"><span  className="text-shadow">Auto Attack:</span></p>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={userSettings.auto_attack}
+                                onChange={() => updateUserSetting('auto_attack')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                    <div className="setting-toggle">
+                    <p className="whiteText"><span  className="text-shadow">Auto Spread:</span></p>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={userSettings.auto_spread}
+                                onChange={() => updateUserSetting('auto_spread')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                    <div className="setting-toggle">
+                    <p className="whiteText"><span  className="text-shadow">Popups:</span></p>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={userSettings.popups}
+                                onChange={() => updateUserSetting('popups')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
                 <div className="button-container">
                     <button className="change-password-btn" onClick={handleChangePassword}>Change Password</button>
                     <button className="logout-btn" onClick={handleLogout}>Log Out</button>

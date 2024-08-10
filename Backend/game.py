@@ -20,7 +20,7 @@ class ServerGame(JsonableTick):
         self.settings = settings
         self.extra_info = []
         self.counts = [0] * player_count
-        self.board = Board(self.gs)
+        self.board = Board(self.gs, settings['ability_type'] == "credits")
         if settings["ability_type"] == "credits":
             self.player_dict = {
                 i: CreditPlayer(i) for i in range(player_count)
@@ -42,7 +42,7 @@ class ServerGame(JsonableTick):
         return self.times[self.current_section]
     
     def create_bot(self, player_id):
-        self.player_dict[player_id] = create_ai(player_id, self.settings["ability_type"], self.board, self.effect, self.event)
+        self.player_dict[player_id] = create_ai(player_id, self.settings, self.board, self.effect, self.event)
         return self.player_dict[player_id].name
 
     @property
@@ -110,6 +110,9 @@ class ServerGame(JsonableTick):
     def set_abilities(self, player, abilities, settings):
         self.player_dict[player].set_abilities(abilities, self.ability_effects, self.board, settings)
 
+    def set_player_settings(self, player, settings):
+        self.player_dict[player].set_settings(settings) 
+
     def all_player_next(self):
         for player in self.player_dict.values():
             player.ps.next()
@@ -171,11 +174,14 @@ class ServerGame(JsonableTick):
             for bot in self.bots:
                 bot.choose_start()
 
-        if self.board.victory_check():
+        if self.board.victory_check() or self.only_bots_remain():
             self.determine_ranks_from_capitalize_or_timeout()
         elif len(self.remaining) == 1:
 
             self.determine_ranks_from_elimination(self.remaining.pop())
+
+    def only_bots_remain(self):
+        return all([isinstance(self.player_dict[player], BaseAI) for player in self.remaining])
 
     def post_tick(self):
         self.extra_info.clear()
@@ -210,7 +216,8 @@ class ServerGame(JsonableTick):
 
         # score equals 100b + a
         # effectively, the player with the most full capitals wins, with total nodes as a tiebreaker
-        player_scores = {key: val * 100 + player_nodes[key] for key, val in player_capitals.items()}
+        # but if already eliminated, they are effectively ranked backwards by multiplying their predetermined rank by -1000
+        player_scores = {key: self.player_dict[key].rank * -1000 + val * 100 + player_nodes[key] for key, val in player_capitals.items()}
         sorted_scores = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
         self.player_dict[sorted_scores[0][0]].win()
         for i in range(1, len(sorted_scores)):

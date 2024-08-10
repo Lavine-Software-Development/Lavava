@@ -881,8 +881,32 @@ def get_display_name():
         return jsonify({"display_name": "guest"})
     
 
-@app.route("/get_user_settings", methods=["POST"])
-def get_user_settings():
+@app.route('/update_user_settings', methods=['POST'])
+@token_required
+def update_user_settings(current_user):
+    user = User.query.filter_by(username=current_user).first()
+    data = request.json
+    settings = UserSettings.query.filter_by(user_id=user.id).first()
+
+    if 'auto_attack' in data:
+        settings.auto_attack = bool(data['auto_attack'])
+    if 'auto_spread' in data:
+        settings.auto_spread = bool(data['auto_spread'])
+    if 'popups' in data:
+        settings.popups = bool(data['popups'])
+
+    db.session.commit()
+    return jsonify({"success": True, "message": "Settings updated successfully"}), 200
+
+
+@app.route("/frontend_get_user_settings", methods=["POST"])
+@token_required
+def get_frontend_user_settings(current_user):
+    return non_route_get_user_settings(current_user)
+    
+
+@app.route("/backend_get_user_settings", methods=["POST"])
+def get_backend_user_settings():
     data = request.json
     token = data.get("token")
 
@@ -893,34 +917,38 @@ def get_user_settings():
         decoded = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
         username = decoded["user"]
 
-        if config.DB_CONNECTED:
-            user = User.query.filter_by(username=username).first()
-            if user:
-                settings = UserSettings.query.filter_by(user_id=user.id).first()
-                if not settings:
-                    # Create new settings if they don't exist
-                    settings = UserSettings(user_id=user.id)
-                    db.session.add(settings)
-                    db.session.commit()
-                
-                return jsonify({
-                    "auto_attack": settings.auto_attack,
-                    "auto_spread": settings.auto_spread,
-                    "popups": settings.popups
-                })
-            else:
-                return jsonify({"error": "User not found"}), 404
-        else:
-            return jsonify({"error": "Database not connected"}), 500
+        return non_route_get_user_settings(username)
 
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return jsonify({"error": "Invalid or expired token"}), 401
+    
+
+def non_route_get_user_settings(username):
+    if config.DB_CONNECTED:
+        user = User.query.filter_by(username=username).first()
+        if user:
+            settings = UserSettings.query.filter_by(user_id=user.id).first()
+            if not settings:
+                # Create new settings if they don't exist
+                settings = UserSettings(user_id=user.id)
+                db.session.add(settings)
+                db.session.commit()
+
+            return jsonify({
+                "auto_attack": settings.auto_attack,
+                "auto_spread": settings.auto_spread,
+                "popups": settings.popups
+            })
+        else:
+            return jsonify({"error": "User not found"}), 404
+    else:
+        return jsonify({"error": "Database not connected"}), 500
 
 
 def username_to_elo(name: str):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=name).first()
-        return user.elo if user else 1100  # Default ELO if user not found
+        return user.elo if user else 400  # Default ELO for bots
     else:
         dummy = {"other": 1200, "default": 1300}
         return dummy.get(name, 1100)  # Def
@@ -947,7 +975,7 @@ def get_royale_settings():
         "ability_type": "elixir",
         "elixir_cap": 8,
         "elixir_rate": 4,
-        "growth_rate": 0.13,
+        "growth_rate": 0.14,
         "transfer_rate": 0.012,
         "main_time": 420,
         "overtime": 60,
@@ -1105,8 +1133,10 @@ def save_game():
             if user:
                 usernames.append(username)
 
+            elif token.startswith("Trainer"):
+                usernames.append(token)
             else:
-                usernames.append("Guest")
+                username.append("Guest")
             user_ranks.append(rank)
 
         new_game = GameHistory(usernames=usernames, user_ranks=user_ranks)

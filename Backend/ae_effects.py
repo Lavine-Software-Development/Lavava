@@ -207,7 +207,7 @@ def make_event_effects(board, update_method):
     return {
         CANNON_SHOT_CODE: make_cannon_shot(board.id_dict, update_method),
         PUMP_DRAIN_CODE : make_pump_drain(board.id_dict),
-        STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].switch(),
+        STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].manual_switch(),
         STANDARD_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].click_swap(),
         CREDIT_USAGE_CODE: credit_usage_effect
     }

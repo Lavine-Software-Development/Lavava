@@ -31,6 +31,10 @@ class DefaultPlayer(JsonableTick):
     def set_abilities(self, chosen_abilities, ability_effects, board, settings):
         pass
 
+    def set_settings(self, settings):
+        self.auto_attack = settings.get('auto_attack')
+        self.auto_spread = settings.get('auto_spread')
+
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
             self.abilities[key].use(data)
@@ -49,7 +53,6 @@ class DefaultPlayer(JsonableTick):
     def eliminate(self, rank):
         self.rank = rank
         self.ps.eliminate()
-        self.color = GREY
 
     def win(self):
         self.rank = 1

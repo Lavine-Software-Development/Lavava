@@ -4,7 +4,6 @@ from constants import (
     EDGE,
     MINIMUM_TRANSFER_VALUE,
     BEGIN_TRANSFER_VALUE,
-    AUTO_ATTACK,
 )
 from tracking_decorator.track_changes import track_changes
 
@@ -40,14 +39,22 @@ class Edge(JsonableTracked):
 
     def valid_right_click(self, clicker):
         return False
+    
+    def manual_switch(self, specified=None):
+        self.popped = True
+        self.switch(specified)
 
     def switch(self, specified=None):
         if specified is None:
             self.on = not self.on
         else:
             self.on = specified
-        if not self.on:
+        if not self:
             self.popped = True
+
+    def cheeky_pop(self):
+        shared_from_node_edges = self.from_node.outgoing
+        return any(edge.flowing for edge in shared_from_node_edges)
 
     def update(self):
         if (
@@ -56,7 +63,7 @@ class Edge(JsonableTracked):
             or not self.flow_allowed()
         ):
             self.flowing = False
-        elif self.from_node.value > BEGIN_TRANSFER_VALUE:
+        elif self.from_node.value > BEGIN_TRANSFER_VALUE or self.cheeky_pop():
             self.flowing = True
 
         if self.flowing:
@@ -69,7 +76,7 @@ class Edge(JsonableTracked):
 
     def pop(self):
         self.popped = True
-        if not self.contested or not AUTO_ATTACK:
+        if not self.contested or not self.from_node.owner.auto_attack:
             self.on = False
 
     def flow(self):

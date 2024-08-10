@@ -7,7 +7,7 @@ from constants import SPAWN_CODE, BOT_START_DELAY
 
 type_to_class = {
     "credits": CreditPlayer,
-    "royale": RoyalePlayer
+    "elixir": RoyalePlayer
 }
 
 
@@ -18,6 +18,9 @@ class BaseAI(ABC):
         self.board = board
         self.effect_method = effect_method
         self.event_method = event_method
+        self.auto_attack = False
+        self.auto_spread = True
+        self.name = "Trainer " + self.trainer_name()
 
     def choose_start(self):
         self.ticks += 1
@@ -27,7 +30,7 @@ class BaseAI(ABC):
 
     def select_start(self, options):
         for node in options:
-            if node.owner is None:
+            if node.owner is None and node.state_name == "default":
                 if self.effect_method(SPAWN_CODE, self.id, [node.id]):
                     break
 
@@ -37,6 +40,10 @@ class BaseAI(ABC):
 
     @abstractmethod
     def make_decisions(self):
+        pass
+
+    @abstractmethod
+    def trainer_name(self) -> str:
         pass
 
     def update(self):
@@ -58,10 +65,12 @@ def create_ai(id, settings, board, effect_method, event_method):
         def make_decisions(self):
             pass
 
+        def trainer_name(self):
+            return "Ian"
+
         def __init__(self):
             BaseAI.__init__(self, board, effect_method, event_method)
             class_type.__init__(self, id, settings)
-            self.name = "Trainer Ian"
     
     return IanAI()
 

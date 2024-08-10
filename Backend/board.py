@@ -21,7 +21,7 @@ from tracking_decorator.track_changes import track_changes
 
 @track_changes("nodes_r", "edges_r", 'full_player_capitals')
 class Board(JsonableTracked):
-    def __init__(self, gs):
+    def __init__(self, gs, track_capitals):
         self.gs = gs
         self.nodes: list[Node] = []
         self.edges = []
@@ -30,7 +30,8 @@ class Board(JsonableTracked):
         # self.tracker = Tracker()
         self.tracker = CapitalTracker()
         self.player_capitals = defaultdict(set)
-        self.full_player_capitals = []
+        self.full_player_capitals = [0] * 4 
+        self.track_capitals = track_capitals
 
         recurse_values = {"nodes", "edges"}
         super().__init__("board", recurse_values, recurse_values, recurse_values)
@@ -126,10 +127,11 @@ class Board(JsonableTracked):
         if updated_nodes:
             self.track_state_changes(updated_nodes)
 
-        self.full_player_capitals = [0] * 4 ## Should not be hard coded. This stores extra 0's
-        for player in self.player_capitals:
-            for node in self.player_capitals[player]:
-                self.full_player_capitals[player.id] += int(node.full())
+        if self.track_capitals:
+            self.full_player_capitals = [0] * 4 ## Should not be hard coded. This stores extra 0's
+            for player in self.player_capitals:
+                for node in self.player_capitals[player]:
+                    self.full_player_capitals[player.id] += int(node.full())
 
     def check_new_edge(self, node_from, node_to):
         if node_to == node_from:
@@ -142,7 +144,7 @@ class Board(JsonableTracked):
         return True
     
     def victory_check(self):
-        return any(count >= CAPITALS_NEEDED_FOR_WIN for count in self.full_player_capitals)
+        return self.track_capitals and any(count >= CAPITALS_NEEDED_FOR_WIN for count in self.full_player_capitals)
 
     def new_edge_id(self):
         return (

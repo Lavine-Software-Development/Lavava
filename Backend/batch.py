@@ -92,16 +92,13 @@ class Batch:
         return display_name
     
     def set_player_settings(self, token):
-        url = USER_BACKEND + '/get_player_settings'
+        url = USER_BACKEND + '/backend_get_user_settings'
         data = {"token": token}
         response = requests.post(url, json=data)
 
         data = response.json()
-        settings = data.get('settings')
-
-        self.settings = settings
-        print(f"Settings set to: {settings}")
-        return
+        player = self.token_ids[token]
+        self.game.set_player_settings(player, data)
         
     def add_player(self, token, websocket, ability_data):
 
@@ -123,11 +120,12 @@ class Batch:
         
     def add_bot(self):
         player_id = len(self.token_ids)
-        bot_id = ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=4))
-        self.token_ids[bot_id] = player_id
-        self.not_responsive_count[player_id] = 0
         name = self.game.create_bot(player_id)
-        self.token_disname[bot_id] = f'{name} {player_id}'
+        if self.player_count > 2:
+            name += f' {player_id}'
+        self.token_ids[name] = player_id
+        self.not_responsive_count[player_id] = 0
+        self.token_disname[name] = name
         
     def remove_player_from_lobby(self, token):
         removed_id = self.token_ids.pop(token)

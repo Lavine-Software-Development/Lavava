@@ -117,7 +117,7 @@ const Lobby: React.FC = () => {
                             }}
                             onClick={handleBotRequest}
                         >
-                            Play Bot
+                            Play Bots
                         </button>
                     </div>
                 )}
