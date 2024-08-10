@@ -12,6 +12,8 @@ const Lobby: React.FC = () => {
     const network = useContext(NetworkContext);
     const [first, setFirst] = useState(true);
     const [gameMode, setGameMode] = useState("");
+    const [botRequested, setBotRequested] = useState(false);
+
     const lobbyData = (code: string, count: number, mode: string) => {
         if (code === "INVALID") {
             network?.disconnectWebSocket();
@@ -27,6 +29,12 @@ const Lobby: React.FC = () => {
         network?.sendMessage({ action: "cancel_match" });
         network?.disconnectWebSocket();
         navigate("/home");
+    };
+
+    const handleBotRequest = () => {
+        network?.sendMessage({ action: "bot_request" });
+        console.log("Bot requested");
+        setBotRequested(true);
     };
 
     useEffect(() => {
@@ -89,6 +97,41 @@ const Lobby: React.FC = () => {
                         {playerCount} Player {gameMode} Ladder Match
                     </h2>
                 )}
+                {gameID && !botRequested && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            right: "50px",
+                            bottom: "10px",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                        }}
+                    >
+                        <h2 style={{ marginBottom: "10px" }}>No one online?</h2>
+                        <button
+                            style={{
+                                padding: "10px 20px",
+                                fontSize: "16px",
+                                cursor: "pointer",
+                            }}
+                            onClick={handleBotRequest}
+                        >
+                            Play Bot
+                        </button>
+                    </div>
+                )}
+                {botRequested && (
+                    <h2
+                        style={{
+                            position: "absolute",
+                            right: "50px",
+                            bottom: "10px",
+                        }}
+                    >
+                        Bot requested
+                    </h2>
+                )}
             </div>
         );
     }
@@ -102,4 +145,3 @@ const Lobby: React.FC = () => {
 };
 
 export default Lobby;
-

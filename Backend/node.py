@@ -230,6 +230,10 @@ class Node(JsonableTracked):
     @property
     def outgoing(self):
         return {edge for edge in self.edges if edge.from_node == self}
+    
+    @property
+    def possible_outgoing(self):
+        return {edge for edge in self.edges if edge.from_node == self or edge.dynamic}
 
     @property
     def neighbors(self):

@@ -17,7 +17,7 @@ from jsonable import JsonableTick
 from math import floor
 
 class DefaultPlayer(JsonableTick):
-    def __init__(self, id):
+    def __init__(self, id, settings=None):
 
         tick_values = self.default_values()
 
@@ -101,9 +101,9 @@ class CreditPlayer(DefaultPlayer):
 
 class RoyalePlayer(DefaultPlayer):
 
-    def __init__(self, id, elixir_cap, elixir_rate):
-        self.elixir_cap = elixir_cap
-        self.elixir_rate = elixir_rate
+    def __init__(self, id, settings):
+        self.elixir_cap = settings['elixir_cap']
+        self.elixir_rate = settings['elixir_rate']
         super().__init__(id)
 
     def default_values(self):

@@ -102,6 +102,19 @@ if config.DB_CONNECTED:
         @property
         def user_ranks_list(self):
             return json.loads(self.user_ranks)
+        
+    class UserSettings(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+        auto_attack = db.Column(db.Boolean, default=False)
+        auto_spread = db.Column(db.Boolean, default=False)
+        popups = db.Column(db.Boolean, default=True)
+
+        user = db.relationship('User', backref=db.backref('settings', uselist=False))
+
+        def __init__(self, user_id):
+            self.user_id = user_id
+        
 
     with app.app_context():
         # def create_tables():
@@ -866,6 +879,42 @@ def get_display_name():
 
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return jsonify({"display_name": "guest"})
+    
+
+@app.route("/get_user_settings", methods=["POST"])
+def get_user_settings():
+    data = request.json
+    token = data.get("token")
+
+    if not token:
+        return jsonify({"error": "No token provided"}), 400
+
+    try:
+        decoded = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+        username = decoded["user"]
+
+        if config.DB_CONNECTED:
+            user = User.query.filter_by(username=username).first()
+            if user:
+                settings = UserSettings.query.filter_by(user_id=user.id).first()
+                if not settings:
+                    # Create new settings if they don't exist
+                    settings = UserSettings(user_id=user.id)
+                    db.session.add(settings)
+                    db.session.commit()
+                
+                return jsonify({
+                    "auto_attack": settings.auto_attack,
+                    "auto_spread": settings.auto_spread,
+                    "popups": settings.popups
+                })
+            else:
+                return jsonify({"error": "User not found"}), 404
+        else:
+            return jsonify({"error": "Database not connected"}), 500
+
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return jsonify({"error": "Invalid or expired token"}), 401
 
 
 def username_to_elo(name: str):

@@ -10,6 +10,7 @@ from ae_effects import make_event_effects
 from ae_validators import make_effect_validators
 from event import Event
 import sys
+from baseAI import create_ai, BaseAI
 
 class ServerGame(JsonableTick):
     def __init__(self, player_count, gs, settings):
@@ -26,7 +27,7 @@ class ServerGame(JsonableTick):
             }
         else:
             self.player_dict = {
-                i: RoyalePlayer(i, settings['elixir_cap'], settings['elixir_rate']) for i in range(player_count)
+                i: RoyalePlayer(i, settings) for i in range(player_count)
             }
 
         start_values = {'board'}
@@ -39,6 +40,14 @@ class ServerGame(JsonableTick):
     @property
     def countdown_timer(self):
         return self.times[self.current_section]
+    
+    def create_bot(self, player_id):
+        self.player_dict[player_id] = create_ai(player_id, self.settings["ability_type"], self.board, self.effect, self.event)
+        return self.player_dict[player_id].name
+
+    @property
+    def bots(self):
+        return [player for player in self.player_dict.values() if isinstance(player, BaseAI)]
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
@@ -47,6 +56,7 @@ class ServerGame(JsonableTick):
                 data_items = [self.board.id_dict[d] for d in data]
                 self.ability_effects[key](data_items, player)
                 player.ps.next()
+                return True
             else:
                 return False
         else:  
@@ -156,6 +166,10 @@ class ServerGame(JsonableTick):
             sys.stdout.flush()
             self.board.update()
             self.player_update()
+
+        if self.gs.value == GSE.START_SELECTION.value:
+            for bot in self.bots:
+                bot.choose_start()
 
         if self.board.victory_check():
             self.determine_ranks_from_capitalize_or_timeout()
