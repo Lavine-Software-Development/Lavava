@@ -475,6 +475,7 @@ input::placeholder {
     overflow: scroll;
     padding: 7vh;
     background-color: #fcfcfc;
+    width: 100vw;
 }
 
 .space {
@@ -1154,4 +1155,155 @@ ul {
 
 .match-history-title {
     margin: 5px 0;
+}
+
+.htp-button-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+    margin-top: 40px;
+}
+
+.htp-button-container button {
+    border: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 15em;
+}
+
+.htp-button-container button:hover {
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+}
+
+.slide-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    margin: 0 auto 20px auto;
+    max-width: 60em; /* Set the maximum width */
+    width: 100%; /* Ensure it takes full width up to the max-width */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.slide-container .slide-text {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: #555;
+    margin: 5px 0;
+}
+
+.slide-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+/* Repeat button styling */
+.slide-container button {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.navigation-buttons {
+    position: absolute;
+    top: 50%;
+    width: calc(100% + 120px); /* Extend the width to account for the buttons */
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+    margin: 0 -40px; /* Negative margin to place buttons outside the container */
+}
+
+.navigation-buttons button {
+    background-color: transparent;
+    border: none;
+    font-size: 3em;
+    color: #000;
+    cursor: pointer;
+    transition: color 0.3s ease; /* Smooth transition for color change */
+}
+
+.navigation-buttons button:hover {
+    color: #d3d3d3; /* Light grey color on hover */
+}
+
+.htp-button-container button:disabled {
+    background-color: grey; /* Change to the desired color */
+    color: white; /* Optional: Change text color */
+    cursor: not-allowed; /* Optional: Change cursor to indicate it's disabled */
+    opacity: 0.6; /* Optional: Make the button appear less prominent */
+}
+
+.prev-slide-btn {
+    position: absolute;
+    left: -10px;
+}
+
+.next-slide-btn {
+    position: absolute;
+    right: -10px;
+}
+
+.basics-button {
+    background-color: yellow;
+    color: black;
+}
+
+.attacking-button {
+    background-color: red;
+    color: white;
+} 
+
+.game-stages-button {
+    background-color: green;
+    color: white;
+}
+
+.scrollable-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.slide-icon-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    margin: 0 -5em;
+    width: 40px; /* Adjust size as needed */
+    height: 40px; /* Adjust size as needed */
+}
+
+.prev-slide-icon-btn {
+    left: 0;
+}
+
+.next-slide-icon-btn {
+    right: 0;
+}
+
+.slide-icon-btn:hover {
+    transition: transform 0.3s ease; /* Smooth transition for hover effect */
+    transform: translateY(-50%) scale(1.05); /* Slightly enlarge on hover */
+}
+
+.side-by-side-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.side-by-side-text {
+    margin-top: 10px; /* Space between image and text */
+    font-size: 14px; /* Adjust font size as needed */
 }
