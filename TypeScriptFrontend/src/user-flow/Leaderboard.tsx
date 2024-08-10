@@ -13,7 +13,7 @@ interface UserDetails {
     username: string;
     displayName: string;
     elo: number;
-    deck: Array<{name: string, count: number}>;
+    decks: any[][];
 }
 
 const Leaderboard: React.FC = () => {
@@ -22,6 +22,10 @@ const Leaderboard: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [gameCount, setGameCount] = useState(0);
+    const [deckMode, setDeckMode] = useState("Original");
+    const [deckIndex, setDeckIndex] = useState<number>(0);
+    const [usersDecks, setUsersDecks] = useState<any[][]>([]);
+    const [decks, setDecks] = useState<any[][]>([]);
 
     useEffect(() => {
         const fetchUserName = async () => {
@@ -64,7 +68,7 @@ const Leaderboard: React.FC = () => {
     }, []);
 
     const handleUserClick = (username: string) => {
-        console.log(`Fetching details for user: ${username}`);
+        //console.log(`Fetching details for user: ${username}`);
         fetch(`${config.userBackend}/user/${username}`)
             .then(response => {
                 if (!response.ok) {
@@ -75,13 +79,37 @@ const Leaderboard: React.FC = () => {
                 return response.json();
             })
             .then(data => {
-                console.log("Fetched user data:", data);
+                //console.log("Fetched user data:", data);
                 setSelectedUser(data);
+                const fetchedDecks: any[][] = data.decks || [];
+                const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
+                const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+                const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
+                setDeckIndex(newDeckIndex);
+                setUsersDecks(newDecks);
+                setDecks(fetchedDecks);
             })
             .catch(error => {
                 console.error('Error fetching user details:', error);
                 setError(`Failed to load user details: ${error.message}`);
             });
+    };
+
+    useEffect(() => {
+        handleMyDeck();
+    }, [deckMode]);
+
+    const handleMyDeck = () => {
+        if (!decks || decks.length === 0) {
+            return;
+        }
+    
+        const modes = decks.map((deck: any[]) => (deck && deck.length > 0 ? deck[deck.length - 1] : undefined));
+        const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+        const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+    
+        setDeckIndex(newDeckIndex);
+        setUsersDecks(newDecks);
     };
 
     const isCurrentUserOnLeaderboard = currentUser && leaderboard.some(player => player.userName === currentUser);
@@ -122,24 +150,43 @@ const Leaderboard: React.FC = () => {
                             <p><strong>Username:</strong> {selectedUser.username}</p>
                         )}
                         <p><strong>ELO:</strong> {selectedUser.elo}</p>
-                        {selectedUser.deck && selectedUser.deck.length > 0 ? (
-                            <div className="abilities-container-leaderboard">
-                                {selectedUser.deck.map((card, index) => (
-                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[card.name] }}>
-                                    <div className="ability-icon">
-                                    <img
-                                        src={`./assets/abilityIcons/${card.name}.png`}
-                                        alt={card.name}
-                                        className="ability-img"
-                                    />
+                        <div className="tab-container" style={{ marginBottom: '10px'}}>
+                            <button 
+                                className={`tab-button tab-profile ${deckMode === "Original" ? "active" : ""}`}
+                                onClick={() => setDeckMode("Original")}
+                            >
+                                Original
+                            </button>
+                            <button 
+                                className={`tab-button tab-profile ${deckMode === "Royale" ? "active" : ""}`}
+                                onClick={() => setDeckMode("Royale")}
+                            >
+                                Royale
+                            </button>
+                        </div>
+                        <h2 className="text-shadow default-deck-text">{deckMode} Deck</h2>
+                        <div className="abilities-container-friendly">
+                        {usersDecks && usersDecks[deckIndex] ? (
+                            usersDecks[deckIndex].length > 0 ? (
+                                usersDecks[deckIndex].map((item: { name: string; count: number }, index: number) => (
+                                    <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name]}}>
+                                        <div className="ability-icon">
+                                            <img
+                                                src={`./assets/abilityIcons/${item.name}.png`}
+                                                alt={item.name}
+                                                className="ability-img"
+                                            />
+                                        </div>
+                                        <div className="ability-count">{item.count}</div>
                                     </div>
-                                    <div className="ability-count">{card.count}</div>
-                                </div>
-                                ))}
-                            </div>
+                                ))
+                            ) : (
+                                <p>You have no saved abilities for {deckMode} mode</p>
+                            )
                         ) : (
-                            <p>No deck information available</p>
+                            <p>Loading your deck...</p>
                         )}
+                        </div>
                         <button onClick={() => setSelectedUser(null)}>Close</button>
                     </div>
                 </div>

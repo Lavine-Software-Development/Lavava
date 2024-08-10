@@ -159,7 +159,6 @@ const DeckBuilder: React.FC = () => {
     
     const handleMyDeck = () => {
         if (!decks || decks.length === 0) {
-            console.warn('Decks is empty or undefined');
             return;
         }
     

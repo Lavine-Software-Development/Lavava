@@ -285,7 +285,7 @@ input::placeholder {
 
 .ability-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); 
+    grid-template-columns: repeat(6, 1fr); 
     gap: 10px;
 }
 
@@ -1180,4 +1180,13 @@ ul {
 .tab-button.active {
     background-color: #fff;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tab-profile.active {
+    background-color: #82b4d6;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tab-profile:hover {
+    background-color: #e8eaed;
 }

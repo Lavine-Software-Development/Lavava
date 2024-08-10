@@ -20,7 +20,7 @@ interface ProfileData {
     userName: string;
     displayName: string;
     email: string;
-    abilities: { name: string; count: number }[];
+    decks: any[][];
     elo: number;
     last_game: GameData | null;
 }
@@ -31,7 +31,7 @@ const Profile: React.FC = () => {
         userName: 'Loading...',
         displayName: 'Loading...',
         email: 'Loading...',
-        abilities: [], // Default to at least one empty list
+        decks: [[]], // Default to at least one empty list
         elo: 1000,
         last_game: null,
     });
@@ -40,6 +40,10 @@ const Profile: React.FC = () => {
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
     const [popupMessage, setPopupMessage] = useState('');
     const [showPopup, setShowPopup] = useState(false);
+    const [deckMode, setDeckMode] = useState("Original");
+    const [deckIndex, setDeckIndex] = useState<number>(0);
+    const [usersDecks, setUsersDecks] = useState<any[][]>([]);
+    const [decks, setDecks] = useState<any[][]>([]);
 
     const handleChangePassword = () => {
         navigate("/change-password");
@@ -109,8 +113,15 @@ const Profile: React.FC = () => {
                     }
                 });
                 const data = await response.json();
-                if (response.ok) {
+                if (response.ok) {;
                     setProfileData(data);
+                    const fetchedDecks: any[][] = data.usersDecks || [];
+                    const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
+                    const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+                    const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
+                    setDeckIndex(newDeckIndex);
+                    setUsersDecks(newDecks);
+                    setDecks(fetchedDecks);
                 } else {
                     if (data.message === 'Login Token has expired!') {
                         localStorage.removeItem('userToken');
@@ -132,6 +143,23 @@ const Profile: React.FC = () => {
             </div>
         );
     }
+
+    useEffect(() => {
+        handleMyDeck();
+    }, [deckMode]);
+
+    const handleMyDeck = () => {
+        if (!decks || decks.length === 0) {
+            return;
+        }
+    
+        const modes = decks.map((deck: any[]) => (deck && deck.length > 0 ? deck[deck.length - 1] : undefined));
+        const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+        const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+    
+        setDeckIndex(newDeckIndex);
+        setUsersDecks(newDecks);
+    };
 
     return (
         <div className="dashboard-container" id="dashboard-container">
@@ -172,20 +200,42 @@ const Profile: React.FC = () => {
             </div>
             <div className="info-cards">
                 <div className="info-card linear-gradient">
-                    <h2 className="text-shadow default-deck-text">Default Deck</h2>
+                    <div className="tab-container" style={{ marginBottom: '10px'}}>
+                        <button 
+                            className={`tab-button tab-profile ${deckMode === "Original" ? "active" : ""}`}
+                            onClick={() => setDeckMode("Original")}
+                        >
+                            Original
+                        </button>
+                        <button 
+                            className={`tab-button tab-profile ${deckMode === "Royale" ? "active" : ""}`}
+                            onClick={() => setDeckMode("Royale")}
+                        >
+                            Royale
+                        </button>
+                    </div>
+                    <h2 className="text-shadow default-deck-text">{deckMode} Deck</h2>
                     <div className="abilities-container-friendly">
-                    {profileData.abilities.map((item, index) => (
-                        <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
-                        <div className="ability-icon">
-                            <img
-                            src={`./assets/abilityIcons/${item.name}.png`}
-                            alt={item.name}
-                            className="ability-img"
-                            />
-                        </div>
-                        <div className="ability-count">{item.count}</div>
-                        </div>
-                    ))}
+                    {usersDecks && usersDecks[deckIndex] ? (
+                        usersDecks[deckIndex].length > 0 ? (
+                            usersDecks[deckIndex].map((item: { name: string; count: number }, index: number) => (
+                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name]}}>
+                                    <div className="ability-icon">
+                                        <img
+                                            src={`./assets/abilityIcons/${item.name}.png`}
+                                            alt={item.name}
+                                            className="ability-img"
+                                        />
+                                    </div>
+                                    <div className="ability-count">{item.count}</div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>You have no saved abilities for {deckMode} mode</p>
+                        )
+                    ) : (
+                        <p>Loading your deck...</p>
+                    )}
                     </div>
                 </div>
                     <div className="info-card linear-gradient">

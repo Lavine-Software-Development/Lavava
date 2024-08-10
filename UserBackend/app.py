@@ -76,15 +76,18 @@ if config.DB_CONNECTED:
             self.ability = ability
             self.count = count
 
-    class GameHistory(db.Model):
+    class MatchHistory(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
         usernames = db.Column(Text, nullable=False)
         user_ranks = db.Column(Text, nullable=False)
+        elo_changes = db.Column(Text, nullable=False)
 
-        def __init__(self, usernames, user_ranks):
+        def __init__(self, usernames, user_ranks, elo_changes):
             self.usernames = json.dumps(usernames)
             self.user_ranks = json.dumps(user_ranks)
+            self.elo_changes = json.dumps(elo_changes)
+
 
         @property
         def usernames_list(self):
@@ -93,6 +96,10 @@ if config.DB_CONNECTED:
         @property
         def user_ranks_list(self):
             return json.loads(self.user_ranks)
+
+        @property
+        def elo_changes_list(self):
+            return json.loads(self.elo_changes)
 
 
     with app.app_context():
@@ -554,7 +561,7 @@ def get_profile(current_user):
                 "userName": user.username,
                 "displayName": user.display_name,
                 "email": user.email,
-                "abilities": user_decks(current_user),
+                "usersDecks": user_decks(current_user),
                 "elo": user.elo,
                 "last_game": last_game_data
             })
@@ -565,7 +572,7 @@ def get_profile(current_user):
             "userName": "Default-User",
             "displayName": "John Doe",
             "email": "john.doe@example.com",
-            "abilities": user_decks(current_user),
+            "usersDecks": user_decks(current_user),
             "elo": 1138,
             "last_game": {
                 "game_id": 12345,
@@ -937,6 +944,10 @@ def save_game():
                 usernames.append("Guest")
             user_ranks.append(rank)
         
+        old_elos = [username_to_elo(user) for user in usernames]
+        new_elos = calculate_elos(old_elos)
+
+
         new_game = GameHistory(usernames=usernames, user_ranks=user_ranks)
         db.session.add(new_game)
         db.session.commit()
@@ -1049,16 +1060,21 @@ def get_user_details(username):
         if not user:
             return jsonify({"error": "User not found"}), 404
         
-        deck = Deck.query.filter_by(user_id=user.id).first()
-        deck_cards = []
-        if deck:
-            deck_cards = DeckCard.query.filter_by(deck_id=deck.id).all()
-        
+        allDecks = []
+        decks = Deck.query.filter_by(user_id=user.id).all()
+        if decks:
+            for deck in decks:
+                mode = deck.name
+                cards = DeckCard.query.filter_by(deck_id=deck.id).all()
+                deck = [{"name": card.ability, "count": card.count} for card in cards]
+                deck.append(mode)
+                allDecks.append(deck)
+
         response = {
             "username": user.username,
             "displayName": user.display_name,
             "elo": user.elo,
-            "deck": [{"name": card.ability, "count": card.count} for card in deck_cards]
+            "decks": allDecks
         }
         return jsonify(response)
     except Exception as e:
