@@ -64,13 +64,6 @@ const Home: React.FC = () => {
     const [gameModeDropdownOpen, setGameModeDropdownOpen] = useState<boolean>(false);
     const gameModeDropdownRef = useRef<HTMLDivElement>(null);
     const [showInvalidCodePopup, setShowInvalidCodePopup] = useState(false);
-    const [deckIndex, setDeckIndex] = useState<number>(0);
-    const [usersDecks, setUsersDecks] = useState<any[][]>([]);
-    const [decks, setDecks] = useState<any[][]>([]);
-    const [guestDecks, setGuestDecks] = useState<any>({
-        Original: [],
-        Royale: []
-    });
 
     useEffect(() => {
         sessionStorage.removeItem("key_code");
@@ -85,39 +78,10 @@ const Home: React.FC = () => {
                 window.location.pathname
             );
         }
+        const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const token = localStorage.getItem("userToken");
         const isGuest = sessionStorage.getItem("guestToken");
         setIsLoggedIn(!!token);
-
-        if (isGuest) {
-            // Load guest decks
-            const guestDecks = JSON.parse(sessionStorage.getItem('guestDecks') || '{}');
-            setGuestDecks(guestDecks);
-            setSelectedAbilities(guestDecks[gameMode] || [])
-        } else if (token) {
-            // Fetch user decks from backend
-            fetch(`${config.userBackend}/user_abilities`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data && data.decks) {
-                        const fetchedDecks: any[][] = data.decks || [];
-                        const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
-                        const newDeckIndex = modes.findIndex((mode: string) => mode === gameMode);
-                        const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
-                        setDeckIndex(newDeckIndex);
-                        setUsersDecks(newDecks);
-                        setDecks(fetchedDecks);
-                        setSelectedAbilities(newDecks[newDeckIndex] || []);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Failed to fetch abilities:", error);
-                });
-        }
 
         let prevMode = sessionStorage.getItem("gameMode");
         if (prevMode === "Royale") {
@@ -129,6 +93,35 @@ const Home: React.FC = () => {
         if (!isGuest && !token) {
             navigate("/login");
         }
+        console.log("stored abilities", storedAbilities);
+        if (storedAbilities) {
+            setSelectedAbilities(JSON.parse(storedAbilities));
+        } else if (token) {
+            // Fetch user decks from backend
+            fetch(`${config.userBackend}/user_abilities`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data && data.decks) {
+                        const fetchedDecks: any[][] = data.decks;
+                        const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
+                        const newDeckIndex = modes.findIndex((mode: string) => mode === gameMode);
+                        const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
+                        setDeckIndex(newDeckIndex);
+                        setUsersDecks(newDecks);
+                        setDecks(fetchedDecks);
+                        setSelectedAbilities(newDecks[newDeckIndex]);
+                        sessionStorage.setItem("selectedAbilities", JSON.stringify(newDecks[newDeckIndex]));
+                    }
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch abilities:", error);
+                });
+        }
+        console.log("abilities: ", selectedAbilities);
 
         const gameStyle = sessionStorage.getItem("gameStyle");
         if (gameStyle) {
@@ -145,14 +138,8 @@ const Home: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const isGuest = sessionStorage.getItem("guestToken");
-        if (isGuest) {
-            setSelectedAbilities(guestDecks[gameMode] || []);
-        } else {
-            handleMyDeck();
-            setSelectedAbilities(usersDecks[deckIndex] || []);
-        }
-    }, [gameMode, guestDecks, usersDecks, deckIndex]);
+        handleMyDeck();
+    }, [gameMode]);
 
     const handleMyDeck = () => {
         if (!decks || decks.length === 0) {
@@ -209,12 +196,12 @@ const Home: React.FC = () => {
     const [playDropdownOpen, setPlayDropdownOpen] = useState<boolean>(false);
     const playDropdownRef = useRef<HTMLDivElement>(null);
     const handlePlayDropdownFocus = () => {
+        console.log(selectedAbilities);
         const deviceType = getDeviceType();
         if (deviceType !== "Desktop") {
             alert("Please use a desktop to play.");
             return;
         }
-        setPlayDropdownOpen(!playDropdownOpen);
         if (selectedAbilities.length > 0) {
             setPlayDropdownOpen(!playDropdownOpen);
         } else {
@@ -480,7 +467,20 @@ const Home: React.FC = () => {
                         <div>
                             <h1 style={{ textAlign: "center" }}>Ladder</h1>
                             <h3 style={{ textAlign: "center" }}>(For elo)</h3>
-
+                            <div className="abilities-container-friendly">
+                                {selectedAbilities.map((item: { name: string; count: number }, index: number) => (
+                                    <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name]}}>
+                                        <div className="ability-icon">
+                                            <img
+                                                src={`./assets/abilityIcons/${item.name}.png`}
+                                                alt={item.name}
+                                                className="ability-img"
+                                            />
+                                        </div>
+                                        <div className="ability-count" style={{fontSize: '1.2rem'}}>{item.count}</div>
+                                    </div>
+                                ))}
+                            </div>
                             <div style={{ height: "43px" }}></div>
                             <div
                                 className="player-count-drop-down-container"
