@@ -108,7 +108,7 @@ class ZombieState(DefaultState):
         change = amount * self.node.intake_multiplier
         if change > 0:
             # this would mean it was recieved from another zombie and was already
-            change /= 3 # doubled when coming out from that other zombie, and then was doubled
+            change /= 3.7 # doubled when coming out from that other zombie, and then was doubled
             # again when coming in (Zombified effect). *4 is too much, so this works out to *4/3
         return change
         
