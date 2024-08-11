@@ -978,7 +978,7 @@ def get_royale_settings():
         "full_size": 200,
         "accessible_percentage": 1/2,
         "walls": True,
-        "wall_counts": [2, 2, 1, 2],
+        "wall_counts": [2, 1, 2, 2],
         "iterative_make_accessible": True,
         "accessibility_times": [300],
         "starting_structures": False,

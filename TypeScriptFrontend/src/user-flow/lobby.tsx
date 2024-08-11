@@ -108,7 +108,7 @@ const Lobby: React.FC = () => {
                             alignItems: "center",
                         }}
                     >
-                        <h2 style={{ marginBottom: "10px" }}>No one online?</h2>
+                        <h2 className="whiteText" style={{ marginBottom: "10px" }}>No one online?</h2>
                         <button
                             style={{
                                 padding: "10px 20px",
