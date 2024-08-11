@@ -97,7 +97,7 @@ const Lobby: React.FC = () => {
                         {playerCount} Player {gameMode} Ladder Match
                     </h2>
                 )}
-                {gameID && !botRequested && (
+                {gameID && !botRequested && gameMode != "Original" && (
                     <div
                         style={{
                             position: "absolute",
