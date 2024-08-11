@@ -41,8 +41,11 @@ class ServerGame(JsonableTick):
     def countdown_timer(self):
         return self.times[self.current_section]
     
+    def get_ordered_counts(self):
+        return sorted(self.counts, reverse=True)
+    
     def create_bot(self, player_id, ability_process):
-        self.player_dict[player_id] = create_ai(player_id, self.settings, self.board, self.effect, self.event, ability_process)
+        self.player_dict[player_id] = create_ai(player_id, self.settings, self.board, self.effect, self.event, self.get_ordered_counts, self.eliminate, ability_process)
         return self.player_dict[player_id].name
 
     @property
@@ -62,7 +65,7 @@ class ServerGame(JsonableTick):
         else:
             try:
                 new_data = [self.board.id_dict[d] for d in data]
-                player.use_ability(key, new_data)
+                return player.use_ability(key, new_data)
             except KeyError:
                 print("failed to use ability because item no longer exists")
                 return False
@@ -72,8 +75,10 @@ class ServerGame(JsonableTick):
         event = self.events[key]
         if event.can_use(player, data):
             event.use(player, data)
+            return True
         else:
             print("failed to use event")
+            return False
     
     def eliminate(self, player, forced=False):
         rank = len(self.remaining)

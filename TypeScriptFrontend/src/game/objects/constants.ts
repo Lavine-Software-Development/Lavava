@@ -96,11 +96,11 @@ export const NameToCode = {
 };
 
 export const AbilityElixir = {
-    [KeyCodes.FREEZE_CODE]: 2,
+    [KeyCodes.FREEZE_CODE]: 3,
     [KeyCodes.MINI_BRIDGE_CODE]: 2,
     [KeyCodes.D_BRIDGE_CODE]: 3,
     [KeyCodes.WALL_CODE]: 3,
-    [KeyCodes.BRIDGE_CODE]: 4,
+    [KeyCodes.BRIDGE_CODE]: 5,
     [KeyCodes.OVER_GROW_CODE]: 4,
     [KeyCodes.RAGE_CODE]: 5,
     [KeyCodes.POISON_CODE]: 5,

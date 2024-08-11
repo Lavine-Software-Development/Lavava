@@ -973,16 +973,16 @@ MINI_BRIDGE_CODE = 109
 def get_royale_settings():
     settings = {
         "ability_type": "elixir",
-        "elixir_cap": 8,
-        "elixir_rate": 4,
+        "elixir_cap": 12,
+        "elixir_rate": 3.5,
         "growth_rate": 0.14,
         "transfer_rate": 0.012,
         "main_time": 420,
         "overtime": 60,
         "full_size": 200,
-        "accessible_percentage": 1 / 2,
+        "accessible_percentage": 1/2,
         "walls": True,
-        "wall_counts": [2, 1, 2],
+        "wall_counts": [2, 2, 1, 2],
         "iterative_make_accessible": True,
         "accessibility_times": [300],
         "starting_structures": False,
@@ -1039,13 +1039,13 @@ def get_royale_abilities():
         },
         {
             "name": "Freeze", 
-            "cost": 2,
+            "cost": 3,
             "description": "Convert edge to one-way"
             
         },
         {
             "name": "Bridge", 
-            "cost": 4,
+            "cost": 5,
         },
         {
             "name": "Poison",

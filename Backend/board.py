@@ -42,11 +42,20 @@ class Board(JsonableTracked):
             if (not player) or node.owner == player:
                 node.set_state(effect)
 
+    @property
     def accessible_nodes(self):
         return {node for node in self.nodes if node.accessible}
     
+    @property
     def unclaimed_nodes(self):
         return {node for node in self.nodes if not node.owner}
+    
+    def find_edge(self, from_node_id, to_node_id):
+        from_node, to_node = self.id_dict[from_node_id], self.id_dict[to_node_id]
+        for edge in from_node.edges:
+            if edge.opposite(from_node) == to_node:
+                return edge
+        return False
 
     def make_accessible(self):
         for node in self.nodes:

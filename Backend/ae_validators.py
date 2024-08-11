@@ -94,7 +94,7 @@ def attack_validators(get_structures, player, attack_type):
         return any(in_structure_range(structure) for structure in structures)
 
     def not_attacking_edge(edge):
-        return edge.from_node == player or not edge.flowing
+        return edge.from_node.owner == player or not edge.flowing
 
     def not_attacking_neighbor_attack(data):
         node = data[0]
@@ -307,16 +307,30 @@ def make_ability_validators(board, player, settings):
         )
     )
 
+def standard_click_validators(board):
+
+    def left_click(player, data):
+        try:
+            return board.id_dict[data[0]].valid_left_click(player)
+        except KeyError:
+            return False
+        
+    def right_click(player, data):
+        try:
+            return board.id_dict[data[0]].valid_right_click(player)
+        except KeyError:
+            return False
+
+
+    return {
+        STANDARD_LEFT_CLICK: left_click,
+        STANDARD_RIGHT_CLICK: right_click,
+    }
+
 
 def make_effect_validators(board):
     return {
         CANNON_SHOT_CODE: make_cannon_shot_check(board.check_new_edge, board.id_dict),
         PUMP_DRAIN_CODE: make_pump_drain_check(board.id_dict),
-        STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[
-            data[0]
-        ].valid_left_click(player),
-        STANDARD_RIGHT_CLICK: lambda player, data: board.id_dict[
-            data[0]
-        ].valid_right_click(player),
         CREDIT_USAGE_CODE: valid_ability_for_credits,
-    }
+    } | standard_click_validators(board)

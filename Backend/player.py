@@ -38,8 +38,10 @@ class DefaultPlayer(JsonableTick):
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
             self.abilities[key].use(data)
+            return True
         else:
             print("failed to use ability, ", key)
+            return False
 
     def default_values(self):
         self.killer = None
@@ -129,12 +131,6 @@ class RoyalePlayer(DefaultPlayer):
     def update_abilities(self):
         for ability in self.abilities.values():
             ability.update()
-
-    def use_ability(self, key, data) -> Optional[dict]:
-        if self.abilities[key].can_use(data):
-            self.abilities[key].use(data)
-        else:
-            print("failed to use ability, ", key)
 
     def set_abilities(self, chosen_abilities, ability_effects, board, settings):
         validators = make_ability_validators(board, self, settings)
