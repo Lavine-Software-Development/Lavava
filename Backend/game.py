@@ -10,7 +10,7 @@ from ae_effects import make_event_effects
 from ae_validators import make_effect_validators
 from event import Event
 import sys
-from baseAI import create_ai, BaseAI
+from baseAI import create_ai, AI
 
 class ServerGame(JsonableTick):
     def __init__(self, player_count, gs, settings):
@@ -41,13 +41,13 @@ class ServerGame(JsonableTick):
     def countdown_timer(self):
         return self.times[self.current_section]
     
-    def create_bot(self, player_id):
-        self.player_dict[player_id] = create_ai(player_id, self.settings, self.board, self.effect, self.event)
+    def create_bot(self, player_id, ability_process):
+        self.player_dict[player_id] = create_ai(player_id, self.settings, self.board, self.effect, self.event, ability_process)
         return self.player_dict[player_id].name
 
     @property
     def bots(self):
-        return [player for player in self.player_dict.values() if isinstance(player, BaseAI)]
+        return [player for player in self.player_dict.values() if isinstance(player, AI)]
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
@@ -59,9 +59,13 @@ class ServerGame(JsonableTick):
                 return True
             else:
                 return False
-        else:  
-            new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
-            player.use_ability(key, new_data)
+        else:
+            try:
+                new_data = [self.board.id_dict[d] for d in data]
+                player.use_ability(key, new_data)
+            except KeyError:
+                print("failed to use ability because item no longer exists")
+                return False
         
     def event(self, key, player_id, data):
         player = self.player_dict[player_id]
@@ -108,6 +112,7 @@ class ServerGame(JsonableTick):
         return {code: Event(validators[code], effects[code]) for code in EVENTS}
 
     def set_abilities(self, player, abilities, settings):
+        print("setting abilities for player", player, "with abilities", abilities)
         self.player_dict[player].set_abilities(abilities, self.ability_effects, self.board, settings)
 
     def set_player_settings(self, player, settings):
@@ -181,7 +186,7 @@ class ServerGame(JsonableTick):
             self.determine_ranks_from_elimination(self.remaining.pop())
 
     def only_bots_remain(self):
-        return all([isinstance(self.player_dict[player], BaseAI) for player in self.remaining])
+        return all([isinstance(self.player_dict[player], AI) for player in self.remaining])
 
     def post_tick(self):
         self.extra_info.clear()

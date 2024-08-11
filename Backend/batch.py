@@ -119,7 +119,7 @@ class Batch:
         
     def add_bot(self):
         player_id = len(self.token_ids)
-        name = self.game.create_bot(player_id)
+        name = self.game.create_bot(player_id, self.ability_process)
         if self.player_count > 2:
             name += f' {player_id}'
         self.token_ids[name] = player_id
@@ -207,6 +207,7 @@ class Batch:
         data = convert_keys_to_int(data)
         if self.settings["forced_deck"]:
             self.game.set_abilities(player, self.settings["deck"], self.settings)
+            print(f"Player {player} has selected abilities {self.game.player_dict[player].abilities.keys()}")
             return True
         elif json_abilities.validate_ability_selection(data, self.settings):
             self.game.set_abilities(player, data, self.settings)

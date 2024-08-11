@@ -69,6 +69,9 @@ class DefaultPlayer(JsonableTick):
     def update(self):
         pass
 
+    def capture_event(self, node, gain):
+        pass  
+
 
 class CreditPlayer(DefaultPlayer):
 

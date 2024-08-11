@@ -193,6 +193,8 @@ class Node(JsonableTracked):
             self.updated = True
 
     def capture(self, player):
+        if self.owner:
+            self.owner.capture_event(self, False)
         self.value = self.state.capture_event()
         self.update_ownerships(player)
         self.check_edge_stati()
@@ -200,6 +202,7 @@ class Node(JsonableTracked):
         if self.state.reset_on_capture:
             self.set_default_state()
         self.effects_update(lambda effect: effect.capture_removal(player))
+        player.capture_event(self, True)
 
     def absorbing(self):
         for edge in self.incoming:
@@ -244,6 +247,9 @@ class Node(JsonableTracked):
     @property
     def neighbors(self):
         return [edge.opposite(self) for edge in self.edges]
+    
+    def neighbors_(self, direction):
+        return [edge.opposite(self) for edge in getattr(self, direction)]
 
     @property
     def color(self):

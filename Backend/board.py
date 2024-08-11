@@ -42,6 +42,12 @@ class Board(JsonableTracked):
             if (not player) or node.owner == player:
                 node.set_state(effect)
 
+    def accessible_nodes(self):
+        return {node for node in self.nodes if node.accessible}
+    
+    def unclaimed_nodes(self):
+        return {node for node in self.nodes if not node.owner}
+
     def make_accessible(self):
         for node in self.nodes:
             node.make_accessible()
@@ -173,12 +179,15 @@ class Board(JsonableTracked):
         return True
 
     def overlap(self, edge1, edge2):
-        return do_intersect(
-            self.nodeDict[edge1[0]],
-            self.nodeDict[edge1[1]],
-            self.nodeDict[edge2[0]],
-            self.nodeDict[edge2[1]],
-        )
+        try:
+            return do_intersect(
+                self.nodeDict[edge1[0]],
+                self.nodeDict[edge1[1]],
+                self.nodeDict[edge2[0]],
+                self.nodeDict[edge2[1]],
+            )
+        except KeyError:
+            return False
 
     def buy_new_edge(self, node_from, node_to, edge_type, only_to_node_port, destroy_ports):
         new_id = self.new_edge_id()
