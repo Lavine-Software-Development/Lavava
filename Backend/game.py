@@ -10,6 +10,7 @@ from ae_effects import make_event_effects
 from ae_validators import make_effect_validators
 from event import Event
 import sys
+from baseAI import create_ai, AI
 
 class ServerGame(JsonableTick):
     def __init__(self, player_count, gs, settings):
@@ -19,14 +20,14 @@ class ServerGame(JsonableTick):
         self.settings = settings
         self.extra_info = []
         self.counts = [0] * player_count
-        self.board = Board(self.gs)
+        self.board = Board(self.gs, settings['ability_type'] == "credits")
         if settings["ability_type"] == "credits":
             self.player_dict = {
                 i: CreditPlayer(i) for i in range(player_count)
             }
         else:
             self.player_dict = {
-                i: RoyalePlayer(i, settings['elixir_cap'], settings['elixir_rate']) for i in range(player_count)
+                i: RoyalePlayer(i, settings) for i in range(player_count)
             }
 
         start_values = {'board'}
@@ -39,6 +40,17 @@ class ServerGame(JsonableTick):
     @property
     def countdown_timer(self):
         return self.times[self.current_section]
+    
+    def get_ordered_counts(self):
+        return sorted(self.counts, reverse=True)
+    
+    def create_bot(self, player_id, ability_process):
+        self.player_dict[player_id] = create_ai(player_id, self.settings, self.board, self.effect, self.event, self.get_ordered_counts, self.eliminate, ability_process)
+        return self.player_dict[player_id].name
+
+    @property
+    def bots(self):
+        return [player for player in self.player_dict.values() if isinstance(player, AI)]
 
     def effect(self, key, player_id, data):
         player = self.player_dict[player_id]
@@ -47,19 +59,26 @@ class ServerGame(JsonableTick):
                 data_items = [self.board.id_dict[d] for d in data]
                 self.ability_effects[key](data_items, player)
                 player.ps.next()
+                return True
             else:
                 return False
-        else:  
-            new_data = [self.board.id_dict[d] if d in self.board.id_dict else d for d in data]
-            player.use_ability(key, new_data)
+        else:
+            try:
+                new_data = [self.board.id_dict[d] for d in data]
+                return player.use_ability(key, new_data)
+            except KeyError:
+                print("failed to use ability because item no longer exists")
+                return False
         
     def event(self, key, player_id, data):
         player = self.player_dict[player_id]
         event = self.events[key]
         if event.can_use(player, data):
             event.use(player, data)
+            return True
         else:
             print("failed to use event")
+            return False
     
     def eliminate(self, player, forced=False):
         rank = len(self.remaining)
@@ -98,7 +117,11 @@ class ServerGame(JsonableTick):
         return {code: Event(validators[code], effects[code]) for code in EVENTS}
 
     def set_abilities(self, player, abilities, settings):
+        print("setting abilities for player", player, "with abilities", abilities)
         self.player_dict[player].set_abilities(abilities, self.ability_effects, self.board, settings)
+
+    def set_player_settings(self, player, settings):
+        self.player_dict[player].set_settings(settings) 
 
     def all_player_next(self):
         for player in self.player_dict.values():
@@ -157,11 +180,18 @@ class ServerGame(JsonableTick):
             self.board.update()
             self.player_update()
 
-        if self.board.victory_check():
+        if self.gs.value == GSE.START_SELECTION.value:
+            for bot in self.bots:
+                bot.choose_start()
+
+        if self.board.victory_check() or self.only_bots_remain():
             self.determine_ranks_from_capitalize_or_timeout()
         elif len(self.remaining) == 1:
 
             self.determine_ranks_from_elimination(self.remaining.pop())
+
+    def only_bots_remain(self):
+        return all([isinstance(self.player_dict[player], AI) for player in self.remaining])
 
     def post_tick(self):
         self.extra_info.clear()
@@ -196,7 +226,8 @@ class ServerGame(JsonableTick):
 
         # score equals 100b + a
         # effectively, the player with the most full capitals wins, with total nodes as a tiebreaker
-        player_scores = {key: val * 100 + player_nodes[key] for key, val in player_capitals.items()}
+        # but if already eliminated, they are effectively ranked backwards by multiplying their predetermined rank by -1000
+        player_scores = {key: self.player_dict[key].rank * -1000 + val * 100 + player_nodes[key] for key, val in player_capitals.items()}
         sorted_scores = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
         self.player_dict[sorted_scores[0][0]].win()
         for i in range(1, len(sorted_scores)):

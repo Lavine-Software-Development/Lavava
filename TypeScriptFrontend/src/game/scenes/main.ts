@@ -882,7 +882,7 @@ export class MainScene extends Scene {
 
             let eliminationText;
 
-            if (player2 == this.mainPlayer.name && this.otherPlayers.length > 2) {
+            if (player2 == this.mainPlayer.name && this.otherPlayers.length > 2 && this.settings.ability_type == "credits") {
                 eliminationText = this.add.text(
                     this.sys.game.config.width as number / 2,
                     20,

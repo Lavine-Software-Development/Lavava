@@ -8,6 +8,7 @@ from json_helpers import all_levels_dict_and_json_cost, convert_keys_to_int, jso
 import requests
 from config import config
 from dotenv import load_dotenv
+import random
 
 load_dotenv()
 USER_BACKEND = config.USER_BACKEND_LOCAL_URL
@@ -87,8 +88,16 @@ class Batch:
         display_name = data.get('display_name')
 
         self.token_disname[token] = display_name
-        print(f"Display name set to: {display_name}")
         return display_name
+    
+    def set_player_settings(self, token):
+        url = USER_BACKEND + '/backend_get_user_settings'
+        data = {"token": token}
+        response = requests.post(url, json=data)
+
+        data = response.json()
+        player = self.token_ids[token]
+        self.game.set_player_settings(player, data)
         
     def add_player(self, token, websocket, ability_data):
 
@@ -98,10 +107,24 @@ class Batch:
             self.id_sockets[player_id] = websocket
             self.not_responsive_count[player_id] = 0
             self.set_token_to_display_name(token)
+            self.set_player_settings(token)
             return False
         else:
             print(f"Invalid ability selection for player with token: {token[:10]}...")
             return "CHEATING: INVALID ABILITY SELECTION"
+        
+    def add_bots(self):
+        while len(self.token_ids) < self.player_count:
+            self.add_bot()
+        
+    def add_bot(self):
+        player_id = len(self.token_ids)
+        name = self.game.create_bot(player_id, self.ability_process)
+        if self.player_count > 2:
+            name += f' {player_id}'
+        self.token_ids[name] = player_id
+        self.not_responsive_count[player_id] = 0
+        self.token_disname[name] = name
         
     def remove_player_from_lobby(self, token):
         removed_id = self.token_ids.pop(token)
@@ -109,6 +132,7 @@ class Batch:
             if self.token_ids[othertoken] > removed_id:
                 self.token_ids[othertoken] = self.token_ids[othertoken] - 1
         self.id_sockets.pop(removed_id)
+        print(f"Player {removed_id} has left the lobby")
 
     def remove_player_from_game(self, id):
         self.id_sockets.pop(id)
@@ -183,6 +207,7 @@ class Batch:
         data = convert_keys_to_int(data)
         if self.settings["forced_deck"]:
             self.game.set_abilities(player, self.settings["deck"], self.settings)
+            print(f"Player {player} has selected abilities {self.game.player_dict[player].abilities.keys()}")
             return True
         elif json_abilities.validate_ability_selection(data, self.settings):
             self.game.set_abilities(player, data, self.settings)
