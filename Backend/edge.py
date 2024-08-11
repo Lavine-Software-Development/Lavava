@@ -51,19 +51,23 @@ class Edge(JsonableTracked):
             self.on = specified
         if not self:
             self.popped = True
-
-    def cheeky_pop(self):
-        shared_from_node_edges = self.from_node.outgoing
-        return any(edge.flowing for edge in shared_from_node_edges)
+    
+    @property
+    def begin_transfer_value(self):
+        return BEGIN_TRANSFER_VALUE + self.from_node.to_output_load * 2
+    
+    @property
+    def minimum_transfer_value(self):
+        return MINIMUM_TRANSFER_VALUE + self.from_node.to_output_load * 2
 
     def update(self):
         if (
             not self.on
-            or self.from_node.value < MINIMUM_TRANSFER_VALUE
+            or self.from_node.value < self.minimum_transfer_value
             or not self.flow_allowed()
         ):
             self.flowing = False
-        elif self.from_node.value > BEGIN_TRANSFER_VALUE or self.cheeky_pop():
+        elif self.from_node.value > self.begin_transfer_value:
             self.flowing = True
 
         if self.flowing:

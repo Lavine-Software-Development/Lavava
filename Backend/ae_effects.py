@@ -132,6 +132,7 @@ def freeze_effect(data, player):
 def spawn_effect(data, player):
     node = data[0]
     node.capture(player)
+    node.value = 10
 
 def zombie_effect(data, player):
     node = data[0]

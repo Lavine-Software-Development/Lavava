@@ -88,7 +88,6 @@ class Batch:
         display_name = data.get('display_name')
 
         self.token_disname[token] = display_name
-        print(f"Display name set to: {display_name}")
         return display_name
     
     def set_player_settings(self, token):
