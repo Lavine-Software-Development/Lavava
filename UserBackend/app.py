@@ -76,17 +76,15 @@ if config.DB_CONNECTED:
             self.ability = ability
             self.count = count
 
-    class MatchHistory(db.Model):
+    class GameHistory(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         game_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
         usernames = db.Column(Text, nullable=False)
         user_ranks = db.Column(Text, nullable=False)
-        elo_changes = db.Column(Text, nullable=False)
 
-        def __init__(self, usernames, user_ranks, elo_changes):
+        def __init__(self, usernames, user_ranks):
             self.usernames = json.dumps(usernames)
             self.user_ranks = json.dumps(user_ranks)
-            self.elo_changes = json.dumps(elo_changes)
 
 
         @property
@@ -96,10 +94,6 @@ if config.DB_CONNECTED:
         @property
         def user_ranks_list(self):
             return json.loads(self.user_ranks)
-
-        @property
-        def elo_changes_list(self):
-            return json.loads(self.elo_changes)
 
 
     with app.app_context():
@@ -227,6 +221,10 @@ def register():
     if config.DB_CONNECTED:
         new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
+
+        create_default_deck(new_user.id, "Original")
+        create_default_deck(new_user.id, "Royale")
+
         db.session.commit()
 
     return jsonify({"success": True, "message": "Please follow the confirmation email sent to: {} (check spam mail). Note that it can take a while for emails to deliver. ".format(email)}), 200
@@ -1136,6 +1134,34 @@ def get_match_history(current_user):
                 } for i in range(1, 21)
             ]
         })
+
+def create_default_deck(user_id, mode):
+    default_abilities = {
+        "Original": [
+            {"name": "spawn", "count": 2},
+            {"name": "Cannon", "count": 2},
+            {"name": "Rage", "count": 2},
+            {"name": "Bridge", "count": 3}
+        ],
+        "Royale": [
+            {"name": "Bridge", "count": 1},
+            {"name": "D-Bridge", "count": 1},
+            {"name": "Freeze", "count": 1},
+            {"name": "Rage", "count": 1},
+            {"name": "Nuke", "count": 1}
+        ]
+    }
+
+    deck = Deck(user_id=user_id, name=mode)
+    db.session.add(deck)
+    db.session.flush()
+
+    for ability in default_abilities[mode]:
+        card = DeckCard(deck_id=deck.id, ability=ability["name"], count=ability["count"])
+        db.session.add(card)
+
+    db.session.commit()
+
 
 if __name__ == '__main__':
     if config.ENV == "PROD":

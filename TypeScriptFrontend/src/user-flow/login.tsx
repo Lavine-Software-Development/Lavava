@@ -38,6 +38,22 @@ const Login: React.FC<LoginProps> = () => {
         const guestToken = generateGuestToken();
         sessionStorage.setItem('guestToken', guestToken);
         localStorage.removeItem("userToken");
+        const defaultDecks = {
+            "Original": [
+                {"name": "spawn", "count": 2},
+                {"name": "Cannon", "count": 2},
+                {"name": "Rage", "count": 2},
+                {"name": "Bridge", "count": 3}
+            ],
+            "Royale": [
+                {"name": "Bridge", "count": 1},
+                {"name": "D-Bridge", "count": 1},
+                {"name": "Freeze", "count": 1},
+                {"name": "Rage", "count": 1},
+                {"name": "Nuke", "count": 1}
+            ]
+        };
+        sessionStorage.setItem('guestDecks', JSON.stringify(defaultDecks));
         navigate('/home');
     };
 

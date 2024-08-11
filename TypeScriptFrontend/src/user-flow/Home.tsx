@@ -53,7 +53,6 @@ const Home: React.FC = () => {
     });
     const [keyCode, setKeyCode] = useState("");
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [showSalaryPopup, setShowSalaryPopup] = useState(false);
     const [showLoginPopup, setShowLoginPopup] = useState(false);
     const [showNoAbilityPopup, setShowNoAbilityPopup] = useState(false);
     const [friendlyMode, setFriendlyMode] = useState<string>(
@@ -79,11 +78,30 @@ const Home: React.FC = () => {
                 window.location.pathname
             );
         }
-
-        const storedAbilities = sessionStorage.getItem("selectedAbilities");
         const token = localStorage.getItem("userToken");
         const isGuest = sessionStorage.getItem("guestToken");
         setIsLoggedIn(!!token);
+
+        if (isGuest) {
+            // Load guest decks
+            const guestDecks = JSON.parse(sessionStorage.getItem('guestDecks') || '{}');
+        } else if (token) {
+            // Fetch user decks from backend
+            fetch(`${config.userBackend}/user_abilities`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data && data.decks) {
+                        const decks = data.decks
+                    }
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch abilities:", error);
+                });
+        }
 
         let prevMode = sessionStorage.getItem("gameMode");
         if (prevMode === "Royale") {
@@ -94,30 +112,6 @@ const Home: React.FC = () => {
 
         if (!isGuest && !token) {
             navigate("/login");
-        }
-
-        if (storedAbilities) {
-            setSelectedAbilities(JSON.parse(storedAbilities));
-        } else if (token) {
-            fetch(`${config.userBackend}/user_abilities`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data && data.abilities) {
-                        const abilities = data.abilities;
-                        sessionStorage.setItem(
-                            "selectedAbilities",
-                            JSON.stringify(abilities)
-                        );
-                        setSelectedAbilities(abilities);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Failed to fetch abilities:", error);
-                });
         }
 
         const gameStyle = sessionStorage.getItem("gameStyle");
@@ -250,7 +244,6 @@ const Home: React.FC = () => {
     }, [gameModeDropdownOpen, playDropdownOpen, playerCountDropdownOpen]);
 
     const handleClosePopups = () => {
-        setShowSalaryPopup(false);
         setShowLoginPopup(false);
         setShowNoAbilityPopup(false);
     };
