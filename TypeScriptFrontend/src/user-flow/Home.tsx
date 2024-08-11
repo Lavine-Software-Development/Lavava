@@ -67,7 +67,10 @@ const Home: React.FC = () => {
     const [deckIndex, setDeckIndex] = useState<number>(0);
     const [usersDecks, setUsersDecks] = useState<any[][]>([]);
     const [decks, setDecks] = useState<any[][]>([]);
-    const [guestDecks, setGuestDecks] = useState<any[][]>([]);
+    const [guestDecks, setGuestDecks] = useState<any>({
+        Original: [],
+        Royale: []
+    });
 
     useEffect(() => {
         sessionStorage.removeItem("key_code");
@@ -90,7 +93,7 @@ const Home: React.FC = () => {
             // Load guest decks
             const guestDecks = JSON.parse(sessionStorage.getItem('guestDecks') || '{}');
             setGuestDecks(guestDecks);
-            setSelectedAbilities(guestDecks[gameMode])
+            setSelectedAbilities(guestDecks[gameMode] || [])
         } else if (token) {
             // Fetch user decks from backend
             fetch(`${config.userBackend}/user_abilities`, {
@@ -108,7 +111,7 @@ const Home: React.FC = () => {
                         setDeckIndex(newDeckIndex);
                         setUsersDecks(newDecks);
                         setDecks(fetchedDecks);
-                        setSelectedAbilities(newDecks[newDeckIndex]);
+                        setSelectedAbilities(newDecks[newDeckIndex] || []);
                     }
                 })
                 .catch((error) => {
@@ -144,13 +147,12 @@ const Home: React.FC = () => {
     useEffect(() => {
         const isGuest = sessionStorage.getItem("guestToken");
         if (isGuest) {
-            setSelectedAbilities(guestDecks[gameMode]);
-        }
-        else {
+            setSelectedAbilities(guestDecks[gameMode] || []);
+        } else {
             handleMyDeck();
-            setSelectedAbilities(usersDecks[deckIndex]);
+            setSelectedAbilities(usersDecks[deckIndex] || []);
         }
-    }, [gameMode]);
+    }, [gameMode, guestDecks, usersDecks, deckIndex]);
 
     const handleMyDeck = () => {
         if (!decks || decks.length === 0) {
@@ -344,7 +346,7 @@ const Home: React.FC = () => {
                 />
                 <div style={{ height: "10px" }}></div>
             </div>
-            {selectedAbilities.length > 0 && tab !== "" && (
+                {selectedAbilities && selectedAbilities.length > 0 && tab !== "" && (
                 <div className="profile-card">
                     {tab === "FRIENDLY" ? (
                         <div>
@@ -381,27 +383,19 @@ const Home: React.FC = () => {
                             <h3 style={{ textAlign: "center" }}>(No elo)</h3>
 
                             <div className="abilities-container-friendly">
-                                {usersDecks && usersDecks[deckIndex] ? (
-                                    usersDecks[deckIndex].length > 0 ? (
-                                        usersDecks[deckIndex].map((item: { name: string; count: number }, index: number) => (
-                                            <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name]}}>
-                                                <div className="ability-icon">
-                                                    <img
-                                                        src={`./assets/abilityIcons/${item.name}.png`}
-                                                        alt={item.name}
-                                                        className="ability-img"
-                                                    />
-                                                </div>
-                                                <div className="ability-count" style={{fontSize: '1.2rem'}}>{item.count}</div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p>You have no saved abilities for {gameMode} mode</p>
-                                    )
-                                ) : (
-                                    <p>Loading your deck...</p>
-                                )}
-                                </div>
+                                {selectedAbilities.map((item: { name: string; count: number }, index: number) => (
+                                    <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name]}}>
+                                        <div className="ability-icon">
+                                            <img
+                                                src={`./assets/abilityIcons/${item.name}.png`}
+                                                alt={item.name}
+                                                className="ability-img"
+                                            />
+                                        </div>
+                                        <div className="ability-count" style={{fontSize: '1.2rem'}}>{item.count}</div>
+                                    </div>
+                                ))}
+                            </div>
                             {friendlyMode === "host" ? (
                                 <>
                                     {/* <label>Player Count:</label> */}

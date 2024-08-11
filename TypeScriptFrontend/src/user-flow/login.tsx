@@ -40,7 +40,7 @@ const Login: React.FC<LoginProps> = () => {
         localStorage.removeItem("userToken");
         const defaultDecks = {
             "Original": [
-                {"name": "spawn", "count": 2},
+                {"name": "Spawn", "count": 2},
                 {"name": "Cannon", "count": 2},
                 {"name": "Rage", "count": 2},
                 {"name": "Bridge", "count": 3}
