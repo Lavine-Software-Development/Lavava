@@ -139,7 +139,7 @@ export class MainScene extends Scene {
         this.load.image("Over-Grow", "Over-Grow.png");
         this.load.image("Catapult", "Catapult.png");
         this.load.image("Wormhole", "Wormhole.png");
-        this.load.image("Wallbreaker", "Wallbreaker.png");
+        this.load.image("Wall", "Wall.png");
     }
 
     create(): void {
@@ -882,7 +882,7 @@ export class MainScene extends Scene {
 
             let eliminationText;
 
-            if (player2 == this.mainPlayer.name && this.otherPlayers.length > 2) {
+            if (player2 == this.mainPlayer.name && this.otherPlayers.length > 2 && this.settings.ability_type == "credits") {
                 eliminationText = this.add.text(
                     this.sys.game.config.width as number / 2,
                     20,

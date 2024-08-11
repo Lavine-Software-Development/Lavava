@@ -16,5 +16,7 @@ COPY . .
 # Make port 80 available to the world outside this container
 EXPOSE 5553 
 
+EXPOSE 5554
+
 # Run the application
 CMD ["python", "websocket_server.py"]

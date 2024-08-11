@@ -6,8 +6,6 @@ from constants import (
     SCREEN_HEIGHT,
     STATE_NAMES,
     EFFECT_NAMES,
-    AUTO_ATTACK,
-    AUTO_EXPAND,
     BLACK,
 )
 from nodeState import (
@@ -127,10 +125,10 @@ class Node(JsonableTracked):
     def expand(self):
         for edge in self.outgoing:
             if edge.contested:
-                if AUTO_ATTACK:
+                if self.owner.auto_attack:
                     edge.switch(True)
                     edge.popped = True
-            elif not edge.owned and AUTO_EXPAND and not edge.popped:
+            elif not edge.owned and self.owner.auto_spread and not edge.popped:
                 edge.switch(True)
 
     def check_edge_stati(self):
@@ -148,7 +146,7 @@ class Node(JsonableTracked):
         return self.owner is not None and self.owner.ps.value < PSE.ELIMINATED.value
 
     def tick(self):
-        if self.value - 10 < self.full_size:
+        if self.value - 10 < self.full_size or self.grow_multiplier < 0:
             self.value = min(self.value + self.grow(), self.full_size)
         self.effects_update(lambda effect: effect.count())
 
@@ -195,6 +193,8 @@ class Node(JsonableTracked):
             self.updated = True
 
     def capture(self, player):
+        if self.owner:
+            self.owner.capture_event(self, False)
         self.value = self.state.capture_event()
         self.update_ownerships(player)
         self.check_edge_stati()
@@ -202,6 +202,7 @@ class Node(JsonableTracked):
         if self.state.reset_on_capture:
             self.set_default_state()
         self.effects_update(lambda effect: effect.capture_removal(player))
+        player.capture_event(self, True)
 
     def absorbing(self):
         for edge in self.incoming:
@@ -230,10 +231,25 @@ class Node(JsonableTracked):
     @property
     def outgoing(self):
         return {edge for edge in self.edges if edge.from_node == self}
+    
+    @property
+    def possible_outgoing(self):
+        return {edge for edge in self.edges if edge.from_node == self or edge.dynamic}
+    
+    @property
+    def to_output_load(self):
+        return len({edge for edge in self.outgoing if edge.on and not edge.flowing})
+    
+    @property
+    def outputting_load(self):
+        return len({edge for edge in self.outgoing if edge.on and edge.flowing})
 
     @property
     def neighbors(self):
         return [edge.opposite(self) for edge in self.edges]
+    
+    def neighbors_(self, direction):
+        return [edge.opposite(self) for edge in getattr(self, direction)]
 
     @property
     def color(self):

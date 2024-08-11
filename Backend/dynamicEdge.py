@@ -20,8 +20,8 @@ class DynamicEdge(Edge):
         self.swap_direction()
 
     def natural_swap(self):
-        self.on = False
         self.swap_direction()
+        self.on = self.contested and self.from_node.owner.auto_attack
 
     def swap_direction(self):
         if self.dynamic:

@@ -28,7 +28,7 @@ from constants import (
     MINIMUM_TRANSFER_VALUE,
     MINI_BRIDGE_CODE,
     OVER_GROW_CODE,
-    WALL_BREAKER_CODE,
+    WALL_CODE,
     WORMHOLE_CODE,
 )
 
@@ -54,6 +54,7 @@ def make_nuke(remove_node):
     def nuke_effect(data, player):
         node = data[0]
         remove_node(node)
+        node.owner.capture_event(node, False)
         if node.owner and node.owner.count == 0:
             node.owner.killed_event(player)
 
@@ -132,6 +133,7 @@ def freeze_effect(data, player):
 def spawn_effect(data, player):
     node = data[0]
     node.capture(player)
+    node.value = 10
 
 def zombie_effect(data, player):
     node = data[0]
@@ -180,9 +182,9 @@ def pump_effect(data, player):
     node = data[0]
     node.set_state("pump")
 
-def wall_breaker_effect(data, player):
+def wall_effect(data, player):
     node = data[0]
-    node.make_accessible()
+    node.wall_count = 1
 
 def make_ability_effects(board, settings):
     return {
@@ -199,7 +201,7 @@ def make_ability_effects(board, settings):
         CANNON_CODE: cannon_effect,
         PUMP_CODE: pump_effect,
         WORMHOLE_CODE: make_wormhole_effect,
-        WALL_BREAKER_CODE: wall_breaker_effect
+        WALL_CODE: wall_effect
     } | make_board_wide_effect(board.board_wide_effect)
 
 
@@ -207,7 +209,7 @@ def make_event_effects(board, update_method):
     return {
         CANNON_SHOT_CODE: make_cannon_shot(board.id_dict, update_method),
         PUMP_DRAIN_CODE : make_pump_drain(board.id_dict),
-        STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].switch(),
+        STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].manual_switch(),
         STANDARD_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].click_swap(),
         CREDIT_USAGE_CODE: credit_usage_effect
     }
