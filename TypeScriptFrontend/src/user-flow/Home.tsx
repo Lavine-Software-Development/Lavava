@@ -64,6 +64,10 @@ const Home: React.FC = () => {
     const [gameModeDropdownOpen, setGameModeDropdownOpen] = useState<boolean>(false);
     const gameModeDropdownRef = useRef<HTMLDivElement>(null);
     const [showInvalidCodePopup, setShowInvalidCodePopup] = useState(false);
+    const [deckIndex, setDeckIndex] = useState<number>(0);
+    const [usersDecks, setUsersDecks] = useState<any[][]>([]);
+    const [decks, setDecks] = useState<any[][]>([]);
+    const [guestDecks, setGuestDecks] = useState<any[][]>([]);
 
     useEffect(() => {
         sessionStorage.removeItem("key_code");
@@ -85,6 +89,8 @@ const Home: React.FC = () => {
         if (isGuest) {
             // Load guest decks
             const guestDecks = JSON.parse(sessionStorage.getItem('guestDecks') || '{}');
+            setGuestDecks(guestDecks);
+            setSelectedAbilities(guestDecks[gameMode])
         } else if (token) {
             // Fetch user decks from backend
             fetch(`${config.userBackend}/user_abilities`, {
@@ -95,7 +101,14 @@ const Home: React.FC = () => {
                 .then((response) => response.json())
                 .then((data) => {
                     if (data && data.decks) {
-                        const decks = data.decks
+                        const fetchedDecks: any[][] = data.decks || [];
+                        const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
+                        const newDeckIndex = modes.findIndex((mode: string) => mode === gameMode);
+                        const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
+                        setDeckIndex(newDeckIndex);
+                        setUsersDecks(newDecks);
+                        setDecks(fetchedDecks);
+                        setSelectedAbilities(newDecks[newDeckIndex]);
                     }
                 })
                 .catch((error) => {
@@ -127,6 +140,30 @@ const Home: React.FC = () => {
             setGameMode(storedGameMode);
         }
     }, []);
+
+    useEffect(() => {
+        const isGuest = sessionStorage.getItem("guestToken");
+        if (isGuest) {
+            setSelectedAbilities(guestDecks[gameMode]);
+        }
+        else {
+            handleMyDeck();
+            setSelectedAbilities(usersDecks[deckIndex]);
+        }
+    }, [gameMode]);
+
+    const handleMyDeck = () => {
+        if (!decks || decks.length === 0) {
+            return;
+        }
+    
+        const modes = decks.map((deck: any[]) => (deck && deck.length > 0 ? deck[deck.length - 1] : undefined));
+        const newDeckIndex = modes.findIndex((mode: string) => mode === gameMode);
+        const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+    
+        setDeckIndex(newDeckIndex);
+        setUsersDecks(newDecks);
+    };
 
     const handleGameModeDropdownFocus = () => {
         setGameModeDropdownOpen(!gameModeDropdownOpen);
@@ -264,16 +301,7 @@ const Home: React.FC = () => {
             <div className="profile-card">
                 <h1 className="form-title">Home</h1>
                 <div className="app-drop-down-container" ref={playDropdownRef}>
-                    {selectedAbilities.length > 0 ? (
-                        <button onClick={handlePlayDropdownFocus}>Play</button>
-                    ) : (
-                        <button
-                            style={{ backgroundColor: "grey" }}
-                            onClick={handlePlayDropdownFocus}
-                        >
-                            Play
-                        </button>
-                    )}
+                    <button onClick={handlePlayDropdownFocus}>Play</button>
                     {playDropdownOpen && (
                         <ul>
                             <li onClick={handleLadderClick}>Ladder</li>
@@ -353,28 +381,27 @@ const Home: React.FC = () => {
                             <h3 style={{ textAlign: "center" }}>(No elo)</h3>
 
                             <div className="abilities-container-friendly">
-                                {selectedAbilities.map((ability, index) => (
-                                    <div
-                                        key={index}
-                                        className="ability-square"
-                                        style={{
-                                            backgroundColor:
-                                                abilityColors[ability.name],
-                                        }}
-                                    >
-                                        <div className="ability-icon">
-                                            <img
-                                                src={`./assets/abilityIcons/${ability.name}.png`}
-                                                alt={ability.name}
-                                                className="ability-img"
-                                            />
-                                        </div>
-                                        <div className="ability-count">
-                                            {ability.count}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                {usersDecks && usersDecks[deckIndex] ? (
+                                    usersDecks[deckIndex].length > 0 ? (
+                                        usersDecks[deckIndex].map((item: { name: string; count: number }, index: number) => (
+                                            <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name]}}>
+                                                <div className="ability-icon">
+                                                    <img
+                                                        src={`./assets/abilityIcons/${item.name}.png`}
+                                                        alt={item.name}
+                                                        className="ability-img"
+                                                    />
+                                                </div>
+                                                <div className="ability-count" style={{fontSize: '1.2rem'}}>{item.count}</div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>You have no saved abilities for {gameMode} mode</p>
+                                    )
+                                ) : (
+                                    <p>Loading your deck...</p>
+                                )}
+                                </div>
                             {friendlyMode === "host" ? (
                                 <>
                                     {/* <label>Player Count:</label> */}
@@ -459,29 +486,7 @@ const Home: React.FC = () => {
                         <div>
                             <h1 style={{ textAlign: "center" }}>Ladder</h1>
                             <h3 style={{ textAlign: "center" }}>(For elo)</h3>
-                            <div className="abilities-container-ladder">
-                                {selectedAbilities.map((ability, index) => (
-                                    <div
-                                        key={index}
-                                        className="ability-square"
-                                        style={{
-                                            backgroundColor:
-                                                abilityColors[ability.name],
-                                        }}
-                                    >
-                                        <div className="ability-icon">
-                                            <img
-                                                src={`./assets/abilityIcons/${ability.name}.png`}
-                                                alt={ability.name}
-                                                className="ability-img"
-                                            />
-                                        </div>
-                                        <div className="ability-count">
-                                            {ability.count}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+
                             <div style={{ height: "43px" }}></div>
                             <div
                                 className="player-count-drop-down-container"
