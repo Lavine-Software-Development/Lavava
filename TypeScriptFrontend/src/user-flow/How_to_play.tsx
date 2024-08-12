@@ -60,13 +60,13 @@ const slides = {
     ],
     abilities: [
         [
-            { type: "text", content: "Abilities are special actions you can use during the game." },
-        ],
-        [
+            { type: "text", content: "Abilities are special actions you can use during the game.<br/>Here are five examples:" },
+            { type: "image", content: "../assets/HowToPlay/freeze_ability.png", sideBySide: true },
+            { type: "image", content: "../assets/HowToPlay/bridge_ability.png", sideBySide: true },
+            { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png", sideBySide: true },
+            { type: "image", content: "../assets/HowToPlay/rage_ability.png", sideBySide: true },
+            { type: "image", content: "../assets/HowToPlay/nuke_ability.png", sideBySide: true },
             { type: "text", content: "They let you do things like create new connections, claim distant points, boost energy transfer, or even destroy an opponent's point." },
-        ],
-        [
-            { type: "text", content: "They have a cost and a cooldown, meaning you can't use them constantly." },
         ],
         [
             { type: "text", content: "The cost for using abilities is measured in Elixir,<br/>a resource that accumulates gradually over time." },
@@ -75,34 +75,27 @@ const slides = {
         [
             { type: "text", content: "To use an ability, click on the ability icon on the right side of the screen." },
         ],
+        // [
+        //     { type: "image", content: "../assets/HowToPlay/freeze_ability.png"},
+        //     { type: "text", content: "Changes a two-way bridge to a one-way bridge, preventing enemies from attacking you through it while you can still use it to transfer energy." },
+        // ],
         [
-            { type: "text", content: "In Royale mode, you can use five abilities.<br/>Freeze, Bridge, Dynamic Bridge (D-Bridge), Rage and Nuke." },
-            { type: "image", content: "../assets/HowToPlay/freeze_ability.png", sideBySide: true },
-            { type: "image", content: "../assets/HowToPlay/bridge_ability.png", sideBySide: true },
-            { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png", sideBySide: true },
-            { type: "image", content: "../assets/HowToPlay/rage_ability.png", sideBySide: true },
-            { type: "image", content: "../assets/HowToPlay/nuke_ability.png", sideBySide: true }
-        ],
-        [
-            { type: "image", content: "../assets/HowToPlay/freeze_ability.png"},
-            { type: "text", content: "Changes a two-way bridge to a one-way bridge, preventing enemies from attacking you through it while you can still use it to transfer energy." },
-        ],
-        [
+            { type: "text", content: "This is the quintessential ability so we’ll tell you about it now. Lets leave the rest for later" },
             { type: "image", content: "../assets/HowToPlay/bridge_ability.png" },
             { type: "text", content: "Creates a new bridge between two dots, allowing you to transfer energy between them." },
         ],
-        [
-            { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png" },
-            { type: "text", content: "Creates a new two-way bridge between two dots, allowing you to control the direction of the flow of energy by flipping it." },
-        ],
-        [
-            { type: "image", content: "../assets/HowToPlay/rage_ability.png" },
-            { type: "text", content: "Temporarily boosts the speed at which all your dots transfer energy, allowing for rapid expansion or attacks." },
-        ],
-        [
-            { type: "image", content: "../assets/HowToPlay/nuke_ability.png" },
-            { type: "text", content: "Destroys a dot and all its connections, removing it from the map entirely." },
-        ],
+        // [
+        //     { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png" },
+        //     { type: "text", content: "Creates a new two-way bridge between two dots, allowing you to control the direction of the flow of energy by flipping it." },
+        // ],
+        // [
+        //     { type: "image", content: "../assets/HowToPlay/rage_ability.png" },
+        //     { type: "text", content: "Temporarily boosts the speed at which all your dots transfer energy, allowing for rapid expansion or attacks." },
+        // ],
+        // [
+        //     { type: "image", content: "../assets/HowToPlay/nuke_ability.png" },
+        //     { type: "text", content: "Destroys a dot and all its connections, removing it from the map entirely." },
+        // ],
     ],
     gameStages: [
         [
@@ -119,9 +112,6 @@ const slides = {
         ],
         [
             { type: "text", content: "In the OverTime phase, things heat up. Walls come down and attacks become free." },
-        ],
-        [
-            { type: "text", content: "What is free attacking?<br/>When you transfer energy into an opponent, you won't shrink at all. Only they will.<br/>This is meant to help finish the game." },
         ],
         [
             { type: "text", content: "Times up!<br/>If no one wins in overtime, the player who owns the most dots wins.<br/>" },
@@ -142,6 +132,9 @@ const slides = {
     extraInfo: [
         [
             { type: "text", content: "In a contested situation, a dynamic bridge bends to the will of the dominant node, directing its flow away from it." },
+        ],
+        [
+            { type: "text", content: "What is free attacking?<br/>When you transfer energy into an opponent, you won't shrink at all. Only they will.<br/>This is meant to help finish the game." },
         ],
         [
             { type: "text", content: "That's it! You're ready to play Royale mode." },

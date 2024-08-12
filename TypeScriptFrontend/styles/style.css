@@ -1243,6 +1243,7 @@ ul {
     color: white; /* Optional: Change text color */
     cursor: not-allowed; /* Optional: Change cursor to indicate it's disabled */
     opacity: 0.6; /* Optional: Make the button appear less prominent */
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.8);
 }
 
 .prev-slide-btn {
