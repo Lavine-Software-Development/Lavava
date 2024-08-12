@@ -6,13 +6,13 @@ const slides = {
     basics: [
         [
             { type: "text", content: "Welcome to Durb.<br/>See all those dots on the screen?<br/>Your goal is to capture as many dots as you can." },
-            { type: "image", content: "../assets/HowToPlay/start_nodes.png" }
+            { type: "image", content: "../assets/HowToPlay/start_nodes.png", style: { width: "80%" } }
         ],
         [
             { type: "text", content: "To begin the game, choose a starting dot." },
-            { type: "image", content: "../assets/HowToPlay/cursor_on_node.png" },
+            { type: "image", content: "../assets/HowToPlay/cursor_on_node.png", style: { width: "30%" } },
             { type: "text", content: "Click on a dot to claim it as your own." },
-            { type: "image", content: "../assets/HowToPlay/claim_node.png" },
+            { type: "image", content: "../assets/HowToPlay/claim_node.png", style: { width: "30%" } },
             { type: "text", content: "Note: This is the only dot that you'll own just by clicking it." }
         ],
         [
@@ -26,12 +26,8 @@ const slides = {
         ],
         [
             { type: "text", content: "Each dot has some bridges surrounding it." },
-            { type: "image", content: "../assets/HowToPlay/bridges_around_nodes.png" },
+            { type: "gif", content: "../assets/HowToPlay/bridge_on.gif" },
             { type : "text", content: "Bridges allow you to transfer energy from one dot to another." }
-        ],
-        [
-            { type: "text", content: "Some dots have walls around them. You cannot bridge to a wall but you can start at a wall." },
-            { type: "image", content: "../assets/HowToPlay/walled_node.png" }
         ],
         [
             { type: "text", content: "Click a bridge to turn it on." },
@@ -42,7 +38,15 @@ const slides = {
             { type: "text", content: "There are two kinds of bridges: Standard bridges, made up of triangles,<br/>and Dynamic Bridges (D-Bridge) made up of mostly circles, and one green triangle." },
             { type: "image", content: "../assets/HowToPlay/standard_bridge.png", text: "Standard Bridge", sideBySide: true },
             { type: "image", content: "../assets/HowToPlay/dynamic_bridge.png", text: "Dynamic Bridge", sideBySide: true }
-        ]
+        ],
+        [
+            { type: "text", content: "If you own both dots, you can switch the direction of a Dynamic Bridge by right clicking on it." },
+            { type: "gif", content: "../assets/HowToPlay/dynamic_bridge_flip.gif" }
+        ],
+        [
+            { type: "text", content: "Some dots have walls around them. You cannot bridge to a wall but you can start at a wall." },
+            { type: "image", content: "../assets/HowToPlay/walled_node.png" }
+        ],
     ],
     attacking: [
         [
@@ -53,6 +57,52 @@ const slides = {
             { type: "text", content: "If your energy is greater than the target dot's energy, you will capture it." },
             { type: "image", content: "../assets/HowToPlay/capture_node.gif" },
         ]
+    ],
+    abilities: [
+        [
+            { type: "text", content: "Abilities are special actions you can use during the game." },
+        ],
+        [
+            { type: "text", content: "They let you do things like create new connections, claim distant points, boost energy transfer, or even destroy an opponent's point." },
+        ],
+        [
+            { type: "text", content: "They have a cost and a cooldown, meaning you can't use them constantly." },
+        ],
+        [
+            { type: "text", content: "The cost for using abilities is measured in Elixir,<br/>a resource that accumulates gradually over time." },
+            { type: "image", content: "../assets/HowToPlay/elixir_bar.png", style: { width: "1.5em", height: "auto" } },
+        ],
+        [
+            { type: "text", content: "To use an ability, click on the ability icon on the right side of the screen." },
+        ],
+        [
+            { type: "text", content: "In Royale mode, you can use five abilities.<br/>Freeze, Bridge, Dynamic Bridge (D-Bridge), Rage and Nuke." },
+            { type: "image", content: "../assets/HowToPlay/freeze_ability.png", sideBySide: true },
+            { type: "image", content: "../assets/HowToPlay/bridge_ability.png", sideBySide: true },
+            { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png", sideBySide: true },
+            { type: "image", content: "../assets/HowToPlay/rage_ability.png", sideBySide: true },
+            { type: "image", content: "../assets/HowToPlay/nuke_ability.png", sideBySide: true }
+        ],
+        [
+            { type: "image", content: "../assets/HowToPlay/freeze_ability.png"},
+            { type: "text", content: "Changes a two-way bridge to a one-way bridge, preventing enemies from attacking you through it while you can still use it to transfer energy." },
+        ],
+        [
+            { type: "image", content: "../assets/HowToPlay/bridge_ability.png" },
+            { type: "text", content: "Creates a new bridge between two dots, allowing you to transfer energy between them." },
+        ],
+        [
+            { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png" },
+            { type: "text", content: "Creates a new two-way bridge between two dots, allowing you to control the direction of the flow of energy by flipping it." },
+        ],
+        [
+            { type: "image", content: "../assets/HowToPlay/rage_ability.png" },
+            { type: "text", content: "Temporarily boosts the speed at which all your dots transfer energy, allowing for rapid expansion or attacks." },
+        ],
+        [
+            { type: "image", content: "../assets/HowToPlay/nuke_ability.png" },
+            { type: "text", content: "Destroys a dot and all its connections, removing it from the map entirely." },
+        ],
     ],
     gameStages: [
         [
@@ -88,6 +138,35 @@ const slides = {
         [
             { type: "text", content: "In the late game, defend your territory and aim for the win." },
         ]
+    ],
+    extraInfo: [
+        [
+            { type: "text", content: "In a contested situation, a dynamic bridge bends to the will of the dominant node, directing its flow away from it." },
+        ],
+        [
+            { type: "text", content: "That's it! You're ready to play Royale mode." },
+        ],
+        [
+            { type: "text", content: "Remember, the goal is to capture as many dots as you can and defeat your opponents." },
+        ],
+        [
+            { type: "text", content: "Here are some extra tips to help you win:" },
+        ],
+        [
+            { type: "text", content: "Don't forget to use your abilities. They can be the difference between winning and losing." },
+        ],
+        [
+            { type: "text", content: "Keep an eye on your elixir levels. If you run out, you won't be able to use abilities until it regenerates." },
+        ],
+        [
+            { type: "text", content: "Don't be afraid to attack. The best defense is a good offense." },
+        ],
+        [
+            { type: "text", content: "Watch your opponents. If they're getting too powerful, it might be time to take them down a peg." },
+        ],
+        [
+            { type: "text", content: "Good luck!" },
+        ]
     ]
 };
 
@@ -96,17 +175,24 @@ const renderContent = (item, index, array) => {
         return null; // Skip rendering this item as it will be handled by the previous item
     }
 
-    if (item.sideBySide && index < array.length - 1 && array[index + 1].sideBySide) {
+    if (item.sideBySide) {
+        const sideBySideItems: { type: string; content: string; className?: string; style?: React.CSSProperties; text?: string; sideBySide?: boolean; }[] = [];
+        let i = index;
+
+        // Collect all consecutive sideBySide items
+        while (i < array.length && array[i].sideBySide) {
+            sideBySideItems.push(array[i]);
+            i++;
+        }
+
         return (
             <div key={index} className="side-by-side-container">
-                <div className="side-by-side-item">
-                    <img src={item.content} className={item.className} style={{ ...item.style, width: '100%' }} alt="Slide content" />
-                    {item.text && <div className="side-by-side-text">{item.text}</div>}
-                </div>
-                <div className="side-by-side-item">
-                    <img src={array[index + 1].content} className={array[index + 1].className} style={{ ...array[index + 1].style, width: '100%' }} alt="Slide content" />
-                    {array[index + 1].text && <div className="side-by-side-text">{array[index + 1].text}</div>}
-                </div>
+                {sideBySideItems.map((sideItem, sideIndex) => (
+                    <div key={sideIndex} className="side-by-side-item">
+                        <img src={sideItem.content} className={sideItem.className} style={{ ...sideItem.style, width: '100%' }} alt="Slide content" />
+                        {sideItem.text && <div className="side-by-side-text">{sideItem.text}</div>}
+                    </div>
+                ))}
             </div>
         );
     }
@@ -200,11 +286,25 @@ const HowToPlay: React.FC = () => {
                     Attacking
                 </button>
                 <button
+                    onClick={() => handleSectionChange("abilities")}
+                    className="abilities-button"
+                    disabled={activeButton === "abilities"}
+                >
+                    Abilities
+                </button>
+                <button
                     onClick={() => handleSectionChange("gameStages")}
                     className="game-stages-button"
                     disabled={activeButton === "gameStages"}
                 >
                     Game Stages
+                </button>
+                <button
+                    onClick={() => handleSectionChange("extraInfo")}
+                    className="extra-info-button"
+                    disabled={activeButton === "extraInfo"}
+                >
+                    Extra Info
                 </button>
             </div>
             <div className="slide-container">

@@ -1265,8 +1265,18 @@ ul {
     color: white;
 } 
 
+.abilities-button {
+    background-color: blue;
+    color: white;
+}
+
 .game-stages-button {
     background-color: green;
+    color: white;
+}
+
+.extra-info-button {
+    background-color: purple;
     color: white;
 }
 
