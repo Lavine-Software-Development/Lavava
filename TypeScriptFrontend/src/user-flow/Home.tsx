@@ -128,15 +128,17 @@ const Home: React.FC = () => {
                     if (data && data.decks) {
                         const fetchedDecks: any[][] = data.decks;
                         const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
-                        const newDeckIndex = modes.findIndex((mode: string) => mode === gameMode);
+                        const originalDeckIndex = modes.findIndex((mode: string) => mode === "Original");
+                        const royaleDeckIndex = modes.findIndex((mode: string) => mode === "Royale");
                         const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
-                        const abilities = newDecks[newDeckIndex];
+                        const originalAbilities = newDecks[originalDeckIndex];
+                        const royaleAbilities = newDecks[royaleDeckIndex]
+                        sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(originalAbilities));
+                        sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(royaleAbilities));
                         if (gameMode === "Original") {
-                            sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(abilities));
-                            setSelectedAbilities(abilities);
+                            setSelectedAbilities(originalAbilities);
                         } else {
-                            sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(abilities));
-                            setSelectedAbilities(abilities);
+                            setSelectedAbilities(royaleAbilities);
                         }
                     }
                 })
@@ -230,7 +232,6 @@ const Home: React.FC = () => {
     const [playDropdownOpen, setPlayDropdownOpen] = useState<boolean>(false);
     const playDropdownRef = useRef<HTMLDivElement>(null);
     const handlePlayDropdownFocus = () => {
-        console.log(selectedAbilities);
         const deviceType = getDeviceType();
         if (deviceType !== "Desktop") {
             alert("Please use a desktop to play.");

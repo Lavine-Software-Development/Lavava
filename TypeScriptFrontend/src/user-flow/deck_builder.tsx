@@ -62,6 +62,7 @@ const DeckBuilder: React.FC = () => {
             try {
                 const response = await fetch(`${config.userBackend}/abilities/Royale`);
                 const data = await response.json();
+                handleGetDeck();
                 if (response.ok) {
                     setRoyalAbilities(data.abilities);
                     setRoyaleOptionCount(data.options);
@@ -82,7 +83,7 @@ const DeckBuilder: React.FC = () => {
             }
         };
         fetchRoyaleAbilities();
-    }, []);
+    }, [isTokenValid]);
 
     useEffect(() => {
         const fetchAbilities = async () => {
@@ -90,6 +91,7 @@ const DeckBuilder: React.FC = () => {
             try {
                 const response = await fetch(`${config.userBackend}/abilities/Original`);
                 const data = await response.json();
+                handleGetDeck();
                 if (response.ok) {
                     setAbilities(data.abilities);
                     setInitialSalary(data.salary);
@@ -111,7 +113,7 @@ const DeckBuilder: React.FC = () => {
             }
         };
         fetchAbilities();
-    }, []);
+    }, [isTokenValid]);
 
     useEffect(() => {
         // This effect recalculates the salary whenever selectedCounts changes

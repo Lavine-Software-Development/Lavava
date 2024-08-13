@@ -8,6 +8,7 @@ interface PlayerData {
     username: string;
     rank: number;
     is_current_user: boolean;
+    elo_change: number;
 }
 
 interface GameData {
@@ -146,6 +147,7 @@ const Profile: React.FC = () => {
 
     useEffect(() => {
         handleMyDeck();
+        console.log(profileData.last_game);
     }, [deckMode]);
 
     const handleMyDeck = () => {
@@ -261,11 +263,18 @@ const Profile: React.FC = () => {
                                     {profileData.last_game.players.map((player, index) => {
                                         let className = '';
                                         if (player.is_current_user) {
-                                            className = player.rank === 1 ? 'current-user-win' : 'current-user-lose';
-                                            }
+                                            className = player.elo_change > 0 ? 'current-user-win' : 'current-user-lose';
+                                        }
                                         return (
                                             <li key={index} className={className}>
-                                            {player.username} - Rank: {player.rank}
+                                                {player.username} - Rank: {player.rank}
+                                                {', ELO: ' + 
+                                                (player.elo_change === null || player.elo_change === undefined 
+                                                    ? 'N/A' 
+                                                    : (Number(player.elo_change) > 0 
+                                                    ? `+${player.elo_change}` 
+                                                    : player.elo_change)
+                                                )}
                                             </li>
                                         );
                                     })}

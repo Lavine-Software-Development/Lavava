@@ -243,6 +243,7 @@ def register():
     if config.DB_CONNECTED:
         new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
+        db.session.flush()
 
         create_default_deck(new_user.id, "Original")
         create_default_deck(new_user.id, "Royale")
@@ -546,10 +547,12 @@ def get_profile(current_user):
         if user:
             # Use a SQL query to get the most recent game containing the exact username
             query = text("""
-                SELECT * FROM game_history
-                WHERE json_array_length(usernames) > 0
-                AND usernames LIKE :username
-                ORDER BY game_date DESC
+                SELECT gh.*, eh.elo_changes, eh.usernames as elo_usernames
+                FROM game_history gh
+                LEFT JOIN elo_history eh ON gh.id = eh.id
+                WHERE json_array_length(gh.usernames) > 0
+                AND gh.usernames LIKE :username
+                ORDER BY gh.game_date DESC
                 LIMIT 1
             """)
             
@@ -559,6 +562,8 @@ def get_profile(current_user):
             if most_recent_game:
                 usernames = json.loads(most_recent_game.usernames)
                 user_ranks = json.loads(most_recent_game.user_ranks)
+                elo_changes = json.loads(most_recent_game.elo_changes) if most_recent_game.elo_changes else []
+                elo_usernames = json.loads(most_recent_game.elo_usernames) if most_recent_game.elo_usernames else []
                 
                 if user.username in usernames:  # Extra check to ensure exact match
                     last_game_data = {
@@ -566,11 +571,16 @@ def get_profile(current_user):
                         "game_date": most_recent_game.game_date.format(),
                         "players": []
                     }
+
+                    elo_dict = dict(zip(elo_usernames, elo_changes))
+
                     for username, rank in zip(usernames, user_ranks):
+                        elo_change = elo_dict.get(username)
                         player_data = {
                             "username": username,
                             "rank": int(rank),
-                            "is_current_user": (username == user.username)
+                            "is_current_user": (username == user.username),
+                            "elo_change": int(elo_change) if elo_change is not None else None
                         }
                         last_game_data["players"].append(player_data)
 
@@ -598,10 +608,10 @@ def get_profile(current_user):
                 "game_id": 12345,
                 "game_date": "2023-07-23T14:30:00",
                 "players": [
-                    {"username": "Current-User", "rank": 1, "is_current_user": True},
-                    {"username": "Player1", "rank": 2, "is_current_user": False},
-                    {"username": "Player3", "rank": 3, "is_current_user": False},
-                    {"username": "Player4", "rank": 4, "is_current_user": False}
+                    {"username": "Current-User", "rank": 1, "is_current_user": True, "elo_change": 15},
+                    {"username": "Player1", "rank": 2, "is_current_user": False, "elo_change": 5},
+                    {"username": "Player3", "rank": 3, "is_current_user": False, "elo_change": -5},
+                    {"username": "Player4", "rank": 4, "is_current_user": False, "elo_change": -15}
                 ]
             }
         })
@@ -719,18 +729,25 @@ def save_deck(current_user):
 def update_elos(new_elos, usernames, match_id):
     if config.DB_CONNECTED:
         elo_changes = []
-        old_elo = []
+        old_elos = []
+        updated_usernames = []
         for username, new_elo in zip(usernames, new_elos):
             user = User.query.filter_by(username=username).first()
             if user:
                 old_elo = user.elo
                 user.elo = new_elo
-                elo_changes.append(new_elo - old_elo)
-                old_elo.append(old_elo)
-        db.session.commit()
-
-        elo_history = EloHistory(id=match_id, usernames=usernames, elo_changes=elo_changes, old_elo=old_elo)
+                elo_change = new_elo - old_elo
+                elo_changes.append(elo_change)
+                updated_usernames.append(username)
+                old_elos.append(old_elo)
+            else:
+                elo_changes.append(None)
+                old_elos.append(1100)
+                updated_usernames.append(username)
+        
+        elo_history = EloHistory(id=match_id, usernames=updated_usernames, elo_changes=elo_changes, old_elo=old_elos)
         db.session.add(elo_history)
+
         db.session.commit()
     else:
         print("Database not connected. Elo updates not saved.")
@@ -963,8 +980,8 @@ def save_game():
         usernames = []
         user_ranks = []
         for rank, token in enumerate(ordered_tokens, start=1):
-            username = token_to_username(token)
-            # username = token
+            #username = token_to_username(token)
+            username = token
             user = User.query.filter_by(username=username).first()
             if user:
                 usernames.append(username)
@@ -975,7 +992,6 @@ def save_game():
         
         old_elos = [username_to_elo(user) for user in usernames]
         new_elos = calculate_elos(old_elos)
-
 
         new_game = GameHistory(usernames=usernames, user_ranks=user_ranks)
         db.session.add(new_game)
@@ -1188,7 +1204,7 @@ def create_default_deck(user_id, mode):
         ]
     }
 
-    deck = Deck(user_id=user_id, name=mode)
+    deck = Deck(name=mode, user_id=user_id)
     db.session.add(deck)
     db.session.flush()
 
