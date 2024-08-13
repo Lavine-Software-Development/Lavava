@@ -995,7 +995,7 @@ def save_game():
 
         new_game = GameHistory(usernames=usernames, user_ranks=user_ranks)
         db.session.add(new_game)
-        db.session.flush() # assigns id before commiting so it can be used for EloChanges db
+        db.session.flush() # assigns id before commiting so it can be used for EloChanges id
 
         update_elos(new_elos, usernames, new_game.id)
 
