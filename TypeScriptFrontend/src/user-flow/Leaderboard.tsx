@@ -9,11 +9,25 @@ interface Player {
     elo: number;
 }
 
+interface PlayerData {
+    username: string;
+    rank: number;
+    is_current_user: boolean;
+    elo_change: number;
+}
+
+interface GameData {
+    game_id: number;
+    game_date: string;
+    players: PlayerData[];
+}
+
 interface UserDetails {
     username: string;
     displayName: string;
     elo: number;
     decks: any[][];
+    last_game: GameData | null;
 }
 
 const Leaderboard: React.FC = () => {
@@ -181,12 +195,51 @@ const Leaderboard: React.FC = () => {
                                     </div>
                                 ))
                             ) : (
-                                <p>You have no saved abilities for {deckMode} mode</p>
+                                <p style={{margin: "20px 7px"}}>No saved abilities for {deckMode} mode</p>
                             )
                         ) : (
-                            <p>Loading your deck...</p>
+                            <p>Loading deck...</p>
                         )}
                         </div>
+                        <h2 className="text-shadow">Most Recent Ladder Game</h2>
+                        {selectedUser.last_game ? (
+                            <div className="game-history-item">
+                                <p>
+                                    <strong>Date:</strong>{" "}
+                                    {new Date(selectedUser.last_game.game_date + "Z").toLocaleString([], {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: true,
+                                    })}
+                                </p>
+                                <p><strong>Players:</strong></p>
+                                <ul>
+                                    {selectedUser.last_game.players.map((player, index) => {
+                                        let className = '';
+                                        if (player.is_current_user) {
+                                            className = player.elo_change > 0 ? 'current-user-win' : 'current-user-lose';
+                                        }
+                                        return (
+                                            <li key={index} className={className}>
+                                                {player.username} - Rank: {player.rank}
+                                                {', ELO: ' + 
+                                                (player.elo_change === null || player.elo_change === undefined 
+                                                    ? 'N/A' 
+                                                    : (Number(player.elo_change) > 0 
+                                                    ? `+${player.elo_change}` 
+                                                    : player.elo_change)
+                                                )}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        ) : (
+                            <p>No recent games played.</p>
+                        )}
                         <button onClick={() => setSelectedUser(null)}>Close</button>
                     </div>
                 </div>

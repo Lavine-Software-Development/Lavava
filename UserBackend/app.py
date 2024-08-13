@@ -742,7 +742,7 @@ def update_elos(new_elos, usernames, match_id):
                 old_elos.append(old_elo)
             else:
                 elo_changes.append(None)
-                old_elos.append(1100)
+                old_elos.append(None)
                 updated_usernames.append(username)
         
         elo_history = EloHistory(id=match_id, usernames=updated_usernames, elo_changes=elo_changes, old_elo=old_elos)
@@ -1120,11 +1120,53 @@ def get_user_details(username):
                 deck.append(mode)
                 allDecks.append(deck)
 
+        query = text("""
+                SELECT gh.*, eh.elo_changes, eh.usernames as elo_usernames
+                FROM game_history gh
+                LEFT JOIN elo_history eh ON gh.id = eh.id
+                WHERE json_array_length(gh.usernames) > 0
+                AND gh.usernames LIKE :username
+                ORDER BY gh.game_date DESC
+                LIMIT 1
+            """)
+            
+        most_recent_game = db.session.execute(query, {'username': f'%"{user.username}"%'}).fetchone()
+
+        last_game_data = None
+        if most_recent_game:
+            usernames = json.loads(most_recent_game.usernames)
+            user_ranks = json.loads(most_recent_game.user_ranks)
+            elo_changes = json.loads(most_recent_game.elo_changes) if most_recent_game.elo_changes else []
+            elo_usernames = json.loads(most_recent_game.elo_usernames) if most_recent_game.elo_usernames else []
+            
+            if user.username in usernames:  # Extra check to ensure exact match
+                last_game_data = {
+                    "game_id": most_recent_game.id,
+                    "game_date": most_recent_game.game_date.format(),
+                    "players": []
+                }
+
+                elo_dict = dict(zip(elo_usernames, elo_changes))
+
+                for username, rank in zip(usernames, user_ranks):
+                    elo_change = elo_dict.get(username)
+                    player_data = {
+                        "username": username,
+                        "rank": int(rank),
+                        "is_current_user": (username == user.username),
+                        "elo_change": int(elo_change) if elo_change is not None else None
+                    }
+                    last_game_data["players"].append(player_data)
+
+                # Sort players by rank
+                last_game_data["players"].sort(key=lambda x: x["rank"])
+
         response = {
             "username": user.username,
             "displayName": user.display_name,
             "elo": user.elo,
-            "decks": allDecks
+            "decks": allDecks,
+            "last_game": last_game_data
         }
         return jsonify(response)
     except Exception as e:
@@ -1139,10 +1181,12 @@ def get_match_history(current_user):
         if user:
             # Use a SQL query to filter games containing the exact username
             query = text("""
-                SELECT * FROM game_history
-                WHERE json_array_length(usernames) > 0
-                AND usernames LIKE :username
-                ORDER BY game_date DESC
+                SELECT gh.*, eh.elo_changes, eh.usernames as elo_usernames
+                FROM game_history gh
+                LEFT JOIN elo_history eh ON gh.id = eh.id
+                WHERE json_array_length(gh.usernames) > 0
+                AND gh.usernames LIKE :username
+                ORDER BY gh.game_date DESC
                 LIMIT 20
             """)
             
@@ -1152,17 +1196,24 @@ def get_match_history(current_user):
             for game in games:
                 usernames = json.loads(game.usernames)
                 user_ranks = json.loads(game.user_ranks)
+                elo_changes = json.loads(game.elo_changes) if game.elo_changes else []
+                elo_usernames = json.loads(game.elo_usernames) if game.elo_usernames else []
                 if user.username in usernames:  # Extra check to ensure exact match
                     game_data = {
                         "game_id": game.id,
                         "game_date": game.game_date.format(),
                         "players": []
                     }
+
+                    elo_dict = dict(zip(elo_usernames, elo_changes))
+
                     for username, rank in zip(usernames, user_ranks):
+                        elo_change = elo_dict.get(username)
                         player_data = {
                             "username": username,
                             "rank": int(rank),
-                            "is_current_user": (username == user.username)
+                            "is_current_user": (username == user.username),
+                            "elo_change": int(elo_change) if elo_change is not None else None
                         }
                         game_data["players"].append(player_data)
                     game_data["players"].sort(key=lambda x: x["rank"])

@@ -9,6 +9,7 @@ interface GameData {
         username: string;
         rank: number;
         is_current_user: boolean;
+        elo_change: number;
     }[];
 }
 
@@ -95,14 +96,20 @@ const MatchHistory: React.FC = () => {
                         </p>
                         <ul>
                             {game.players.map((player, index) => {
-                                let className = player.is_current_user
-                                    ? player.rank === 1
-                                        ? "current-user-win"
-                                        : "current-user-lose"
-                                    : "";
+                                let className = '';
+                                if (player.is_current_user) {
+                                    className = player.elo_change > 0 ? 'current-user-win' : 'current-user-lose';
+                                }
                                 return (
                                     <li key={index} className={className}>
                                         {player.username} - Rank: {player.rank}
+                                        {', ELO: ' + 
+                                        (player.elo_change === null || player.elo_change === undefined 
+                                            ? 'N/A' 
+                                            : (Number(player.elo_change) > 0 
+                                            ? `+${player.elo_change}` 
+                                            : player.elo_change)
+                                        )}
                                     </li>
                                 );
                             })}
