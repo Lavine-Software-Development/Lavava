@@ -1190,3 +1190,15 @@ ul {
 .tab-profile:hover {
     background-color: #e8eaed;
 }
+
+.no-abilities-message {
+    color: red;
+    font-weight: bold;
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 2px;
+    border: 1px solid red;
+    border-radius: 5px;
+    background-color: #fdd;
+    margin: 13px;
+}

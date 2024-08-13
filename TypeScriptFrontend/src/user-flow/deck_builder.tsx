@@ -204,7 +204,7 @@ const DeckBuilder: React.FC = () => {
                             counts[ability.name] = ability.count;
                             return counts;
                         }, {});
-                        setSelectedCounts(initialCounts);
+                        setSelectedRoyaleCounts(initialCounts);
                         sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(newDecks[newDeckIndex]));
                     }
                 } else {
@@ -287,10 +287,11 @@ const DeckBuilder: React.FC = () => {
             }
     
             // Check if salary allows for this increment
-            if (increment && (salary - abilityCost < 0)) {
+            // no salary in royale
+            /*if (increment && (salary - abilityCost < 0)) {
                 setError(`You cannot afford the ${abilityName} ability.`);
                 return prevCounts;
-            }
+            }*/
     
             const newCounts = {
                 ...prevCounts,

@@ -231,7 +231,9 @@ const Profile: React.FC = () => {
                                 </div>
                             ))
                         ) : (
-                            <p>You have no saved abilities for {deckMode} mode</p>
+                            <div className="no-abilities-message" style = {{margin: "0px"}}>
+                                No Abilities Saved for {deckMode} mode.
+                            </div>
                         )
                     ) : (
                         <p>Loading your deck...</p>
