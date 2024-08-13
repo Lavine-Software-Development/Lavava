@@ -190,22 +190,26 @@ const DeckBuilder: React.FC = () => {
                 if (response.ok) {
                     const fetchedDecks: any[][] = data.decks || [];
                     const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
-                    const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+                    const originalDeckIndex = modes.findIndex((mode: string) => mode === "Original");
+                    const royaleDeckIndex = modes.findIndex((mode: string) => mode === "Royale");
                     const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
-                    if (deckMode === "Original") {
-                        const initialCounts = newDecks[newDeckIndex].reduce((counts: { [key: string]: number }, ability: {name: string; count: number}) => {
+                    
+                    if (originalDeckIndex !== -1) {
+                        const originalInitialCounts = newDecks[originalDeckIndex].reduce((counts: { [key: string]: number }, ability: {name: string; count: number}) => {
                             counts[ability.name] = ability.count;
                             return counts;
                         }, {});
-                        setSelectedCounts(initialCounts);
-                        sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(newDecks[newDeckIndex]));
-                    } else {
-                        const initialCounts = newDecks[newDeckIndex].reduce((counts: { [key: string]: number }, ability: {name: string; count: number}) => {
+                        setSelectedCounts(originalInitialCounts);
+                        sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(newDecks[originalDeckIndex]));
+                    }
+                    
+                    if (royaleDeckIndex !== -1) {
+                        const royaleInitialCounts = newDecks[royaleDeckIndex].reduce((counts: { [key: string]: number }, ability: {name: string; count: number}) => {
                             counts[ability.name] = ability.count;
                             return counts;
                         }, {});
-                        setSelectedRoyaleCounts(initialCounts);
-                        sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(newDecks[newDeckIndex]));
+                        setSelectedRoyaleCounts(royaleInitialCounts);
+                        sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(newDecks[royaleDeckIndex]));
                     }
                 } else {
                     throw new Error(data.message);
