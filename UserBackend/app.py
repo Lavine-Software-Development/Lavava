@@ -980,8 +980,8 @@ def save_game():
         usernames = []
         user_ranks = []
         for rank, token in enumerate(ordered_tokens, start=1):
-            #username = token_to_username(token)
-            username = token
+            username = token_to_username(token)
+            #username = token
             user = User.query.filter_by(username=username).first()
             if user:
                 usernames.append(username)
