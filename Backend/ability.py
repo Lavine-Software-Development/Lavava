@@ -21,8 +21,12 @@ class AbstractAbility(JsonableTracked):
     def counter(self):
         pass
 
+    @property
+    def can_afford(self):
+        return self.counter >= self.in_game_cost
+
     def can_use(self, data):
-        return self.counter >= self.in_game_cost and self.validation_func(data)
+        return self.can_afford and self.validation_func(data)
     
     @abstractmethod
     def update(self):

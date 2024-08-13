@@ -5,20 +5,22 @@ from constants import (
     OVER_GROW_TICKS,
     RAGE_MULTIPLIER,
     POISON_SPREAD_DELAY,
+    ZOMBIE_TICKS,
+    POISON_MULTIPLIER
 )
 from effectEnums import EffectType
 from abstractEffect import AbstractSpreadingEffect
 
 class Poisoned(AbstractSpreadingEffect):
     def __init__(self, originator, length):
-        super().__init__(length, EffectType.GROW, POISON_SPREAD_DELAY)
+        super().__init__(length, EffectType.GROW, True, POISON_SPREAD_DELAY)
         self.originator = originator
        
     def can_spread(self, killed, new_owner):
         return self.originator != new_owner
 
     def effect(self, amount):
-        return amount * -1
+        return -amount * POISON_MULTIPLIER
     
     def spread(self):
         return (self.originator, self.length - self.counter)
@@ -29,7 +31,7 @@ class Poisoned(AbstractSpreadingEffect):
 
 class Enraged(AbstractSpreadingEffect):
     def __init__(self):
-        super().__init__(RAGE_TICKS, EffectType.EXPEL)
+        super().__init__(RAGE_TICKS, EffectType.EXPEL, False)
 
     def effect(self, amount):
         return amount * RAGE_MULTIPLIER
@@ -41,15 +43,32 @@ class Enraged(AbstractSpreadingEffect):
         return False
     
 
+class Zombified(AbstractSpreadingEffect):
+    def __init__(self):
+        super().__init__(ZOMBIE_TICKS, EffectType.INTAKE, False)
+    
+    def can_spread(self, killed, new_owner):
+        return killed
+    
+    def capture_removal(self, player):
+        return False
+    
+    def effect(self, amount):
+        return amount * -2
+    
+    def spread_key(self, key):
+        return "zombie"
+
+
 class OverGrown(AbstractSpreadingEffect):
     def __init__(self):
-        super().__init__(OVER_GROW_TICKS, EffectType.GROW)
+        super().__init__(OVER_GROW_TICKS, EffectType.GROW_CAP, False)
     
     def effect(self, amount):
         return amount * 5
     
     def can_spread(self, killed, new_owner):
-        return killed and new_owner.state_name == "default"
+        return killed
 
     def capture_removal(self, player):
         return False
@@ -57,7 +76,7 @@ class OverGrown(AbstractSpreadingEffect):
 
 class Burning(AbstractSpreadingEffect):
     def __init__(self):
-        super().__init__(BURN_TICKS, EffectType.NONE, BURN_SPREAD_DELAY)
+        super().__init__(BURN_TICKS, EffectType.NONE, False, BURN_SPREAD_DELAY)
     
     def effect(self, amount):
         return 0

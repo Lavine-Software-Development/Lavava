@@ -21,7 +21,7 @@ from tracking_decorator.track_changes import track_changes
 
 @track_changes("nodes_r", "edges_r", 'full_player_capitals')
 class Board(JsonableTracked):
-    def __init__(self, gs):
+    def __init__(self, gs, track_capitals):
         self.gs = gs
         self.nodes: list[Node] = []
         self.edges = []
@@ -30,7 +30,8 @@ class Board(JsonableTracked):
         # self.tracker = Tracker()
         self.tracker = CapitalTracker()
         self.player_capitals = defaultdict(set)
-        self.full_player_capitals = []
+        self.full_player_capitals = [0] * 4 
+        self.track_capitals = track_capitals
 
         recurse_values = {"nodes", "edges"}
         super().__init__("board", recurse_values, recurse_values, recurse_values)
@@ -40,6 +41,21 @@ class Board(JsonableTracked):
         for node in self.nodes:
             if (not player) or node.owner == player:
                 node.set_state(effect)
+
+    @property
+    def accessible_nodes(self):
+        return {node for node in self.nodes if node.accessible}
+    
+    @property
+    def unclaimed_nodes(self):
+        return {node for node in self.nodes if not node.owner}
+    
+    def find_edge(self, from_node_id, to_node_id):
+        from_node, to_node = self.id_dict[from_node_id], self.id_dict[to_node_id]
+        for edge in from_node.edges:
+            if edge.opposite(from_node) == to_node:
+                return edge
+        return False
 
     def make_accessible(self):
         for node in self.nodes:
@@ -126,10 +142,11 @@ class Board(JsonableTracked):
         if updated_nodes:
             self.track_state_changes(updated_nodes)
 
-        self.full_player_capitals = [0] * 4 ## Should not be hard coded. This stores extra 0's
-        for player in self.player_capitals:
-            for node in self.player_capitals[player]:
-                self.full_player_capitals[player.id] += int(node.full())
+        if self.track_capitals:
+            self.full_player_capitals = [0] * 4 ## Should not be hard coded. This stores extra 0's
+            for player in self.player_capitals:
+                for node in self.player_capitals[player]:
+                    self.full_player_capitals[player.id] += int(node.full())
 
     def check_new_edge(self, node_from, node_to):
         if node_to == node_from:
@@ -142,7 +159,7 @@ class Board(JsonableTracked):
         return True
     
     def victory_check(self):
-        return any(count >= CAPITALS_NEEDED_FOR_WIN for count in self.full_player_capitals)
+        return self.track_capitals and any(count >= CAPITALS_NEEDED_FOR_WIN for count in self.full_player_capitals)
 
     def new_edge_id(self):
         return (
@@ -171,12 +188,15 @@ class Board(JsonableTracked):
         return True
 
     def overlap(self, edge1, edge2):
-        return do_intersect(
-            self.nodeDict[edge1[0]],
-            self.nodeDict[edge1[1]],
-            self.nodeDict[edge2[0]],
-            self.nodeDict[edge2[1]],
-        )
+        try:
+            return do_intersect(
+                self.nodeDict[edge1[0]],
+                self.nodeDict[edge1[1]],
+                self.nodeDict[edge2[0]],
+                self.nodeDict[edge2[1]],
+            )
+        except KeyError:
+            return False
 
     def buy_new_edge(self, node_from, node_to, edge_type, only_to_node_port, destroy_ports):
         new_id = self.new_edge_id()

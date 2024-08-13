@@ -178,7 +178,7 @@ export class Node extends IDItem implements INode {
     draw(): void {
         this.graphics.clear();
         if (this.state.graphic_override) {
-            this.state.draw(this._scene, this.size, this.pos);
+            this.state.draw(this._scene, this.size, this.pos, this.owner?.color);
             return;
         } else {
             if (this.effects.has("poison")) {
@@ -198,11 +198,19 @@ export class Node extends IDItem implements INode {
             this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
 
             if (this.effects.has("rage")) {
-                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
+                this.graphics.lineStyle(3, phaserColor(Colors.DARK_RED), 1);
                 this.graphics.strokeCircle(
                     this.pos.x,
                     this.pos.y,
                     this.size - 2
+                );
+            }
+            if (this.effects.has("over_grow")) {
+                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 2);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size - 3
                 );
             }
             if (this.full) {

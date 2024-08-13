@@ -150,8 +150,8 @@ class MapBuilder:
             else:
                 edges.append(Edge(nodes[id1], nodes[id2], id3))
 
-        outsider_choose_accessible_nodes(nodes, settings["accessible_percentage"], settings)
         nodes = self.starter_states_and_removal(settings["starting_structures"])(nodes, settings)
+        outsider_choose_accessible_nodes(nodes, settings["accessible_percentage"], settings)
 
         self.edge_objects = edges
         self.node_objects = nodes

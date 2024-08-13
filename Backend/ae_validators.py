@@ -23,7 +23,8 @@ from constants import (
     PUMP_CODE,
     CREDIT_USAGE_CODE,
     STRUCTURE_RANGES,
-    WALL_BREAKER_CODE,
+    WALL_CODE,
+    WORMHOLE_CODE,
 )
 
 
@@ -36,9 +37,9 @@ def owned_burnable_node(data):
     return node.owner is not None and burnable_node(data)
 
 
-def walled_node(data):
+def non_walled_node(data):
     node = data[0]
-    return node.wall_count > 0
+    return node.wall_count == 0
 
 
 # option for slightly improved burn, allowing preemptive burns before ownership
@@ -65,13 +66,17 @@ def standard_node_attack(data, player):
 
 
 def attack_validators(get_structures, player, attack_type):
-
     def structure_ranged_default_attack(data):
-        return default_node(data) and structure_ranged_node_attack(data)
-    
+        return default_node(data) and (
+            structure_ranged_node_attack(data)
+            or not_attacking_neighbor_or_owner_attack(data)
+        )
+
     def opposing_structure_ranged_attack(data):
         node = data[0]
-        return node.owner != player and structure_ranged_node_attack(data)
+        return node.owner != player and (
+            structure_ranged_node_attack(data) or not_attacking_neighbor_attack(data)
+        )
 
     def structure_ranged_node_attack(data):
         node = data[0]
@@ -81,27 +86,52 @@ def attack_validators(get_structures, player, attack_type):
             x1, y1 = node.pos
             x2, y2 = structure.pos
             distance = (x1 - x2) ** 2 + (y1 - y2) ** 2
-            structure_nuke_range = (
+            structure_attack_range = (
                 STRUCTURE_RANGES[structure.state_name] * structure.value
             ) ** 2
-            return distance <= structure_nuke_range
+            return distance <= structure_attack_range
 
         return any(in_structure_range(structure) for structure in structures)
-    
-    def neighbor_or_owner_attack(data):
+
+    def not_attacking_edge(edge):
+        return edge.from_node.owner == player or not edge.flowing
+
+    def not_attacking_neighbor_attack(data):
         node = data[0]
-        return node.owner == player or neighbor_attack(data)
+        if node.owner == player:
+            return False
+        for edge in node.edges:
+            if edge.opposite(node).owner == player and not_attacking_edge(edge):
+                return True
+        return False
 
     def neighbor_attack(data):
         node = data[0]
+        if node.owner == player:
+            return False
         for neighbor in node.neighbors:
             if neighbor.owner == player:
                 return True
         return False
 
+    def neighbor_or_owner_attack(data):
+        node = data[0]
+        return node.owner == player or neighbor_attack(data)
+
+    def not_attacking_neighbor_or_owner_attack(data):
+        node = data[0]
+        return node.owner == player or not_attacking_neighbor_attack(data)
+
     return {
-        POISON_CODE: neighbor_attack if attack_type == "neighbor" else opposing_structure_ranged_attack,
-        NUKE_CODE: neighbor_or_owner_attack if attack_type == "neighbor" else structure_ranged_default_attack,
+        POISON_CODE: not_attacking_neighbor_attack
+        if attack_type == "neighbor"
+        else opposing_structure_ranged_attack,
+        NUKE_CODE: not_attacking_neighbor_or_owner_attack
+        if attack_type == "neighbor"
+        else structure_ranged_default_attack,
+        ZOMBIE_CODE: not_attacking_neighbor_or_owner_attack
+        if attack_type == "neighbor"
+        else structure_ranged_default_attack,
     }
 
 
@@ -157,13 +187,29 @@ def validators_needing_player(player):
             edge.from_node.owner == player or edge.to_node.owner == player
         )
 
-    return {
+    structure_validators = {
         CAPITAL_CODE: capital_logic,
-        FREEZE_CODE: dynamic_edge_own_either_but_not_flowing,
-        ZOMBIE_CODE: my_default_node,
         CANNON_CODE: my_default_port_node,
         PUMP_CODE: my_default_node,
     }
+
+    def wormhole_validator(data):
+        name_to_code = {
+            "capital": CAPITAL_CODE,
+            "cannon": CANNON_CODE,
+            "pump": PUMP_CODE,
+        }
+        source_node, target_node = data
+        if source_node.state_name in STRUCTURE_RANGES:
+            validator_func = structure_validators[name_to_code[source_node.state_name]]
+            if validator_func:
+                return validator_func([target_node])  # Pass target_node as a list
+        return False
+
+    return {
+        FREEZE_CODE: dynamic_edge_own_either_but_not_flowing,
+        WORMHOLE_CODE: wormhole_validator,
+    } | structure_validators
 
 
 def no_crossovers(check_new_edge, data, player):
@@ -214,12 +260,16 @@ def make_new_edge_ports(check_new_edge, player, from_port_needed):
         if all([node.accessible for node in data]):
             return no_crossovers(check_new_edge, data, player)
         return False
-    
+
     def defense_bridge(data):
-        return data[1].owner == data[0].owner and (data[1].accessible or data[0].accessible)
+        return data[1].owner == data[0].owner and (
+            data[1].accessible or data[0].accessible
+        )
 
     def only_to_node_port(data):
-        return (defense_bridge(data) or data[1].accessible) and no_crossovers(check_new_edge, data, player)
+        return (defense_bridge(data) or data[1].accessible) and no_crossovers(
+            check_new_edge, data, player
+        )
 
     # Check if the nodes are within the range of a mini bridge
     def check_mini_bridge_range(data):
@@ -246,25 +296,41 @@ def make_ability_validators(board, player, settings):
             BURN_CODE: owned_burnable_node,
             RAGE_CODE: no_click,
             OVER_GROW_CODE: no_click,
-            WALL_BREAKER_CODE: walled_node,
+            WALL_CODE: non_walled_node,
         }
         | validators_needing_player(player)
         | make_new_edge_ports(
             board.check_new_edge, player, settings["bridge_from_port_needed"]
-        ) 
-        | attack_validators(board.get_player_structures, player, settings["attack_type"])
+        )
+        | attack_validators(
+            board.get_player_structures, player, settings["attack_type"]
+        )
     )
+
+def standard_click_validators(board):
+
+    def left_click(player, data):
+        try:
+            return board.id_dict[data[0]].valid_left_click(player)
+        except KeyError:
+            return False
+        
+    def right_click(player, data):
+        try:
+            return board.id_dict[data[0]].valid_right_click(player)
+        except KeyError:
+            return False
+
+
+    return {
+        STANDARD_LEFT_CLICK: left_click,
+        STANDARD_RIGHT_CLICK: right_click,
+    }
 
 
 def make_effect_validators(board):
     return {
         CANNON_SHOT_CODE: make_cannon_shot_check(board.check_new_edge, board.id_dict),
         PUMP_DRAIN_CODE: make_pump_drain_check(board.id_dict),
-        STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[
-            data[0]
-        ].valid_left_click(player),
-        STANDARD_RIGHT_CLICK: lambda player, data: board.id_dict[
-            data[0]
-        ].valid_right_click(player),
         CREDIT_USAGE_CODE: valid_ability_for_credits,
-    }
+    } | standard_click_validators(board)

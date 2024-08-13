@@ -17,7 +17,7 @@ from jsonable import JsonableTick
 from math import floor
 
 class DefaultPlayer(JsonableTick):
-    def __init__(self, id):
+    def __init__(self, id, settings=None):
 
         tick_values = self.default_values()
 
@@ -31,11 +31,17 @@ class DefaultPlayer(JsonableTick):
     def set_abilities(self, chosen_abilities, ability_effects, board, settings):
         pass
 
+    def set_settings(self, settings):
+        self.auto_attack = settings.get('auto_attack')
+        self.auto_spread = settings.get('auto_spread')
+
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
             self.abilities[key].use(data)
+            return True
         else:
             print("failed to use ability, ", key)
+            return False
 
     def default_values(self):
         self.killer = None
@@ -49,7 +55,6 @@ class DefaultPlayer(JsonableTick):
     def eliminate(self, rank):
         self.rank = rank
         self.ps.eliminate()
-        self.color = GREY
 
     def win(self):
         self.rank = 1
@@ -60,14 +65,14 @@ class DefaultPlayer(JsonableTick):
             self.rank = rank
         self.ps.defeat()
 
-    def capital_handover(self, gain):
-        pass
-
     def overtime_bonus(self):
         pass
 
     def update(self):
         pass
+
+    def capture_event(self, node, gain):
+        pass  
 
 
 class CreditPlayer(DefaultPlayer):
@@ -104,9 +109,9 @@ class CreditPlayer(DefaultPlayer):
 
 class RoyalePlayer(DefaultPlayer):
 
-    def __init__(self, id, elixir_cap, elixir_rate):
-        self.elixir_cap = elixir_cap
-        self.elixir_rate = elixir_rate
+    def __init__(self, id, settings):
+        self.elixir_cap = settings['elixir_cap']
+        self.elixir_rate = settings['elixir_rate']
         super().__init__(id)
 
     def default_values(self):
@@ -126,12 +131,6 @@ class RoyalePlayer(DefaultPlayer):
     def update_abilities(self):
         for ability in self.abilities.values():
             ability.update()
-
-    def use_ability(self, key, data) -> Optional[dict]:
-        if self.abilities[key].can_use(data):
-            self.abilities[key].use(data)
-        else:
-            print("failed to use ability, ", key)
 
     def set_abilities(self, chosen_abilities, ability_effects, board, settings):
         validators = make_ability_validators(board, self, settings)
@@ -156,12 +155,12 @@ class MoneyPlayer(DefaultPlayer):
     def change_tick(self, amount):
         self.tick_production += amount
 
-    def capital_handover(self, gain):
-        if gain:
-            self.tick_production += CAPITAL_BONUS
-        else:
-            self.tick_production -= CAPITAL_BONUS
-        super().capital_handover(gain)
+    # def capital_handover(self, gain):
+    #     if gain:
+    #         self.tick_production += CAPITAL_BONUS
+    #     else:
+    #         self.tick_production -= CAPITAL_BONUS
+    #     super().capital_handover(gain)
 
     # def eliminate(self):
     #     self.money = 0

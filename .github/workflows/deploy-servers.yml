@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master-deploy
+      - master
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -32,22 +34,24 @@ jobs:
           if [[ "${{ steps.check_game_server.outputs.changed }}" != "true" && "${{ steps.check_user_backend.outputs.changed }}" != "true" ]]; then
             echo "No changes detected in either server. No deployment needed."
           fi
-      - name: Build and push Game Server
-        if: steps.check_game_server.outputs.changed == 'true'
+
+      # Production deployment steps
+      - name: Build and push Game Server (Production)
+        if: steps.check_game_server.outputs.changed == 'true' && github.ref == 'refs/heads/master-deploy'
         uses: docker/build-push-action@v2
         with:
           context: ./Backend
           push: true
           tags: akashilangovan/gameserver:latest
-      - name: Build and push User Backend
-        if: steps.check_user_backend.outputs.changed == 'true'
+      - name: Build and push User Backend (Production)
+        if: steps.check_user_backend.outputs.changed == 'true' && github.ref == 'refs/heads/master-deploy'
         uses: docker/build-push-action@v2
         with:
           context: ./UserBackend
           push: true
           tags: akashilangovan/userbackend:latest
-      - name: Deploy Game Server
-        if: steps.check_game_server.outputs.changed == 'true'
+      - name: Deploy Game Server (Production)
+        if: steps.check_game_server.outputs.changed == 'true' && github.ref == 'refs/heads/master-deploy'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.GAME_SERVER_HOST }}
@@ -55,11 +59,11 @@ jobs:
           key: ${{ secrets.GAME_SERVER_SSH_KEY }}
           script: |
             sudo docker pull akashilangovan/gameserver:latest
-            sudo docker stop gameserver_act|| true
+            sudo docker stop gameserver_act || true
             sudo docker rm gameserver_act || true
             sudo docker run -e ENV=PROD -p 5553:5553 -d --name gameserver_act akashilangovan/gameserver:latest
-      - name: Deploy UserBackend
-        if: steps.check_user_backend.outputs.changed == 'true'
+      - name: Deploy UserBackend (Production)
+        if: steps.check_user_backend.outputs.changed == 'true' && github.ref == 'refs/heads/master-deploy'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.USER_BACKEND_HOST }}
@@ -70,3 +74,43 @@ jobs:
             sudo docker stop userbackend_act || true
             sudo docker rm userbackend_act || true
             sudo docker run -e ENV=PROD -e MJ_APIKEY_PUBLIC=${{ secrets.MJ_APIKEY_PUBLIC }} -e MJ_APIKEY_PRIVATE=${{ secrets.MJ_APIKEY_PRIVATE }} -d -p 5001:5001 -v /home/ec2-user/game_data:/app/game_data --name userbackend_act akashilangovan/userbackend:latest
+
+      # Staging deployment steps
+      - name: Build and push Game Server (Staging)
+        if: steps.check_game_server.outputs.changed == 'true' && github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v2
+        with:
+          context: ./Backend
+          push: true
+          tags: akashilangovan/gameserver:staging
+      - name: Build and push User Backend (Staging)
+        if: steps.check_user_backend.outputs.changed == 'true' && github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v2
+        with:
+          context: ./UserBackend
+          push: true
+          tags: akashilangovan/userbackend:staging
+      - name: Deploy Game Server (Staging)
+        if: steps.check_game_server.outputs.changed == 'true' && github.ref == 'refs/heads/master'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GAME_SERVER_HOST }}
+          username: ${{ secrets.GAME_SERVER_USERNAME }}
+          key: ${{ secrets.GAME_SERVER_SSH_KEY }}
+          script: |
+            sudo docker pull akashilangovan/gameserver:staging
+            sudo docker stop gameserver_staging || true
+            sudo docker rm gameserver_staging || true
+            sudo docker run -e ENV=STAGING -p 5554:5554 -d --name gameserver_staging akashilangovan/gameserver:staging
+      - name: Deploy UserBackend (Staging)
+        if: steps.check_user_backend.outputs.changed == 'true' && github.ref == 'refs/heads/master'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.USER_BACKEND_HOST }}
+          username: ${{ secrets.USER_BACKEND_USERNAME }}
+          key: ${{ secrets.USER_BACKEND_SSH_KEY }}
+          script: |
+            sudo docker pull akashilangovan/userbackend:staging
+            sudo docker stop userbackend_staging || true
+            sudo docker rm userbackend_staging || true
+            sudo docker run -e ENV=STAGING -e MJ_APIKEY_PUBLIC=${{ secrets.MJ_APIKEY_PUBLIC }} -e MJ_APIKEY_PRIVATE=${{ secrets.MJ_APIKEY_PRIVATE }} -d -p 5002:5002 -v /home/ec2-user/staging_game_data:/app/game_data --name userbackend_staging akashilangovan/userbackend:staging

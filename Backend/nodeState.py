@@ -28,7 +28,7 @@ class AbstractState(JsonableSkeleton):
         self.visual_id = visual_id
 
     def grow(self):
-        change = self.node.growth_rate * self.node.grow_maximum
+        change = self.node.growth_rate * self.node.grow_multiplier
         if self.node.value >= self.full_size or self.node.value + change < 0:
             return 0
         return change
@@ -61,6 +61,9 @@ class AbstractState(JsonableSkeleton):
 
     def contested(self, incoming_player):
         return incoming_player != self.node.owner
+    
+    def lost_amount(self, amount, contested):
+        return amount
 
     @property
     def json_repr(self):
@@ -78,7 +81,7 @@ class DefaultState(AbstractState):
     def intake(self, amount, incoming_player):
         change = amount * self.node.intake_multiplier
         if self.contested(incoming_player):
-            change *= -1
+            change = abs(change) * -1
         return change
 
     def capture_event(self):
@@ -90,15 +93,35 @@ class DefaultState(AbstractState):
 
 class ZombieState(DefaultState):
     def __init__(self, node):
-        node.capture(None)
         AbstractState.__init__(self, node, True, False, False, 1)  # default on capture
-        self.node.value = ZOMBIE_FULL_SIZE
+        self.node.set_state("zombified")
+        self.node.owner.count -= 1
+
+    @property
+    def full_size(self):
+        return ZOMBIE_FULL_SIZE * 2
 
     def grow(self):
         return 0
 
     def intake(self, amount, incoming_player):
-        return super().intake(amount, incoming_player) / 2
+        change = amount * self.node.intake_multiplier
+        if change > 0:
+            # this would mean it was recieved from another zombie and was already
+            change /= 3.7 # doubled when coming out from that other zombie, and then was doubled
+            # again when coming in (Zombified effect). *4 is too much, so this works out to *4/3
+        return change
+        
+    def expel(self):
+        return super().expel() * -2
+    
+    def lost_amount(self, amount, contested):
+        return abs(amount * 1/2)
+    
+    def capture_event(self):
+        # to counteract the loss they're about to receive when the node is taken from them
+        self.node.owner.count += 1 # a node which, as a zombie, they technically never owned
+        return super().capture_event()
 
 
 class CannonState(DefaultState):
@@ -148,7 +171,7 @@ class CapitalState(DefaultState):
         self.capitalized = False
         self.acceptBridge = False
         self.shrink_count = math.floor(
-            (self.full_size - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
+            (self.node.value - MINIMUM_TRANSFER_VALUE) / abs(STANDARD_SHRINK_SPEED)
         )
 
     def grow(self):

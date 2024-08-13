@@ -6,8 +6,6 @@ from constants import (
     SCREEN_HEIGHT,
     STATE_NAMES,
     EFFECT_NAMES,
-    AUTO_ATTACK,
-    AUTO_EXPAND,
     BLACK,
 )
 from nodeState import (
@@ -19,7 +17,7 @@ from nodeState import (
     CannonState,
     PumpState,
 )
-from nodeEffect import Poisoned, Enraged, OverGrown
+from nodeEffect import Poisoned, Enraged, OverGrown, Zombified
 from effectEnums import EffectType
 from tracking_decorator.track_changes import track_changes
 from method_mulitplier import method_multipliers
@@ -41,6 +39,7 @@ class Node(JsonableTracked):
         self.expel_multiplier = 1
         self.intake_multiplier = 1
         self.grow_maximum = 1
+        self.grow_multiplier = 1
         self.growth_rate = growth_rate
         self.transfer_rate = transfer_rate
         self.default_full_size = default_full_size
@@ -95,19 +94,25 @@ class Node(JsonableTracked):
             return Enraged()
         elif effect_name == "over_grow":
             return OverGrown()
+        elif effect_name == "zombified":
+            length = data
+            return Zombified()
         else:
             return None
 
     def calculate_interactions(self):
-        inter_grow, inter_intake, inter_expel = 1, 1, 1
+        inter_grow, inter_grow_cap, inter_intake, inter_expel = 1, 1, 1, 1
         for effect in self.effects.values():
             if effect.effect_type == EffectType.GROW:
                 inter_grow *= effect.effect(inter_grow)
+            elif effect.effect_type == EffectType.GROW_CAP:
+                inter_grow_cap *= effect.effect(inter_grow_cap)
             elif effect.effect_type == EffectType.INTAKE:
                 inter_intake *= effect.effect(inter_intake)
             elif effect.effect_type == EffectType.EXPEL:
                 inter_expel *= effect.effect(inter_expel)
-        self.grow_maximum = inter_grow
+        self.grow_maximum = inter_grow_cap
+        self.grow_multiplier = inter_grow
         self.intake_multiplier = inter_intake
         self.expel_multiplier = inter_expel
 
@@ -120,10 +125,10 @@ class Node(JsonableTracked):
     def expand(self):
         for edge in self.outgoing:
             if edge.contested:
-                if AUTO_ATTACK:
+                if self.owner.auto_attack:
                     edge.switch(True)
                     edge.popped = True
-            elif not edge.owned and AUTO_EXPAND and not edge.popped:
+            elif not edge.owned and self.owner.auto_spread and not edge.popped:
                 edge.switch(True)
 
     def check_edge_stati(self):
@@ -141,7 +146,8 @@ class Node(JsonableTracked):
         return self.owner is not None and self.owner.ps.value < PSE.ELIMINATED.value
 
     def tick(self):
-        self.value = min(self.value + self.grow(), self.full_size)
+        if self.value - 10 < self.full_size or self.grow_multiplier < 0:
+            self.value = min(self.value + self.grow(), self.full_size)
         self.effects_update(lambda effect: effect.count())
 
     def grow(self):
@@ -173,7 +179,7 @@ class Node(JsonableTracked):
         return self.state.expel()
 
     def lost_amount(self, amount, contested):
-        return amount
+        return self.state.lost_amount(amount, contested)
 
     def update_ownerships(self, player=None):
         if self.owner is not None and self.owner != player:
@@ -187,6 +193,8 @@ class Node(JsonableTracked):
             self.updated = True
 
     def capture(self, player):
+        if self.owner:
+            self.owner.capture_event(self, False)
         self.value = self.state.capture_event()
         self.update_ownerships(player)
         self.check_edge_stati()
@@ -194,6 +202,7 @@ class Node(JsonableTracked):
         if self.state.reset_on_capture:
             self.set_default_state()
         self.effects_update(lambda effect: effect.capture_removal(player))
+        player.capture_event(self, True)
 
     def absorbing(self):
         for edge in self.incoming:
@@ -222,10 +231,25 @@ class Node(JsonableTracked):
     @property
     def outgoing(self):
         return {edge for edge in self.edges if edge.from_node == self}
+    
+    @property
+    def possible_outgoing(self):
+        return {edge for edge in self.edges if edge.from_node == self or edge.dynamic}
+    
+    @property
+    def to_output_load(self):
+        return len({edge for edge in self.outgoing if edge.on and not edge.flowing})
+    
+    @property
+    def outputting_load(self):
+        return len({edge for edge in self.outgoing if edge.on and edge.flowing})
 
     @property
     def neighbors(self):
         return [edge.opposite(self) for edge in self.edges]
+    
+    def neighbors_(self, direction):
+        return [edge.opposite(self) for edge in getattr(self, direction)]
 
     @property
     def color(self):

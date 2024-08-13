@@ -47,6 +47,7 @@ const DeckBuilder: React.FC = () => {
     const [selectedCounts, setSelectedCounts] = useState<{ [key: string]: number }>({});
     const [initialSalary, setInitialSalary] = useState(0); // Store the initial salary
     const [salary, setSalary] = useState(0); 
+    const [optionCount, setOptionCount] = useState(3);
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -57,7 +58,8 @@ const DeckBuilder: React.FC = () => {
                 const data = await response.json();
                 if (response.ok) {
                     setAbilities(data.abilities);
-                    setInitialSalary(data.salary);
+                    setInitialSalary(data.credits);
+                    setOptionCount(data.options)
                     const storedAbilities = sessionStorage.getItem('selectedAbilities');
                     if (storedAbilities) {
                         const parsedAbilities = JSON.parse(storedAbilities);
@@ -165,8 +167,8 @@ const DeckBuilder: React.FC = () => {
             const distinctAbilities = Object.keys(prevCounts).filter(name => prevCounts[name] > 0).length;
     
             // Check if adding a new distinct ability and already at max
-            if (increment && newCount === 1 && distinctAbilities >= 4) {
-                setError("You cannot select more than 4 distinct abilities.");
+            if (increment && newCount === 1 && distinctAbilities >= optionCount) {
+                setError(`You cannot select more than ${optionCount} distinct abilities.`);
                 return prevCounts;
             }
     
