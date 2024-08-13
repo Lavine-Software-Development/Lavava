@@ -86,7 +86,6 @@ if config.DB_CONNECTED:
             self.usernames = json.dumps(usernames)
             self.user_ranks = json.dumps(user_ranks)
 
-
         @property
         def usernames_list(self):
             return json.loads(self.usernames)
@@ -95,6 +94,29 @@ if config.DB_CONNECTED:
         def user_ranks_list(self):
             return json.loads(self.user_ranks)
 
+    class EloHistory(db.Model):
+        id = db.Column(db.Integer, db.ForeignKey('game_history.id'), primary_key = True)
+        usernames = db.Column(Text, nullable=False)
+        elo_changes = db.Column(Text, nullable=False)
+        old_elo = db.Column(Text, nullable=False)
+
+        def __init__(self, id, usernames, elo_changes, old_elo):
+            self.id = id
+            self.usernames = json.dumps(usernames)
+            self.elo_changes = json.dumps(elo_changes)
+            self.old_elo = json.dumps(old_elo)
+
+        @property
+        def usernames_list(self):
+            return json.loads(self.usernames)
+        
+        @property
+        def elo_changes_list(self):
+            return json.loads(self.elo_changes)
+        
+        @property
+        def old_elo_list(self):
+            return json.loads(self.old_elo)
 
     with app.app_context():
     # def create_tables():
@@ -694,12 +716,21 @@ def save_deck(current_user):
         db.session.rollback()
         return jsonify({"success": False, "message": "Error saving deck"}), 500
 
-def update_elos(new_elos, usernames):
+def update_elos(new_elos, usernames, match_id):
     if config.DB_CONNECTED:
+        elo_changes = []
+        old_elo = []
         for username, new_elo in zip(usernames, new_elos):
             user = User.query.filter_by(username=username).first()
             if user:
+                old_elo = user.elo
                 user.elo = new_elo
+                elo_changes.append(new_elo - old_elo)
+                old_elo.append(old_elo)
+        db.session.commit()
+
+        elo_history = EloHistory(id=match_id, usernames=usernames, elo_changes=elo_changes, old_elo=old_elo)
+        db.session.add(elo_history)
         db.session.commit()
     else:
         print("Database not connected. Elo updates not saved.")
@@ -948,10 +979,15 @@ def save_game():
 
         new_game = GameHistory(usernames=usernames, user_ranks=user_ranks)
         db.session.add(new_game)
+        db.session.flush() # assigns id before commiting so it can be used for EloChanges db
+
+        update_elos(new_elos, usernames, new_game.id)
+
         db.session.commit()
 
-        return update_elo()
-    
+        elo_tuples = {ordered_tokens[i]: (old_elos[i], new_elos[i]) for i in range(len(ordered_tokens))}
+        return jsonify({"new_elos": elo_tuples})
+
     else:
         return update_elo()
 
