@@ -725,7 +725,7 @@ def get_profile(current_user):
                     {"username": "Player4", "rank": 4, "is_current_user": False, "elo_change": -15}
                 ]
             }
-        )
+        })
 
 
 @app.route("/send-email", methods=["POST"])
@@ -1040,8 +1040,7 @@ def get_royale_settings():
         "bridge_burn": False,
         "bridge_from_port_needed": False,
         "deck_size": 5,
-        "forced_deck": True,
-        "deck": [FREEZE_CODE, D_BRIDGE_CODE, BRIDGE_CODE, RAGE_CODE, NUKE_CODE],
+        "forced_deck": False,
     }
     return jsonify(settings)
 
@@ -1112,7 +1111,7 @@ def get_royale_abilities():
             "description": "Destroy nearby dot and its bridges",
         },
     ]
-    return jsonify({"abilities": abilities, "options": 6})
+    return jsonify({"abilities": abilities, "options": 5})
 
 
 @app.route("/abilities/Original", methods=["GET"])
