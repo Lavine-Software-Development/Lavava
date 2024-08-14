@@ -215,7 +215,7 @@ export class CreditAbility extends AbstractAbility {
         scene: Phaser.Scene,
         squareSize: number,
     ) {
-        super(visual, clickCount, clickType, verificationFunc, id, x - 10, y, scene, squareSize);
+        super(visual, clickCount, clickType, verificationFunc, id, x, y, scene, squareSize);
         this.credits = credits;
         this.reload = reload;
         this._remaining = remaining;
@@ -321,7 +321,7 @@ export class ElixirAbility extends AbstractAbility {
         scene: Phaser.Scene,
         squareSize: number,
     ) {
-        super(visual, clickCount, clickType, verificationFunc, id, x - 35, y, scene, squareSize);
+        super(visual, clickCount, clickType, verificationFunc, id, x, y, scene, squareSize);
         this.elixir = elixir;
         this.addTextToScene(scene);
     }

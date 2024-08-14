@@ -1,5 +1,5 @@
 import { State } from "./States";
-import { Colors, GROWTH_STOP, PORT_COUNT } from "./constants";
+import { Colors, PORT_COUNT } from "./constants";
 import { OtherPlayer } from "./otherPlayer";
 import { IDItem } from "./idItem";
 import { ClickType } from "./enums";
@@ -12,7 +12,6 @@ import { random_equal_distributed_angles } from "./utilities";
 export class Node extends IDItem implements INode {
     pos: Phaser.Math.Vector2;
     percents: [number, number];
-    is_port: boolean;
     private _state: State;
     private _value: number;
     delayChange = false;
@@ -28,7 +27,6 @@ export class Node extends IDItem implements INode {
     constructor(
         id: number,
         pos: [number, number],
-        is_port: boolean,
         state: State,
         value: number,
         _scene: Phaser.Scene
@@ -36,7 +34,6 @@ export class Node extends IDItem implements INode {
         super(id, ClickType.NODE);
         this.percents = [pos[0] / 1000, pos[1] / 700];
         this.pos = new Phaser.Math.Vector2(pos[0], pos[1]);
-        this.is_port = is_port;
 
         this.state = state;
         this.value = value;
@@ -127,15 +124,16 @@ export class Node extends IDItem implements INode {
         this.outwardEdges.forEach((edge) => (edge.recolor = true));
     }
 
-    get color(): readonly [number, number, number] {
-        if (!this.owner) {
-            return this.is_port ? Colors.BROWN : Colors.BLACK;
-        }
-        return this.owner.color;
-    }
-
     get phaserColor(): number {
         return phaserColor(this.color);
+    }
+;
+    get color(): readonly [number, number, number] {
+        throw new Error("Method not implemented.");
+    }
+
+    get accessible(): boolean {
+        throw new Error("Method not implemented.");
     }
 
     get influencedEdges(): IEdge[] {
@@ -180,7 +178,7 @@ export class Node extends IDItem implements INode {
     draw(): void {
         this.graphics.clear();
         if (this.state.graphic_override) {
-            this.state.draw(this._scene, this.size, this.pos);
+            this.state.draw(this._scene, this.size, this.pos, this.owner?.color);
             return;
         } else {
             if (this.effects.has("poison")) {
@@ -200,11 +198,19 @@ export class Node extends IDItem implements INode {
             this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
 
             if (this.effects.has("rage")) {
-                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 1);
+                this.graphics.lineStyle(3, phaserColor(Colors.DARK_RED), 1);
                 this.graphics.strokeCircle(
                     this.pos.x,
                     this.pos.y,
                     this.size - 2
+                );
+            }
+            if (this.effects.has("over_grow")) {
+                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 2);
+                this.graphics.strokeCircle(
+                    this.pos.x,
+                    this.pos.y,
+                    this.size - 3
                 );
             }
             if (this.full) {
@@ -315,6 +321,7 @@ export class Node extends IDItem implements INode {
 
 
 export class PortNode extends Node {
+    is_port: boolean;
     portPercent: number;
     ports: Array<number>;
 
@@ -326,9 +333,21 @@ export class PortNode extends Node {
         value: number,
         _scene: Phaser.Scene
     ) {
-        super(id, pos, is_port, state, value, _scene);
+        super(id, pos, state, value, _scene);
+        this.is_port = is_port;
         this.portPercent = 1;
-        this.ports = random_equal_distributed_angles(PORT_COUNT);
+        this.ports = is_port ? random_equal_distributed_angles(PORT_COUNT) : [];
+    }
+
+    get color(): readonly [number, number, number] {
+        if (!this.owner) {
+            return this.is_port ? Colors.BROWN : Colors.BLACK;
+        }
+        return this.owner.color;
+    }
+
+    get accessible(): boolean {
+        return this.is_port;
     }
 
     drawSurrounding(): void {
@@ -357,27 +376,111 @@ export class PortNode extends Node {
 export class WallNode extends Node {
     private readonly waveCount: number = 8;
     private readonly waveAmplitude: number = 0.1;
-    private readonly wallColor: number = phaserColor(Colors.DARK_GRAY); // Brick color
+    private readonly innerWallColor: number = phaserColor(Colors.LIGHT_GREY);
+    private readonly outerWallColor: number = phaserColor(Colors.DARK_GRAY);
+    private _wall_count: number;
+    private wallPercent: number;
+
+    constructor(
+        id: number,
+        pos: [number, number],
+        wall_count: number,
+        state: State,
+        value: number,
+        _scene: Phaser.Scene 
+    ) {
+        super(id, pos, state, value, _scene);
+        this._wall_count = wall_count;
+        this.wallPercent = 0;
+    }
+
+    set wall_count(wall_count: number) {
+        if (this._wall_count && wall_count < this._wall_count) {
+            this.wallPercent = 1;
+        }
+        this._wall_count = wall_count;
+    }
+
+    get wall_count(): number {
+        return this._wall_count;
+    }
+
+    get color(): readonly [number, number, number] {
+        if (!this.owner) {
+            return this.wall_count > 0 ? Colors.BLACK : Colors.BROWN;
+        }
+        return this.owner.color;
+    }
 
     drawSurrounding(): void {
-        if (!this.is_port) {
-            this.drawWavyWall();
+        if (this.wall_count > 0 || this.wallPercent > 0) {
+            this.drawWalls();
+        }
+
+        if (this.wallPercent > 0) {
+            this.wallPercent -= 0.02;
         }
     }
 
-    private drawWavyWall(): void {
+    get accessible(): boolean {
+        return this.wall_count === 0;
+    }
+
+    // private drawWalls(): void {
+    //     const graphics = this.graphics;
+    //     const centerX = this.pos.x;
+    //     const centerY = this.pos.y;
+
+    //     if (this.wall_count === 0) {
+    //         // Draw a partial inner wall if wall_count is 0 but wallPercent > 0
+    //         if (this.wallPercent > 0) {
+    //             this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.3, this.innerWallColor, this.wallPercent);
+    //         }
+    //     } else {
+    //         // Draw inner wall if wall_count is at least 1
+    //         this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.3, this.innerWallColor);
+
+    //         // Draw outer wall if wall_count is 2 or if there's a partial wall
+    //         if (this.wall_count === 2 || (this.wall_count === 1 && this.wallPercent > 0)) {
+    //             const outerWallPercent = this.wall_count === 2 ? 1 : this.wallPercent;
+    //             this.drawWavyWall(centerX, centerY, this.size * 1.3, this.size * 1.5, this.outerWallColor, outerWallPercent);
+    //         }
+    //     }
+    // }
+
+    private drawWalls(): void {
         const graphics = this.graphics;
         const centerX = this.pos.x;
         const centerY = this.pos.y;
-        const outerRadius = this.size * 1.3;
-        const innerRadius = this.size * 1.1;
+    
+        if (this.wall_count === 0) {
+            // Draw a partial inner wall if wall_count is 0 but wallPercent > 0
+            if (this.wallPercent > 0) {
+                this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.3, this.innerWallColor, this.wallPercent);
+            }
+        } else if (this.wall_count === 1) {
+            // Draw inner wall if wall_count is 1
+            this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.3, this.innerWallColor);
+    
+            // Draw partial outer wall if there's a partial wall
+            if (this.wallPercent > 0) {
+                this.drawWavyWall(centerX, centerY, this.size * 1.3, this.size * 1.5, this.outerWallColor, this.wallPercent);
+            }
+        } else if (this.wall_count === 2) {
+            // Draw a single dark wall for wall_count 2
+            this.drawWavyWall(centerX, centerY, this.size * 1.1, this.size * 1.5, this.outerWallColor);
+        }
+    }
 
-        graphics.fillStyle(this.wallColor, 1);
+    private drawWavyWall(centerX: number, centerY: number, innerRadius: number, outerRadius: number, color: number, percent: number = 1): void {
+        const graphics = this.graphics;
+        const endAngle = 360 * percent;
 
+        graphics.fillStyle(color, 1);
         graphics.beginPath();
 
         // Draw outer wavy circle
-        for (let i = 0; i <= 360; i++) {
+        for (let i = 0; i <= endAngle; i++) {
             const angle = Phaser.Math.DegToRad(i);
             const waveOffset = Math.sin(angle * this.waveCount) * this.waveAmplitude;
             const x = centerX + (outerRadius + waveOffset * outerRadius) * Math.cos(angle);
@@ -391,7 +494,7 @@ export class WallNode extends Node {
         }
 
         // Draw inner circle (counterclockwise)
-        for (let i = 360; i >= 0; i--) {
+        for (let i = endAngle; i >= 0; i--) {
             const angle = Phaser.Math.DegToRad(i);
             const x = centerX + innerRadius * Math.cos(angle);
             const y = centerY + innerRadius * Math.sin(angle);
@@ -402,12 +505,12 @@ export class WallNode extends Node {
         graphics.fillPath();
 
         // Add a stroke to the outer edge for definition
-        graphics.lineStyle(2, phaserColor(Colors.BROWN), 1);
         graphics.strokePath();
     }
 
     draw(): void {
-        this.drawWavyWall(); // Draw the wall first
+        this.drawWalls(); // Draw the walls first
         super.draw(); // Then draw the node on top
     }
+
 }

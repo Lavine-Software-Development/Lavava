@@ -285,7 +285,7 @@ input::placeholder {
 
 .ability-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr); 
+    grid-template-columns: repeat(7, 1fr); /* Changed from 4 to 5 */
     gap: 10px;
 }
 
@@ -657,8 +657,8 @@ ul {
 }
 
 .container#deck-builder-container {
-    max-width: 1200px; /* Increased from typical 960px or 1024px */
-    width: 90%; /* Use percentage for responsiveness */
+    max-width: 24000px; /* Increased from typical 960px or 1024px */
+    width: 100%; /* Use percentage for responsiveness */
     /* margin: 0 auto; Center the container */
     padding: 20px;
     display: flex;
@@ -670,7 +670,7 @@ ul {
 /* Add a media query for responsiveness */
 @media (max-width: 1200px) {
     .container#deck-builder-container {
-        width: 95%;
+        width: 100%;
     }
 }
 
@@ -1201,4 +1201,77 @@ ul {
     border-radius: 5px;
     background-color: #fdd;
     margin: 13px;
+
+
+.user-settings {
+    border-top: 1px solid black;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    margin-left: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    width: 40px;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2e1e1e;
+    transition: .3s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.setting-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    white-space: nowrap;  /* Prevent wrapping */
+}
+
+.setting-toggle label {
+    display: flex;
+    align-items: center;
+    color: white;
+    width: 100%;  /* Use full width of container */
+    justify-content: space-between;  /* Push checkbox to the right */
+}
+
+.setting-toggle input[type="checkbox"] {
+    margin-left: 10px;
 }

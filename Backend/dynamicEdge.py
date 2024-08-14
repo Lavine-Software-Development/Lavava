@@ -20,8 +20,8 @@ class DynamicEdge(Edge):
         self.swap_direction()
 
     def natural_swap(self):
-        self.on = False
         self.swap_direction()
+        self.on = self.contested and self.from_node.owner.auto_attack
 
     def swap_direction(self):
         if self.dynamic:
@@ -30,10 +30,10 @@ class DynamicEdge(Edge):
             self.from_node = temp
 
     def valid_right_click(self, clicker):
-        return self.to_node.owner == clicker and (self.owned or self.to_node.full())
+        return self.to_node.owner == clicker and (self.owned or self.to_node.full() or self.to_node.value > self.from_node.value)
 
     def check_status(self):
-        if self.from_node.owner is None and self.to_node.owner is not None:
+        if self.dynamic and self.from_node.owner is None and self.to_node.owner is not None:
             self.natural_swap()
 
     def update(self):
@@ -42,7 +42,7 @@ class DynamicEdge(Edge):
         # if equal status, only swap if from_node is not full and smaller than to_node*
         # note that if flowing, a slight advantage is given to from_node (momentum)
         super().update()
-        if self.contested:
+        if self.dynamic and self.contested:
             to_status = self.to_node.swap_status
             from_status = self.from_node.swap_status
             if from_status < to_status:

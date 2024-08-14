@@ -6,8 +6,7 @@ import json
 import signal
 import ssl 
 import logging
-
-# Configure logging 
+from config import config
 # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -28,10 +27,10 @@ class WebSocketServer():
                 await self.process_message(websocket, data)
         except websockets.exceptions.ConnectionClosed:
             logger.info(f"Connection closed for {websocket.remote_address}")
-        except json.JSONDecodeError:
-            logger.error(f"Invalid JSON received: {message}")
-        except Exception as e:
-            logger.exception(f"Error in handler: {str(e)}")
+        # except json.JSONDecodeError:
+        #     logger.error(f"Invalid JSON received: {message}")
+        # except Exception as e:
+        #     logger.exception(f"Error in handler: {str(e)}")
 
     def waiting_ladder_count(self, player_count, mode):
         settings_add_on = mode[0] + str(player_count)
@@ -60,10 +59,21 @@ class WebSocketServer():
             logger.info(f"Processing action: {action}")
             if action == 'cancel_match':
                 await self.handle_cancel_match(token, game_code)
+            elif action == 'bot_request':
+                await self.handle_bot_request(game_code)
             elif action == 'reconnect':
                 await self.handle_reconnect(websocket, token, game_code)
         else:
             await self.handle_game_setup(websocket, data)
+
+    async def handle_bot_request(self, game_id):
+        logger.info(f"Handling bot request for game {game_id}")
+        if game_id in self.waiting_players:
+            batch = self.waiting_players[game_id]
+            batch.add_bots()
+            await self.check_game_ready(game_id)
+        else:
+            logger.warning(f"Game {game_id} not found. Can't create bot")
 
     async def handle_cancel_match(self, token, game_id):
         logger.info(f"Handling cancel match for game {game_id}")
@@ -71,6 +81,7 @@ class WebSocketServer():
             batch = self.waiting_players[game_id]
             if len(batch.token_ids) == 1:
                 self.waiting_players.pop(game_id)
+                print("cancelled game")
                 logger.info(f"Removed game {game_id} from waiting players")
             else:
                 batch.remove_player_from_lobby(token)
@@ -122,7 +133,10 @@ class WebSocketServer():
 
         message = json.dumps({"game_id": game_code, "player_count": self.waiting_players[game_code].player_count, "mode": mode})
         await websocket.send(message)
-        
+
+        await self.check_game_ready(game_code)
+
+    async def check_game_ready(self, game_code):
         if self.waiting_players[game_code].is_ready():
             self.running_games[game_code] = self.waiting_players.pop(game_code)
             logger.info(f"Game {game_code} is ready to start")
@@ -200,5 +214,6 @@ class WebSocketServer():
         asyncio.get_event_loop().stop()
 
 if __name__ == "__main__":
-    server = WebSocketServer(5553)
+    port_number = 5554 if config.ENV == 'STAGING' else 5553
+    server = WebSocketServer(port_number)
     server.run()

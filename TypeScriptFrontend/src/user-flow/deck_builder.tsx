@@ -242,7 +242,7 @@ const DeckBuilder: React.FC = () => {
     
             // Check if adding a new distinct ability and already at max
             if (increment && newCount === 1 && distinctAbilities >= originalOptionCount) {
-                setError("You cannot select more than 4 distinct abilities.");
+                setError("You cannot select more than ${originalOptionCount} distinct abilities.");
                 return prevCounts;
             }
     
@@ -283,7 +283,7 @@ const DeckBuilder: React.FC = () => {
     
             // Check if adding a new distinct ability and already at max
             if (increment && newCount === 1 && distinctAbilities >= royaleOptionCount) {
-                setError("You cannot select more than 4 distinct abilities.");
+                setError("You cannot select more than ${royaleOptionCount} distinct abilities.");
                 return prevCounts;
             }
 
