@@ -111,10 +111,33 @@ if config.DB_CONNECTED:
         popups = db.Column(db.Boolean, default=True)
 
         user = db.relationship('User', backref=db.backref('settings', uselist=False))
-
+        
         def __init__(self, user_id):
             self.user_id = user_id
+
+    class EloHistory(db.Model):
+        id = db.Column(db.Integer, db.ForeignKey('game_history.id'), primary_key = True)
+        usernames = db.Column(Text, nullable=False)
+        elo_changes = db.Column(Text, nullable=False)
+        old_elo = db.Column(Text, nullable=False)
+
+        def __init__(self, id, usernames, elo_changes, old_elo):
+            self.id = id
+            self.usernames = json.dumps(usernames)
+            self.elo_changes = json.dumps(elo_changes)
+            self.old_elo = json.dumps(old_elo)
+
+        @property
+        def usernames_list(self):
+            return json.loads(self.usernames)
         
+        @property
+        def elo_changes_list(self):
+            return json.loads(self.elo_changes)
+        
+        @property
+        def old_elo_list(self):
+            return json.loads(self.old_elo)
 
     with app.app_context():
         # def create_tables():
@@ -278,6 +301,11 @@ def register():
     if config.DB_CONNECTED:
         new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
+        db.session.flush()
+
+        create_default_deck(new_user.id, "Original")
+        create_default_deck(new_user.id, "Royale")
+
         db.session.commit()
 
     return jsonify(
@@ -607,16 +635,16 @@ def get_home(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
         if user:
-            return jsonify({"abilities": user_decks(current_user)})
+            return jsonify({
+                "decks": user_decks(current_user)
+            })
         else:
             return jsonify({"error": "User not found or no deck assigned"}), 404
 
     elif current_user in {"default", "other"}:
-        return jsonify(
-            {
-                "abilities": user_decks(current_user),
-            }
-        )
+        return jsonify({
+            "decks": user_decks(current_user),
+        })
     else:
         return jsonify({"error": "User not found"}), 404
 
@@ -629,10 +657,12 @@ def get_profile(current_user):
         if user:
             # Use a SQL query to get the most recent game containing the exact username
             query = text("""
-                SELECT * FROM game_history
-                WHERE json_array_length(usernames) > 0
-                AND usernames LIKE :username
-                ORDER BY game_date DESC
+                SELECT gh.*, eh.elo_changes, eh.usernames as elo_usernames
+                FROM game_history gh
+                LEFT JOIN elo_history eh ON gh.id = eh.id
+                WHERE json_array_length(gh.usernames) > 0
+                AND gh.usernames LIKE :username
+                ORDER BY gh.game_date DESC
                 LIMIT 1
             """)
 
@@ -644,58 +674,56 @@ def get_profile(current_user):
             if most_recent_game:
                 usernames = json.loads(most_recent_game.usernames)
                 user_ranks = json.loads(most_recent_game.user_ranks)
-
+                elo_changes = json.loads(most_recent_game.elo_changes) if most_recent_game.elo_changes else []
+                elo_usernames = json.loads(most_recent_game.elo_usernames) if most_recent_game.elo_usernames else []
                 if user.username in usernames:  # Extra check to ensure exact match
                     last_game_data = {
                         "game_id": most_recent_game.id,
                         "game_date": most_recent_game.game_date.format(),
                         "players": [],
                     }
+
+                    elo_dict = dict(zip(elo_usernames, elo_changes))
+
                     for username, rank in zip(usernames, user_ranks):
+                        elo_change = elo_dict.get(username)
                         player_data = {
                             "username": username,
                             "rank": int(rank),
                             "is_current_user": (username == user.username),
+                            "elo_change": int(elo_change) if elo_change is not None else None
                         }
                         last_game_data["players"].append(player_data)
 
                     # Sort players by rank
                     last_game_data["players"].sort(key=lambda x: x["rank"])
 
-            return jsonify(
-                {
-                    "userName": user.username,
-                    "displayName": user.display_name,
-                    "email": user.email,
-                    "abilities": user_decks(current_user),
-                    "elo": user.elo,
-                    "last_game": last_game_data,
-                }
-            )
+            return jsonify({
+                "userName": user.username,
+                "displayName": user.display_name,
+                "email": user.email,
+                "usersDecks": user_decks(current_user),
+                "elo": user.elo,
+                "last_game": last_game_data
+            })
         else:
             return jsonify({"error": "User not found"}), 404
     else:
-        return jsonify(
-            {
-                "userName": "Default-User",
-                "displayName": "John Doe",
-                "email": "john.doe@example.com",
-                "abilities": user_decks(current_user),
-                "elo": 1138,
-                "last_game": {
-                    "game_id": 12345,
-                    "game_date": "2023-07-23T14:30:00",
-                    "players": [
-                        {
-                            "username": "Current-User",
-                            "rank": 1,
-                            "is_current_user": True,
-                        },
-                        {"username": "Player1", "rank": 2, "is_current_user": False},
-                        {"username": "Player3", "rank": 3, "is_current_user": False},
-                        {"username": "Player4", "rank": 4, "is_current_user": False},
-                    ],
-                },
+        return jsonify({
+            "userName": "Default-User",
+            "displayName": "John Doe",
+            "email": "john.doe@example.com",
+            "usersDecks": user_decks(current_user),
+            "elo": 1138,
+            "last_game": {
+                "game_id": 12345,
+                "game_date": "2023-07-23T14:30:00",
+                "players": [
+                    {"username": "Current-User", "rank": 1, "is_current_user": True, "elo_change": 15},
+                    {"username": "Player1", "rank": 2, "is_current_user": False, "elo_change": 5},
+                    {"username": "Player3", "rank": 3, "is_current_user": False, "elo_change": -5},
+                    {"username": "Player4", "rank": 4, "is_current_user": False, "elo_change": -15}
+                ]
             }
         )
 
@@ -748,11 +776,17 @@ def update_display_name(current_user):
 def user_decks(current_user):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=current_user).first()
+        allDecks = []
         if user:
-            deck = Deck.query.filter_by(user_id=user.id).first()
-            if deck:
-                cards = DeckCard.query.filter_by(deck_id=deck.id).all()
-                return [{"name": card.ability, "count": card.count} for card in cards]
+            decks = Deck.query.filter_by(user_id=user.id).all()
+            if decks:
+                for deck in decks:
+                    mode = deck.name
+                    cards = DeckCard.query.filter_by(deck_id=deck.id).all()
+                    deck = [{"name": card.ability, "count": card.count} for card in cards]
+                    deck.append(mode)
+                    allDecks.append(deck)
+                return allDecks
         return []  # Return empty list if no user or no deck
     else:
         return [
@@ -770,7 +804,8 @@ def save_deck(current_user):
         return jsonify({"success": False, "message": "Database not connected"}), 500
 
     data = request.json
-    abilities = data.get("abilities")
+    abilities = data.get('abilities')
+    mode = data.get('mode')
 
     user = User.query.filter_by(username=current_user).first()
     if not user:
@@ -778,9 +813,9 @@ def save_deck(current_user):
 
     try:
         # Get or create the user's deck
-        deck = Deck.query.filter_by(user_id=user.id).first()
+        deck = Deck.query.filter_by(user_id=user.id, name = mode).first()
         if not deck:
-            deck = Deck(user_id=user.id, name="Default Deck")
+            deck = Deck(user_id=user.id, name=mode)
             db.session.add(deck)
             db.session.flush()  # This assigns an ID to the deck if it's new
 
@@ -815,13 +850,28 @@ def save_deck(current_user):
         db.session.rollback()
         return jsonify({"success": False, "message": "Error saving deck"}), 500
 
-
-def update_elos(new_elos, usernames):
+def update_elos(new_elos, usernames, match_id):
     if config.DB_CONNECTED:
+        elo_changes = []
+        old_elos = []
+        updated_usernames = []
         for username, new_elo in zip(usernames, new_elos):
             user = User.query.filter_by(username=username).first()
             if user:
+                old_elo = user.elo
                 user.elo = new_elo
+                elo_change = new_elo - old_elo
+                elo_changes.append(elo_change)
+                updated_usernames.append(username)
+                old_elos.append(old_elo)
+            else:
+                elo_changes.append(None)
+                old_elos.append(None)
+                updated_usernames.append(username)
+        
+        elo_history = EloHistory(id=match_id, usernames=updated_usernames, elo_changes=elo_changes, old_elo=old_elos)
+        db.session.add(elo_history)
+
         db.session.commit()
     else:
         print("Database not connected. Elo updates not saved.")
@@ -1128,7 +1178,7 @@ def save_game():
         user_ranks = []
         for rank, token in enumerate(ordered_tokens, start=1):
             username = token_to_username(token)
-            # username = token
+            #username = token
             user = User.query.filter_by(username=username).first()
             if user:
                 usernames.append(username)
@@ -1138,12 +1188,20 @@ def save_game():
             else:
                 username.append("Guest")
             user_ranks.append(rank)
+        
+        old_elos = [username_to_elo(user) for user in usernames]
+        new_elos = calculate_elos(old_elos)
 
         new_game = GameHistory(usernames=usernames, user_ranks=user_ranks)
         db.session.add(new_game)
+        db.session.flush() # assigns id before commiting so it can be used for EloChanges id
+
+        update_elos(new_elos, usernames, new_game.id)
+
         db.session.commit()
 
-        return update_elo()
+        elo_tuples = {ordered_tokens[i]: (old_elos[i], new_elos[i]) for i in range(len(ordered_tokens))}
+        return jsonify({"new_elos": elo_tuples})
 
     else:
         return update_elo()
@@ -1258,19 +1316,64 @@ def get_user_details(username):
         user = User.query.filter_by(username=username).first()
         if not user:
             return jsonify({"error": "User not found"}), 404
+        
+        allDecks = []
+        decks = Deck.query.filter_by(user_id=user.id).all()
+        if decks:
+            for deck in decks:
+                mode = deck.name
+                cards = DeckCard.query.filter_by(deck_id=deck.id).all()
+                deck = [{"name": card.ability, "count": card.count} for card in cards]
+                deck.append(mode)
+                allDecks.append(deck)
 
-        deck = Deck.query.filter_by(user_id=user.id).first()
-        deck_cards = []
-        if deck:
-            deck_cards = DeckCard.query.filter_by(deck_id=deck.id).all()
+        query = text("""
+                SELECT gh.*, eh.elo_changes, eh.usernames as elo_usernames
+                FROM game_history gh
+                LEFT JOIN elo_history eh ON gh.id = eh.id
+                WHERE json_array_length(gh.usernames) > 0
+                AND gh.usernames LIKE :username
+                ORDER BY gh.game_date DESC
+                LIMIT 1
+            """)
+            
+        most_recent_game = db.session.execute(query, {'username': f'%"{user.username}"%'}).fetchone()
+
+        last_game_data = None
+        if most_recent_game:
+            usernames = json.loads(most_recent_game.usernames)
+            user_ranks = json.loads(most_recent_game.user_ranks)
+            elo_changes = json.loads(most_recent_game.elo_changes) if most_recent_game.elo_changes else []
+            elo_usernames = json.loads(most_recent_game.elo_usernames) if most_recent_game.elo_usernames else []
+            
+            if user.username in usernames:  # Extra check to ensure exact match
+                last_game_data = {
+                    "game_id": most_recent_game.id,
+                    "game_date": most_recent_game.game_date.format(),
+                    "players": []
+                }
+
+                elo_dict = dict(zip(elo_usernames, elo_changes))
+
+                for username, rank in zip(usernames, user_ranks):
+                    elo_change = elo_dict.get(username)
+                    player_data = {
+                        "username": username,
+                        "rank": int(rank),
+                        "is_current_user": (username == user.username),
+                        "elo_change": int(elo_change) if elo_change is not None else None
+                    }
+                    last_game_data["players"].append(player_data)
+
+                # Sort players by rank
+                last_game_data["players"].sort(key=lambda x: x["rank"])
 
         response = {
             "username": user.username,
             "displayName": user.display_name,
             "elo": user.elo,
-            "deck": [
-                {"name": card.ability, "count": card.count} for card in deck_cards
-            ],
+            "decks": allDecks,
+            "last_game": last_game_data
         }
         return jsonify(response)
     except Exception as e:
@@ -1285,10 +1388,12 @@ def get_match_history(current_user):
         if user:
             # Use a SQL query to filter games containing the exact username
             query = text("""
-                SELECT * FROM game_history
-                WHERE json_array_length(usernames) > 0
-                AND usernames LIKE :username
-                ORDER BY game_date DESC
+                SELECT gh.*, eh.elo_changes, eh.usernames as elo_usernames
+                FROM game_history gh
+                LEFT JOIN elo_history eh ON gh.id = eh.id
+                WHERE json_array_length(gh.usernames) > 0
+                AND gh.usernames LIKE :username
+                ORDER BY gh.game_date DESC
                 LIMIT 20
             """)
 
@@ -1300,17 +1405,24 @@ def get_match_history(current_user):
             for game in games:
                 usernames = json.loads(game.usernames)
                 user_ranks = json.loads(game.user_ranks)
+                elo_changes = json.loads(game.elo_changes) if game.elo_changes else []
+                elo_usernames = json.loads(game.elo_usernames) if game.elo_usernames else []
                 if user.username in usernames:  # Extra check to ensure exact match
                     game_data = {
                         "game_id": game.id,
                         "game_date": game.game_date.format(),
                         "players": [],
                     }
+
+                    elo_dict = dict(zip(elo_usernames, elo_changes))
+
                     for username, rank in zip(usernames, user_ranks):
+                        elo_change = elo_dict.get(username)
                         player_data = {
                             "username": username,
                             "rank": int(rank),
                             "is_current_user": (username == user.username),
+                            "elo_change": int(elo_change) if elo_change is not None else None
                         }
                         game_data["players"].append(player_data)
                     game_data["players"].sort(key=lambda x: x["rank"])
@@ -1349,6 +1461,34 @@ def get_match_history(current_user):
                 ]
             }
         )
+
+
+def create_default_deck(user_id, mode):
+    default_abilities = {
+        "Original": [
+            {"name": "Spawn", "count": 2},
+            {"name": "Cannon", "count": 1},
+            {"name": "Rage", "count": 2},
+            {"name": "Bridge", "count": 6}
+        ],
+        "Royale": [
+            {"name": "Bridge", "count": 1},
+            {"name": "D-Bridge", "count": 1},
+            {"name": "Freeze", "count": 1},
+            {"name": "Rage", "count": 1},
+            {"name": "Nuke", "count": 1}
+        ]
+    }
+
+    deck = Deck(name=mode, user_id=user_id)
+    db.session.add(deck)
+    db.session.flush()
+
+    for ability in default_abilities[mode]:
+        card = DeckCard(deck_id=deck.id, ability=ability["name"], count=ability["count"])
+        db.session.add(card)
+
+    db.session.commit()
 
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import config from "../env-config";
-import { jwtDecode } from "jwt-decode";
 
 interface GameData {
     game_id: number;
@@ -10,6 +9,7 @@ interface GameData {
         username: string;
         rank: number;
         is_current_user: boolean;
+        elo_change: number;
     }[];
 }
 
@@ -82,10 +82,13 @@ const MatchHistory: React.FC = () => {
                     <div key={game.game_id} className="game-history-item">
                         <p>
                             <strong>Date:</strong>{" "}
-                            {new Date(game.game_date).toLocaleDateString()}{" "}
-                            {new Date(game.game_date).toLocaleTimeString([], {
+                            {new Date(game.game_date + "Z").toLocaleString([], {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
                                 hour: "2-digit",
                                 minute: "2-digit",
+                                hour12: true,
                             })}
                         </p>
                         <p>
@@ -93,14 +96,20 @@ const MatchHistory: React.FC = () => {
                         </p>
                         <ul>
                             {game.players.map((player, index) => {
-                                let className = player.is_current_user
-                                    ? player.rank === 1
-                                        ? "current-user-win"
-                                        : "current-user-lose"
-                                    : "";
+                                let className = '';
+                                if (player.is_current_user) {
+                                    className = player.elo_change > 0 ? 'current-user-win' : 'current-user-lose';
+                                }
                                 return (
                                     <li key={index} className={className}>
                                         {player.username} - Rank: {player.rank}
+                                        {', ELO: ' + 
+                                        (player.elo_change === null || player.elo_change === undefined 
+                                            ? 'N/A' 
+                                            : (Number(player.elo_change) > 0 
+                                            ? `+${player.elo_change}` 
+                                            : player.elo_change)
+                                        )}
                                     </li>
                                 );
                             })}

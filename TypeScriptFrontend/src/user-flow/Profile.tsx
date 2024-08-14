@@ -8,6 +8,7 @@ interface PlayerData {
     username: string;
     rank: number;
     is_current_user: boolean;
+    elo_change: number;
 }
 
 interface GameData {
@@ -26,7 +27,7 @@ interface ProfileData {
     userName: string;
     displayName: string;
     email: string;
-    abilities: { name: string; count: number }[];
+    decks: any[][];
     elo: number;
     last_game: GameData | null;
 }
@@ -37,7 +38,7 @@ const Profile: React.FC = () => {
         userName: 'Loading...',
         displayName: 'Loading...',
         email: 'Loading...',
-        abilities: [], // Default to at least one empty list
+        decks: [[]], // Default to at least one empty list
         elo: 1000,
         last_game: null,
     });
@@ -52,6 +53,10 @@ const Profile: React.FC = () => {
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
     const [popupMessage, setPopupMessage] = useState('');
     const [showPopup, setShowPopup] = useState(false);
+    const [deckMode, setDeckMode] = useState("Original");
+    const [deckIndex, setDeckIndex] = useState<number>(0);
+    const [usersDecks, setUsersDecks] = useState<any[][]>([]);
+    const [decks, setDecks] = useState<any[][]>([]);
 
     const handleChangePassword = () => {
         navigate("/change-password");
@@ -166,6 +171,13 @@ const Profile: React.FC = () => {
                 await fetchUserSettings();
                 if (response.ok) {
                     setProfileData(data);
+                    const fetchedDecks: any[][] = data.usersDecks || [];
+                    const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
+                    const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+                    const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
+                    setDeckIndex(newDeckIndex);
+                    setUsersDecks(newDecks);
+                    setDecks(fetchedDecks);
                 } else {
                     if (data.message === 'Login Token has expired!') {
                         localStorage.removeItem('userToken');
@@ -187,6 +199,24 @@ const Profile: React.FC = () => {
             </div>
         );
     }
+
+    useEffect(() => {
+        handleMyDeck();
+        console.log(profileData.last_game);
+    }, [deckMode]);
+
+    const handleMyDeck = () => {
+        if (!decks || decks.length === 0) {
+            return;
+        }
+    
+        const modes = decks.map((deck: any[]) => (deck && deck.length > 0 ? deck[deck.length - 1] : undefined));
+        const newDeckIndex = modes.findIndex((mode: string) => mode === deckMode);
+        const newDecks = decks.map((deck: any[]) => deck.slice(0, -1));
+    
+        setDeckIndex(newDeckIndex);
+        setUsersDecks(newDecks);
+    };
 
     return (
         <div className="dashboard-container" id="dashboard-container">
@@ -263,20 +293,44 @@ const Profile: React.FC = () => {
             </div>
             <div className="info-cards">
                 <div className="info-card linear-gradient">
-                    <h2 className="text-shadow default-deck-text">Default Deck</h2>
+                    <div className="tab-container" style={{ marginBottom: '10px'}}>
+                        <button 
+                            className={`tab-button tab-profile ${deckMode === "Original" ? "active" : ""}`}
+                            onClick={() => setDeckMode("Original")}
+                        >
+                            Original
+                        </button>
+                        <button 
+                            className={`tab-button tab-profile ${deckMode === "Royale" ? "active" : ""}`}
+                            onClick={() => setDeckMode("Royale")}
+                        >
+                            Royale
+                        </button>
+                    </div>
+                    <h2 className="text-shadow default-deck-text">{deckMode} Deck</h2>
                     <div className="abilities-container-friendly">
-                    {profileData.abilities.map((item, index) => (
-                        <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
-                        <div className="ability-icon">
-                            <img
-                            src={`./assets/abilityIcons/${item.name}.png`}
-                            alt={item.name}
-                            className="ability-img"
-                            />
-                        </div>
-                        <div className="ability-count">{item.count}</div>
-                        </div>
-                    ))}
+                    {usersDecks && usersDecks[deckIndex] ? (
+                        usersDecks[deckIndex].length > 0 ? (
+                            usersDecks[deckIndex].map((item: { name: string; count: number }, index: number) => (
+                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name]}}>
+                                    <div className="ability-icon">
+                                        <img
+                                            src={`./assets/abilityIcons/${item.name}.png`}
+                                            alt={item.name}
+                                            className="ability-img"
+                                        />
+                                    </div>
+                                    <div className="ability-count">{item.count}</div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="no-abilities-message" style = {{margin: "0px"}}>
+                                No Abilities Saved for {deckMode} mode.
+                            </div>
+                        )
+                    ) : (
+                        <p>Loading your deck...</p>
+                    )}
                     </div>
                 </div>
                     <div className="info-card linear-gradient">
@@ -284,17 +338,34 @@ const Profile: React.FC = () => {
                         <h2 className="text-shadow">Most Recent Ladder Game</h2>
                         {profileData.last_game ? (
                             <div className="game-history-item">
-                                <p><strong>Date:</strong> {new Date(profileData.last_game.game_date).toLocaleDateString()} {new Date(profileData.last_game.game_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p>
+                                    <strong>Date:</strong>{" "}
+                                    {new Date(profileData.last_game.game_date + "Z").toLocaleString([], {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: true,
+                                    })}
+                                </p>
                                 <p><strong>Players:</strong></p>
                                 <ul>
                                     {profileData.last_game.players.map((player, index) => {
                                         let className = '';
                                         if (player.is_current_user) {
-                                            className = player.rank === 1 ? 'current-user-win' : 'current-user-lose';
-                                            }
+                                            className = player.elo_change > 0 ? 'current-user-win' : 'current-user-lose';
+                                        }
                                         return (
                                             <li key={index} className={className}>
-                                            {player.username} - Rank: {player.rank}
+                                                {player.username} - Rank: {player.rank}
+                                                {', ELO: ' + 
+                                                (player.elo_change === null || player.elo_change === undefined 
+                                                    ? 'N/A' 
+                                                    : (Number(player.elo_change) > 0 
+                                                    ? `+${player.elo_change}` 
+                                                    : player.elo_change)
+                                                )}
                                             </li>
                                         );
                                     })}
