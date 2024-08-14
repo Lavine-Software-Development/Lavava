@@ -4,6 +4,7 @@ export class OtherPlayer {
     ready: boolean;
     eliminated: boolean;
     victor: boolean;
+    nodeCount: number;
 
     constructor(id: string, color: readonly [number, number, number], ready: boolean = false, eliminated: boolean = false, victor: boolean = false) {
         this.name = id;
@@ -11,6 +12,7 @@ export class OtherPlayer {
         this.ready = ready;
         this.eliminated = eliminated;
         this.victor = victor;
+        this.nodeCount = 0;
     }
 
     get color(): readonly [number, number, number] {

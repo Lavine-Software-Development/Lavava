@@ -2,10 +2,11 @@ import { OtherPlayer } from "./otherPlayer";
 
 export class MyCreditPlayer extends OtherPlayer {
     credits: number;
-
+    capitalCount: number;
     constructor(name: string, color: readonly [number, number, number], ready: boolean = false, eliminated: boolean = false, victor: boolean = false) {
         super(name, color, ready, eliminated, victor);
         this.credits = 0;
+        this.capitalCount = 0;
     }
 }
 
