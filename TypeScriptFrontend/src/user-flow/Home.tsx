@@ -171,11 +171,11 @@ const Home: React.FC = () => {
         const storedOriginalAbilities = sessionStorage.getItem("selectedOriginalAbilities");
         const storedRoyaleAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
         if (gameMode === "Original") {
-            if (storedOriginalAbilities) {
+            if (storedOriginalAbilities  && storedOriginalAbilities !== "undefined") {
                 setSelectedAbilities(JSON.parse(storedOriginalAbilities));
             }
         } else {
-            if (storedRoyaleAbilities) {
+            if (storedRoyaleAbilities && storedRoyaleAbilities !== "undefined") {
                 setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
             }
         }

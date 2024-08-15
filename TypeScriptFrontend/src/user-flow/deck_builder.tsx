@@ -285,12 +285,12 @@ const DeckBuilder: React.FC = () => {
     
             // Check if adding a new distinct ability and already at max
             if (increment && newCount === 1 && distinctAbilities >= royaleOptionCount) {
-                setError("You cannot select more than ${royaleOptionCount} distinct abilities.");
+                setError(`You cannot select more than ${royaleOptionCount} distinct abilities.`);
                 return prevCounts;
             }
 
             if (increment && newCount === 2) {
-                setError("You can select an ability once in Royale decks.");
+                setError("You can only select an ability once in Royale decks.");
                 return prevCounts;
             }
     
