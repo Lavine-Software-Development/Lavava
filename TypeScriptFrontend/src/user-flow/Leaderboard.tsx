@@ -201,7 +201,7 @@ const Leaderboard: React.FC = () => {
                             <p>Loading deck...</p>
                         )}
                         </div>
-                        <h2 className="text-shadow">Most Recent Ladder Game</h2>
+                        {/* <h2 className="text-shadow">Most Recent Ladder Game</h2>
                         {selectedUser.last_game ? (
                             <div className="game-history-item">
                                 <p>
@@ -239,7 +239,7 @@ const Leaderboard: React.FC = () => {
                             </div>
                         ) : (
                             <p>No recent games played.</p>
-                        )}
+                        )} */}
                         <button onClick={() => setSelectedUser(null)}>Close</button>
                     </div>
                 </div>

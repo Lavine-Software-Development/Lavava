@@ -40,16 +40,15 @@ const Login: React.FC<LoginProps> = () => {
         localStorage.removeItem("userToken");
         const defaultDecks = {
             "Original": [
-                {"name": "Spawn", "count": 2},
-                {"name": "Cannon", "count": 2},
-                {"name": "Rage", "count": 2},
-                {"name": "Bridge", "count": 3}
+                {"name": "Bridge", "count": 4},
+                {"name": "Mini-Bridge", "count": 3},
+                {"name": "Freeze", "count": 3},
+                {"name": "Cannon", "count": 2}
             ],
             "Royale": [
                 {"name": "Bridge", "count": 1},
                 {"name": "D-Bridge", "count": 1},
                 {"name": "Freeze", "count": 1},
-                {"name": "Rage", "count": 1},
                 {"name": "Nuke", "count": 1}
             ]
         };

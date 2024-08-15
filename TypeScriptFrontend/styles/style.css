@@ -284,9 +284,16 @@ input::placeholder {
 }
 
 .ability-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* Changed from 4 to 5 */
-    gap: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.ability-grid.original-mode {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.ability-grid.royale-mode {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .ability-button {
@@ -657,14 +664,13 @@ ul {
 }
 
 .container#deck-builder-container {
-    max-width: 24000px; /* Increased from typical 960px or 1024px */
-    width: 100%; /* Use percentage for responsiveness */
-    /* margin: 0 auto; Center the container */
+    max-width: 100%; /* Allow full width */
+    width: 100%; /* Set a fixed width */
     padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Align content to the top */
-    min-height: 80vh; /* Ensure container has enough height */
+    justify-content: flex-start;
+    min-height: 80vh;
 }
 
 /* Add a media query for responsiveness */
@@ -1157,9 +1163,30 @@ ul {
     margin: 5px 0;
 }
 
+.tab-and-salary-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.salary-display {
+    margin-left: auto; /* Push to the right */
+}
+
+.salary-display h2 {
+    margin: 0; /* Remove default margins */
+    font-size: 1.2em; /* Adjust size as needed */
+}
+
 .tab-container {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* Remove bottom margin */
+}
+
+.deck-tab-container {
+    display: flex;
+    margin-bottom: 0;
 }
 
 .tab-button {

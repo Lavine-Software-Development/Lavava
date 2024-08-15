@@ -230,7 +230,6 @@ const Home: React.FC = () => {
             sessionStorage.setItem("type", "JOIN");
             sessionStorage.setItem("key_code", keyCode);
             sessionStorage.setItem("reconnect", "false");
-            sessionStorage.setItem("selectedAbilities", JSON.stringify(selectedAbilities))
             navigate("/lobby");
         }
     };
@@ -406,28 +405,28 @@ const Home: React.FC = () => {
                             </h1>
                             <h3 style={{ textAlign: "center" }}>(No elo)</h3>
 
-                            <div className="abilities-container-friendly">
-                                {selectedAbilities && selectedAbilities.length > 0 ? (
-                                    selectedAbilities.map((item: { name: string; count: number }, index: number) => (
-                                        <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
-                                            <div className="ability-icon">
-                                                <img
-                                                    src={`./assets/abilityIcons/${item.name}.png`}
-                                                    alt={item.name}
-                                                    className="ability-img"
-                                                />
-                                            </div>
-                                            <div className="ability-count" style={{ fontSize: '1.2rem' }}>{item.count}</div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="no-abilities-message">
-                                        No Abilities Selected.
-                                    </div>
-                                )}
-                            </div>
                             {friendlyMode === "host" ? (
                                 <>
+                                    <div className="abilities-container-friendly">
+                                        {selectedAbilities && selectedAbilities.length > 0 ? (
+                                            selectedAbilities.map((item: { name: string; count: number }, index: number) => (
+                                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
+                                                    <div className="ability-icon">
+                                                        <img
+                                                            src={`./assets/abilityIcons/${item.name}.png`}
+                                                            alt={item.name}
+                                                            className="ability-img"
+                                                        />
+                                                    </div>
+                                                    <div className="ability-count" style={{ fontSize: '1.2rem' }}>{item.count}</div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="no-abilities-message">
+                                                No Abilities Selected.
+                                            </div>
+                                        )}
+                                    </div>
                                     {/* <label>Player Count:</label> */}
                                     <div
                                         className="player-count-drop-down-container"
@@ -483,6 +482,7 @@ const Home: React.FC = () => {
                                 </>
                             ) : (
                                 <>
+                                    <h3 style={{ textAlign: "center" }}>Schrodinger's Deck</h3>
                                     <div className="key-code-container">
                                         <input
                                             type="text"

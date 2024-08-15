@@ -1080,7 +1080,7 @@ def get_royale_abilities():
         },
         {
             "name": "Wall",
-            "cost": 3,
+            "cost": 2,
         },
         {
             "name": "Over-Grow",
@@ -1098,7 +1098,7 @@ def get_royale_abilities():
         },
         {
             "name": "Poison",
-            "cost": 5,
+            "cost": 4,
         },
         {
             "name": "Rage", 
@@ -1148,11 +1148,11 @@ def get_og_abilities():
         #     "cost": 2,
         #     "description": "Create a two-way bridge"
         # },
-        {
-            "name": "Over-Grow",
-            "cost": 2,
-            "description": "nodes can grow to any size for short period",
-        },
+        # {
+        #     "name": "Over-Grow",
+        #     "cost": 2,
+        #     "description": "nodes can grow to any size for short period",
+        # },
         {"name": "Capital", "cost": 2, "description": "Create a capital"},
         {
             "name": "Pump",
@@ -1465,16 +1465,15 @@ def get_match_history(current_user):
 def create_default_deck(user_id, mode):
     default_abilities = {
         "Original": [
-            {"name": "Spawn", "count": 2},
-            {"name": "Cannon", "count": 1},
-            {"name": "Rage", "count": 2},
-            {"name": "Bridge", "count": 6}
+            {"name": "Bridge", "count": 4},
+            {"name": "Mini-Bridge", "count": 3},
+            {"name": "Freeze", "count": 3},
+            {"name": "Cannon", "count": 2}
         ],
         "Royale": [
             {"name": "Bridge", "count": 1},
             {"name": "D-Bridge", "count": 1},
             {"name": "Freeze", "count": 1},
-            {"name": "Rage", "count": 1},
             {"name": "Nuke", "count": 1}
         ]
     }

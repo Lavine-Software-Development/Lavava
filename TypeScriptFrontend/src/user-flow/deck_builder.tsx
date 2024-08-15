@@ -332,40 +332,54 @@ const DeckBuilder: React.FC = () => {
         sessionStorage.setItem("gameMode", mode);
     };
 
+    const gridClassName = `ability-grid ${deckMode === "Original" ? "original-mode" : "royale-mode"}`;
+
     return (
         <div className="container" id="deck-builder-container">
             <h1>Deck Builder</h1>
-            <div className="tab-container">
-                <button 
-                    className={`tab-button ${deckMode === "Original" ? "active" : ""}`}
-                    onClick={() => handleGameModeChange("Original")}
-                >
-                    Original
-                </button>
-                <button 
-                    className={`tab-button ${deckMode === "Royale" ? "active" : ""}`}
-                    onClick={() => handleGameModeChange("Royale")}
-                >
-                    Royale
-                </button>
+            <div className="tab-and-salary-container">
+                <div className="deck-tab-container">
+                    <button 
+                        className={`tab-button ${deckMode === "Original" ? "active" : ""}`}
+                        onClick={() => handleGameModeChange("Original")}
+                    >
+                        Original
+                    </button>
+                    <button 
+                        className={`tab-button ${deckMode === "Royale" ? "active" : ""}`}
+                        onClick={() => handleGameModeChange("Royale")}
+                    >
+                        Royale
+                    </button>
+                </div>
+                {deckMode === "Original" && (
+                    <div className="salary-display">
+                        <h2>Credits: {salary}</h2>
+                    </div>
+                )}
             </div>
-            <div className="ability-grid">
+            <div className={gridClassName}>
                 {(deckMode === "Original" ? abilities : royalAbilities).map((ability, index) => (
                     <button
-                        key={index}
-                        className={`ability-button ${(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] > 0 ? 'selected' : ''}`}
-                        onClick={() => deckMode === "Original" ? handleButtonClick(ability.name, true) : handleRoyaleButtonClick(ability.name, true)}
-                        data-tooltip={ability.description}
-                        onContextMenu={(e) => {
-                            e.preventDefault();
-                            deckMode === "Original" ? handleButtonClick(ability.name, false) : handleRoyaleButtonClick(ability.name, false);
-                        }}
+                    key={index}
+                    className={`ability-button ${(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] > 0 ? 'selected' : ''}`}
+                    onClick={() => deckMode === "Original" ? handleButtonClick(ability.name, true) : handleRoyaleButtonClick(ability.name, true)}
+                    data-tooltip={ability.description}
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        deckMode === "Original" ? handleButtonClick(ability.name, false) : handleRoyaleButtonClick(ability.name, false);
+                    }}
                     >
-                        <img src={`./assets/abilityIcons/${ability.name}.png`} alt={ability.name} 
-                        style={{ width: '70%', height: 'auto', marginBottom: '15%' }}/>
-                        <div className="ability-name">{ability.name}</div>
-                        {deckMode === "Original" && <div className="ability-cost">Cost: {ability.cost}</div>}
-                        <div className="ability-count">{(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] || 0}</div>
+                    <img 
+                        src={`./assets/abilityIcons/${ability.name}.png`} 
+                        alt={ability.name} 
+                        style={{ width: '70%', height: 'auto', marginBottom: '15%' }}
+                    />
+                    <div className="ability-name">{ability.name}</div>
+                    <div className="ability-cost">Cost: {ability.cost}</div>
+                    <div className="ability-count">
+                        {(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] || 0}
+                    </div>
                     </button>
                 ))}
             </div>
@@ -381,11 +395,6 @@ const DeckBuilder: React.FC = () => {
                 </div>
                 <button className="custom-button ready-button" data-tooltip="Go to the home page" onClick={goHome}>Ready</button>
                 {error && <p className="error-message">{error}</p>}
-                {deckMode === "Original" && (
-                    <div className="salary-display">
-                        <h2>Credits: {salary}</h2>
-                    </div>
-                )}
                 <div className="click-instructions">
                     <span className="click-instruction">
                         <img src="/assets/left_click.png" alt="Left click" className="click-icon" />
@@ -396,9 +405,9 @@ const DeckBuilder: React.FC = () => {
                         Deselect
                     </span>
                 </div>
-                <h2 style={{ marginTop: '20px' }}>Selected abilities:</h2>
+                {/* <h2 style={{ marginTop: '20px' }}>Selected abilities:</h2> */}
                 <div className="abilities-container-friendly">
-                    {getCurrentSelections().length > 0 ? (
+                    {/* {getCurrentSelections().length > 0 ? (
                         getCurrentSelections().map((item, index) => (
                             <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] , width: '100px', height: '100px'}}>
                                 <div className="ability-icon">
@@ -413,7 +422,8 @@ const DeckBuilder: React.FC = () => {
                         ))
                     ) : (
                         <p>No abilities selected for {deckMode} mode</p>
-                    )}
+                    )} */}
+                    {getCurrentSelections().length == 0 && (<p>No abilities selected for {deckMode} mode</p>)}
                 </div>
             </div>
             {showPopup && (

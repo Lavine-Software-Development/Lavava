@@ -104,7 +104,12 @@ export class MainScene extends Scene {
         this.network.updateCallback = this.update_data.bind(this);
         this.network.leaveGameCallback = this.leaveMatchDirect.bind(this);
         this.burning = [];
-        const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        let storedAbilities;
+        if (this.board.mode === "Original") {
+            storedAbilities = sessionStorage.getItem("selectedOriginalAbilities");
+        } else {
+            storedAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
+        }
 
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
