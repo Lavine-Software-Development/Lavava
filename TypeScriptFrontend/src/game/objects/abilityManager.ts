@@ -473,7 +473,7 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
 
     constructor(
         scene: Phaser.Scene,
-        ability_values: number [],
+        ability_values: { [x: string]: number },
         validators:  { [key: string]: ValidatorFunc } ,
         events: { [key: number]: Event },
         capacity: number,
@@ -491,19 +491,22 @@ export class ElixirAbilityManager extends AbstractAbilityManager {
         this.updateElixirBar(scene);
     }
 
-    makeAbilities(ability_values: number[], validators: { [key: string]: ValidatorFunc }, scene: Phaser.Scene): void {
+    makeAbilities(abilityCounts: { [x: string]: number }, validators: { [key: string]: ValidatorFunc }, scene: Phaser.Scene): void {
 
         this.barWidth = 30;
         this.barPadding = 5;
+        console.log(abilityCounts)
 
         let y_position = 20;
         const spacing = 15; // Spacing between squares
         const topPadding = 20;
         const absHeight = scene.sys.canvas.height - topPadding - 60 - this.barPadding * 2;
-        const squareSize = (absHeight - (spacing * (ability_values.length - 1))) / ability_values.length; // Size of each square
+        const squareSize = Math.min((absHeight - (spacing * (Object.keys(abilityCounts).length - 1))) / Object.keys(abilityCounts).length, 180); // Size of each square
         const unaltered_x_position = scene.scale.width - squareSize - this.barWidth - this.barPadding - 10;
+        console.log("Square size: ", squareSize);
 
-        ability_values.forEach((abilityCode: number) => {
+        Object.entries(abilityCounts).forEach(([abk, count]) => {
+            const abilityCode = parseInt(abk);
             this.abilities[abilityCode] = new ElixirAbility(
                 VISUALS[abilityCode] as AbilityVisual,
                 CLICKS[abilityCode][0],
