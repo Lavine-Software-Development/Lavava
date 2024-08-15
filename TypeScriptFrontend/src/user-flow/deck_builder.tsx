@@ -54,7 +54,9 @@ const DeckBuilder: React.FC = () => {
     const [royaleOptionCount, setRoyaleOptionCount] = useState(3);
     const [error, setError] = useState("");
     const [royalAbilities, setRoyalAbilities] = useState<Ability[]>([]);
-    const [deckMode, setDeckMode] = useState<string>("Original");
+    const [deckMode, setDeckMode] = useState<string>(
+        sessionStorage.getItem("gameMode") || "Original"
+    );
     
     useEffect(() => {
         const fetchRoyaleAbilities = async () => {
@@ -94,7 +96,7 @@ const DeckBuilder: React.FC = () => {
                 handleGetDeck();
                 if (response.ok) {
                     setAbilities(data.abilities);
-                    setInitialSalary(data.salary);
+                    setInitialSalary(data.credits);
                     setOriginalOptionCount(data.options);
                     const storedOriginalAbilities = sessionStorage.getItem("selectedOriginalAbilities");
                     if (storedOriginalAbilities) {
@@ -325,19 +327,24 @@ const DeckBuilder: React.FC = () => {
         }
     };
 
+    const handleGameModeChange = (mode: string) => {
+        setDeckMode(mode);
+        sessionStorage.setItem("gameMode", mode);
+    };
+
     return (
         <div className="container" id="deck-builder-container">
             <h1>Deck Builder</h1>
             <div className="tab-container">
                 <button 
                     className={`tab-button ${deckMode === "Original" ? "active" : ""}`}
-                    onClick={() => setDeckMode("Original")}
+                    onClick={() => handleGameModeChange("Original")}
                 >
                     Original
                 </button>
                 <button 
                     className={`tab-button ${deckMode === "Royale" ? "active" : ""}`}
-                    onClick={() => setDeckMode("Royale")}
+                    onClick={() => handleGameModeChange("Royale")}
                 >
                     Royale
                 </button>

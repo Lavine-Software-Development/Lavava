@@ -1182,13 +1182,41 @@ ul {
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.tab-profile.active {
-    background-color: #82b4d6;
+.modal-content .tab-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.modal-content .tab-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #d1d5db;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-content .tab-button.active {
+    background-color: #fff;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.tab-profile:hover {
-    background-color: #e8eaed;
+.tab-blue-background-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #d1d5db;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-blue-background-button.active {
+    background-color: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .no-abilities-message {
@@ -1201,7 +1229,7 @@ ul {
     border-radius: 5px;
     background-color: #fdd;
     margin: 13px;
-
+}
 
 .user-settings {
     border-top: 1px solid black;

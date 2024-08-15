@@ -725,7 +725,7 @@ def get_profile(current_user):
                     {"username": "Player4", "rank": 4, "is_current_user": False, "elo_change": -15}
                 ]
             }
-        )
+        })
 
 
 @app.route("/send-email", methods=["POST"])

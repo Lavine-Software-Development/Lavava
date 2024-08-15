@@ -294,14 +294,14 @@ const Profile: React.FC = () => {
             <div className="info-cards">
                 <div className="info-card linear-gradient">
                     <div className="tab-container" style={{ marginBottom: '10px'}}>
-                        <button 
-                            className={`tab-button tab-profile ${deckMode === "Original" ? "active" : ""}`}
+                        <button
+                            className={`tab-blue-background-button ${deckMode === "Original" ? "active" : ""}`}
                             onClick={() => setDeckMode("Original")}
                         >
                             Original
                         </button>
-                        <button 
-                            className={`tab-button tab-profile ${deckMode === "Royale" ? "active" : ""}`}
+                        <button
+                            className={`tab-blue-background-button ${deckMode === "Royale" ? "active" : ""}`}
                             onClick={() => setDeckMode("Royale")}
                         >
                             Royale

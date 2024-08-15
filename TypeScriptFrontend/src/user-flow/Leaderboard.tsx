@@ -166,13 +166,13 @@ const Leaderboard: React.FC = () => {
                         <p><strong>ELO:</strong> {selectedUser.elo}</p>
                         <div className="tab-container" style={{ marginBottom: '10px'}}>
                             <button 
-                                className={`tab-button tab-profile ${deckMode === "Original" ? "active" : ""}`}
+                                className={`tab-button ${deckMode === "Original" ? "active" : ""}`}
                                 onClick={() => setDeckMode("Original")}
                             >
                                 Original
                             </button>
                             <button 
-                                className={`tab-button tab-profile ${deckMode === "Royale" ? "active" : ""}`}
+                                className={`tab-button ${deckMode === "Royale" ? "active" : ""}`}
                                 onClick={() => setDeckMode("Royale")}
                             >
                                 Royale

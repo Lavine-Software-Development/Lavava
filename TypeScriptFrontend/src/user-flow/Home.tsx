@@ -117,34 +117,40 @@ const Home: React.FC = () => {
             }
         }
         if (token) {
-            // Fetch user decks from backend
-            fetch(`${config.userBackend}/user_abilities`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data && data.decks) {
-                        const fetchedDecks: any[][] = data.decks;
-                        const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
-                        const originalDeckIndex = modes.findIndex((mode: string) => mode === "Original");
-                        const royaleDeckIndex = modes.findIndex((mode: string) => mode === "Royale");
-                        const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
-                        const originalAbilities = newDecks[originalDeckIndex];
-                        const royaleAbilities = newDecks[royaleDeckIndex]
-                        sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(originalAbilities));
-                        sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(royaleAbilities));
-                        if (gameMode === "Original") {
-                            setSelectedAbilities(originalAbilities);
-                        } else {
-                            setSelectedAbilities(royaleAbilities);
-                        }
-                    }
+            if (storedOriginalAbilities) {
+                setSelectedAbilities(JSON.parse(storedOriginalAbilities));
+            } else if (storedRoyaleAbilities) {
+                setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
+            } else {
+                // Fetch user decks from backend
+                fetch(`${config.userBackend}/user_abilities`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 })
-                .catch((error) => {
-                    console.error("Failed to fetch abilities:", error);
-                });
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data && data.decks) {
+                            const fetchedDecks: any[][] = data.decks;
+                            const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
+                            const originalDeckIndex = modes.findIndex((mode: string) => mode === "Original");
+                            const royaleDeckIndex = modes.findIndex((mode: string) => mode === "Royale");
+                            const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
+                            const originalAbilities = newDecks[originalDeckIndex];
+                            const royaleAbilities = newDecks[royaleDeckIndex]
+                            sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(originalAbilities));
+                            sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(royaleAbilities));
+                            if (gameMode === "Original") {
+                                setSelectedAbilities(originalAbilities);
+                            } else {
+                                setSelectedAbilities(royaleAbilities);
+                            }
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Failed to fetch abilities:", error);
+                    });
+                }
         }
 
         const gameStyle = sessionStorage.getItem("gameStyle");
