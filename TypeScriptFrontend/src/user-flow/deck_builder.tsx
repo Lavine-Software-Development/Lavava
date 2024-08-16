@@ -64,7 +64,9 @@ const DeckBuilder: React.FC = () => {
             try {
                 const response = await fetch(`${config.userBackend}/abilities/Royale`);
                 const data = await response.json();
-                handleGetDeck();
+                if (!sessionStorage.getItem("selectedRoyaleAbilities")) {
+                    handleGetDeck();
+                }
                 if (response.ok) {
                     setRoyalAbilities(data.abilities);
                     setRoyaleOptionCount(data.options);
@@ -93,7 +95,9 @@ const DeckBuilder: React.FC = () => {
             try {
                 const response = await fetch(`${config.userBackend}/abilities/Original`);
                 const data = await response.json();
-                handleGetDeck();
+                if (!sessionStorage.getItem("selectedOriginalAbilities")) {
+                    handleGetDeck();
+                }
                 if (response.ok) {
                     setAbilities(data.abilities);
                     setInitialSalary(data.credits);

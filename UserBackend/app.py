@@ -994,7 +994,7 @@ def non_route_get_user_settings(username):
 def username_to_elo(name: str):
     if config.DB_CONNECTED:
         user = User.query.filter_by(username=name).first()
-        return user.elo if user else 400  # Default ELO for bots
+        return user.elo if user else 900 # Default ELO for bots
     else:
         dummy = {"other": 1200, "default": 1300}
         return dummy.get(name, 1100)  # Def

@@ -239,7 +239,7 @@ export class MainScene extends Scene {
             const markX = barX + (time / this.settings.main_time) * this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime));
             this.progressBar.fillRect(markX, this.barY - 5, 2, this.barHeight + 10) ; // 2-pixel wide marks
             this.markerTexts.push(
-                this.add.text(markX, this.barY + this.barHeight + 5, "Walls Down", {
+                this.add.text(markX, this.barY + this.barHeight + 5, "Grey Walls Down", {
                     fontFamily: 'Arial',
                     fontSize: '10px',
                     color: '#000000'
@@ -982,7 +982,7 @@ export class MainScene extends Scene {
                 },
             });
         } else if (tuple[0] == "Walls Down") {
-            let text = "Walls Down";
+            let text = "Grey Walls Down";
             let bonusText = this.add.text(
                 this.sys.game.config.width as number / 2,
                 40,
