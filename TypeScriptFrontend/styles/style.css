@@ -284,10 +284,16 @@ input::placeholder {
 }
 
 .ability-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* Changed from 4 to 5 */
-    gap: 10px;
-    /* margin-top: 20px; Add some space below the title */
+  display: grid;
+  gap: 10px;
+}
+
+.ability-grid.original-mode {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.ability-grid.royale-mode {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .ability-button {
@@ -297,14 +303,16 @@ input::placeholder {
     justify-content: center;
     padding: 10px;
     background-color: #f0f0f0;
-    border: none;
+    border: 2px solid transparent;
     border-radius: 5px;
     cursor: pointer;
     position: relative;
+    min-height: 135px;
 }
 
 .ability-button.selected {
     background-color: #e0e0e0;
+    border-color: #999;
 }
 
 .ability-name {
@@ -475,6 +483,7 @@ input::placeholder {
     overflow: scroll;
     padding: 7vh;
     background-color: #fcfcfc;
+    width: 100vw;
 }
 
 .space {
@@ -656,14 +665,13 @@ ul {
 }
 
 .container#deck-builder-container {
-    max-width: 24000px; /* Increased from typical 960px or 1024px */
-    width: 100%; /* Use percentage for responsiveness */
-    /* margin: 0 auto; Center the container */
+    max-width: 100%; /* Allow full width */
+    width: 100%; /* Set a fixed width */
     padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Align content to the top */
-    min-height: 80vh; /* Ensure container has enough height */
+    justify-content: flex-start;
+    min-height: 80vh;
 }
 
 /* Add a media query for responsiveness */
@@ -907,7 +915,7 @@ ul {
 .button-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 60px;
+    margin-top: 10px;
     width: 100%;
 }
 
@@ -1156,7 +1164,262 @@ ul {
     margin: 5px 0;
 }
 
+.tab-and-salary-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
+.salary-display {
+    margin-left: auto; /* Push to the right */
+}
+
+.salary-display h2 {
+    margin: 0; /* Remove default margins */
+    font-size: 1.2em; /* Adjust size as needed */
+}
+
+.tab-container {
+    display: flex;
+    margin-bottom: 20px; /* Remove bottom margin */
+}
+
+.deck-tab-container {
+    display: flex;
+    margin-bottom: 0;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #f1f3f4;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: #e8eaed;
+}
+
+.tab-button.active {
+    background-color: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content .tab-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.modal-content .tab-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #d1d5db;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-content .tab-button.active {
+    background-color: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tab-blue-background-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #d1d5db;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-blue-background-button.active {
+    background-color: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+
+.htp-button-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+    margin-top: 40px;
+}
+
+.htp-button-container button {
+    border: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 15em;
+}
+
+.htp-button-container button:hover {
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+}
+
+.slide-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    margin: 0 auto 20px auto;
+    max-width: 60em; /* Set the maximum width */
+    width: 100%; /* Ensure it takes full width up to the max-width */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.slide-container .slide-text {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: #555;
+    margin: 5px 0;
+}
+
+.slide-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+/* Repeat button styling */
+.slide-container button {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.navigation-buttons {
+    position: absolute;
+    top: 50%;
+    width: calc(100% + 120px); /* Extend the width to account for the buttons */
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+    margin: 0 -40px; /* Negative margin to place buttons outside the container */
+}
+
+.navigation-buttons button {
+    background-color: transparent;
+    border: none;
+    font-size: 3em;
+    color: #000;
+    cursor: pointer;
+    transition: color 0.3s ease; /* Smooth transition for color change */
+}
+
+.navigation-buttons button:hover {
+    color: #d3d3d3; /* Light grey color on hover */
+}
+
+.htp-button-container button:disabled {
+    background-color: grey; /* Change to the desired color */
+    color: white; /* Optional: Change text color */
+    cursor: not-allowed; /* Optional: Change cursor to indicate it's disabled */
+    opacity: 0.6; /* Optional: Make the button appear less prominent */
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.8);
+}
+
+.prev-slide-btn {
+    position: absolute;
+    left: -10px;
+}
+
+.next-slide-btn {
+    position: absolute;
+    right: -10px;
+}
+
+.basics-button {
+    background-color: yellow;
+    color: black;
+}
+
+.attacking-button {
+    background-color: red;
+    color: white;
+} 
+
+.abilities-button {
+    background-color: blue;
+    color: white;
+}
+
+.game-stages-button {
+    background-color: green;
+    color: white;
+}
+
+.extra-info-button {
+    background-color: purple;
+    color: white;
+}
+
+.scrollable-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.slide-icon-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    margin: 0 -5em;
+    width: 40px; /* Adjust size as needed */
+    height: 40px; /* Adjust size as needed */
+}
+
+.prev-slide-icon-btn {
+    left: 0;
+}
+
+.next-slide-icon-btn {
+    right: 0;
+}
+
+.slide-icon-btn:hover {
+    transition: transform 0.3s ease; /* Smooth transition for hover effect */
+    transform: translateY(-50%) scale(1.05); /* Slightly enlarge on hover */
+}
+
+.side-by-side-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.side-by-side-text {
+    margin-top: 10px; /* Space between image and text */
+    font-size: 14px; /* Adjust font size as needed */
+
+}
+
+.no-abilities-message {
+    color: red;
+    font-weight: bold;
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 2px;
+    border: 1px solid red;
+    border-radius: 5px;
+    background-color: #fdd;
+    margin: 13px;
+}
 
 .user-settings {
     border-top: 1px solid black;

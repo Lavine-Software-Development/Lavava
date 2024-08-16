@@ -53,7 +53,6 @@ const Home: React.FC = () => {
     });
     const [keyCode, setKeyCode] = useState("");
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [showSalaryPopup, setShowSalaryPopup] = useState(false);
     const [showLoginPopup, setShowLoginPopup] = useState(false);
     const [showNoAbilityPopup, setShowNoAbilityPopup] = useState(false);
     const [friendlyMode, setFriendlyMode] = useState<string>(
@@ -79,8 +78,8 @@ const Home: React.FC = () => {
                 window.location.pathname
             );
         }
-
-        const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        const storedOriginalAbilities = sessionStorage.getItem("selectedOriginalAbilities");
+        const storedRoyaleAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
         const token = localStorage.getItem("userToken");
         const isGuest = sessionStorage.getItem("guestToken");
         setIsLoggedIn(!!token);
@@ -95,29 +94,63 @@ const Home: React.FC = () => {
         if (!isGuest && !token) {
             navigate("/login");
         }
-
-        if (storedAbilities) {
-            setSelectedAbilities(JSON.parse(storedAbilities));
-        } else if (token) {
-            fetch(`${config.userBackend}/user_abilities`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data && data.abilities) {
-                        const abilities = data.abilities;
-                        sessionStorage.setItem(
-                            "selectedAbilities",
-                            JSON.stringify(abilities)
-                        );
-                        setSelectedAbilities(abilities);
+        if (isGuest) {
+            if (storedOriginalAbilities) {
+                setSelectedAbilities(JSON.parse(storedOriginalAbilities));
+            } else if (storedRoyaleAbilities) {
+                setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
+            } else {
+                const guestDecksJSON = sessionStorage.getItem("guestDecks");
+                if (guestDecksJSON) {
+                    const guestDecks = JSON.parse(guestDecksJSON);
+    
+                    const guestOriginalDeck = guestDecks["Original"];
+                    const guestRoyaleDeck = guestDecks["Royale"];
+                    if (gameMode === "Original") {
+                        setSelectedAbilities(guestOriginalDeck);
+                    } else {
+                        setSelectedAbilities(guestRoyaleDeck);
                     }
+                    sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(guestOriginalDeck));
+                    sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(guestRoyaleDeck));
+                }
+            }
+        }
+        if (token) {
+            if (storedOriginalAbilities) {
+                setSelectedAbilities(JSON.parse(storedOriginalAbilities));
+            } else if (storedRoyaleAbilities) {
+                setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
+            } else {
+                // Fetch user decks from backend
+                fetch(`${config.userBackend}/user_abilities`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 })
-                .catch((error) => {
-                    console.error("Failed to fetch abilities:", error);
-                });
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data && data.decks) {
+                            const fetchedDecks: any[][] = data.decks;
+                            const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
+                            const originalDeckIndex = modes.findIndex((mode: string) => mode === "Original");
+                            const royaleDeckIndex = modes.findIndex((mode: string) => mode === "Royale");
+                            const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
+                            const originalAbilities = newDecks[originalDeckIndex];
+                            const royaleAbilities = newDecks[royaleDeckIndex]
+                            sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(originalAbilities));
+                            sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(royaleAbilities));
+                            if (gameMode === "Original") {
+                                setSelectedAbilities(originalAbilities);
+                            } else {
+                                setSelectedAbilities(royaleAbilities);
+                            }
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Failed to fetch abilities:", error);
+                    });
+                }
         }
 
         const gameStyle = sessionStorage.getItem("gameStyle");
@@ -133,6 +166,20 @@ const Home: React.FC = () => {
             setGameMode(storedGameMode);
         }
     }, []);
+
+    useEffect(() =>{
+        const storedOriginalAbilities = sessionStorage.getItem("selectedOriginalAbilities");
+        const storedRoyaleAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
+        if (gameMode === "Original") {
+            if (storedOriginalAbilities  && storedOriginalAbilities !== "undefined") {
+                setSelectedAbilities(JSON.parse(storedOriginalAbilities));
+            }
+        } else {
+            if (storedRoyaleAbilities && storedRoyaleAbilities !== "undefined") {
+                setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
+            }
+        }
+    }, [gameMode]);
 
     const handleGameModeDropdownFocus = () => {
         setGameModeDropdownOpen(!gameModeDropdownOpen);
@@ -151,26 +198,40 @@ const Home: React.FC = () => {
     };
 
     const handleHostGame = () => {
-        sessionStorage.setItem("type", "HOST");
-        sessionStorage.setItem("player_count", playerCount.toString());
-        sessionStorage.removeItem("key_code");
-        sessionStorage.setItem("reconnect", "false");
-        navigate("/lobby");
+        if (selectedAbilities.length <= 0) {
+            setShowNoAbilityPopup(true);
+        } else {
+            sessionStorage.setItem("type", "HOST");
+            sessionStorage.setItem("player_count", playerCount.toString());
+            sessionStorage.removeItem("key_code");
+            sessionStorage.setItem("reconnect", "false");
+            sessionStorage.setItem("selectedAbilities", JSON.stringify(selectedAbilities))
+            navigate("/lobby");
+        }
     };
 
     const handleLadderGame = () => {
-        sessionStorage.setItem("type", "LADDER");
-        sessionStorage.setItem("player_count", playerCount.toString());
-        sessionStorage.removeItem("key_code");
-        sessionStorage.setItem("reconnect", "false");
-        navigate("/lobby");
+        if (selectedAbilities.length <= 0) {
+            setShowNoAbilityPopup(true);
+        } else {
+            sessionStorage.setItem("type", "LADDER");
+            sessionStorage.setItem("player_count", playerCount.toString());
+            sessionStorage.removeItem("key_code");
+            sessionStorage.setItem("reconnect", "false");
+            sessionStorage.setItem("selectedAbilities", JSON.stringify(selectedAbilities))
+            navigate("/lobby");
+        }
     };
 
     const handleJoinGame = () => {
-        sessionStorage.setItem("type", "JOIN");
-        sessionStorage.setItem("key_code", keyCode);
-        sessionStorage.setItem("reconnect", "false");
-        navigate("/lobby");
+        if (selectedAbilities.length <= 0) {
+            setShowNoAbilityPopup(true);
+        } else {
+            sessionStorage.setItem("type", "JOIN");
+            sessionStorage.setItem("key_code", keyCode);
+            sessionStorage.setItem("reconnect", "false");
+            navigate("/lobby");
+        }
     };
 
     const [playDropdownOpen, setPlayDropdownOpen] = useState<boolean>(false);
@@ -182,11 +243,6 @@ const Home: React.FC = () => {
             return;
         }
         setPlayDropdownOpen(!playDropdownOpen);
-        if (selectedAbilities.length > 0) {
-            setPlayDropdownOpen(!playDropdownOpen);
-        } else {
-            setShowNoAbilityPopup(true);
-        }
     };
 
     const setTabAndCloseDropdown = (tab: string) => {
@@ -250,7 +306,6 @@ const Home: React.FC = () => {
     }, [gameModeDropdownOpen, playDropdownOpen, playerCountDropdownOpen]);
 
     const handleClosePopups = () => {
-        setShowSalaryPopup(false);
         setShowLoginPopup(false);
         setShowNoAbilityPopup(false);
     };
@@ -271,16 +326,7 @@ const Home: React.FC = () => {
             <div className="profile-card">
                 <h1 className="form-title">Home</h1>
                 <div className="app-drop-down-container" ref={playDropdownRef}>
-                    {selectedAbilities.length > 0 ? (
-                        <button onClick={handlePlayDropdownFocus}>Play</button>
-                    ) : (
-                        <button
-                            style={{ backgroundColor: "grey" }}
-                            onClick={handlePlayDropdownFocus}
-                        >
-                            Play
-                        </button>
-                    )}
+                    <button onClick={handlePlayDropdownFocus}>Play</button>
                     {playDropdownOpen && (
                         <ul>
                             <li onClick={handleLadderClick}>Ladder</li>
@@ -323,7 +369,7 @@ const Home: React.FC = () => {
                 />
                 <div style={{ height: "10px" }}></div>
             </div>
-            {selectedAbilities.length > 0 && tab !== "" && (
+                {tab !== "" && (
                 <div className="profile-card">
                     {tab === "FRIENDLY" ? (
                         <div>
@@ -359,31 +405,28 @@ const Home: React.FC = () => {
                             </h1>
                             <h3 style={{ textAlign: "center" }}>(No elo)</h3>
 
-                            <div className="abilities-container-friendly">
-                                {selectedAbilities.map((ability, index) => (
-                                    <div
-                                        key={index}
-                                        className="ability-square"
-                                        style={{
-                                            backgroundColor:
-                                                abilityColors[ability.name],
-                                        }}
-                                    >
-                                        <div className="ability-icon">
-                                            <img
-                                                src={`./assets/abilityIcons/${ability.name}.png`}
-                                                alt={ability.name}
-                                                className="ability-img"
-                                            />
-                                        </div>
-                                        <div className="ability-count">
-                                            {ability.count}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
                             {friendlyMode === "host" ? (
                                 <>
+                                    <div className="abilities-container-friendly">
+                                        {selectedAbilities && selectedAbilities.length > 0 ? (
+                                            selectedAbilities.map((item: { name: string; count: number }, index: number) => (
+                                                <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
+                                                    <div className="ability-icon">
+                                                        <img
+                                                            src={`./assets/abilityIcons/${item.name}.png`}
+                                                            alt={item.name}
+                                                            className="ability-img"
+                                                        />
+                                                    </div>
+                                                    <div className="ability-count" style={{ fontSize: '1.2rem' }}>{item.count}</div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="no-abilities-message">
+                                                No Abilities Selected.
+                                            </div>
+                                        )}
+                                    </div>
                                     {/* <label>Player Count:</label> */}
                                     <div
                                         className="player-count-drop-down-container"
@@ -439,6 +482,7 @@ const Home: React.FC = () => {
                                 </>
                             ) : (
                                 <>
+                                    <h3 style={{ textAlign: "center" }}>Schrodinger's Deck</h3>
                                     <div className="key-code-container">
                                         <input
                                             type="text"
@@ -466,28 +510,25 @@ const Home: React.FC = () => {
                         <div>
                             <h1 style={{ textAlign: "center" }}>Ladder</h1>
                             <h3 style={{ textAlign: "center" }}>(For elo)</h3>
-                            <div className="abilities-container-ladder">
-                                {selectedAbilities.map((ability, index) => (
-                                    <div
-                                        key={index}
-                                        className="ability-square"
-                                        style={{
-                                            backgroundColor:
-                                                abilityColors[ability.name],
-                                        }}
-                                    >
-                                        <div className="ability-icon">
-                                            <img
-                                                src={`./assets/abilityIcons/${ability.name}.png`}
-                                                alt={ability.name}
-                                                className="ability-img"
-                                            />
+                            <div className="abilities-container-friendly">
+                                {selectedAbilities && selectedAbilities.length > 0 ? (
+                                    selectedAbilities.map((item: { name: string; count: number }, index: number) => (
+                                        <div key={index} className="ability-square" style={{ backgroundColor: abilityColors[item.name] }}>
+                                            <div className="ability-icon">
+                                                <img
+                                                    src={`./assets/abilityIcons/${item.name}.png`}
+                                                    alt={item.name}
+                                                    className="ability-img"
+                                                />
+                                            </div>
+                                            <div className="ability-count" style={{ fontSize: '1.2rem' }}>{item.count}</div>
                                         </div>
-                                        <div className="ability-count">
-                                            {ability.count}
-                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="no-abilities-message">
+                                        No Abilities Selected.
                                     </div>
-                                ))}
+                                )}
                             </div>
                             <div style={{ height: "43px" }}></div>
                             <div

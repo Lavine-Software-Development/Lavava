@@ -119,7 +119,7 @@ const Team: React.FC = () => {
                 {showPopup && (
                     <div className="popup">
                         <p>Thank you for your message!</p>
-                        <button onClick={() => setShowPopup(false)}>Close</button>
+                        <button style={{ width: "40%" }} onClick={() => setShowPopup(false)}>Close</button>
                     </div>
                 )}
             </div>
