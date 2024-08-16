@@ -25,22 +25,21 @@ from flask import render_template
 load_dotenv()
 
 app = Flask(__name__, static_url_path="/static", static_folder="static")
+
 CORS(
     app,
-    # origins=["https://www.durb.ca", "https://localhost:8080", "https://localhost:8081"],
-    origins='*',
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+    supports_credentials=True
 )
-app.config["SECRET_KEY"] = "your_secret_key"
+
+app.config["SECRET_KEY"] = "secret_phrase_durb"
 
 EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
 if config.DB_CONNECTED:
     db_path = os.path.join("/app/game_data", "game.db")
-    if config.ENV == "PROD" or config.ENV == "STAGING":
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
-    else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///game.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db = SQLAlchemy(app)
@@ -183,28 +182,25 @@ def token_required(f):
 
     return decorated
 
-
 @app.after_request
 def after_request(response):
-    # Get the origin of the request
     origin = request.headers.get("Origin")
 
-    # List of allowed origins
-    allowed_origins = [
-        "https://www.durb.ca",
-        "https://localhost:8080",
-        "https://localhost:8081",
+    allowed_patterns = [
+        r'^https://www\.durb\.ca$',
+        r'^https?://localhost(:\d+)?$',
+         r'https://lavava-.*-durb-477e2271\.vercel\.app'
     ]
 
-    # Add CORS headers only if the request's origin is in the allowed list
-    # if origin in allowed_origins:
-    response.headers.add("Access-Control-Allow-Origin", origin)
-    response.headers.add(
-        "Access-Control-Allow-Headers", "Content-Type,Authorization"
-    )
-    response.headers.add(
-        "Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE"
-    )
+    if origin and any(re.match(pattern, origin) for pattern in allowed_patterns):
+        response.headers.add("Access-Control-Allow-Origin", origin)
+        response.headers.add(
+            "Access-Control-Allow-Headers", "Content-Type,Authorization"
+        )
+        response.headers.add(
+            "Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE"
+        )
+        response.headers.add("Access-Control-Allow-Credentials", "true")
 
     return response
 
@@ -1049,7 +1045,7 @@ def get_royale_settings():
 def get_og_settings():
     settings = {
         "ability_type": "credits",
-        "credit_cap": 20,
+        "credit_cap": 22,
         "growth_rate": 0.15,
         "transfer_rate": 0.012,
         "main_time": 390,
