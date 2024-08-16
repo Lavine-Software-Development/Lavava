@@ -1026,7 +1026,7 @@ def get_royale_settings():
         "main_time": 420,
         "overtime": 60,
         "full_size": 200,
-        "accessible_percentage": 1/2,
+        "accessible_percentage": 6/11,
         "walls": True,
         "wall_counts": [2, 2, 1, 2],
         "iterative_make_accessible": True,
