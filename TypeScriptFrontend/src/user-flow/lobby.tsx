@@ -37,6 +37,18 @@ const Lobby: React.FC = () => {
         setBotRequested(true);
     };
 
+    function allDecks() {
+        const original = abilityCountsConversion(JSON.parse(sessionStorage.getItem("selectedOriginalAbilities") || "{}"));
+        const royale = abilityCountsConversion(JSON.parse(sessionStorage.getItem("selectedRoyaleAbilities") || "{}"));
+      
+        const combinedObj = {
+          Original: original,
+          Royale: royale
+        };
+
+        return JSON.stringify(combinedObj, null, 2); // The '2' argument adds indentation for readability
+      }
+
     useEffect(() => {
         const reconnect = sessionStorage.getItem("reconnect");
         if (reconnect == "false") {
@@ -48,7 +60,13 @@ const Lobby: React.FC = () => {
                 ? JSON.parse(storedAbilities)
                 : [];
 
-            const abilityCounts = abilityCountsConversion(abilitiesFromStorage);
+            let abilityCounts = {};
+            if (sessionStorage.getItem("type") === "JOIN") {
+                abilityCounts = allDecks();
+            } else {
+                abilityCounts = abilityCountsConversion(abilitiesFromStorage);
+            }
+            
             if (network) {
                 network.gameIDEtcCallback = lobbyData;
             }

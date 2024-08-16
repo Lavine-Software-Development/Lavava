@@ -104,7 +104,12 @@ export class MainScene extends Scene {
         this.network.updateCallback = this.update_data.bind(this);
         this.network.leaveGameCallback = this.leaveMatchDirect.bind(this);
         this.burning = [];
-        const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        let storedAbilities;
+        if (this.board.mode === "Original") {
+            storedAbilities = sessionStorage.getItem("selectedOriginalAbilities");
+        } else {
+            storedAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
+        }
 
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
@@ -288,7 +293,7 @@ export class MainScene extends Scene {
         if (this.mode == "Royale") {
             this.abilityManager = new ElixirAbilityManager(
                 this,
-                this.settings.deck,
+                this.abilityCounts,
                 ab_validators,
                 events,
                 this.settings.elixir_cap,
@@ -579,10 +584,11 @@ export class MainScene extends Scene {
         this.settings = startData.settings;
         this.mode = startData.mode;
         
+        console.log(this.mode);
         if (this.mode === "Royale") {
             this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
         } else {
-            this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
+            this.mainPlayer = new MyCreditPlayer(String(pi), PlayerColors[pi]);
         }
         
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
@@ -678,7 +684,7 @@ export class MainScene extends Scene {
                     }
                 } else if ('a_elixir' in new_data["player"]) {
                     let mainPlayer = this.mainPlayer as MyElixirPlayer;
-                    if (new_data["player"]["a_elixir"] !== mainPlayer.elixir) {
+                    if (this.mainPlayer && new_data["player"]["a_elixir"] !== mainPlayer.elixir) {
                         mainPlayer.elixir = new_data["player"]["a_elixir"];
                         let manager = this.abilityManager as ElixirAbilityManager;
                         manager.elixir = new_data["player"]["a_elixir"];
