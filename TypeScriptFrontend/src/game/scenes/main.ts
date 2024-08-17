@@ -96,6 +96,10 @@ export class MainScene extends Scene {
     ];
     private rainbowIndex: number = 0;
 
+    get readonlySettings() {
+        return this.settings;
+    }
+
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
         this.board = props;
@@ -760,92 +764,18 @@ export class MainScene extends Scene {
                 }
 
                 const updateDisplays = () => {
-                    // Clear existing texts
-                    if (this.capitalTexts) {
-                        this.capitalTexts.forEach(text => text.destroy());
-                    }
-                    if (this.countTexts) {
-                        this.countTexts.forEach(text => text.destroy());
-                    }
-
-                    this.capitalTexts = [];
-                    this.countTexts = [];
-
-                    // Display capital counts and regular counts for up to 4 players
                     this.otherPlayers.slice(0, 4).forEach((player, index) => {
+                        player.destroyRenderedText();
+
+                        //proposal: refactor name of "positions" to "playerOrdinal" or something similar
+                        //"positions" can be confused with an (x, y) positions in screenspace
+                        const position = positions[index];
+                        player.nodeCount = new_data["counts"][player.name];
+                        player.renderNodeCount(this, position);
+
                         if (player instanceof MyCreditPlayer) {
                             player.capitalCount = this.full_capitals[player.name];
-                        }
-                        player.nodeCount = new_data["counts"][player.name];
-
-                        const position = positions[index];
-
-                        const x = (position.xPercent / 100) * (this.sys.game.config.width as number);
-                        const y = (position.yPercent / 100) * (this.sys.game.config.height as number);
-
-                        let count_y = y - 20;
-                        if (this.settings.starting_structures) {
-                            count_y = y - 40;
-                        }
-
-                        const playerColor = this.rgbToHex(player?.color || [255, 0, 255]); //fushia default
-
-                        // Display regular count
-                        const countText = this.add.text(
-                            x,
-                            count_y, // 30 pixels above the capital count
-                            `Count: `,
-                            {
-                                fontFamily: "Arial",
-                                fontSize: "19px", // Slightly smaller font
-                                color: playerColor,
-                            }
-                        );
-                        countText.setOrigin(0, 1);  // Align to bottom-left
-
-                        const countNumber = this.add.text(
-                            countText.x + countText.width,
-                            count_y,
-                            `${player.nodeCount}`,
-                            {
-                                fontFamily: "Arial",
-                                fontSize: "19px",
-                                color: '#000000', // Black color for the number
-                            }
-                        );
-                        countNumber.setOrigin(0, 1);
-
-                        this.countTexts.push(countText, countNumber);
-
-                        if (this.settings.starting_structures) {
-                            // Display full capital count
-                            const capitalText = this.add.text(
-                                x,
-                                y - 15,
-                                `Full Capitals: `,
-                                {
-                                    fontFamily: "Arial",
-                                    fontSize: "23px",
-                                    color: playerColor,
-                                }
-                            );
-                            capitalText.setOrigin(0, 1);  // Align to bottom-left
-
-                            if (player instanceof MyCreditPlayer) {
-                                const capitalNumber = this.add.text(
-                                    capitalText.x + capitalText.width,
-                                    y - 15,
-                                    `${player.capitalCount || 0}`,
-                                    {
-                                        fontFamily: "Arial",
-                                        fontSize: "23px",
-                                        color: '#000000', // Black color for the number
-                                    }
-                                );
-                                capitalNumber.setOrigin(0, 1);
-                                this.capitalTexts.push(capitalText, capitalNumber);
-                            }
-
+                            player.renderCapitalCount(this, position);
                         }
 
                     });
@@ -1067,7 +997,7 @@ export class MainScene extends Scene {
         });
     }
 
-    private rgbToHex(color: readonly [number, number, number]): string {
+    rgbToHex(color: readonly [number, number, number]): string {
         return (
             "#" +
             color
