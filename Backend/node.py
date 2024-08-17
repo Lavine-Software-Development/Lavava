@@ -259,6 +259,14 @@ class Node(JsonableTracked):
     def outputting_load(self):
         return len({edge for edge in self.outgoing if edge.on and edge.flowing})
 
+    def extended_neighbors(self, range=3):
+        nei_set = set()
+        for neigh in self.neighbors:
+            nei_set.add(neigh)
+            if range > 1:
+                nei_set.update(neigh.extended_neighbors(range - 1))
+        return nei_set
+
     @property
     def neighbors(self):
         return [edge.opposite(self) for edge in self.edges]

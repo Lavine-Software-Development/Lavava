@@ -206,8 +206,8 @@ class AI(ABC):
     def most_outgoing_nodes(self):
         return sorted(self.board.nodes, key=lambda node: len(node.possible_outgoing), reverse=True)
     
-    def alone(self, node):
-        return all(n.owner is None for n in node.neighbors)
+    def alone(self, node: Node):
+        return all(n.owner is None for n in node.extended_neighbors())
     
     def largest_reachable_lonely_nodes(self):
         return list(filter(self.alone, self.largest_reachable_nodes()))

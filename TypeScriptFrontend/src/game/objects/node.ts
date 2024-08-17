@@ -373,6 +373,8 @@ export class PortNode extends Node {
     }
 }
 
+const wall_count_color = {0: Colors.BROWN, 1: Colors.GREY, 2: Colors.BLACK}
+
 export class WallNode extends Node {
     private readonly waveCount: number = 8;
     private readonly waveAmplitude: number = 0.1;
@@ -407,7 +409,7 @@ export class WallNode extends Node {
 
     get color(): readonly [number, number, number] {
         if (!this.owner) {
-            return this.wall_count > 0 ? Colors.BLACK : Colors.BROWN;
+            return wall_count_color[this.wall_count];
         }
         return this.owner.color;
     }
