@@ -1026,7 +1026,7 @@ def get_royale_settings():
         "main_time": 420,
         "overtime": 60,
         "full_size": 200,
-        "accessible_percentage": 6/11,
+        "accessible_percentage": 1/2,
         "walls": True,
         "wall_counts": [2, 1, 2, 2],
         "iterative_make_accessible": True,
@@ -1080,7 +1080,7 @@ def get_royale_abilities():
         {
             "name": "D-Bridge", 
             "cost": 3,
-            "description": "Create a two-way bridge with"
+            "description": "Create a two-way bridge"
         },
         {
             "name": "Freeze", 
@@ -1092,13 +1092,13 @@ def get_royale_abilities():
             "cost": 4,
         },
         {
-            "name": "Bridge", 
-            "cost": 5,
-        },
-        {
             "name": "Rage", 
             "cost": 5,
             "description": "Increase energy transfer speed"
+        },
+        {
+            "name": "Bridge", 
+            "cost": 5,
         },
         {
             "name": "Nuke",
