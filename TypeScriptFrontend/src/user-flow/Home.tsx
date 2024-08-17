@@ -95,13 +95,13 @@ const Home: React.FC = () => {
             navigate("/login");
         }
         if (isGuest) {
-            if (storedOriginalAbilities) {
+            if (storedOriginalAbilities && storedOriginalAbilities !== "undefined") {
                 setSelectedAbilities(JSON.parse(storedOriginalAbilities));
-            } else if (storedRoyaleAbilities) {
+            } else if (storedRoyaleAbilities && storedRoyaleAbilities !== "undefined") {
                 setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
             } else {
                 const guestDecksJSON = sessionStorage.getItem("guestDecks");
-                if (guestDecksJSON) {
+                if (guestDecksJSON && guestDecksJSON !== "undefined") {
                     const guestDecks = JSON.parse(guestDecksJSON);
     
                     const guestOriginalDeck = guestDecks["Original"];
@@ -117,9 +117,9 @@ const Home: React.FC = () => {
             }
         }
         if (token) {
-            if (storedOriginalAbilities) {
+            if (storedOriginalAbilities && storedOriginalAbilities !== "undefined") {
                 setSelectedAbilities(JSON.parse(storedOriginalAbilities));
-            } else if (storedRoyaleAbilities) {
+            } else if (storedRoyaleAbilities  && storedRoyaleAbilities !== "undefined") {
                 setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
             } else {
                 // Fetch user decks from backend

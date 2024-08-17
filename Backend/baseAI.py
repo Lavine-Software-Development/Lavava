@@ -79,11 +79,11 @@ class AI(ABC):
     def update(self):
         super().update()
         self.ticks += 1
-        if self.ticks % AI_DELAYED_WAIT_TIME:
-            self.make_occasional_decisions()
         if self.ticks % AI_REGULAR_WAIT_TIME == 0:
             self.make_regular_decisions()
             self.consider_forfeit()
+            if self.elxir >= 10:
+                self.make_wealthy_decisions()
 
     def effect(self, key, data):
         return self.effect_method(key, self.id, data)
@@ -182,7 +182,7 @@ class AI(ABC):
         pass
 
     @abstractmethod
-    def make_occasional_decisions(self):
+    def make_wealthy_decisions(self):
         pass
 
     @abstractmethod
@@ -211,7 +211,7 @@ def create_ai(id, settings, board, effect_method, event_method, get_counts_metho
         def make_regular_decisions(self):
             pass
         
-        def make_occasional_decisions(self):
+        def make_wealthy_decisions(self):
             pass
 
         def trainer_name(self):
@@ -235,7 +235,7 @@ def create_ai(id, settings, board, effect_method, event_method, get_counts_metho
             self.freeze_dangerous_edges()
             self.switch_offense_edges()
 
-        def make_occasional_decisions(self):
+        def make_wealthy_decisions(self):
             self.bridge(True)
             self.bridge()
 

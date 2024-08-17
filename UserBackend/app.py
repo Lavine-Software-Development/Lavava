@@ -1070,31 +1070,30 @@ def get_og_settings():
 def get_royale_abilities():
     abilities = [
         {
-            "name": "D-Bridge", 
-            "cost": 3,
-            "description": "Create a two-way bridge with"
-        },
-        {
             "name": "Wall",
             "cost": 2,
         },
         {
             "name": "Over-Grow",
+            "cost": 2,
+        },
+        {
+            "name": "D-Bridge", 
             "cost": 3,
+            "description": "Create a two-way bridge with"
         },
         {
             "name": "Freeze", 
             "cost": 3,
             "description": "Convert edge to one-way"
-            
-        },
-        {
-            "name": "Bridge", 
-            "cost": 5,
         },
         {
             "name": "Poison",
             "cost": 4,
+        },
+        {
+            "name": "Bridge", 
+            "cost": 5,
         },
         {
             "name": "Rage", 
