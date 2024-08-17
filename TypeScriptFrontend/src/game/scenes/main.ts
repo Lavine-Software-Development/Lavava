@@ -104,7 +104,12 @@ export class MainScene extends Scene {
         this.network.updateCallback = this.update_data.bind(this);
         this.network.leaveGameCallback = this.leaveMatchDirect.bind(this);
         this.burning = [];
-        const storedAbilities = sessionStorage.getItem("selectedAbilities");
+        let storedAbilities;
+        if (this.board.mode === "Original") {
+            storedAbilities = sessionStorage.getItem("selectedOriginalAbilities");
+        } else {
+            storedAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
+        }
 
         const abilitiesFromStorage = storedAbilities
             ? JSON.parse(storedAbilities)
@@ -234,7 +239,7 @@ export class MainScene extends Scene {
             const markX = barX + (time / this.settings.main_time) * this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime));
             this.progressBar.fillRect(markX, this.barY - 5, 2, this.barHeight + 10); // 2-pixel wide marks
             this.markerTexts.push(
-                this.add.text(markX, this.barY + this.barHeight + 5, "Walls Down", {
+                this.add.text(markX, this.barY + this.barHeight + 5, "Grey Walls Down", {
                     fontFamily: 'Arial',
                     fontSize: '10px',
                     color: '#000000'
@@ -288,7 +293,7 @@ export class MainScene extends Scene {
         if (this.mode == "Royale") {
             this.abilityManager = new ElixirAbilityManager(
                 this,
-                this.settings.deck,
+                this.abilityCounts,
                 ab_validators,
                 events,
                 this.settings.elixir_cap,
@@ -579,6 +584,7 @@ export class MainScene extends Scene {
         this.settings = startData.settings;
         this.mode = startData.mode;
 
+        console.log(this.mode);
         if (this.mode === "Royale") {
             this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
         } else {
@@ -682,7 +688,7 @@ export class MainScene extends Scene {
                     }
                 } else if ('a_elixir' in new_data["player"]) {
                     let mainPlayer = this.mainPlayer as MyElixirPlayer;
-                    if (new_data["player"]["a_elixir"] !== mainPlayer.elixir) {
+                    if (this.mainPlayer && new_data["player"]["a_elixir"] !== mainPlayer.elixir) {
                         mainPlayer.elixir = new_data["player"]["a_elixir"];
                         let manager = this.abilityManager as ElixirAbilityManager;
                         manager.elixir = new_data["player"]["a_elixir"];
@@ -981,7 +987,7 @@ export class MainScene extends Scene {
                 },
             });
         } else if (tuple[0] == "Walls Down") {
-            let text = "Walls Down";
+            let text = "Grey Walls Down";
             let bonusText = this.add.text(
                 this.sys.game.config.width as number / 2,
                 40,

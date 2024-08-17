@@ -120,6 +120,9 @@ class WebSocketServer():
             self.waiting_players[game_code] = Batch(int(player_count), player_type == "LADDER", mode, token, websocket, abilities)
             logger.info(f"Created new game: {game_code}")
         elif player_type in ("JOIN", "LADDER") and game_code in self.waiting_players:
+            if player_type == "JOIN":
+                print(abilities)
+                abilities = json.loads(abilities).get(self.waiting_players[game_code].mode)
             if message := self.waiting_players[game_code].add_player(token, websocket, abilities):
                 await self.problem(message)
                 logger.warning(f"Problem adding player to game {game_code}: {message}")

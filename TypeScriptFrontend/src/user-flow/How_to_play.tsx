@@ -43,10 +43,6 @@ const slides = {
             { type: "text", content: "If you own both dots, you can switch the direction of a Dynamic Bridge by right clicking on it." },
             { type: "gif", content: "../assets/HowToPlay/dynamic_bridge_flip.gif" }
         ],
-        [
-            { type: "text", content: "Some dots have walls around them. You cannot bridge to a wall but you can start at a wall." },
-            { type: "image", content: "../assets/HowToPlay/walled_node.png" }
-        ],
     ],
     attacking: [
         [
@@ -84,6 +80,10 @@ const slides = {
             { type: "image", content: "../assets/HowToPlay/bridge_ability.png" },
             { type: "text", content: "Creates a new bridge between two dots, allowing you to transfer energy between them." },
         ],
+        [
+            { type: "text", content: "Some dots have walls around them. You CANNOT bridge to a wall but you CAN start at a wall." },
+            { type: "image", content: "../assets/HowToPlay/walled_node.png" }
+        ],
         // [
         //     { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png" },
         //     { type: "text", content: "Creates a new two-way bridge between two dots, allowing you to control the direction of the flow of energy by flipping it." },
@@ -111,55 +111,55 @@ const slides = {
             { type: "text", content: "In the Main Game phase, you have the real juicy stuff.<br/>You get to attack other players and claim territory." },
         ],
         [
-            { type: "text", content: "In the OverTime phase, things heat up. Walls come down and attacks become free." },
+            { type: "text", content: "Part way through the Main Game phase, all the grey walls come down.<br/>This makes way for creating more bridges" },
+        ],
+        [
+            { type: "text", content: "In the OverTime phase, things heat up. Attacks become free.<br/><br/>What is free attacking?<br/>When you transfer energy into an opponent, you won't shrink at all. Only they will.<br/>This is meant to help finish the game." },
         ],
         [
             { type: "text", content: "Times up!<br/>If no one wins in overtime, the player who owns the most dots wins.<br/>" },
         ],
-        [
-            { type: "text", content: "Here are some tips for each stage:" },
-        ],
-        [
-            { type: "text", content: "In the early stages, focus on capturing as many dots as possible." },
-        ],
-        [
-            { type: "text", content: "In the mid-game, start building your strategy and attacking other players." },
-        ],
-        [
-            { type: "text", content: "In the late game, defend your territory and aim for the win." },
-        ]
+        // [
+        //     { type: "text", content: "Here are some tips for each stage:" },
+        // ],
+        // [
+        //     { type: "text", content: "In the early stages, focus on capturing as many dots as possible." },
+        // ],
+        // [
+        //     { type: "text", content: "In the mid-game, start building your strategy and attacking other players." },
+        // ],
+        // [
+        //     { type: "text", content: "In the late game, defend your territory and aim for the win." },
+        // ]
     ],
     extraInfo: [
         [
-            { type: "text", content: "In a contested situation, a dynamic bridge bends to the will of the dominant node, directing its flow away from it." },
+            { type: "text", content: "In a contested situation, a dynamic bridge bends to the will of the bigger node, directing its flow away from it." },
         ],
-        [
-            { type: "text", content: "What is free attacking?<br/>When you transfer energy into an opponent, you won't shrink at all. Only they will.<br/>This is meant to help finish the game." },
-        ],
-        [
-            { type: "text", content: "That's it! You're ready to play Royale mode." },
-        ],
-        [
-            { type: "text", content: "Remember, the goal is to capture as many dots as you can and defeat your opponents." },
-        ],
-        [
-            { type: "text", content: "Here are some extra tips to help you win:" },
-        ],
-        [
-            { type: "text", content: "Don't forget to use your abilities. They can be the difference between winning and losing." },
-        ],
-        [
-            { type: "text", content: "Keep an eye on your elixir levels. If you run out, you won't be able to use abilities until it regenerates." },
-        ],
-        [
-            { type: "text", content: "Don't be afraid to attack. The best defense is a good offense." },
-        ],
-        [
-            { type: "text", content: "Watch your opponents. If they're getting too powerful, it might be time to take them down a peg." },
-        ],
-        [
-            { type: "text", content: "Good luck!" },
-        ]
+        // [
+        //     { type: "text", content: "That's it! You're ready to play Royale mode." },
+        // ],
+        // [
+        //     { type: "text", content: "Remember, the goal is to capture as many dots as you can and defeat your opponents." },
+        // ],
+        // [
+        //     { type: "text", content: "Here are some extra tips to help you win:" },
+        // ],
+        // [
+        //     { type: "text", content: "Don't forget to use your abilities. They can be the difference between winning and losing." },
+        // ],
+        // [
+        //     { type: "text", content: "Keep an eye on your elixir levels. If you run out, you won't be able to use abilities until it regenerates." },
+        // ],
+        // [
+        //     { type: "text", content: "Don't be afraid to attack. The best defense is a good offense." },
+        // ],
+        // [
+        //     { type: "text", content: "Watch your opponents. If they're getting too powerful, it might be time to take them down a peg." },
+        // ],
+        // [
+        //     { type: "text", content: "Good luck!" },
+        // ]
     ]
 };
 
