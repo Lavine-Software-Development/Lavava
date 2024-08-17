@@ -154,7 +154,7 @@ class AI(ABC):
                         self.get_backup(self.board.id_dict[my_node])
                         break
 
-    def get_backup(self, node, count=7, history=set()):
+    def get_backup(self, node, count=5, history=set()):
         to_recurse = set()
         new_history = set()
         for edge in node.incoming - history:
@@ -172,11 +172,13 @@ class AI(ABC):
             for node in to_recurse:
                 self.get_backup(node, count - 1, new_history)
 
-    def switch_offense_edges(self, recursions=7):
+    def switch_offense_edges(self, recursions=5):
         for edge in self.enemy_edges('outgoing'):
             if not edge.on and edge.to_node.value < edge.from_node.value:
                 if self.event(STANDARD_LEFT_CLICK, [edge.id]):
                     self.get_backup(edge.from_node, recursions)
+            if edge.on and edge.to_node.value > edge.from_node.value:
+                self.event(STANDARD_LEFT_CLICK, [edge.id])
 
     @abstractmethod
     def get_start_options(self) -> list[Node]:
@@ -198,8 +200,17 @@ class AI(ABC):
     def choose_abilities(self) -> list[int]:
         pass
 
+    def largest_reachable_nodes(self):
+        return sorted(self.board.nodes, key=lambda node: node.reachable, reverse=True)
+
     def most_outgoing_nodes(self):
         return sorted(self.board.nodes, key=lambda node: len(node.possible_outgoing), reverse=True)
+    
+    def alone(self, node):
+        return all(n.owner is None for n in node.neighbors)
+    
+    def largest_reachable_lonely_nodes(self):
+        return list(filter(self.alone, self.largest_reachable_nodes()))
 
 
 def create_ai(id, settings, board, effect_method, event_method, get_counts_method, eliminate_method, ability_process):
@@ -229,7 +240,7 @@ def create_ai(id, settings, board, effect_method, event_method, get_counts_metho
     class IanAI(AI, class_type):
 
         def get_start_options(self):
-            return self.most_outgoing_nodes()
+            return self.largest_reachable_lonely_nodes()
         
         def choose_abilities(self):
             return {str(FREEZE_CODE): 1, str(NUKE_CODE): 1, str(BRIDGE_CODE): 1, str(D_BRIDGE_CODE): 1}
