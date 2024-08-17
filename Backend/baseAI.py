@@ -82,7 +82,7 @@ class AI(ABC):
         if self.ticks % AI_REGULAR_WAIT_TIME == 0:
             self.make_regular_decisions()
             self.consider_forfeit()
-            if self.elxir >= 10:
+            if self.elixir >= 10:
                 self.make_wealthy_decisions()
 
     def effect(self, key, data):
