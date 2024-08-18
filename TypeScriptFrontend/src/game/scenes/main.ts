@@ -10,7 +10,7 @@ import {
     PRE_STRUCTURE_RANGES,
     PlayerColors,
     NUKE_OPTION_STRINGS,
-    NUKE_OPTION_CODES, 
+    NUKE_OPTION_CODES,
     MINI_BRIDGE_RANGE,
     attackCodes,
 } from "../objects/constants";
@@ -62,7 +62,7 @@ export class MainScene extends Scene {
     private board: any;
     private countdown: number;
     private full_capitals: number[];
-    private lastCounts: number [];
+    private lastCounts: number[];
 
     private timerText: Phaser.GameObjects.Text;
     private capitalTexts: Phaser.GameObjects.Text[] = [];
@@ -95,6 +95,10 @@ export class MainScene extends Scene {
         "#4B0082", // Indigo
     ];
     private rainbowIndex: number = 0;
+
+    get readonlySettings() {
+        return this.settings;
+    }
 
     constructor(config, props, network: Network, navigate: Function) {
         super({ key: "MainScene" });
@@ -197,28 +201,28 @@ export class MainScene extends Scene {
         const gameWidth = this.sys.game.config.width as number;
         this.barWidth = gameWidth * 0.5; // Half the screen width
         const barX = gameWidth * 0.6 - this.barWidth / 2; // Centered at 60%
-    
+
         this.progressBar = this.add.graphics();
         this.progressLine = this.add.graphics();
-    
+
         // Draw the main time portion of the bar
         this.progressBar.fillStyle(this.mainTimeColor, 1);
         this.progressBar.fillRect(barX, this.barY, this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)), this.barHeight);
-    
+
         // Draw the overtime portion of the bar
         this.progressBar.fillStyle(this.overtimeColor, 1);
         this.progressBar.fillRect(
-            barX + this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)), 
-            this.barY, 
-            this.barWidth * (this.settings.overtime / (this.settings.main_time + this.settings.overtime)), 
+            barX + this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime)),
+            this.barY,
+            this.barWidth * (this.settings.overtime / (this.settings.main_time + this.settings.overtime)),
             this.barHeight
         );
-    
+
         // Draw accessibility marks if needed
         if (this.settings.iterative_make_accessible) {
             this.drawAccessibilityMarks(barX);
         }
-    
+
         // Initialize the progress line (taller than the bar)
         this.progressLine.fillStyle(0x000000, 1); // Black line
         this.progressLine.fillRect(barX, this.barY - 5, 4, this.barHeight + 10); // 2 pixels wide, extending beyond the bar
@@ -232,12 +236,12 @@ export class MainScene extends Scene {
             color: '#FFFFFF'
         }).setOrigin(0.5);
     }
-    
+
     private drawAccessibilityMarks(barX: number): void {
         this.progressBar.fillStyle(0x000000, 0.5); // Semi-transparent black
         this.settings.accessibility_times.forEach(time => {
             const markX = barX + (time / this.settings.main_time) * this.barWidth * (this.settings.main_time / (this.settings.main_time + this.settings.overtime));
-            this.progressBar.fillRect(markX, this.barY - 5, 2, this.barHeight + 10) ; // 2-pixel wide marks
+            this.progressBar.fillRect(markX, this.barY - 5, 2, this.barHeight + 10); // 2-pixel wide marks
             this.markerTexts.push(
                 this.add.text(markX, this.barY + this.barHeight + 5, "Grey Walls Down", {
                     fontFamily: 'Arial',
@@ -247,13 +251,13 @@ export class MainScene extends Scene {
             );
         });
     }
-    
+
     private updateProgressBar(): void {
         const gameWidth = this.sys.game.config.width as number;
         const barX = gameWidth * 0.6 - this.barWidth / 2;
         const totalTime = this.settings.main_time + this.settings.overtime;
         let progress = 0;
-    
+
         if (this.gs < GSE.PLAY) {
             progress = 0;
         } else if (this.gs === GSE.PLAY) {
@@ -261,10 +265,10 @@ export class MainScene extends Scene {
         } else if (this.gs >= GSE.END_GAME) {
             progress = (this.settings.main_time + (this.settings.overtime - this.countdown)) / totalTime;
         }
-    
+
         // Ensure progress doesn't exceed 1
         progress = Math.min(progress, 1);
-    
+
         // Update the position of the progress line
         this.progressLine.clear();
         this.progressLine.fillStyle(0x000000, 1);
@@ -393,14 +397,14 @@ export class MainScene extends Scene {
 
         // Iterate over the values of the dictionary to draw each node
 
-        if ( attackCodes.includes(this.abilityManager.getMode()) ) {
+        if (attackCodes.includes(this.abilityManager.getMode())) {
             if (this.settings.attack_type == 'structure_range') {
                 const structures = Object.values(this.nodes).filter(
                     (node) =>
                         NUKE_OPTION_STRINGS.includes(node.stateName) &&
                         node.owner === this.mainPlayer
                 );
-    
+
                 structures.forEach((node) => {
                     this.drawScaledCircle(node, node.value * node.state.attack_range, Colors.BLACK);
                 });
@@ -408,7 +412,7 @@ export class MainScene extends Scene {
                 const neighbors = Object.values(this.nodes).filter(
                     (node) => node.owner != this.mainPlayer && node.edges.some((edge) => edge.other(node).owner === this.mainPlayer)
                 );
-    
+
                 neighbors.forEach((node) => {
                     this.graphics.strokeCircle(
                         node.pos.x,
@@ -512,7 +516,7 @@ export class MainScene extends Scene {
                         if (
                             button === EventCodes.STANDARD_RIGHT_CLICK &&
                             this.highlight.usage ===
-                                EventCodes.STANDARD_LEFT_CLICK
+                            EventCodes.STANDARD_LEFT_CLICK
                         ) {
                             this.send(
                                 event_data,
@@ -583,19 +587,23 @@ export class MainScene extends Scene {
 
         this.settings = startData.settings;
         this.mode = startData.mode;
-        
+
         console.log(this.mode);
         if (this.mode === "Royale") {
             this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
         } else {
             this.mainPlayer = new MyCreditPlayer(String(pi), PlayerColors[pi]);
         }
-        
+
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
             const id = index.toString();
-            return id !== pi.toString()
-                ? new OtherPlayer(id, PlayerColors[index])
-                : this.mainPlayer;
+            if (id !== pi.toString()) {
+                if (this.mode === "Royale") {
+                    return new MyElixirPlayer(id, PlayerColors[index])
+                }
+                return new MyCreditPlayer(id, PlayerColors[index])
+            }
+            return this.mainPlayer;
         });
 
         this.displayNames(display);
@@ -756,98 +764,25 @@ export class MainScene extends Scene {
                 }
 
                 const updateDisplays = () => {
-                    const players = Object.keys(this.lastCounts);
-                
-                    // Display positions for up to 4 players
-                
-                    // Clear existing texts
-                    if (this.capitalTexts) {
-                        this.capitalTexts.forEach(text => text.destroy());
-                    }
-                    if (this.countTexts) {
-                        this.countTexts.forEach(text => text.destroy());
-                    }
-                
-                    this.capitalTexts = [];
-                    this.countTexts = [];
-                
-                    // Display capital counts and regular counts for up to 4 players
-                    players.slice(0, 4).forEach((playerName, index) => {
-                        const capitalCount = this.full_capitals[playerName];
-                        const regularCount = new_data["counts"][playerName];
+                    this.otherPlayers.slice(0, 4).forEach((player, index) => {
+                        player.destroyRenderedText();
+
+                        //proposal: refactor name of "positions" to "playerOrdinal" or something similar
+                        //"positions" can be confused with an (x, y) positions in screenspace
                         const position = positions[index];
-                
-                        const x = (position.xPercent / 100) * (this.sys.game.config.width as number);
-                        const y = (position.yPercent / 100) * (this.sys.game.config.height as number);
+                        player.nodeCount = new_data["counts"][player.name];
+                        player.renderNodeCount(this, position);
 
-                        let count_y = y - 20;
-                        if (this.settings.starting_structures) {
-                            count_y = y -  40;
-                        }
-                
-                        const playerColor = this.rgbToHex(this.otherPlayers[playerName].color);
-                
-                        // Display regular count
-                        const countText = this.add.text(
-                            x,
-                            count_y, // 30 pixels above the capital count
-                            `Count: `,
-                            {
-                                fontFamily: "Arial",
-                                fontSize: "19px", // Slightly smaller font
-                                color: playerColor,
-                            }
-                        );
-                        countText.setOrigin(0, 1);  // Align to bottom-left
-                        
-                        const countNumber = this.add.text(
-                            countText.x + countText.width,
-                            count_y,
-                            `${regularCount}`,
-                            {
-                                fontFamily: "Arial",
-                                fontSize: "19px",
-                                color: '#000000', // Black color for the number
-                            }
-                        );
-                        countNumber.setOrigin(0, 1);
-                
-                        this.countTexts.push(countText, countNumber);
-                
-                        if (this.settings.starting_structures) {
-                            // Display full capital count
-                            const capitalText = this.add.text(
-                                x,
-                                y - 15,
-                                `Full Capitals: `,
-                                {
-                                    fontFamily: "Arial",
-                                    fontSize: "23px",
-                                    color: playerColor,
-                                }
-                            );
-                            capitalText.setOrigin(0, 1);  // Align to bottom-left
-                    
-                            const capitalNumber = this.add.text(
-                                capitalText.x + capitalText.width,
-                                y - 15,
-                                `${capitalCount}`,
-                                {
-                                    fontFamily: "Arial",
-                                    fontSize: "23px",
-                                    color: '#000000', // Black color for the number
-                                }
-                            );
-                            capitalNumber.setOrigin(0, 1);
-
-                            this.capitalTexts.push(capitalText, capitalNumber);
+                        if (player instanceof MyCreditPlayer) {
+                            player.capitalCount = this.full_capitals[player.name];
+                            player.renderCapitalCount(this, position);
                         }
 
                     });
                 };
 
                 if (JSON.stringify(this.lastCounts) !== JSON.stringify(new_data["counts"])) {
-                    this.lastCounts = {...new_data["counts"]};
+                    this.lastCounts = { ...new_data["counts"] };
                     updateDisplays();
                 }
 
@@ -959,7 +894,7 @@ export class MainScene extends Scene {
                     eliminationText.destroy();
                 },
             });
-            
+
         } else if (tuple[0] == "End Game") {
             let bonus = tuple[1] as number;
             let text = this.settings.ability_type == "credits" ? `Overtime - Free Attack - ${bonus} credits available` : `Overtime - Free Attack`;
@@ -1062,7 +997,7 @@ export class MainScene extends Scene {
         });
     }
 
-    private rgbToHex(color: readonly [number, number, number]): string {
+    rgbToHex(color: readonly [number, number, number]): string {
         return (
             "#" +
             color
@@ -1074,7 +1009,7 @@ export class MainScene extends Scene {
         );
     }
 
-    parse(this, items, updates, refresh, redraw=false) {
+    parse(this, items, updates, refresh, redraw = false) {
 
         if (refresh === true) {
             Object.keys(items).forEach(key => {
@@ -1146,21 +1081,21 @@ export class MainScene extends Scene {
     }
 
     darken(color: readonly [number, number, number]): readonly [number, number, number] {
-        return[Math.round(color[0] * 0.4), Math.round(color[1] * 0.4), Math.round(color[2] * 0.4)];
+        return [Math.round(color[0] * 0.4), Math.round(color[1] * 0.4), Math.round(color[2] * 0.4)];
     }
 
     displayNames(namesList) {
-        
+
         namesList.forEach((name: string, index: number) => {
             let position = positions[index];
             const playerColor = this.rgbToHex(this.darken(PlayerColors[index]));
-                
+
             let x = (position.xPercent / 100) * (this.sys.game.config.width as number);
             let y = (position.yPercent / 100) * (this.sys.game.config.height as number);
             this.add.text(
-                x, 
-                y, 
-                name, 
+                x,
+                y,
+                name,
                 {
                     fontSize: '16px',
                     color: playerColor,  // Changed from 'fill' to 'color'
