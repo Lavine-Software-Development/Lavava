@@ -68,7 +68,7 @@ class DefaultPlayer(JsonableTick):
     def overtime_bonus(self):
         pass
 
-    def update(self):
+    def update(self, overtime=False):
         pass
 
     def capture_event(self, node, gain):
@@ -77,7 +77,7 @@ class DefaultPlayer(JsonableTick):
 
 class CreditPlayer(DefaultPlayer):
 
-    def update(self):
+    def update(self, overtime=False):
         for ability in self.abilities.values():
             ability.update()
 
@@ -138,8 +138,8 @@ class RoyalePlayer(DefaultPlayer):
         for ab in chosen_abilities:
             self.abilities[ab] = RoyaleAbility(ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].elixir, self)
 
-    def update(self):
-        if self.elixir < self.elixir_cap:
+    def update(self, overtime=False):
+        if not overtime and self.elixir < self.elixir_cap:
             self.mini_counter += TIME_AMOUNT
             if self.mini_counter >= self.elixir_rate:
                 self.elixir += 1

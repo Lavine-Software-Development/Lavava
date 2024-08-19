@@ -161,7 +161,7 @@ export class Node extends IDItem implements INode {
     }
 
     get full(): boolean {
-        return this.value >= this.state.full_size;
+        return this.value >= this.state.full_size && !this.effects.has("over_grow");
     }
 
     set scene(scene: Phaser.Scene) {
@@ -182,7 +182,7 @@ export class Node extends IDItem implements INode {
             return;
         } else {
             if (this.effects.has("poison")) {
-                this.graphics.lineStyle(6, phaserColor(Colors.PURPLE), 1);
+                this.graphics.lineStyle(5, phaserColor(Colors.PURPLE), 1);
                 this.graphics.strokeCircle(
                     this.pos.x,
                     this.pos.y,
@@ -198,19 +198,21 @@ export class Node extends IDItem implements INode {
             this.graphics.fillCircle(this.pos.x, this.pos.y, this.size);
 
             if (this.effects.has("rage")) {
-                this.graphics.lineStyle(3, phaserColor(Colors.DARK_RED), 1);
+                const eff_color = this.owner?.color == Colors.RED ? Colors.DARK_RED : Colors.RED;
+                this.graphics.lineStyle(3, phaserColor(eff_color), 1);
                 this.graphics.strokeCircle(
                     this.pos.x,
                     this.pos.y,
-                    this.size - 2
+                    this.size - 5
                 );
             }
             if (this.effects.has("over_grow")) {
-                this.graphics.lineStyle(3, phaserColor(Colors.DARK_GREEN), 2);
+                const eff_color = this.owner?.color == Colors.GREEN ? Colors.DARK_GREEN : Colors.MEDIUM_GREEN;
+                this.graphics.lineStyle(3, phaserColor(eff_color), 1);
                 this.graphics.strokeCircle(
                     this.pos.x,
                     this.pos.y,
-                    this.size - 3
+                    this.size 
                 );
             }
             if (this.full) {
@@ -230,7 +232,7 @@ export class Node extends IDItem implements INode {
                 }
             }
 
-            this.state.draw(this._scene, this.size, this.pos);
+            this.state.draw(this._scene, this.size, this.pos, this.owner?.color);
 
             if (this.state instanceof CannonState) {
                 this.cannonGraphics.clear();

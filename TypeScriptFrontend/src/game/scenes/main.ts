@@ -245,7 +245,7 @@ export class MainScene extends Scene {
             this.markerTexts.push(
                 this.add.text(markX, this.barY + this.barHeight + 5, "Grey Walls Down", {
                     fontFamily: 'Arial',
-                    fontSize: '10px',
+                    fontSize: '14px',
                     color: '#000000'
                 }).setOrigin(0.5, 0)
             );

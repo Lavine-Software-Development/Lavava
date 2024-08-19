@@ -205,8 +205,7 @@ class ServerGame(JsonableTick):
     def player_update(self):
         for player in self.player_dict.values():
             if player.ps.value < PSE.ELIMINATED.value:
-                if self.gs.value < GSE.END_GAME.value:
-                    player.update()
+                player.update(self.gs.value == GSE.END_GAME.value)
                 if player.count == 0:
                     self.eliminate(player.id, True)
                     if player.killer:

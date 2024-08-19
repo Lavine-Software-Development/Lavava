@@ -81,13 +81,13 @@ class AI(ABC):
         elif len(all_counts) >= 3 and all_counts[0] + all_counts[1] >= 28 and my_official_count * 6 <= all_counts[0] + all_counts[1]:
             self.forfeit()
 
-    def update(self):
-        super().update()
+    def update(self, overtime=False):
+        super().update(overtime)
         self.ticks += 1
         if self.ticks % AI_REGULAR_WAIT_TIME == 0:
             self.make_regular_decisions()
             self.consider_forfeit()
-            if self.elixir >= 10:
+            if self.elixir >= 8 or overtime:
                 self.make_wealthy_decisions()
 
     def effect(self, key, data):
@@ -128,7 +128,7 @@ class AI(ABC):
     
     def freeze_dangerous_edges(self, direction='edges'):
         if self.can_afford_ability(FREEZE_CODE):
-            for edge in self.specific_enemy_edges(direction, None, True):
+            for edge in self.specific_enemy_edges(direction, False, True):
                 self.effect(FREEZE_CODE, [edge.id])
                 if not self.can_afford_ability(FREEZE_CODE):
                     break
@@ -174,10 +174,10 @@ class AI(ABC):
 
     def switch_offense_edges(self, recursions=5):
         for edge in self.enemy_edges('outgoing'):
-            if not edge.on and edge.to_node.value < edge.from_node.value:
+            if not edge.on and edge.to_node.value <= edge.from_node.value:
                 if self.event(STANDARD_LEFT_CLICK, [edge.id]):
                     self.get_backup(edge.from_node, recursions)
-            if edge.on and edge.to_node.value > edge.from_node.value:
+            if edge.on and edge.to_node.value * 0.8 > edge.from_node.value:
                 self.event(STANDARD_LEFT_CLICK, [edge.id])
 
     @abstractmethod
@@ -207,7 +207,7 @@ class AI(ABC):
         return sorted(self.board.nodes, key=lambda node: len(node.possible_outgoing), reverse=True)
     
     def alone(self, node: Node):
-        return all(n.owner is None for n in node.extended_neighbors())
+        return all(n.owner is None for n in node.extended_neighbors(5))
     
     def largest_reachable_lonely_nodes(self):
         return list(filter(self.alone, self.largest_reachable_nodes()))
@@ -248,7 +248,6 @@ def create_ai(id, settings, board, effect_method, event_method, get_counts_metho
         def make_regular_decisions(self):
             self.nuke_dangerous_nodes()
             self.freeze_dangerous_edges('incoming')
-            self.freeze_dangerous_edges()
             self.switch_offense_edges()
 
         def make_wealthy_decisions(self):
