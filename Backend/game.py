@@ -57,18 +57,17 @@ class ServerGame(JsonableTick):
         if player.ps.state == PSE.START_SELECTION:
             if key == SPAWN_CODE:
                 data_items = [self.board.id_dict[d] for d in data]
-                self.ability_effects[key](data_items, player)
-                player.ps.next()
-                return True
-            else:
-                return False
+                if data_items[0].owner is None:
+                    self.ability_effects[key](data_items, player)
+                    player.ps.next()       
+                    return True
         else:
             try:
                 new_data = [self.board.id_dict[d] for d in data]
                 return player.use_ability(key, new_data)
             except KeyError:
                 print("failed to use ability because item no longer exists")
-                return False
+        return False
         
     def event(self, key, player_id, data):
         player = self.player_dict[player_id]
@@ -180,9 +179,10 @@ class ServerGame(JsonableTick):
             self.board.update()
             self.player_update()
 
-        if self.gs.value == GSE.START_SELECTION.value:
+        elif self.gs.value == GSE.START_SELECTION.value:
             for bot in self.bots:
-                bot.choose_start()
+                if bot.ps.state == PSE.START_SELECTION:
+                    bot.choose_start()
 
         if self.board.victory_check() or self.only_bots_remain():
             self.determine_ranks_from_capitalize_or_timeout()

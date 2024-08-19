@@ -26,10 +26,11 @@ class AI(ABC):
         self.ability_process = ability_process
         self.eliminate_method = eliminate_method
         self.nodes = {}
+        self.already_bridged = set()
 
     def choose_start(self):
         self.ticks += 1
-        if self.ticks == BOT_START_DELAY:
+        if self.ticks >= BOT_START_DELAY:
             options = self.get_start_options()
             self.select_start(options)
             self.ability_process(self.id, self.choose_abilities())
@@ -52,6 +53,10 @@ class AI(ABC):
         else:
             self.nodes.pop(node.id)
 
+    @property
+    def not_bridged(self):
+        return {k: self.nodes[k] for k in self.nodes.keys() - self.already_bridged}
+
     def bridgable_nodes(self, unclaimed=False):
         accessible = self.board.accessible_nodes
         if unclaimed:
@@ -59,7 +64,7 @@ class AI(ABC):
         else:
             accessible = accessible - self.board.unclaimed_nodes
         bridge_options = []
-        for my_node in self.nodes:
+        for my_node in self.not_bridged:
             for new_node in accessible:
                 if self.board.check_new_edge(my_node, new_node.id):
                     bridge_options.append((my_node, new_node.id))
@@ -71,9 +76,9 @@ class AI(ABC):
         if my_count != my_official_count:
             print(my_count, my_official_count, "....yikes buddy")
         all_counts = self.get_counts_method()
-        if all_counts[0] >= 20 and my_official_count * 5 <= all_counts[0]:
+        if all_counts[0] >= 20 and my_official_count * 4 <= all_counts[0]:
             self.forfeit()
-        elif len(all_counts) >= 3 and all_counts[0] + all_counts[1] >= 28 and my_official_count * 7 <= all_counts[0] + all_counts[1]:
+        elif len(all_counts) >= 3 and all_counts[0] + all_counts[1] >= 28 and my_official_count * 6 <= all_counts[0] + all_counts[1]:
             self.forfeit()
 
     def update(self):
@@ -142,14 +147,14 @@ class AI(ABC):
                     if self.effect(D_BRIDGE_CODE, [my_node, new_node]):
                         # edge = self.board.find_edge(my_node, new_node)
                         # self.event(STANDARD_LEFT_CLICK, [edge.id])
-                        pass
+                        self.already_bridged.add(my_node)
+                        break
                 else:
                     if self.effect(BRIDGE_CODE, [my_node, new_node]) and not unclaimed:
                         self.get_backup(self.board.id_dict[my_node])
-                if not self.can_afford_ability(BRIDGE_CODE):
-                    break
+                        break
 
-    def get_backup(self, node, count=7, history=set()):
+    def get_backup(self, node, count=5, history=set()):
         to_recurse = set()
         new_history = set()
         for edge in node.incoming - history:
@@ -167,11 +172,13 @@ class AI(ABC):
             for node in to_recurse:
                 self.get_backup(node, count - 1, new_history)
 
-    def switch_offense_edges(self, recursions=7):
+    def switch_offense_edges(self, recursions=5):
         for edge in self.enemy_edges('outgoing'):
             if not edge.on and edge.to_node.value < edge.from_node.value:
                 if self.event(STANDARD_LEFT_CLICK, [edge.id]):
                     self.get_backup(edge.from_node, recursions)
+            if edge.on and edge.to_node.value > edge.from_node.value:
+                self.event(STANDARD_LEFT_CLICK, [edge.id])
 
     @abstractmethod
     def get_start_options(self) -> list[Node]:
@@ -193,8 +200,17 @@ class AI(ABC):
     def choose_abilities(self) -> list[int]:
         pass
 
+    def largest_reachable_nodes(self):
+        return sorted(self.board.nodes, key=lambda node: node.reachable, reverse=True)
+
     def most_outgoing_nodes(self):
         return sorted(self.board.nodes, key=lambda node: len(node.possible_outgoing), reverse=True)
+    
+    def alone(self, node: Node):
+        return all(n.owner is None for n in node.extended_neighbors())
+    
+    def largest_reachable_lonely_nodes(self):
+        return list(filter(self.alone, self.largest_reachable_nodes()))
 
 
 def create_ai(id, settings, board, effect_method, event_method, get_counts_method, eliminate_method, ability_process):
@@ -224,10 +240,10 @@ def create_ai(id, settings, board, effect_method, event_method, get_counts_metho
     class IanAI(AI, class_type):
 
         def get_start_options(self):
-            return self.most_outgoing_nodes()
+            return self.largest_reachable_lonely_nodes()
         
         def choose_abilities(self):
-            return {str(FREEZE_CODE): 6, str(NUKE_CODE): 2, str(BRIDGE_CODE): 5}
+            return {str(FREEZE_CODE): 1, str(NUKE_CODE): 1, str(BRIDGE_CODE): 1, str(D_BRIDGE_CODE): 1}
         
         def make_regular_decisions(self):
             self.nuke_dangerous_nodes()

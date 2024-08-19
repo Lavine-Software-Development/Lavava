@@ -233,6 +233,21 @@ class Node(JsonableTracked):
         return {edge for edge in self.edges if edge.from_node == self}
     
     @property
+    def reachable(self):
+        visited = set()
+        res = 0
+        def dfs(node):
+            nonlocal res
+            if node in visited:
+                return
+            visited.add(node)
+            res += 1
+            for edge in node.possible_outgoing:
+                dfs(edge.opposite(node))
+        dfs(self)
+        return res
+    
+    @property
     def possible_outgoing(self):
         return {edge for edge in self.edges if edge.from_node == self or edge.dynamic}
     
@@ -243,6 +258,14 @@ class Node(JsonableTracked):
     @property
     def outputting_load(self):
         return len({edge for edge in self.outgoing if edge.on and edge.flowing})
+
+    def extended_neighbors(self, range=3):
+        nei_set = set()
+        for neigh in self.neighbors:
+            nei_set.add(neigh)
+            if range > 1:
+                nei_set.update(neigh.extended_neighbors(range - 1))
+        return nei_set
 
     @property
     def neighbors(self):
