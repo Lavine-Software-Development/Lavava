@@ -1020,7 +1020,7 @@ def get_royale_settings():
     settings = {
         "ability_type": "elixir",
         "elixir_cap": 12,
-        "elixir_rate": 3.5,
+        "elixir_rate": 3,
         "growth_rate": 0.14,
         "transfer_rate": 0.012,
         "main_time": 420,
@@ -1102,7 +1102,7 @@ def get_royale_abilities():
         },
         {
             "name": "Nuke",
-            "cost": 6,
+            "cost": 7,
             "description": "Destroy nearby dot and its bridges",
         },
     ]

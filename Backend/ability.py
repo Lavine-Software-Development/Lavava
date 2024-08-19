@@ -81,4 +81,3 @@ class RoyaleAbility(AbstractAbility):
     def use(self, data):
         super().use(data)
         self.player.elixir -= self.in_game_cost
-        print(self.player.elixir)

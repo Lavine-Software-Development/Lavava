@@ -104,7 +104,7 @@ export const AbilityElixir = {
     [KeyCodes.OVER_GROW_CODE]: 2,
     [KeyCodes.RAGE_CODE]: 5,
     [KeyCodes.POISON_CODE]: 4,
-    [KeyCodes.NUKE_CODE]: 6,
+    [KeyCodes.NUKE_CODE]: 7,
 };
 
 
