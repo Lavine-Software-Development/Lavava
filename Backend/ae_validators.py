@@ -37,11 +37,6 @@ def owned_burnable_node(data):
     return node.owner is not None and burnable_node(data)
 
 
-def non_walled_node(data):
-    node = data[0]
-    return node.wall_count == 0
-
-
 # option for slightly improved burn, allowing preemptive burns before ownership
 def burnable_node(data):
     node = data[0]
@@ -152,6 +147,10 @@ def validators_needing_player(player):
     def my_node(data):
         node = data[0]
         return node.owner == player
+    
+    def my_default_non_walled_node(data):
+        node = data[0]
+        return my_node(data) and node.state_name == "default" and node.wall_count == 0
 
     def my_default_port_node(data):
         node = data[0]
@@ -209,6 +208,7 @@ def validators_needing_player(player):
     return {
         FREEZE_CODE: dynamic_edge_own_either_but_not_flowing,
         WORMHOLE_CODE: wormhole_validator,
+        WALL_CODE: my_default_non_walled_node,
     } | structure_validators
 
 
@@ -225,7 +225,7 @@ def make_cannon_shot_check(check_new_edge, id_dict):
     def cannon_shot_check(player, data):
         cannon, target = id_dict[data[0]], id_dict[data[1]]
         can_shoot = cannon.state_name == "cannon" and cannon.owner == player
-        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and (
+        can_accept = cannon.value > MINIMUM_TRANSFER_VALUE and target.accepts_shot and (
             target.owner != player or not target.full()
         )
         return (
@@ -296,7 +296,6 @@ def make_ability_validators(board, player, settings):
             BURN_CODE: owned_burnable_node,
             RAGE_CODE: no_click,
             OVER_GROW_CODE: no_click,
-            WALL_CODE: non_walled_node,
         }
         | validators_needing_player(player)
         | make_new_edge_ports(

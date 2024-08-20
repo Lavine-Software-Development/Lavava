@@ -122,19 +122,23 @@ class ZombieState(DefaultState):
         # to counteract the loss they're about to receive when the node is taken from them
         self.node.owner.count += 1 # a node which, as a zombie, they technically never owned
         return super().capture_event()
+    
+
+class StructureState(DefaultState):
+
+    def grow(self):
+        if self.node.structure_grow:
+            return super().grow()
+        return 0
 
 
-class CannonState(DefaultState):
+class CannonState(StructureState):
     def __init__(self, node):
         AbstractState.__init__(
             self, node, True, False, False, 5
         )  # does not stay on capture
 
-    def grow(self):
-        return 0
-
-
-class PumpState(DefaultState):
+class PumpState(StructureState):
     def __init__(self, node):
         AbstractState.__init__(
             self, node, True, False, False, 6
@@ -150,7 +154,7 @@ class PumpState(DefaultState):
     def grow(self):
         if self.draining:
             return self.drain()
-        return 0
+        return super().grow()
 
     def drain(self):
         if self.shrink_count == 0:
@@ -163,7 +167,7 @@ class PumpState(DefaultState):
         return super().intake(amount, incoming_player) * PUMP_INTAKE_MULTIPLIER
 
 
-class CapitalState(DefaultState):
+class CapitalState(StructureState):
     def __init__(self, node, reset=True, update_on_new_owner=False):
         AbstractState.__init__(
             self, node, reset, False, update_on_new_owner, 2
@@ -177,7 +181,7 @@ class CapitalState(DefaultState):
     def grow(self):
         if not self.capitalized:
             return self.shrink()
-        return 0
+        return super().grow()
 
     def shrink(self):
         if self.shrink_count == 0:
@@ -201,7 +205,7 @@ class StartingCapitalState(CapitalState):  # stays on capture
         self.is_owned = is_owned
 
     def grow(self):
-        return 0
+        return StructureState.grow(self)
 
 
 class MineState(AbstractState):  # default on capture

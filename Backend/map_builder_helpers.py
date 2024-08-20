@@ -14,8 +14,8 @@ def starter_default_nodes(node_list):
         nodes.append(Node(node[0], node[1]))
     return nodes
 
-def create_nodes(node_class, node_list: list[tuple], growth_rate, transfer_rate, default_full_size) -> list[PortNode]:
-    return [node_class(node[0], node[1], growth_rate, transfer_rate, default_full_size) for node in node_list]
+def create_nodes(node_class, node_list: list[tuple], growth_rate, transfer_rate, default_full_size, structures_grow) -> list[PortNode]:
+    return [node_class(node[0], node[1], growth_rate, transfer_rate, default_full_size, structures_grow) for node in node_list]
 
 def random_choose_accessible_nodes(node_list, percentage, settings):
     total_nodes = len(node_list)

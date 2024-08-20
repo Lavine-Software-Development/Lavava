@@ -6,9 +6,9 @@ import random
 
 @track_changes('is_port')
 class PortNode(Node):
-    def __init__(self, id, pos, growth_rate, transfer_rate, default_full_size):
+    def __init__(self, id, pos, growth_rate, transfer_rate, default_full_size, structures_grow):
 
-        super().__init__(id, pos, growth_rate, transfer_rate, default_full_size)
+        super().__init__(id, pos, growth_rate, transfer_rate, default_full_size, structures_grow)
         self.item_type = PORT_NODE
         self.is_port = False
 
@@ -29,15 +29,19 @@ class PortNode(Node):
         self.is_port = True
 
     @property
+    def accepts_shot(self):
+        return True
+
+    @property
     def accessible(self):
         return self.is_port
     
 
 @track_changes('wall_count')
 class WallNode(Node):
-    def __init__(self, id, pos, growth_rate, transfer_rate, default_full_size):
+    def __init__(self, id, pos, growth_rate, transfer_rate, default_full_size, structures_grow):
 
-        super().__init__(id, pos, growth_rate, transfer_rate, default_full_size)
+        super().__init__(id, pos, growth_rate, transfer_rate, default_full_size, structures_grow)
         self.item_type = WALL_NODE
         self.wall_count = 0
 
@@ -51,6 +55,10 @@ class WallNode(Node):
     def make_accessible(self):
         if self.wall_count == 1:
             self.wall_count -= 1
+
+    @property
+    def accepts_shot(self):
+        return self.wall_count == 0
 
     @property
     def accessible(self):

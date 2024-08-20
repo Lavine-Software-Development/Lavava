@@ -141,7 +141,7 @@ class MapBuilder:
     def convert_to_objects(self, settings):
         edges = []
 
-        nodes = create_nodes(nodeClassDict[settings["walls"]], self.nodes, settings["growth_rate"], settings["transfer_rate"], settings["full_size"])
+        nodes = create_nodes(nodeClassDict[settings["walls"]], self.nodes, settings["growth_rate"], settings["transfer_rate"], settings["full_size"], settings["structures_grow"])
 
         for edge in self.edges:
             id1, id2, id3, dynamic = edge[0], edge[1], edge[2], edge[3]
