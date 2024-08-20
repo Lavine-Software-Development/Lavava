@@ -1031,6 +1031,7 @@ def get_royale_settings():
         "wall_counts": [2, 1, 2, 2],
         "iterative_make_accessible": True,
         "accessibility_times": [300],
+        "structures_grow": True,
         "starting_structures": False,
         "attack_type": "neighbor",
         "bridge_burn": False,
@@ -1054,6 +1055,7 @@ def get_og_settings():
         "accessible_percentage": 4 / 7,
         "walls": False,
         "iterative_make_accessible": False,
+        "structures_grow": False,
         "starting_structures": True,
         "starting_land_capitals": 3,
         "starting_island_capitals": 1,
@@ -1072,10 +1074,12 @@ def get_royale_abilities():
         {
             "name": "Wall",
             "cost": 2,
+            "description": "Put up a grey wall"
         },
         {
             "name": "Over-Grow",
             "cost": 2,
+            "description": "Increase maximum node size"
         },
         {
             "name": "D-Bridge", 
@@ -1090,6 +1094,7 @@ def get_royale_abilities():
         {
             "name": "Poison",
             "cost": 4,
+            "description": "Opponent nodes shrink rather than growing"
         },
         {
             "name": "Rage", 
@@ -1099,12 +1104,18 @@ def get_royale_abilities():
         {
             "name": "Bridge", 
             "cost": 5,
+            "description": "Create a bridge"
         },
         {
             "name": "Nuke",
             "cost": 7,
             "description": "Destroy nearby dot and its bridges",
         },
+        {
+            "name": "Cannon",
+            "cost": 8,
+            "description": "Shoot energy at nodes"
+        }
     ]
     return jsonify({"abilities": abilities, "options": 5})
 

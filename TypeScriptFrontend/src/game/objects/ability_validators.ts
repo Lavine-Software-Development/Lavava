@@ -220,6 +220,11 @@ function playerValidators(player: OtherPlayer): {
         return node.stateName === "default" && myNode(node, player);
     }
 
+    const myDefaultNonWallNode = (data: IDItem[]): boolean => {
+        const node = data[0] as WallNode;
+        return node.wall_count === 0 && myDefaultNode(data);
+    }
+
     const myDefaultPortNode = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
         return node.accessible && myDefaultNode(data);
@@ -257,6 +262,7 @@ function playerValidators(player: OtherPlayer): {
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEitherButNotFlowing,
         [KeyCodes.CANNON_CODE]: myDefaultPortNode,
         [KeyCodes.PUMP_CODE]: myDefaultNode,
+        [KeyCodes.WALL_CODE]: myDefaultNonWallNode,
     };
 }
 
@@ -342,7 +348,6 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
-        [KeyCodes.WALL_CODE]: nonWallNode,
         [KeyCodes.WORMHOLE_CODE]: (data: IDItem[]) => wormholeValidator(data, player, getEdges),
     };
 
@@ -367,7 +372,8 @@ export function makeEventValidators(player: MyCreditPlayer, getEdges: () => Edge
         } else if (data.length > 1) {
             const firstNode = data[0] as Node;
             const secondNode = data[1] as Node;
-            return !(secondNode.owner === player && secondNode.full) &&
+            return secondNode.accepts_shot &&
+            !(secondNode.owner === player && secondNode.full) &&
             checkNewEdge(firstNode, secondNode, getEdges());
         }
         return false;
