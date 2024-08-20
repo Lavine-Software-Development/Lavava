@@ -136,6 +136,10 @@ export class Node extends IDItem implements INode {
         throw new Error("Method not implemented.");
     }
 
+    get accepts_shot(): boolean {
+        throw new Error("Method not implemented.");
+    }
+
     get influencedEdges(): IEdge[] {
         return this.outwardEdges.filter((edge) => edge.on);
     }
@@ -352,6 +356,10 @@ export class PortNode extends Node {
         return this.is_port;
     }
 
+    get accepts_shot(): boolean {
+        return true;
+    }
+
     drawSurrounding(): void {
         if (this.is_port) {
             this.drawPorts(Colors.BROWN);
@@ -427,6 +435,10 @@ export class WallNode extends Node {
     }
 
     get accessible(): boolean {
+        return this.wall_count === 0;
+    }
+
+    get accepts_shot(): boolean {
         return this.wall_count === 0;
     }
 
