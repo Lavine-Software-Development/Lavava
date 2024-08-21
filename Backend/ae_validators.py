@@ -130,7 +130,7 @@ def attack_validators(get_structures, player, attack_type):
     }
 
 
-def validators_needing_player(player):
+def validators_needing_player(player, cannon_accessible_placement):
     def capital_logic(data):
         node = data[0]
         if node.owner == player and node.state_name == "default" and node.full():
@@ -155,6 +155,10 @@ def validators_needing_player(player):
     def my_default_port_node(data):
         node = data[0]
         return my_default_node(data) and node.accessible
+    
+    def cannon_placement(data):
+        node = data[0]
+        return my_default_node(data) and (node.accessible or not cannon_accessible_placement)
 
     # Can be used for buffed cannon, not requiring port placement. Harder to attack for bridge players
     def my_default_node(data):
@@ -188,7 +192,7 @@ def validators_needing_player(player):
 
     structure_validators = {
         CAPITAL_CODE: capital_logic,
-        CANNON_CODE: my_default_port_node,
+        CANNON_CODE: cannon_placement,
         PUMP_CODE: my_default_node,
     }
 
@@ -297,7 +301,7 @@ def make_ability_validators(board, player, settings):
             RAGE_CODE: no_click,
             OVER_GROW_CODE: no_click,
         }
-        | validators_needing_player(player)
+        | validators_needing_player(player, settings["cannon_accessible_placement"])
         | make_new_edge_ports(
             board.check_new_edge, player, settings["bridge_from_port_needed"]
         )
