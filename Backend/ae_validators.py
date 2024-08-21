@@ -116,12 +116,16 @@ def attack_validators(get_structures, player, attack_type):
     def not_attacking_neighbor_or_owner_attack(data):
         node = data[0]
         return node.owner == player or not_attacking_neighbor_attack(data)
+    
+    def not_attacking_neighbor_or_owner_default_attack(data):
+        node = data[0]
+        return node.state_name == "default" and (node.owner == player or not_attacking_neighbor_attack(data))
 
     return {
         POISON_CODE: not_attacking_neighbor_attack
         if attack_type == "neighbor"
         else opposing_structure_ranged_attack,
-        NUKE_CODE: not_attacking_neighbor_or_owner_attack
+        NUKE_CODE: not_attacking_neighbor_or_owner_default_attack
         if attack_type == "neighbor"
         else structure_ranged_default_attack,
         ZOMBIE_CODE: not_attacking_neighbor_or_owner_attack

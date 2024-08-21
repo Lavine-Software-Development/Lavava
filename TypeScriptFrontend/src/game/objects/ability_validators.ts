@@ -101,6 +101,11 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
         return myNode(node1, player) || isNotAttackingNeighbor(data);
     }
 
+    const isNotAttackingNeighborOrOwnerDefault = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return defaultNode(node1) && (myNode(node1, player) || isNotAttackingNeighbor(data));
+    }
+
     const notAttacking = (edge: Edge): boolean => {
         return edge.from_node.owner === player || !edge.flowing;
     }
@@ -143,7 +148,7 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
     }
 
     return {
-        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNotAttackingNeighborOrOwner : defaultStructureRangedNodeAttack,
+        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNotAttackingNeighborOrOwnerDefault : defaultStructureRangedNodeAttack,
         [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNotAttackingNeighbor : opposingStructureRangedNodeAttack,
         [KeyCodes.ZOMBIE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
     };
