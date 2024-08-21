@@ -1,4 +1,4 @@
-import { ClickType } from "../enums";
+import { ClickType } from "./enums";
 
 export class IDItem{
     id: number;

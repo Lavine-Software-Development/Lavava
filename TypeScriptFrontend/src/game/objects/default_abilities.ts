@@ -87,13 +87,13 @@ export const CLICKS: ClickParameters = {
 };
 
 interface EventParameters {
-    [index: string]: [number, ClickType]; // Adjust the types according to what Event constructor expects
+    [index: string]: [number, ClickType, Set<number>?]; // Make the Set optional
 }
 
 export const EVENTS: EventParameters = {
-    [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE],
-    [EventCodes.PUMP_DRAIN_CODE]: [1, ClickType.NODE],
-    [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE],
-    [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE],
-    [EventCodes.CREDIT_USAGE_CODE]: [1, ClickType.ABILITY],
+    [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE, new Set([KeyCodes.POISON_CODE, KeyCodes.NUKE_CODE, KeyCodes.ZOMBIE_CODE])],
+    [EventCodes.PUMP_DRAIN_CODE]: [1, ClickType.NODE, new Set()],
+    [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE, new Set()],
+    [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE, new Set()],
+    [EventCodes.CREDIT_USAGE_CODE]: [1, ClickType.ABILITY, new Set()],
 };
