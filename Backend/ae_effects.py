@@ -77,7 +77,7 @@ def make_rage(board_wide_effect):
         board_wide_effect('rage', player)
     return rage_effect
 
-def make_cannon_shot(id_dict, update_method):
+def make_cannon_shot(id_dict, update_method, cannon_shot_decrease):
     def constant_cannon_shot(player, data):
         cannon, target = id_dict[data[0]], id_dict[data[1]]
         if target.owner == player:
@@ -109,6 +109,8 @@ def make_cannon_shot(id_dict, update_method):
         target.delivery(max_delivery, player)
         update_method(("cannon_shot", (data[0], data[1], cannon_send, max_delivery)))
 
+    if not cannon_shot_decrease:
+        return constant_cannon_shot
     return decreasing_cannon_shot
 
 def make_pump_drain(id_dict):
@@ -205,9 +207,9 @@ def make_ability_effects(board, settings):
     } | make_board_wide_effect(board.board_wide_effect)
 
 
-def make_event_effects(board, update_method):
+def make_event_effects(board, update_method, cannon_shot_decrease):
     return {
-        CANNON_SHOT_CODE: make_cannon_shot(board.id_dict, update_method),
+        CANNON_SHOT_CODE: make_cannon_shot(board.id_dict, update_method, cannon_shot_decrease),
         PUMP_DRAIN_CODE : make_pump_drain(board.id_dict),
         STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].manual_switch(),
         STANDARD_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].click_swap(),

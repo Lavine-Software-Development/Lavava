@@ -439,7 +439,8 @@ export class WallNode extends Node {
     }
 
     get accepts_shot(): boolean {
-        return this.wall_count === 0;
+        // return this.wall_count === 0;
+        return true;
     }
 
     // private drawWalls(): void {

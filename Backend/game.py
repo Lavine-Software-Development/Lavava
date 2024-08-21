@@ -112,7 +112,7 @@ class ServerGame(JsonableTick):
         
     def make_events_dict(self):
         validators = make_effect_validators(self.board)
-        effects = make_event_effects(self.board, self.update_extra_info)
+        effects = make_event_effects(self.board, self.update_extra_info, self.settings["cannon_shot_decrease"])
         return {code: Event(validators[code], effects[code]) for code in EVENTS}
 
     def set_abilities(self, player, abilities, settings):
