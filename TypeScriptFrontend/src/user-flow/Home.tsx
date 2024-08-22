@@ -85,10 +85,10 @@ const Home: React.FC = () => {
         setIsLoggedIn(!!token);
 
         let prevMode = sessionStorage.getItem("gameMode");
-        if (prevMode === "Basic") {
-            handleGameModeChange("Basic");
-        } else {
+        if (prevMode === "Experimental") {
             handleGameModeChange("Experimental");
+        } else {
+            handleGameModeChange("Basic");
         }
 
         if (!isGuest && !token) {
