@@ -241,6 +241,54 @@ export class AbstractAbilityManager {
         return null;
     }
 
+    get inProgress(): boolean {
+        return this.mode !== null;
+    }
+
+    get type(): ClickType {
+        if (this.ability) {
+            return this.ability.clickType;
+        }
+        else if (this.event) {
+            return this.event.clickType;
+        }
+        return ClickType.BLANK;
+    }
+
+    get typeName() {
+        if (this.type == ClickType.NODE) {
+            return "dot";
+        } else if (this.type == ClickType.EDGE) {
+            return "bridge";
+        }
+        return "";
+    }
+
+    get name() {
+        if (this.ability) {
+            return this.ability.visual.name;
+        } else if (this.event) {
+            return this.event.visual.name;
+        }
+        return "";
+    }
+
+    get wrongTypeMessage() {
+        let name = this.name;
+        let type = this.typeName;
+        return `${name} must be used on ${type}`
+    }
+
+    get wrongUseMessage() {
+        if (this.ability) {
+            return `Only ${this.name} ${this.ability.visual.desc}`
+        }
+        else if (this.event) {
+            return this.event.visual.desc;
+        }
+        return "";
+    }
+
     draw(scene: Phaser.Scene): void {
         if (this.ability) {
             this.abilityText.setText( this.ability.visual.name);
