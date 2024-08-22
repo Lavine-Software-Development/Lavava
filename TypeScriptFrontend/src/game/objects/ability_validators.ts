@@ -415,11 +415,38 @@ export function makeEventValidators(player: MyCreditPlayer, getEdges: () => Edge
         return false;
     }
 
+    function nodeValidator(data: IDItem[]): boolean {
+        if (
+            data instanceof Array &&
+            data.length > 0 &&
+            data[0] instanceof Node
+        ) {
+            const node = data[0] as Node;
+            return node.hasRelevantEdges(player);
+        }
+        return false;
+    }
+
+
+    function nodeStopValidator(data: IDItem[]): boolean {
+        if (
+            data instanceof Array &&
+            data.length > 0 &&
+            data[0] instanceof Node
+        ) {
+            const node = data[0] as Node;
+            return node.hasRelevantOffEdges(player);
+        }
+        return false;
+    }
+
     return {
         [EventCodes.CANNON_SHOT_CODE]: cannonShotValidator,
         [EventCodes.PUMP_DRAIN_CODE]: pumpDrainValidator,
         [EventCodes.STANDARD_LEFT_CLICK]: edgeValidator,
         [EventCodes.STANDARD_RIGHT_CLICK]: edgeValidator,
+        [EventCodes.NODE_LEFT_CLICK]: nodeValidator,
+        [EventCodes.NODE_RIGHT_CLICK]: nodeStopValidator,
         [EventCodes.CREDIT_USAGE_CODE]: creditUsageValidator,
     };
 }

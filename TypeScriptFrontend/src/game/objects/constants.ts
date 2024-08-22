@@ -62,6 +62,8 @@ export const EventCodes = {
     STANDARD_LEFT_CLICK: 1,
     STANDARD_RIGHT_CLICK: 3,
     CREDIT_USAGE_CODE: 6,
+    NODE_LEFT_CLICK: 7,
+    NODE_RIGHT_CLICK: 9,
 };
 
 export const stateCodes = {

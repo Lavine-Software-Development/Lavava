@@ -516,12 +516,12 @@ export class MainScene extends Scene {
                     if (event_data !== false) {
                         if (
                             button === EventCodes.STANDARD_RIGHT_CLICK &&
-                            this.highlight.usage ===
-                            EventCodes.STANDARD_LEFT_CLICK
+                            (this.highlight.usage === EventCodes.STANDARD_LEFT_CLICK || 
+                                this.highlight.usage === EventCodes.NODE_LEFT_CLICK)
                         ) {
                             this.send(
                                 event_data,
-                                EventCodes.STANDARD_RIGHT_CLICK
+                                this.highlight.usage + 2
                             );
                         } else {
                             this.send(event_data);

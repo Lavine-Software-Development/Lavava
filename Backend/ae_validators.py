@@ -18,6 +18,8 @@ from constants import (
     OVER_GROW_CODE,
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
+    NODE_LEFT_CLICK,
+    NODE_RIGHT_CLICK,
     ZOMBIE_CODE,
     CANNON_CODE,
     PUMP_CODE,
@@ -332,6 +334,8 @@ def standard_click_validators(board):
     return {
         STANDARD_LEFT_CLICK: left_click,
         STANDARD_RIGHT_CLICK: right_click,
+        NODE_LEFT_CLICK: left_click,
+        NODE_RIGHT_CLICK: right_click,
     }
 
 

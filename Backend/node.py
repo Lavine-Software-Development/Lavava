@@ -213,6 +213,27 @@ class Node(JsonableTracked):
 
     def acceptBridge(self):
         return self.state.acceptBridge
+    
+    def valid_left_click(self, clicker):
+        return self.owner == clicker or clicker in {n.owner for n in self.neighbors}
+
+    def valid_right_click(self, clicker):
+        return self.owner == clicker or clicker in {n.owner for n in self.neighbors}
+    
+    def suck(self, player):
+        for edge in self.incoming:
+            if edge.controlled_by(player):
+                edge.manual_switch(True)
+
+        for edge in self.outgoing:
+            if edge.dynamic and edge.owned_by(player):
+                edge.click_swap()
+
+    def stop_suck(self, player):
+        for edge in self.incoming:
+            if edge.controlled_by(player):
+                edge.manual_switch(False)
+
 
     @property
     def swap_status(self):

@@ -61,4 +61,4 @@ class DynamicEdge(Edge):
         )
 
     def can_be_controlled_by(self, player):
-        return self.to_node.owner == player or self.to_node.owner == player
+        return self.to_node.owner == player

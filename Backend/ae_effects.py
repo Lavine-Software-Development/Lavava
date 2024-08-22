@@ -21,6 +21,8 @@ from constants import (
     RAGE_CODE,
     STANDARD_LEFT_CLICK,
     STANDARD_RIGHT_CLICK,
+    NODE_LEFT_CLICK,
+    NODE_RIGHT_CLICK,
     ZOMBIE_CODE,
     EDGE,
     DYNAMIC_EDGE,
@@ -213,6 +215,8 @@ def make_event_effects(board, update_method, cannon_shot_decrease):
         PUMP_DRAIN_CODE : make_pump_drain(board.id_dict),
         STANDARD_LEFT_CLICK: lambda player, data: board.id_dict[data[0]].manual_switch(),
         STANDARD_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].click_swap(),
+        NODE_LEFT_CLICK : lambda player, data: board.id_dict[data[0]].suck(player),
+        NODE_RIGHT_CLICK : lambda player, data: board.id_dict[data[0]].stop_suck(player),
         CREDIT_USAGE_CODE: credit_usage_effect
     }
 
