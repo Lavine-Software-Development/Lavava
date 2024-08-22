@@ -39,13 +39,13 @@ const Login: React.FC<LoginProps> = () => {
         sessionStorage.setItem('guestToken', guestToken);
         localStorage.removeItem("userToken");
         const defaultDecks = {
-            "Original": [
+            "Experimental": [
                 {"name": "Bridge", "count": 4},
                 {"name": "Mini-Bridge", "count": 3},
                 {"name": "Freeze", "count": 3},
                 {"name": "Cannon", "count": 2}
             ],
-            "Royale": [
+            "Basic": [
                 {"name": "Bridge", "count": 1},
                 {"name": "D-Bridge", "count": 1},
                 {"name": "Freeze", "count": 1},

@@ -28,7 +28,9 @@ from playerStateEnums import PlayerStateEnum as PSE
 @track_changes("owner", "state", "value", "effects")
 @method_multipliers({("lost_amount", freeAttack)})
 class Node(JsonableTracked):
-    def __init__(self, id, pos, growth_rate, transfer_rate, default_full_size, structures_grow):
+    def __init__(
+        self, id, pos, growth_rate, transfer_rate, default_full_size, structures_grow
+    ):
         self.value: float = 0
         self.owner = None
         self.item_type = NODE
@@ -155,13 +157,13 @@ class Node(JsonableTracked):
         return self.state.grow()
 
     def effects_update(self, condition_func):
-        original_length = len(self.effects)
+        experimental_length = len(self.effects)
         self.effects = {
             key: effect
             for key, effect in self.effects.items()
             if condition_func(effect)
         }
-        if len(self.effects) < original_length:
+        if len(self.effects) < experimental_length:
             self.calculate_interactions()
 
     def delivery(self, amount, player):
@@ -213,13 +215,13 @@ class Node(JsonableTracked):
 
     def acceptBridge(self):
         return self.state.acceptBridge
-    
+
     def valid_left_click(self, clicker):
         return self.owner == clicker or clicker in {n.owner for n in self.neighbors}
 
     def valid_right_click(self, clicker):
         return self.owner == clicker or clicker in {n.owner for n in self.neighbors}
-    
+
     def suck(self, player):
         for edge in self.incoming:
             if edge.controlled_by(player):
@@ -233,7 +235,6 @@ class Node(JsonableTracked):
         for edge in self.incoming:
             if edge.controlled_by(player):
                 edge.manual_switch(False)
-
 
     @property
     def swap_status(self):
@@ -253,11 +254,12 @@ class Node(JsonableTracked):
     @property
     def outgoing(self):
         return {edge for edge in self.edges if edge.from_node == self}
-    
+
     @property
     def reachable(self):
         visited = set()
         res = 0
+
         def dfs(node):
             nonlocal res
             if node in visited:
@@ -266,17 +268,18 @@ class Node(JsonableTracked):
             res += 1
             for edge in node.possible_outgoing:
                 dfs(edge.opposite(node))
+
         dfs(self)
         return res
-    
+
     @property
     def possible_outgoing(self):
         return {edge for edge in self.edges if edge.from_node == self or edge.dynamic}
-    
+
     @property
     def to_output_load(self):
         return len({edge for edge in self.outgoing if edge.on and not edge.flowing})
-    
+
     @property
     def outputting_load(self):
         return len({edge for edge in self.outgoing if edge.on and edge.flowing})
@@ -292,7 +295,7 @@ class Node(JsonableTracked):
     @property
     def neighbors(self):
         return [edge.opposite(self) for edge in self.edges]
-    
+
     def neighbors_(self, direction):
         return [edge.opposite(self) for edge in getattr(self, direction)]
 

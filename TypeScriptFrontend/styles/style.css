@@ -288,11 +288,11 @@ input::placeholder {
   gap: 10px;
 }
 
-.ability-grid.original-mode {
+.ability-grid.experimental-mode {
   grid-template-columns: repeat(7, 1fr);
 }
 
-.ability-grid.royale-mode {
+.ability-grid.basic-mode {
   grid-template-columns: repeat(5, 1fr);
 }
 

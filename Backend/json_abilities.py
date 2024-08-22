@@ -1,4 +1,5 @@
-from constants import BREAKDOWNS, START_CREDITS, ALL_ABILITIES, ROYALE_ABILITIES
+from constants import BREAKDOWNS, START_CREDITS, ALL_ABILITIES, BASIC_ABILITIES
+
 
 def start_elixir_json(elixir_cap):
     return {
@@ -6,20 +7,23 @@ def start_elixir_json(elixir_cap):
             code: {
                 "elixir": BREAKDOWNS[code].elixir,
             }
-            for code in ROYALE_ABILITIES
+            for code in BASIC_ABILITIES
         },
-        "elixir_cap": elixir_cap
+        "elixir_cap": elixir_cap,
     }
+
 
 def start_credit_json(credit_cap):
     return {
         "credits": credit_cap,
     }
 
+
 def start_json(settings):
     if settings["ability_type"] == "credits":
         return start_credit_json(settings["credit_cap"])
     return start_elixir_json(settings["elixir_cap"])
+
 
 def validate_ability_selection(data, settings):
     if len(data) > settings["deck_size"]:

@@ -38,12 +38,12 @@ const Lobby: React.FC = () => {
     };
 
     function allDecks() {
-        const original = abilityCountsConversion(JSON.parse(sessionStorage.getItem("selectedOriginalAbilities") || "{}"));
-        const royale = abilityCountsConversion(JSON.parse(sessionStorage.getItem("selectedRoyaleAbilities") || "{}"));
+        const experimental = abilityCountsConversion(JSON.parse(sessionStorage.getItem("selectedExperimentalAbilities") || "{}"));
+        const basic = abilityCountsConversion(JSON.parse(sessionStorage.getItem("selectedBasicAbilities") || "{}"));
       
         const combinedObj = {
-          Original: original,
-          Royale: royale
+          Experimental: experimental,
+          Basic: basic
         };
 
         return JSON.stringify(combinedObj, null, 2); // The '2' argument adds indentation for readability
@@ -115,7 +115,7 @@ const Lobby: React.FC = () => {
                         {playerCount} Player {gameMode} Ladder Match
                     </h2>
                 )}
-                {gameID && !botRequested && gameMode != "Original" && (
+                {gameID && !botRequested && gameMode != "Experimental" && (
                     <div
                         style={{
                             position: "absolute",

@@ -47,37 +47,37 @@ const DeckBuilder: React.FC = () => {
 
     const [abilities, setAbilities] = useState<Ability[]>([]);
     const [selectedCounts, setSelectedCounts] = useState<{ [key: string]: number }>({});
-    const [selectedRoyaleCounts, setSelectedRoyaleCounts] = useState<{ [key: string]: number }>({});
+    const [selectedBasicCounts, setSelectedBasicCounts] = useState<{ [key: string]: number }>({});
     const [initialSalary, setInitialSalary] = useState(0); // Store the initial salary
     const [salary, setSalary] = useState(0);
-    const [originalOptionCount, setOriginalOptionCount] = useState(3);
-    const [royaleOptionCount, setRoyaleOptionCount] = useState(3);
+    const [experimentalOptionCount, setExperimentalOptionCount] = useState(3);
+    const [basicOptionCount, setBasicOptionCount] = useState(3);
     const [error, setError] = useState("");
     const [royalAbilities, setRoyalAbilities] = useState<Ability[]>([]);
     const [deckMode, setDeckMode] = useState<string>(
-        sessionStorage.getItem("gameMode") || "Original"
+        sessionStorage.getItem("gameMode") || "Experimental"
     );
     
     useEffect(() => {
-        const fetchRoyaleAbilities = async () => {
+        const fetchBasicAbilities = async () => {
             if (isTokenValid === false) return;
             try {
-                const response = await fetch(`${config.userBackend}/abilities/Royale`);
+                const response = await fetch(`${config.userBackend}/abilities/Basic`);
                 const data = await response.json();
-                if (!sessionStorage.getItem("selectedRoyaleAbilities")) {
+                if (!sessionStorage.getItem("selectedBasicAbilities")) {
                     handleGetDeck();
                 }
                 if (response.ok) {
                     setRoyalAbilities(data.abilities);
-                    setRoyaleOptionCount(data.options);
-                    const storedRoyaleAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
-                    if (storedRoyaleAbilities) {
-                        const parsedAbilities = JSON.parse(storedRoyaleAbilities);
+                    setBasicOptionCount(data.options);
+                    const storedBasicAbilities = sessionStorage.getItem("selectedBasicAbilities");
+                    if (storedBasicAbilities) {
+                        const parsedAbilities = JSON.parse(storedBasicAbilities);
                         const initialCounts = parsedAbilities.reduce((counts: {[key: string]: number}, ability: { name: string; count: number }) => {
                             counts[ability.name] = ability.count;
                             return counts;
                         }, {});
-                        setSelectedRoyaleCounts(initialCounts);
+                        setSelectedBasicCounts(initialCounts);
                     }
                 } else {
                     throw new Error(data.message);
@@ -86,25 +86,25 @@ const DeckBuilder: React.FC = () => {
                 console.error('Error fetching abilities:', error);
             }
         };
-        fetchRoyaleAbilities();
+        fetchBasicAbilities();
     }, [isTokenValid]);
 
     useEffect(() => {
         const fetchAbilities = async () => {
             if (isTokenValid === false) return;
             try {
-                const response = await fetch(`${config.userBackend}/abilities/Original`);
+                const response = await fetch(`${config.userBackend}/abilities/Experimental`);
                 const data = await response.json();
-                if (!sessionStorage.getItem("selectedOriginalAbilities")) {
+                if (!sessionStorage.getItem("selectedExperimentalAbilities")) {
                     handleGetDeck();
                 }
                 if (response.ok) {
                     setAbilities(data.abilities);
                     setInitialSalary(data.credits);
-                    setOriginalOptionCount(data.options);
-                    const storedOriginalAbilities = sessionStorage.getItem("selectedOriginalAbilities");
-                    if (storedOriginalAbilities) {
-                        const parsedAbilities = JSON.parse(storedOriginalAbilities);
+                    setExperimentalOptionCount(data.options);
+                    const storedExperimentalAbilities = sessionStorage.getItem("selectedExperimentalAbilities");
+                    if (storedExperimentalAbilities) {
+                        const parsedAbilities = JSON.parse(storedExperimentalAbilities);
                         const initialCounts = parsedAbilities.reduce((counts: {[key: string]: number}, ability: { name: string; count: number }) => {
                             counts[ability.name] = ability.count;
                             return counts;
@@ -132,20 +132,20 @@ const DeckBuilder: React.FC = () => {
 
     const handleStartFresh = () => {
         setError("");
-        if (deckMode === "Original") {
+        if (deckMode === "Experimental") {
             setSelectedCounts(abilities.reduce((counts: { [key: string]: number }, ability: Ability) => {
                 counts[ability.name] = 0;
                 return counts;
             }, {}));
             setSalary(abilities.reduce((total, ability) => total + (ability.cost * 0), salary)); // Reset salary to full amount
-            sessionStorage.setItem('selectedOriginalAbilities', JSON.stringify({ abilities: []}));
+            sessionStorage.setItem('selectedExperimentalAbilities', JSON.stringify({ abilities: []}));
         }
         else {
-            setSelectedRoyaleCounts(abilities.reduce((counts: { [key: string]: number }, ability: Ability) => {
+            setSelectedBasicCounts(abilities.reduce((counts: { [key: string]: number }, ability: Ability) => {
                 counts[ability.name] = 0;
                 return counts;
             }, {}));
-            sessionStorage.setItem('selectedRoyaleAbilities', JSON.stringify({ abilities: []}));
+            sessionStorage.setItem('selectedBasicAbilities', JSON.stringify({ abilities: []}));
         }
     };
 
@@ -154,12 +154,12 @@ const DeckBuilder: React.FC = () => {
         const token = localStorage.getItem('userToken');
         if (token) {
             let selectedAbilities;
-            if (deckMode === "Original") {
+            if (deckMode === "Experimental") {
                 selectedAbilities = Object.entries(selectedCounts)
                     .filter(([, count]) => count > 0)
                     .map(([name, count]) => ({ name, count }));
             } else {
-                selectedAbilities = Object.entries(selectedRoyaleCounts)
+                selectedAbilities = Object.entries(selectedBasicCounts)
                     .filter(([, count]) => count > 0)
                     .map(([name, count]) => ({ name, count }));
             }
@@ -198,26 +198,26 @@ const DeckBuilder: React.FC = () => {
                 if (response.ok) {
                     const fetchedDecks: any[][] = data.decks || [];
                     const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
-                    const originalDeckIndex = modes.findIndex((mode: string) => mode === "Original");
-                    const royaleDeckIndex = modes.findIndex((mode: string) => mode === "Royale");
+                    const experimentalDeckIndex = modes.findIndex((mode: string) => mode === "Experimental");
+                    const basicDeckIndex = modes.findIndex((mode: string) => mode === "Basic");
                     const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
                     
-                    if (originalDeckIndex !== -1) {
-                        const originalInitialCounts = newDecks[originalDeckIndex].reduce((counts: { [key: string]: number }, ability: {name: string; count: number}) => {
+                    if (experimentalDeckIndex !== -1) {
+                        const experimentalInitialCounts = newDecks[experimentalDeckIndex].reduce((counts: { [key: string]: number }, ability: {name: string; count: number}) => {
                             counts[ability.name] = ability.count;
                             return counts;
                         }, {});
-                        setSelectedCounts(originalInitialCounts);
-                        sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(newDecks[originalDeckIndex]));
+                        setSelectedCounts(experimentalInitialCounts);
+                        sessionStorage.setItem("selectedExperimentalAbilities", JSON.stringify(newDecks[experimentalDeckIndex]));
                     }
                     
-                    if (royaleDeckIndex !== -1) {
-                        const royaleInitialCounts = newDecks[royaleDeckIndex].reduce((counts: { [key: string]: number }, ability: {name: string; count: number}) => {
+                    if (basicDeckIndex !== -1) {
+                        const basicInitialCounts = newDecks[basicDeckIndex].reduce((counts: { [key: string]: number }, ability: {name: string; count: number}) => {
                             counts[ability.name] = ability.count;
                             return counts;
                         }, {});
-                        setSelectedRoyaleCounts(royaleInitialCounts);
-                        sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(newDecks[royaleDeckIndex]));
+                        setSelectedBasicCounts(basicInitialCounts);
+                        sessionStorage.setItem("selectedBasicAbilities", JSON.stringify(newDecks[basicDeckIndex]));
                     }
                 } else {
                     throw new Error(data.message);
@@ -247,8 +247,8 @@ const DeckBuilder: React.FC = () => {
             const distinctAbilities = Object.keys(prevCounts).filter(name => prevCounts[name] > 0).length;
     
             // Check if adding a new distinct ability and already at max
-            if (increment && newCount === 1 && distinctAbilities >= originalOptionCount) {
-                setError("You cannot select more than ${originalOptionCount} distinct abilities.");
+            if (increment && newCount === 1 && distinctAbilities >= experimentalOptionCount) {
+                setError("You cannot select more than ${experimentalOptionCount} distinct abilities.");
                 return prevCounts;
             }
     
@@ -267,15 +267,15 @@ const DeckBuilder: React.FC = () => {
                 .filter(([, count]) => count > 0)
                 .map (([name, count]) => ({ name, count}));
 
-            sessionStorage.setItem('selectedOriginalAbilities', JSON.stringify(selectedAbilities));
+            sessionStorage.setItem('selectedExperimentalAbilities', JSON.stringify(selectedAbilities));
 
             return newCounts;
         });
     };
 
-    const handleRoyaleButtonClick = (abilityName: string, increment: boolean) => {
+    const handleBasicButtonClick = (abilityName: string, increment: boolean) => {
         setError(""); // Clear previous errors
-        setSelectedRoyaleCounts(prevCounts => {
+        setSelectedBasicCounts(prevCounts => {
             const abilityCost = abilities.find(a => a.name === abilityName)?.cost || 0;
             const currentCount = prevCounts[abilityName] || 0;
     
@@ -288,18 +288,18 @@ const DeckBuilder: React.FC = () => {
             const distinctAbilities = Object.keys(prevCounts).filter(name => prevCounts[name] > 0).length;
     
             // Check if adding a new distinct ability and already at max
-            if (increment && newCount === 1 && distinctAbilities >= royaleOptionCount) {
-                setError(`You cannot select more than ${royaleOptionCount} distinct abilities.`);
+            if (increment && newCount === 1 && distinctAbilities >= basicOptionCount) {
+                setError(`You cannot select more than ${basicOptionCount} distinct abilities.`);
                 return prevCounts;
             }
 
             if (increment && newCount === 2) {
-                setError("You can only select an ability once in Royale decks.");
+                setError("You can only select an ability once in Basic decks.");
                 return prevCounts;
             }
     
             // Check if salary allows for this increment
-            // no salary in royale
+            // no salary in basic
             /*if (increment && (salary - abilityCost < 0)) {
                 setError(`You cannot afford the ${abilityName} ability.`);
                 return prevCounts;
@@ -313,19 +313,19 @@ const DeckBuilder: React.FC = () => {
                 .filter(([, count]) => count > 0)
                 .map (([name, count]) => ({ name, count}));
             
-            sessionStorage.setItem('selectedRoyaleAbilities', JSON.stringify(selectedAbilities));
+            sessionStorage.setItem('selectedBasicAbilities', JSON.stringify(selectedAbilities));
 
             return newCounts;
         });
     };
 
     const getCurrentSelections = () => {
-        if (deckMode === "Original") {
+        if (deckMode === "Experimental") {
             return Object.entries(selectedCounts)
                 .filter(([, count]) => count > 0)
                 .map(([name, count]) => ({ name, count }));
         } else {
-            return Object.entries(selectedRoyaleCounts)
+            return Object.entries(selectedBasicCounts)
                 .filter(([, count]) => count > 0)
                 .map(([name, count]) => ({ name, count }));
         }
@@ -336,7 +336,7 @@ const DeckBuilder: React.FC = () => {
         sessionStorage.setItem("gameMode", mode);
     };
 
-    const gridClassName = `ability-grid ${deckMode === "Original" ? "original-mode" : "royale-mode"}`;
+    const gridClassName = `ability-grid ${deckMode === "Experimental" ? "experimental-mode" : "basic-mode"}`;
 
     return (
         <div className="container" id="deck-builder-container">
@@ -344,34 +344,34 @@ const DeckBuilder: React.FC = () => {
             <div className="tab-and-salary-container">
                 <div className="deck-tab-container">
                     <button 
-                        className={`tab-button ${deckMode === "Original" ? "active" : ""}`}
-                        onClick={() => handleGameModeChange("Original")}
+                        className={`tab-button ${deckMode === "Basic" ? "active" : ""}`}
+                        onClick={() => handleGameModeChange("Basic")}
                     >
-                        Original
+                        Basic
                     </button>
                     <button 
-                        className={`tab-button ${deckMode === "Royale" ? "active" : ""}`}
-                        onClick={() => handleGameModeChange("Royale")}
+                        className={`tab-button ${deckMode === "Experimental" ? "active" : ""}`}
+                        onClick={() => handleGameModeChange("Experimental")}
                     >
-                        Royale
+                        Experimental
                     </button>
                 </div>
-                {deckMode === "Original" && (
+                {deckMode === "Experimental" && (
                     <div className="salary-display">
                         <h2>Credits: {salary}</h2>
                     </div>
                 )}
             </div>
             <div className={gridClassName}>
-                {(deckMode === "Original" ? abilities : royalAbilities).map((ability, index) => (
+                {(deckMode === "Experimental" ? abilities : royalAbilities).map((ability, index) => (
                     <button
                     key={index}
-                    className={`ability-button ${(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] > 0 ? 'selected' : ''}`}
-                    onClick={() => deckMode === "Original" ? handleButtonClick(ability.name, true) : handleRoyaleButtonClick(ability.name, true)}
+                    className={`ability-button ${(deckMode === "Experimental" ? selectedCounts : selectedBasicCounts)[ability.name] > 0 ? 'selected' : ''}`}
+                    onClick={() => deckMode === "Experimental" ? handleButtonClick(ability.name, true) : handleBasicButtonClick(ability.name, true)}
                     data-tooltip={ability.description}
                     onContextMenu={(e) => {
                         e.preventDefault();
-                        deckMode === "Original" ? handleButtonClick(ability.name, false) : handleRoyaleButtonClick(ability.name, false);
+                        deckMode === "Experimental" ? handleButtonClick(ability.name, false) : handleBasicButtonClick(ability.name, false);
                     }}
                     >
                     <img 
@@ -382,7 +382,7 @@ const DeckBuilder: React.FC = () => {
                     <div className="ability-name">{ability.name}</div>
                     <div className="ability-cost">Cost: {ability.cost}</div>
                     <div className="ability-count">
-                        {(deckMode === "Original" ? selectedCounts : selectedRoyaleCounts)[ability.name] || 0}
+                        {(deckMode === "Experimental" ? selectedCounts : selectedBasicCounts)[ability.name] || 0}
                     </div>
                     </button>
                 ))}

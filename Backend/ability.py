@@ -3,6 +3,7 @@ from constants import TIME_AMOUNT
 from abc import abstractmethod
 from tracking_decorator.track_changes import track_changes
 
+
 class AbstractAbility(JsonableTracked):
     def __init__(self, id, validation_func, effect_func, in_game_cost, player):
         self.validation_func = validation_func
@@ -27,7 +28,7 @@ class AbstractAbility(JsonableTracked):
 
     def can_use(self, data):
         return self.can_afford and self.validation_func(data)
-    
+
     @abstractmethod
     def update(self):
         pass
@@ -40,10 +41,11 @@ class AbstractAbility(JsonableTracked):
         return min(1, self.counter / self.in_game_cost)
 
 
-@track_changes('remaining', ('load_amount', 'percentage'))
+@track_changes("remaining", ("load_amount", "percentage"))
 class CreditAbility(AbstractAbility):
-
-    def __init__(self, id, validation_func, effect_func, in_game_cost, player, remaining):
+    def __init__(
+        self, id, validation_func, effect_func, in_game_cost, player, remaining
+    ):
         super().__init__(id, validation_func, effect_func, in_game_cost, player)
         self.remaining = remaining
 
@@ -53,7 +55,7 @@ class CreditAbility(AbstractAbility):
     @property
     def counter(self):
         return self.load_amount
-    
+
     def update(self):
         if self.remaining > 0:
             self.load_amount += TIME_AMOUNT
@@ -64,9 +66,8 @@ class CreditAbility(AbstractAbility):
         self.load_amount = 0
 
 
-@track_changes(('chop', 'percentage'))
-class RoyaleAbility(AbstractAbility):
-
+@track_changes(("chop", "percentage"))
+class BasicAbility(AbstractAbility):
     def create_attributes(self):
         # Updated occasionally so the percentage is only checked on whole numbers. Same way elixir works
         self.chop = 0
@@ -74,7 +75,7 @@ class RoyaleAbility(AbstractAbility):
     @property
     def counter(self):
         return self.player.elixir
-    
+
     def update(self):
         self.chop += 1
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ability import CreditAbility, RoyaleAbility
+from ability import CreditAbility, BasicAbility
 from constants import (
     GREY,
     START_MONEY,
@@ -16,12 +16,12 @@ from player_state import PlayerState
 from jsonable import JsonableTick
 from math import floor
 
+
 class DefaultPlayer(JsonableTick):
     def __init__(self, id, settings=None):
-
         tick_values = self.default_values()
 
-        recurse_values = {'abilities'}
+        recurse_values = {"abilities"}
         # tick_values = {'ps', 'count'}
         super().__init__(id, set(), recurse_values, tick_values)
 
@@ -32,8 +32,8 @@ class DefaultPlayer(JsonableTick):
         pass
 
     def set_settings(self, settings):
-        self.auto_attack = settings.get('auto_attack')
-        self.auto_spread = settings.get('auto_spread')
+        self.auto_attack = settings.get("auto_attack")
+        self.auto_spread = settings.get("auto_spread")
 
     def use_ability(self, key, data) -> Optional[dict]:
         if self.abilities[key].can_use(data):
@@ -50,7 +50,7 @@ class DefaultPlayer(JsonableTick):
         self.ps = PlayerState()
         self.rank = 0
         self.credits = 0
-        return {'ps'}
+        return {"ps"}
 
     def eliminate(self, rank):
         self.rank = rank
@@ -72,18 +72,17 @@ class DefaultPlayer(JsonableTick):
         pass
 
     def capture_event(self, node, gain):
-        pass  
+        pass
 
 
 class CreditPlayer(DefaultPlayer):
-
     def update(self, overtime=False):
         for ability in self.abilities.values():
             ability.update()
 
     def default_values(self):
         self.credits = 0
-        return super().default_values() | {'credits'}
+        return super().default_values() | {"credits"}
 
     def eliminate(self, rank):
         super().eliminate(rank)
@@ -104,21 +103,27 @@ class CreditPlayer(DefaultPlayer):
         validators = make_ability_validators(board, self, settings)
 
         for ab in chosen_abilities:
-            self.abilities[ab] = CreditAbility(ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].reload, self, chosen_abilities[ab])
+            self.abilities[ab] = CreditAbility(
+                ab,
+                validators[ab],
+                ability_effects[ab],
+                BREAKDOWNS[ab].reload,
+                self,
+                chosen_abilities[ab],
+            )
 
 
-class RoyalePlayer(DefaultPlayer):
-
+class BasicPlayer(DefaultPlayer):
     def __init__(self, id, settings):
-        self.elixir_cap = settings['elixir_cap']
-        self.elixir_rate = settings['elixir_rate']
+        self.elixir_cap = settings["elixir_cap"]
+        self.elixir_rate = settings["elixir_rate"]
         super().__init__(id)
 
     def default_values(self):
         self.mini_counter = 0
         self.a_elixir = 0
-        return super().default_values() | {'a_elixir'}
-    
+        return super().default_values() | {"a_elixir"}
+
     @property
     def elixir(self):
         return self.a_elixir
@@ -136,7 +141,9 @@ class RoyalePlayer(DefaultPlayer):
         validators = make_ability_validators(board, self, settings)
 
         for ab in chosen_abilities:
-            self.abilities[ab] = RoyaleAbility(ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].elixir, self)
+            self.abilities[ab] = BasicAbility(
+                ab, validators[ab], ability_effects[ab], BREAKDOWNS[ab].elixir, self
+            )
 
     def update(self, overtime=False):
         if not overtime and self.elixir < self.elixir_cap:

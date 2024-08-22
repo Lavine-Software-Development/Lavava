@@ -109,10 +109,10 @@ export class MainScene extends Scene {
         this.network.leaveGameCallback = this.leaveMatchDirect.bind(this);
         this.burning = [];
         let storedAbilities;
-        if (this.board.mode === "Original") {
-            storedAbilities = sessionStorage.getItem("selectedOriginalAbilities");
+        if (this.board.mode === "Experimental") {
+            storedAbilities = sessionStorage.getItem("selectedExperimentalAbilities");
         } else {
-            storedAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
+            storedAbilities = sessionStorage.getItem("selectedBasicAbilities");
         }
 
         const abilitiesFromStorage = storedAbilities
@@ -295,7 +295,7 @@ export class MainScene extends Scene {
             );
         });
 
-        if (this.mode == "Royale") {
+        if (this.mode == "Basic") {
             this.abilityManager = new ElixirAbilityManager(
                 this,
                 this.abilityCounts,
@@ -488,7 +488,7 @@ export class MainScene extends Scene {
             }
         }
 
-        if (this.ps === PSE.PLAY && this.mode === "Original") {
+        if (this.ps === PSE.PLAY && this.mode === "Experimental") {
             let manager = this.abilityManager as CreditAbilityManager;
             let ability = manager.triangle_validate(position);
             if (ability) {
@@ -590,7 +590,7 @@ export class MainScene extends Scene {
         this.mode = startData.mode;
 
         console.log(this.mode);
-        if (this.mode === "Royale") {
+        if (this.mode === "Basic") {
             this.mainPlayer = new MyElixirPlayer(String(pi), PlayerColors[pi]);
         } else {
             this.mainPlayer = new MyCreditPlayer(String(pi), PlayerColors[pi]);
@@ -599,7 +599,7 @@ export class MainScene extends Scene {
         this.otherPlayers = Array.from({ length: pc }, (_, index) => {
             const id = index.toString();
             if (id !== pi.toString()) {
-                if (this.mode === "Royale") {
+                if (this.mode === "Basic") {
                     return new MyElixirPlayer(id, PlayerColors[index])
                 }
                 return new MyCreditPlayer(id, PlayerColors[index])
