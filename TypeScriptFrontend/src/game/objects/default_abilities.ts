@@ -31,6 +31,8 @@ const PUMP_DRAIN_V = createEventVisual("Pump Drain", Colors.DARK_PURPLE);
 const STANDARD_LEFT_CLICK_V = createEventVisual("Switch", Colors.GREY);
 const STANDARD_RIGHT_CLICK_V = createEventVisual("Swap", Colors.GREY);
 const CREDIT_USAGE_V = createEventVisual("Credit Usage", Colors.DARK_PURPLE);
+const NODE_LEFT_CLICK_V = createEventVisual("Node Left Click", Colors.GREY);
+const NODE_RIGHT_CLICK_V = createEventVisual("Node Right Click", Colors.YELLOW);
 
 interface EventVisualParameters {
     [index: string]: EventVisual | AbilityVisual;
@@ -60,6 +62,8 @@ export const VISUALS: EventVisualParameters = {
     [EventCodes.STANDARD_LEFT_CLICK]: STANDARD_LEFT_CLICK_V,
     [EventCodes.STANDARD_RIGHT_CLICK]: STANDARD_RIGHT_CLICK_V,
     [EventCodes.CREDIT_USAGE_CODE]: CREDIT_USAGE_V,
+    [EventCodes.NODE_LEFT_CLICK]: NODE_LEFT_CLICK_V,
+    [EventCodes.NODE_RIGHT_CLICK]: NODE_RIGHT_CLICK_V,
 };
 
 interface ClickParameters {
@@ -87,13 +91,15 @@ export const CLICKS: ClickParameters = {
 };
 
 interface EventParameters {
-    [index: string]: [number, ClickType]; // Adjust the types according to what Event constructor expects
+    [index: string]: [number, ClickType, Set<number>?]; // Make the Set optional
 }
 
 export const EVENTS: EventParameters = {
-    [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE],
-    [EventCodes.PUMP_DRAIN_CODE]: [1, ClickType.NODE],
-    [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE],
-    [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE],
-    [EventCodes.CREDIT_USAGE_CODE]: [1, ClickType.ABILITY],
+    [EventCodes.CANNON_SHOT_CODE]: [2, ClickType.NODE, new Set([KeyCodes.POISON_CODE, KeyCodes.NUKE_CODE, KeyCodes.ZOMBIE_CODE])],
+    [EventCodes.PUMP_DRAIN_CODE]: [1, ClickType.NODE, new Set()],
+    [EventCodes.STANDARD_LEFT_CLICK]: [1, ClickType.EDGE, new Set()],
+    [EventCodes.STANDARD_RIGHT_CLICK]: [1, ClickType.EDGE, new Set()],
+    [EventCodes.CREDIT_USAGE_CODE]: [1, ClickType.ABILITY, new Set()],
+    [EventCodes.NODE_LEFT_CLICK]: [1, ClickType.NODE, new Set()],
+    [EventCodes.NODE_RIGHT_CLICK]: [1, ClickType.NODE, new Set()],
 };

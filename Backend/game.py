@@ -73,7 +73,13 @@ class ServerGame(JsonableTick):
         player = self.player_dict[player_id]
         event = self.events[key]
         if event.can_use(player, data):
-            event.use(player, data)
+            # the following code is GROSS
+            if len(data) == 3 and data[2] in player.abilities and player.abilities[data[2]].can_afford:
+                # thus they used a cannon ability shot
+                self.update_extra_info(("cannon_shot", (data[0], data[1], data[2])))
+                player.abilities[data[2]].use([self.board.id_dict[data[1]]])
+            else:
+                event.use(player, data)
             return True
         else:
             print("failed to use event")
@@ -112,7 +118,7 @@ class ServerGame(JsonableTick):
         
     def make_events_dict(self):
         validators = make_effect_validators(self.board)
-        effects = make_event_effects(self.board, self.update_extra_info)
+        effects = make_event_effects(self.board, self.update_extra_info, self.settings["cannon_shot_decrease"])
         return {code: Event(validators[code], effects[code]) for code in EVENTS}
 
     def set_abilities(self, player, abilities, settings):

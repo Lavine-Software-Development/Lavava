@@ -111,6 +111,9 @@ class Edge(JsonableTracked):
     @property
     def owned(self):
         return self.duo_ownership and self.to_node.owner == self.from_node.owner
+    
+    def owned_by(self, player):
+        return self.duo_ownership and self.to_node.owner == self.from_node.owner == player
 
     @property
     def duo_ownership(self):

@@ -58,7 +58,8 @@ class WallNode(Node):
 
     @property
     def accepts_shot(self):
-        return self.wall_count == 0
+        # return self.wall_count == 0
+        return True
 
     @property
     def accessible(self):

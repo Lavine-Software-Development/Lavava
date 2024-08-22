@@ -22,6 +22,7 @@ export class AbstractAbilityManager {
     clicks: IDItem[] = [];
     abilityText: Phaser.GameObjects.Text;
     BridgeGraphics: Phaser.GameObjects.Graphics;
+    extraData: Set<number>;
 
     constructor(
         scene: Phaser.Scene,
@@ -45,6 +46,7 @@ export class AbstractAbilityManager {
 
         // Set origin to (1, 1) to align text to the bottom right
         this.abilityText.setOrigin(1, 1);
+        this.extraData = new Set<number>();
     }
 
     makeAbilities(ability_values: any, validators: { [key: string]: ValidatorFunc }, scene: Phaser.Scene): void {
@@ -94,9 +96,11 @@ export class AbstractAbilityManager {
         this.clicks.push(highlight.item!); // Assuming item is always present
         this.updateSelection();
         if (this.completeCheck(highlight.usage)) {
-            const clicks = this.clicks.map((click) => click.id);
+            const clickIds = this.clicks.map((click) => click.id);
+            const extraDataArray = Array.from(this.extraData);
+            const send_info = [...clickIds, ...extraDataArray];
             this.backupReset();
-            return clicks;
+            return send_info;
         }
         return false;
     }
@@ -157,10 +161,11 @@ export class AbstractAbilityManager {
             if (click.type === ClickType.NODE) {
                 let node = click as Node;
                 node.select(false);
+            }
         }
         this.clicks = [];
         this.BridgeGraphics.clear();
-        }
+        this.extraData.clear();
     }
 
     switchTo(key: number): boolean {
@@ -182,13 +187,18 @@ export class AbstractAbilityManager {
     }
 
     select(key: number): boolean {
-        if (this.mode) {
-            this.wipe();
+        if (this.event?.addons.has(key) && this.abilities[key].selectable) {    
+            this.extraData.add(key);
         }
-        if (this.mode === key) {
-            this.mode = null;
-        } else if (this.abilities[key].selectable) {
-            return this.switchTo(key);
+        else {
+            if (this.mode) {
+                this.wipe();
+            }
+            if (this.mode === key) {
+                this.mode = null;
+            } else if (this.abilities[key].selectable) {
+                return this.switchTo(key);
+            }
         }
         return false;
     }

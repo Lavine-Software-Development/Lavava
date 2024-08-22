@@ -49,6 +49,42 @@ export class Node extends IDItem implements INode {
         return this._value;
     }
 
+    hasRelevantEdges(player: OtherPlayer): boolean {
+        // Check incoming edges
+        const relevantIncomingEdges = this.edges.some(edge => 
+            edge.to_node === this && 
+            edge.from_node.owner === player && 
+            !edge.on
+        );
+
+        if (relevantIncomingEdges) {
+            return true;
+        }
+        else if (this.owner !== player) {
+            return false;
+        }
+
+        // Check outgoing edges
+        const relevantOutgoingEdges = this.edges.some(edge => 
+            edge.from_node === this && 
+            edge.to_node.owner === player && 
+            edge.dynamic
+        );
+
+        return relevantOutgoingEdges;
+    }
+
+    hasRelevantOffEdges(player: OtherPlayer): boolean {
+        // Check incoming edges
+        const relevantIncomingEdges = this.edges.some(edge => 
+            edge.to_node === this && 
+            edge.from_node.owner === player && 
+            edge.on
+        );
+
+        return relevantIncomingEdges;
+    }
+
     set value(value: number) {
         if (!this.delayChange) {
             this._value = value;
@@ -439,7 +475,8 @@ export class WallNode extends Node {
     }
 
     get accepts_shot(): boolean {
-        return this.wall_count === 0;
+        // return this.wall_count === 0;
+        return true;
     }
 
     // private drawWalls(): void {

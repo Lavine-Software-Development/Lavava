@@ -101,6 +101,11 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
         return myNode(node1, player) || isNotAttackingNeighbor(data);
     }
 
+    const isNotAttackingNeighborOrOwnerDefault = (data: IDItem[]): boolean => {
+        const node1 = data[0] as Node;
+        return defaultNode(node1) && (myNode(node1, player) || isNotAttackingNeighbor(data));
+    }
+
     const notAttacking = (edge: Edge): boolean => {
         return edge.from_node.owner === player || !edge.flowing;
     }
@@ -143,7 +148,7 @@ function attackValidators(nodes: Node[], player: OtherPlayer, ratio: [number, nu
     }
 
     return {
-        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNotAttackingNeighborOrOwner : defaultStructureRangedNodeAttack,
+        [KeyCodes.NUKE_CODE]: attackType === "neighbor" ? isNotAttackingNeighborOrOwnerDefault : defaultStructureRangedNodeAttack,
         [KeyCodes.POISON_CODE]: attackType === "neighbor" ? isNotAttackingNeighbor : opposingStructureRangedNodeAttack,
         [KeyCodes.ZOMBIE_CODE]: attackType === "neighbor" ? isNeighborOrOwner : defaultStructureRangedNodeAttack,
     };
@@ -181,11 +186,11 @@ function capitalValidator(getEdges: () => Edge[], player: OtherPlayer): Validato
     };
 }
 
-const wormholeValidator = (data: IDItem[], player: OtherPlayer, getEdges: () => Edge[]): boolean => {
+const wormholeValidator = (data: IDItem[], player: OtherPlayer, getEdges: () => Edge[], cap): boolean => {
     const structureValidators = {
         "capital": capitalValidator(getEdges, player),
-        "cannon": playerValidators(player)[KeyCodes.CANNON_CODE],
-        "pump": playerValidators(player)[KeyCodes.PUMP_CODE],
+        "cannon": playerValidators(player, cap)[KeyCodes.CANNON_CODE],
+        "pump": playerValidators(player, cap)[KeyCodes.PUMP_CODE],
     };
 
     if (data.length === 1) {
@@ -209,7 +214,7 @@ export function unownedNode(data: IDItem[]): boolean {
     return node.owner === null && node.stateName === "default";
 }
 
-function playerValidators(player: OtherPlayer): {
+function playerValidators(player: OtherPlayer, cannon_accessible_placement): {
     [key: string]: ValidatorFunc;
 } {
 
@@ -228,6 +233,11 @@ function playerValidators(player: OtherPlayer): {
     const myDefaultPortNode = (data: IDItem[]): boolean => {
         const node = data[0] as Node;
         return node.accessible && myDefaultNode(data);
+    }
+
+    const cannonPlacement = (data: IDItem[]): boolean => {
+        const node = data[0] as Node;
+        return (node.accessible || !cannon_accessible_placement) && myDefaultNode(data);
     }
 
     // Weakest Freeze.
@@ -260,7 +270,7 @@ function playerValidators(player: OtherPlayer): {
     return {
         [KeyCodes.POISON_CODE]: attackingEdge,
         [KeyCodes.FREEZE_CODE]: dynamicEdgeOwnEitherButNotFlowing,
-        [KeyCodes.CANNON_CODE]: myDefaultPortNode,
+        [KeyCodes.CANNON_CODE]: cannonPlacement,
         [KeyCodes.PUMP_CODE]: myDefaultNode,
         [KeyCodes.WALL_CODE]: myDefaultNonWallNode,
     };
@@ -348,11 +358,11 @@ export function makeAbilityValidators(
         [KeyCodes.BURN_CODE]: ownedBurnableNode,
         [KeyCodes.RAGE_CODE]: noClick,
         [KeyCodes.CAPITAL_CODE]: capitalValidator(getEdges, player),
-        [KeyCodes.WORMHOLE_CODE]: (data: IDItem[]) => wormholeValidator(data, player, getEdges),
+        [KeyCodes.WORMHOLE_CODE]: (data: IDItem[]) => wormholeValidator(data, player, getEdges, settings.cannon_accessible_placement),
     };
 
     // Merge the validators from `player_validators` into `abilityValidators`
-    const playerValidatorsMap = playerValidators(player);
+    const playerValidatorsMap = playerValidators(player, settings.cannon_accessible_placement);
     const newEdgeValidators = newEdgeValidator(getEdges, player, ratio, settings.bridge_from_port_needed);
     const attackValidatorsMap = attackValidators(nodes, player, ratio, settings.attack_type);
     return { ...abilityValidators, ...playerValidatorsMap, ...newEdgeValidators, ...attackValidatorsMap };
@@ -405,11 +415,38 @@ export function makeEventValidators(player: MyCreditPlayer, getEdges: () => Edge
         return false;
     }
 
+    function nodeValidator(data: IDItem[]): boolean {
+        if (
+            data instanceof Array &&
+            data.length > 0 &&
+            data[0] instanceof Node
+        ) {
+            const node = data[0] as Node;
+            return node.hasRelevantEdges(player);
+        }
+        return false;
+    }
+
+
+    function nodeStopValidator(data: IDItem[]): boolean {
+        if (
+            data instanceof Array &&
+            data.length > 0 &&
+            data[0] instanceof Node
+        ) {
+            const node = data[0] as Node;
+            return node.hasRelevantOffEdges(player);
+        }
+        return false;
+    }
+
     return {
         [EventCodes.CANNON_SHOT_CODE]: cannonShotValidator,
         [EventCodes.PUMP_DRAIN_CODE]: pumpDrainValidator,
         [EventCodes.STANDARD_LEFT_CLICK]: edgeValidator,
         [EventCodes.STANDARD_RIGHT_CLICK]: edgeValidator,
+        [EventCodes.NODE_LEFT_CLICK]: nodeValidator,
+        [EventCodes.NODE_RIGHT_CLICK]: nodeStopValidator,
         [EventCodes.CREDIT_USAGE_CODE]: creditUsageValidator,
     };
 }

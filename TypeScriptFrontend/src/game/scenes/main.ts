@@ -290,7 +290,8 @@ export class MainScene extends Scene {
                 VISUALS[eb],
                 EVENTS[eb][0],
                 EVENTS[eb][1],
-                ev[eb]
+                ev[eb],
+                EVENTS[eb][2]
             );
         });
 
@@ -515,12 +516,12 @@ export class MainScene extends Scene {
                     if (event_data !== false) {
                         if (
                             button === EventCodes.STANDARD_RIGHT_CLICK &&
-                            this.highlight.usage ===
-                            EventCodes.STANDARD_LEFT_CLICK
+                            (this.highlight.usage === EventCodes.STANDARD_LEFT_CLICK || 
+                                this.highlight.usage === EventCodes.NODE_LEFT_CLICK)
                         ) {
                             this.send(
                                 event_data,
-                                EventCodes.STANDARD_RIGHT_CLICK
+                                this.highlight.usage + 2
                             );
                         } else {
                             this.send(event_data);
@@ -815,7 +816,16 @@ export class MainScene extends Scene {
             if (tuple[1].length > 3) {
                 this.cannonShot(cannon, target, tuple[1][2], tuple[1][3]);
             } else {
-                this.cannonShot(cannon, target, tuple[1][2], tuple[1][2]);
+                if (tuple[1][2] == 112) {
+                    this.cannonShot(cannon, target, 50, 50, Colors.PURPLE);
+                } else if (tuple[1][2] == 110) {
+                    this.cannonShot(cannon, target, 70, 70, Colors.BLACK);
+                } else if (tuple[1][2] == 122) {
+                    this.cannonShot(cannon, target, 30, 30, Colors.LIGHT_GREY);
+                }
+                else {
+                    this.cannonShot(cannon, target, tuple[1][2], tuple[1][2]);
+                }
             }
         } else if (tuple[0] == "player_elimination") {
             let player1 = tuple[1][0];
@@ -939,7 +949,7 @@ export class MainScene extends Scene {
         }
     }
 
-    private cannonShot(cannon: Node, target: Node, size: number, end_size: number) {
+    private cannonShot(cannon: Node, target: Node, size: number, end_size: number, color_override?: readonly [number, number, number]) {
         cannonAngle(cannon, target.pos.x, target.pos.y);
         target.delayChange = true;
 
@@ -957,7 +967,12 @@ export class MainScene extends Scene {
         );
 
         // Draw the diamond-shaped projectile
-        projectile.fillStyle(cannon.phaserColor, 1);
+        if (color_override) {
+            projectile.fillStyle(phaserColor(color_override), 1);
+        }
+        else {
+            projectile.fillStyle(cannon.phaserColor, 1);
+        }
         projectile.beginPath();
         projectile.moveTo(0, -ball_size); // Top point
         projectile.lineTo(ball_size * 0.6, 0); // Right point

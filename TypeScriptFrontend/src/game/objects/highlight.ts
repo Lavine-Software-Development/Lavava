@@ -66,13 +66,13 @@ export class Highlight {
             if (this.type === ClickType.NODE) {
                 const node = this.item as Node;
                 const [r, g, b] = this.color;
-                this.graphics.lineStyle(2, Phaser.Display.Color.GetColor(r, g, b), 1); // Set line color and alpha
+                this.graphics.lineStyle(3, Phaser.Display.Color.GetColor(r, g, b), 1); // Set line color and alpha
                 this.graphics.strokeCircle(node.pos.x, node.pos.y, node.size + 3); // Assuming `x`, `y` coordinates and radius
                 this.graphics.closePath();
             } else if (this.type === ClickType.EDGE) {
                 const edge = this.item as Edge;
                 const [r, g, b] = this.color;
-                this.graphics.lineStyle(2, Phaser.Display.Color.GetColor(r, g, b), 1); // Set line color and alpha
+                this.graphics.lineStyle(3, Phaser.Display.Color.GetColor(r, g, b), 1); // Set line color and alpha
         
                 const startX = edge.line.x1;
                 const startY = edge.line.y1;
