@@ -36,7 +36,7 @@ const Leaderboard: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [gameCount, setGameCount] = useState(0);
-    const [deckMode, setDeckMode] = useState("Original");
+    const [deckMode, setDeckMode] = useState("Experimental");
     const [deckIndex, setDeckIndex] = useState<number>(0);
     const [usersDecks, setUsersDecks] = useState<any[][]>([]);
     const [decks, setDecks] = useState<any[][]>([]);
@@ -166,16 +166,16 @@ const Leaderboard: React.FC = () => {
                         <p><strong>ELO:</strong> {selectedUser.elo}</p>
                         <div className="tab-container" style={{ marginBottom: '10px'}}>
                             <button 
-                                className={`tab-button ${deckMode === "Original" ? "active" : ""}`}
-                                onClick={() => setDeckMode("Original")}
+                                className={`tab-button ${deckMode === "Experimental" ? "active" : ""}`}
+                                onClick={() => setDeckMode("Experimental")}
                             >
-                                Original
+                                Experimental
                             </button>
                             <button 
-                                className={`tab-button ${deckMode === "Royale" ? "active" : ""}`}
-                                onClick={() => setDeckMode("Royale")}
+                                className={`tab-button ${deckMode === "Basic" ? "active" : ""}`}
+                                onClick={() => setDeckMode("Basic")}
                             >
-                                Royale
+                                Basic
                             </button>
                         </div>
                         <h2 className="text-shadow default-deck-text">{deckMode} Deck</h2>

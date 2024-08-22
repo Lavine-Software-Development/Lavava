@@ -137,7 +137,7 @@ const slides = {
             { type: "text", content: "In a contested situation, a dynamic bridge bends to the will of the bigger node, directing its flow away from it." },
         ],
         // [
-        //     { type: "text", content: "That's it! You're ready to play Royale mode." },
+        //     { type: "text", content: "That's it! You're ready to play Basic mode." },
         // ],
         // [
         //     { type: "text", content: "Remember, the goal is to capture as many dots as you can and defeat your opponents." },
@@ -262,7 +262,7 @@ const HowToPlay: React.FC = () => {
 
     return (
         <div className="scrollable-container">
-            <h1>Royale Mode: How to Play</h1>
+            <h1>Basic Mode: How to Play</h1>
             <div className="htp-button-container">
                 <button
                     onClick={() => handleSectionChange("basics")}

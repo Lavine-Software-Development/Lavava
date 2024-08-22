@@ -59,7 +59,7 @@ const Home: React.FC = () => {
         sessionStorage.getItem("friendlyMode") || "join"
     );
     const [gameMode, setGameMode] = useState<string>(
-        sessionStorage.getItem("gameMode") || "Original"
+        sessionStorage.getItem("gameMode") || "Basic"
     );
     const [gameModeDropdownOpen, setGameModeDropdownOpen] = useState<boolean>(false);
     const gameModeDropdownRef = useRef<HTMLDivElement>(null);
@@ -78,49 +78,49 @@ const Home: React.FC = () => {
                 window.location.pathname
             );
         }
-        const storedOriginalAbilities = sessionStorage.getItem("selectedOriginalAbilities");
-        const storedRoyaleAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
+        const storedExperimentalAbilities = sessionStorage.getItem("selectedExperimentalAbilities");
+        const storedBasicAbilities = sessionStorage.getItem("selectedBasicAbilities");
         const token = localStorage.getItem("userToken");
         const isGuest = sessionStorage.getItem("guestToken");
         setIsLoggedIn(!!token);
 
         let prevMode = sessionStorage.getItem("gameMode");
-        if (prevMode === "Royale") {
-            handleGameModeChange("Royale");
+        if (prevMode === "Basic") {
+            handleGameModeChange("Basic");
         } else {
-            handleGameModeChange("Original");
+            handleGameModeChange("Experimental");
         }
 
         if (!isGuest && !token) {
             navigate("/login");
         }
         if (isGuest) {
-            if (storedOriginalAbilities && storedOriginalAbilities !== "undefined") {
-                setSelectedAbilities(JSON.parse(storedOriginalAbilities));
-            } else if (storedRoyaleAbilities && storedRoyaleAbilities !== "undefined") {
-                setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
+            if (storedExperimentalAbilities && storedExperimentalAbilities !== "undefined") {
+                setSelectedAbilities(JSON.parse(storedExperimentalAbilities));
+            } else if (storedBasicAbilities && storedBasicAbilities !== "undefined") {
+                setSelectedAbilities(JSON.parse(storedBasicAbilities));
             } else {
                 const guestDecksJSON = sessionStorage.getItem("guestDecks");
                 if (guestDecksJSON && guestDecksJSON !== "undefined") {
                     const guestDecks = JSON.parse(guestDecksJSON);
     
-                    const guestOriginalDeck = guestDecks["Original"];
-                    const guestRoyaleDeck = guestDecks["Royale"];
-                    if (gameMode === "Original") {
-                        setSelectedAbilities(guestOriginalDeck);
+                    const guestExperimentalDeck = guestDecks["Experimental"];
+                    const guestBasicDeck = guestDecks["Basic"];
+                    if (gameMode === "Experimental") {
+                        setSelectedAbilities(guestExperimentalDeck);
                     } else {
-                        setSelectedAbilities(guestRoyaleDeck);
+                        setSelectedAbilities(guestBasicDeck);
                     }
-                    sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(guestOriginalDeck));
-                    sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(guestRoyaleDeck));
+                    sessionStorage.setItem("selectedExperimentalAbilities", JSON.stringify(guestExperimentalDeck));
+                    sessionStorage.setItem("selectedBasicAbilities", JSON.stringify(guestBasicDeck));
                 }
             }
         }
         if (token) {
-            if (storedOriginalAbilities && storedOriginalAbilities !== "undefined") {
-                setSelectedAbilities(JSON.parse(storedOriginalAbilities));
-            } else if (storedRoyaleAbilities  && storedRoyaleAbilities !== "undefined") {
-                setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
+            if (storedExperimentalAbilities && storedExperimentalAbilities !== "undefined") {
+                setSelectedAbilities(JSON.parse(storedExperimentalAbilities));
+            } else if (storedBasicAbilities  && storedBasicAbilities !== "undefined") {
+                setSelectedAbilities(JSON.parse(storedBasicAbilities));
             } else {
                 // Fetch user decks from backend
                 fetch(`${config.userBackend}/user_abilities`, {
@@ -133,17 +133,17 @@ const Home: React.FC = () => {
                         if (data && data.decks) {
                             const fetchedDecks: any[][] = data.decks;
                             const modes = fetchedDecks.map((deck: any[]) => deck[deck.length - 1]);
-                            const originalDeckIndex = modes.findIndex((mode: string) => mode === "Original");
-                            const royaleDeckIndex = modes.findIndex((mode: string) => mode === "Royale");
+                            const experimentalDeckIndex = modes.findIndex((mode: string) => mode === "Experimental");
+                            const basicDeckIndex = modes.findIndex((mode: string) => mode === "Basic");
                             const newDecks: any[][] = fetchedDecks.map((deck: any[]) => deck.slice(0, -1));
-                            const originalAbilities = newDecks[originalDeckIndex];
-                            const royaleAbilities = newDecks[royaleDeckIndex]
-                            sessionStorage.setItem("selectedOriginalAbilities", JSON.stringify(originalAbilities));
-                            sessionStorage.setItem("selectedRoyaleAbilities", JSON.stringify(royaleAbilities));
-                            if (gameMode === "Original") {
-                                setSelectedAbilities(originalAbilities);
+                            const experimentalAbilities = newDecks[experimentalDeckIndex];
+                            const basicAbilities = newDecks[basicDeckIndex]
+                            sessionStorage.setItem("selectedExperimentalAbilities", JSON.stringify(experimentalAbilities));
+                            sessionStorage.setItem("selectedBasicAbilities", JSON.stringify(basicAbilities));
+                            if (gameMode === "Experimental") {
+                                setSelectedAbilities(experimentalAbilities);
                             } else {
-                                setSelectedAbilities(royaleAbilities);
+                                setSelectedAbilities(basicAbilities);
                             }
                         }
                     })
@@ -168,15 +168,15 @@ const Home: React.FC = () => {
     }, []);
 
     useEffect(() =>{
-        const storedOriginalAbilities = sessionStorage.getItem("selectedOriginalAbilities");
-        const storedRoyaleAbilities = sessionStorage.getItem("selectedRoyaleAbilities");
-        if (gameMode === "Original") {
-            if (storedOriginalAbilities  && storedOriginalAbilities !== "undefined") {
-                setSelectedAbilities(JSON.parse(storedOriginalAbilities));
+        const storedExperimentalAbilities = sessionStorage.getItem("selectedExperimentalAbilities");
+        const storedBasicAbilities = sessionStorage.getItem("selectedBasicAbilities");
+        if (gameMode === "Experimental") {
+            if (storedExperimentalAbilities  && storedExperimentalAbilities !== "undefined") {
+                setSelectedAbilities(JSON.parse(storedExperimentalAbilities));
             }
         } else {
-            if (storedRoyaleAbilities && storedRoyaleAbilities !== "undefined") {
-                setSelectedAbilities(JSON.parse(storedRoyaleAbilities));
+            if (storedBasicAbilities && storedBasicAbilities !== "undefined") {
+                setSelectedAbilities(JSON.parse(storedBasicAbilities));
             }
         }
     }, [gameMode]);
@@ -463,11 +463,11 @@ const Home: React.FC = () => {
                                         </button>
                                         {gameModeDropdownOpen && (
                                             <ul>
-                                                <li onClick={() => handleGameModeChange("Original")}>
-                                                    Original
+                                                <li onClick={() => handleGameModeChange("Basic")}>
+                                                    Basic
                                                 </li>
-                                                <li onClick={() => handleGameModeChange("Royale")}>
-                                                    Royale
+                                                <li onClick={() => handleGameModeChange("Experimental")}>
+                                                    Experimental
                                                 </li>
                                             </ul>
                                         )}
@@ -562,11 +562,11 @@ const Home: React.FC = () => {
                                 </button>
                                 {gameModeDropdownOpen && (
                                     <ul>
-                                        <li onClick={() => handleGameModeChange("Original")}>
-                                            Original
+                                        <li onClick={() => handleGameModeChange("Basic")}>
+                                            Basic
                                         </li>
-                                        <li onClick={() => handleGameModeChange("Royale")}>
-                                            Royale
+                                        <li onClick={() => handleGameModeChange("Experimental")}>
+                                            Experimental
                                         </li>
                                     </ul>
                                 )}
