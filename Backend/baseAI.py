@@ -377,7 +377,7 @@ def create_ai(
 
         def make_regular_decisions(self):
             self.nuke_dangerous_nodes(probability=0.1)
-            # self.freeze_dangerous_edges("incoming",probability=0.1)
+            self.freeze_dangerous_edges("incoming",probability=0.1)
             self.switch_offense_edges(probability=0.1)
 
         def make_wealthy_decisions(self):
