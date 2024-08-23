@@ -11,7 +11,7 @@ export interface AbilityVisual {
     letter: string;
 }
 
-export function createEventVisual(name: string, desc: string, color: readonly [number, number, number]): EventVisual {
+export function createEventVisual(name: string, desc: string, color: readonly [number, number, number] = [0, 0, 0]): EventVisual {
     return Object({ name, desc, color });
 }
 

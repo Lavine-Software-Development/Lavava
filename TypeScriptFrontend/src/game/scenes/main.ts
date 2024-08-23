@@ -96,13 +96,15 @@ export class MainScene extends Scene {
     ];
     private rainbowIndex: number = 0;
 
+    private popups: boolean;
+
     get readonlySettings() {
         return this.settings;
     }
 
-    constructor(config, props, network: Network, navigate: Function) {
+    constructor(config, data, network: Network, navigate: Function) {
         super({ key: "MainScene" });
-        this.board = props;
+        this.board = data;
         this.network = network;
         this.navigate = navigate;
         this.network.updateCallback = this.update_data.bind(this);
@@ -170,6 +172,7 @@ export class MainScene extends Scene {
             } else if (pointer.rightButtonDown()) {
                 this.mouseButtonDownEvent(EventCodes.STANDARD_RIGHT_CLICK);
             }
+            this.checkHighlight();
         });
 
         this.input.keyboard!.on("keydown", (event: KeyboardEvent) => {
@@ -353,6 +356,8 @@ export class MainScene extends Scene {
             this.simple_send(stateCodes.RESTART_CODE);
         } else if (this.ps === PSE.VICTORY && key === stateCodes.RESTART_CODE) {
             this.simple_send(stateCodes.RESTART_CODE);
+        } else if (key == 32) {
+            this.cancelAbility();
         } else if (this.ps === PSE.PLAY) {
             this.abilitySelection(key);
             if (key === stateCodes.FORFEIT_CODE) {
@@ -527,25 +532,38 @@ export class MainScene extends Scene {
                         this.send(completion);
                     }
                 } else {
+                    if (this.abilityManager.ability) {
+                        this.popUpLogic(button)
+                    }
                     const event_data = this.abilityManager.useEvent(
                         this.highlight
                     );
                     if (event_data !== false) {
-                        if (
-                            button === EventCodes.STANDARD_RIGHT_CLICK &&
-                            (this.highlight.usage === EventCodes.STANDARD_LEFT_CLICK || 
-                                this.highlight.usage === EventCodes.NODE_LEFT_CLICK)
-                        ) {
-                            this.send(
-                                event_data,
-                                this.highlight.usage + 2
-                            );
-                        } else {
-                            this.send(event_data);
+                        if (button === EventCodes.STANDARD_RIGHT_CLICK) {
+                            if (this.highlight.usage === EventCodes.STANDARD_LEFT_CLICK) {
+                                let edge = this.highlight.item as Edge;
+                                if (!(edge.dynamic && 
+                                    (edge.from_node.owner == this.mainPlayer ||
+                                    (edge.to_node.owner == this.mainPlayer && edge.to_node.full)))) {
+                                        this.popUpLogic(button)
+                                        return;
+                                }
+                            }
+                            if (this.highlight.usage === EventCodes.STANDARD_LEFT_CLICK || 
+                                this.highlight.usage === EventCodes.NODE_LEFT_CLICK) {
+                                    this.send(
+                                        event_data,
+                                        this.highlight.usage + 2
+                                    );
+                                    return;
+                            }
                         }
+                        this.send(event_data);
                     }
                 }
             }
+        } else if (this.ps !== PSE.START_SELECTION && this.gs === GSE.START_SELECTION) {
+            this.createPopUp("Wait! The Game hasn't begun!")
         } else {
             // added this else
             let key = this.abilityManager.clickSelect(
@@ -560,6 +578,11 @@ export class MainScene extends Scene {
         }
     }
 
+    cancelAbility() {
+        this.abilityManager.backupReset()
+        this.createPopUp("Ability Canceled")
+    }
+
     popUpLogic(button: number): void {
         let pointer = this.input.activePointer;
         let hoverResult = this.invalidHover(
@@ -567,8 +590,7 @@ export class MainScene extends Scene {
         );
         if (!hoverResult) {
             if (this.abilityManager.inProgress) {
-                this.abilityManager.backupReset()
-                this.createPopUp("Ability Canceled")
+                this.cancelAbility()
             }
         }
         else {
@@ -590,44 +612,46 @@ export class MainScene extends Scene {
     }
 
     createPopUp(message: string): void {
-        const padding = 10;
-        const lineHeight = 24;
-        const maxWidth = this.scale.width * 0.3;
-        const style = {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            fill: '#ffffff',
-            wordWrap: { width: maxWidth - padding * 2 }
-        };
-    
-        const text = this.add.text(0, 0, message, style);
-        const bounds = text.getBounds();
-    
-        const graphics = this.add.graphics();
-        graphics.fillStyle(0x000000, 0.8);
-        graphics.fillRoundedRect(0, 0, bounds.width + padding * 2, bounds.height + padding * 2, 8);
-    
-        const container = this.add.container(this.input.mousePointer.x, this.input.mousePointer.y);
-        container.add(graphics);
-        container.add(text);
-    
-        text.setPosition(padding, padding);
-    
-        // Adjust position if it goes off-screen
-        if (container.x + container.width > this.scale.width) {
-            container.x = this.scale.width - container.width;
+        if (this.popups) {
+            const padding = 10;
+            const lineHeight = 24;
+            const maxWidth = this.scale.width * 0.3;
+            const style = {
+                fontFamily: 'Arial',
+                fontSize: '16px',
+                fill: '#ffffff',
+                wordWrap: { width: maxWidth - padding * 2 }
+            };
+        
+            const text = this.add.text(0, 0, message, style);
+            const bounds = text.getBounds();
+        
+            const graphics = this.add.graphics();
+            graphics.fillStyle(0x000000, 0.8);
+            graphics.fillRoundedRect(0, 0, bounds.width + padding * 2, bounds.height + padding * 2, 8);
+        
+            const container = this.add.container(this.input.mousePointer.x, this.input.mousePointer.y);
+            container.add(graphics);
+            container.add(text);
+        
+            text.setPosition(padding, padding);
+        
+            // Adjust position if it goes off-screen
+            if (container.x + container.width > this.scale.width) {
+                container.x = this.scale.width - container.width;
+            }
+            if (container.y + container.height > this.scale.height) {
+                container.y = this.scale.height - container.height;
+            }
+        
+            const closePopUp = () => {
+                container.destroy();
+                this.input.off('pointerdown', closePopUp);
+            };
+        
+            this.input.on('pointerdown', closePopUp);
+            this.input.on('pointermove', closePopUp);
         }
-        if (container.y + container.height > this.scale.height) {
-            container.y = this.scale.height - container.height;
-        }
-    
-        const closePopUp = () => {
-            container.destroy();
-            this.input.off('pointerdown', closePopUp);
-        };
-    
-        this.input.on('pointerdown', closePopUp);
-        this.input.on('pointermove', closePopUp);
     }
 
     send(items?: number[], code?: number): void {
@@ -668,6 +692,10 @@ export class MainScene extends Scene {
             (this.sys.game.config.width as number) / 1000,
             (this.sys.game.config.height as number) / 700,
         ];
+        this.popups = this.board.player_settings.popups;
+        if (this.popups === undefined) {
+            this.popups = true;
+        }
 
         let startData = this.board;
         const pi = Number(startData.player_id.toString());
@@ -793,6 +821,9 @@ export class MainScene extends Scene {
 
                 if (this.gs != new_data["gs"]) {
                     this.gs = new_data["gs"] as GSE;
+                    if (this.gs == GSE.PLAY) {
+                        this.createPopUp("Begin!")
+                    }
                     this.updateProgressBar();
                 }
 
