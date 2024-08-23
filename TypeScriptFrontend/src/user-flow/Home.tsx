@@ -326,7 +326,12 @@ const Home: React.FC = () => {
             <div className="profile-card">
                 <h1 className="form-title">Home</h1>
                 <div className="app-drop-down-container" ref={playDropdownRef}>
-                    <button onClick={handlePlayDropdownFocus}>Play</button>
+                <button onClick={handlePlayDropdownFocus} className="dropdown-button">
+                    <span className="arrow-box">
+                        <i className="fas fa-caret-down"></i>
+                    </span>
+                    <span className="button-text">Play</span>
+                </button>
                     {playDropdownOpen && (
                         <ul>
                             <li onClick={handleLadderClick}>Ladder</li>
@@ -432,12 +437,11 @@ const Home: React.FC = () => {
                                         className="player-count-drop-down-container"
                                         ref={playerCountDropdownRef}
                                     >
-                                        <button
-                                            onClick={
-                                                handlePlayerCountDropdownFocus
-                                            }
-                                        >
-                                            {playerCount} Players
+                                        <button onClick={ handlePlayerCountDropdownFocus }> 
+                                            <span className="arrow-box">
+                                                <i className="fas fa-caret-down"></i>
+                                            </span>
+                                            <span className="button-text">{playerCount} Players</span>
                                         </button>
                                         {playerCountDropdownOpen && (
                                             <ul>
@@ -459,7 +463,10 @@ const Home: React.FC = () => {
                                         ref={gameModeDropdownRef}
                                     >
                                         <button onClick={handleGameModeDropdownFocus}>
-                                            {gameMode} Mode
+                                            <span className="arrow-box">
+                                                <i className="fas fa-caret-down"></i>
+                                            </span>
+                                            <span className="button-text">{gameMode} Mode</span>
                                         </button>
                                         {gameModeDropdownOpen && (
                                             <ul>
@@ -531,14 +538,12 @@ const Home: React.FC = () => {
                                 )}
                             </div>
                             <div style={{ height: "43px" }}></div>
-                            <div
-                                className="player-count-drop-down-container"
-                                ref={playerCountDropdownRef}
-                            >
-                                <button
-                                    onClick={handlePlayerCountDropdownFocus}
-                                >
-                                    {playerCount} Players
+                            <div className="player-count-drop-down-container" ref={playerCountDropdownRef}>
+                                <button onClick={ handlePlayerCountDropdownFocus }> 
+                                    <span className="arrow-box">
+                                        <i className="fas fa-caret-down"></i>
+                                    </span>
+                                    <span className="button-text">{playerCount} Players</span>
                                 </button>
                                 {playerCountDropdownOpen && (
                                     <ul>
@@ -558,7 +563,10 @@ const Home: React.FC = () => {
                                 ref={gameModeDropdownRef}
                             >
                                 <button onClick={handleGameModeDropdownFocus}>
-                                    {gameMode} Mode
+                                    <span className="arrow-box">
+                                        <i className="fas fa-caret-down"></i>
+                                    </span>
+                                    <span className="button-text">{gameMode} Mode</span>
                                 </button>
                                 {gameModeDropdownOpen && (
                                     <ul>
