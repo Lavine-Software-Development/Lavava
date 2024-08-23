@@ -166,8 +166,77 @@ const slides = {
     ],
     abilitiesCatalogue: [
         [
-            { type: "text", content: "test"},
-        ]   
+            { type: "text", content: "Bridge" },
+            { type: "text", content: "Bridge allows you to bridge to another node.<br>You can only bridge to unwalled nodes. Bridge is uni-directional. Bridges cannot cross other existing bridges." },
+        ],
+        [
+            { type: "text", content: "D-Bridge"},
+            { type: "image", content: "../assets/abilityIcons/D-Bridge.png"},
+            { type: "image", content: "../assets/HowToPlay/dynamic_bridge_flip.gif"},
+            { type: "text", content: "D-Bridge, like bridge, can connect to other unwalled nodes as long as it doesn't overlap existing bridges.<br>However, if both nodes belong to you, the direction can be switched by right-clicking the bridge." },
+            
+        ],
+        [
+            { type: "text", content: "Wall" },
+            { type: "text", content: "A player can wall their nodes to prevent opponents bridging to that node." },
+        ],
+        [
+            { type: "text", content: "Wallbreaker" },
+            { type: "text", content: "Wallbreaker can help remove walls from opponents' nodes." },
+        ],
+        [
+            { type: "text", content: "Spawn" },
+            { type: "text", content: "With spawn, you can buy a new, unowned node anywhere on the map. Capital nodes cannot be bought." },
+        ],
+        [
+            { type: "text", content: "Capital" },
+            { type: "text", content: "Capitals are special nodes. A player acquires them by flowing into them (they cannot be bought). They are a winning condition - the more capitals a player owns, higher the probability of them winning." },
+        ],
+        [
+            { type: "text", content: "Nuke" },
+            { type: "text", content: "Nuke allows you to remove a node, as long as its a neighbour to your node AND isn't currenlty attacking you." },
+        ],
+        [
+            { type: "text", content: "Freeze" },
+            { type: "text", content: "With freeze, the direction of a D-Bridge can be permanently set. Be mindful of switching the direction to your advantage before freezing." },
+        ],
+        [
+            { type: "text", content: "Rage" },
+            { type: "text", content: "Rage temporarily increases the flow of player's energy. It can be useful while attacking for making a swift work of opponents' nodes." },
+        ],
+        [
+            { type: "text", content: "Poison" },
+            { type: "text", content: "Poison can be used on an opponent's node to temporarily slow the flow of their energy. The poison will spread with active bridges." },
+            // can poison be transfered among players?
+        ],
+        [
+            { type: "text", content: "Burn" },
+            { type: "text", content: "Burnnnnnn " },
+        ],
+        [
+            { type: "text", content: "Cannon" },
+            { type: "text", content: "The player chooses a node to fix the cannon on. Once deployed, it can be used to inflict damage on opponents' unwalled nodes.<br>It is similar to bridges, but you needn't worry about overlaps." },
+        ],
+        [
+            { type: "text", content: "Catapult" },
+            { type: "text", content: "Catapult " },
+        ],
+        [
+            { type: "text", content: "Wormhole" },
+            { type: "text", content: "Wormhole allows the player to transport their node to another location on the map." },
+        ],
+        [
+            { type: "text", content: "Zombie" },
+            { type: "text", content: "Zombie " },
+        ],
+        [
+            { type: "text", content: "Over-Grow" },
+            { type: "text", content: "Each node has a capacity. With over-grow, the player can increase the capacity of a certain node." },
+        ],
+        [
+            { type: "text", content: "Pump" },
+            { type: "text", content: "Pump " },
+        ],
     ]
 };
 
