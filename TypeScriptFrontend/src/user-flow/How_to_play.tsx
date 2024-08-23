@@ -6,8 +6,8 @@ const slides = {
     basics: [
         [
             { type: "text", content: "Welcome to Durb.<br/>See all those dots on the screen?<br/>Your goal is to capture as many dots as you can." },
-            // { type: "image", content: "../assets/HowToPlay/start_nodes.png", style: { width: "80%" } }
-            { type: "image", content: "../assets/HowToPlay/start_nodes.gif", style: { width: "80%" } }
+            { type: "image", content: "../assets/HowToPlay/start_nodes.png", style: { width: "80%" } }
+            // { type: "image", content: "../assets/HowToPlay/start_nodes.gif", style: { width: "80%" } }
         ],
         [
             { type: "text", content: "To begin the game, choose a starting dot." },
@@ -180,22 +180,23 @@ const slides = {
             { type: "text", content: "Wall" },
             { type: "text", content: "A player can wall their nodes to prevent opponents bridging to that node." },
             { type: "image", content: "../assets/HowToPlay/wall_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/wall_ability.gif"},
         ],
-        [
-            { type: "text", content: "Wallbreaker" },
-            { type: "text", content: "Wallbreaker can help remove walls from opponents' nodes." },
-            { type: "image", content: "../assets/abilityIcons/Wallbreaker.png"},
-        ],
-        [
-            { type: "text", content: "Spawn" },
-            { type: "text", content: "With spawn, you can buy a new, unowned node anywhere on the map. Capital nodes cannot be bought." },
-            { type: "image", content: "../assets/abilityIcons/Spawn.png"},
-        ],
-        [
-            { type: "text", content: "Capital" },
-            { type: "text", content: "Capitals are special nodes. A player acquires them by flowing into them (they cannot be bought). They are a winning condition - the more capitals a player owns, higher the probability of them winning." },
-            { type: "image", content: "../assets/abilityIcons/Capital.png"},
-        ],
+        // [
+        //     { type: "text", content: "Wallbreaker" },
+        //     { type: "text", content: "Wallbreaker can help remove walls from opponents' nodes." },
+        //     { type: "image", content: "../assets/abilityIcons/Wallbreaker.png"},
+        // ],
+        // [
+        //     { type: "text", content: "Spawn" },
+        //     { type: "text", content: "With spawn, you can buy a new, unowned node anywhere on the map. Capital nodes cannot be bought." },
+        //     { type: "image", content: "../assets/abilityIcons/Spawn.png"},
+        // ],
+        // [
+        //     { type: "text", content: "Capital" },
+        //     { type: "text", content: "Capitals are special nodes. A player acquires them by flowing into them (they cannot be bought). They are a winning condition - the more capitals a player owns, higher the probability of them winning." },
+        //     { type: "image", content: "../assets/abilityIcons/Capital.png"},
+        // ],
         [
             { type: "text", content: "Nuke" },
             { type: "text", content: "Nuke allows you to remove a node, as long as its a neighbour to your node AND isn't currenlty attacking you." },
@@ -219,41 +220,41 @@ const slides = {
             { type: "image", content: "../assets/HowToPlay/poison_ability.png"},
             { type: "image", content: "../assets/HowToPlay/poison_ability.gif"},
         ],
-        [
-            { type: "text", content: "Burn" },
-            { type: "text", content: "Burnnnnnn " },
-            { type: "image", content: "../assets/abilityIcons/Burn.png"},
-        ],
+        // [
+        //     { type: "text", content: "Burn" },
+        //     { type: "text", content: "Burnnnnnn " },
+        //     { type: "image", content: "../assets/abilityIcons/Burn.png"},
+        // ],
         [
             { type: "text", content: "Cannon" },
-            { type: "text", content: "The player chooses a node to fix the cannon on. Once deployed, it can be used to inflict damage on opponents' unwalled nodes.<br>It is similar to bridges, but you needn't worry about overlaps." },
+            { type: "text", content: "The player chooses a node to fix the cannon on. Once deployed, it can be used to inflict damage on opponents' nodes.<br>It is similar to bridges, but you needn't worry about overlaps." },
             { type: "image", content: "../assets/HowToPlay/cannon_ability.png"},
         ],
-        [
-            { type: "text", content: "Catapult" },
-            { type: "text", content: "Catapult " },
-            { type: "image", content: "../assets/abilityIcons/Catapult.png"},
-        ],
-        [
-            { type: "text", content: "Wormhole" },
-            { type: "text", content: "Wormhole allows the player to transport their node to another location on the map." },
-            { type: "image", content: "../assets/abilityIcons/Wormhole.png"},
-        ],
-        [
-            { type: "text", content: "Zombie" },
-            { type: "text", content: "Zombie " },
-            { type: "image", content: "../assets/abilityIcons/Zombie.png"},
-        ],
+        // [
+        //     { type: "text", content: "Catapult" },
+        //     { type: "text", content: "Catapult " },
+        //     { type: "image", content: "../assets/abilityIcons/Catapult.png"},
+        // ],
+        // [
+        //     { type: "text", content: "Wormhole" },
+        //     { type: "text", content: "Wormhole allows the player to transport their node to another location on the map." },
+        //     { type: "image", content: "../assets/abilityIcons/Wormhole.png"},
+        // ],
+        // [
+        //     { type: "text", content: "Zombie" },
+        //     { type: "text", content: "Zombie " },
+        //     { type: "image", content: "../assets/abilityIcons/Zombie.png"},
+        // ],
         [
             { type: "text", content: "Over-Grow" },
             { type: "text", content: "Each node has a capacity. With over-grow, the player can increase the capacity of a certain node." },
             { type: "image", content: "../assets/HowToPlay/overgrow_ability.png"},
         ],
-        [
-            { type: "text", content: "Pump" },
-            { type: "text", content: "Pump " },
-            { type: "image", content: "../assets/abilityIcons/Pump.png"},
-        ],
+        // [
+        //     { type: "text", content: "Pump" },
+        //     { type: "text", content: "Pump " },
+        //     { type: "image", content: "../assets/abilityIcons/Pump.png"},
+        // ],
     ]
 };
 
