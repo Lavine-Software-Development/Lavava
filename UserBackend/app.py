@@ -1133,12 +1133,12 @@ def get_basic_abilities():
         },
         {"name": "Rage", "cost": 5, "description": "Increase energy transfer speed"},
         {"name": "Bridge", "cost": 5, "description": "Create a bridge"},
+        {"name": "Cannon", "cost": 6, "description": "Shoot energy at nodes"},
         {
             "name": "Nuke",
             "cost": 7,
             "description": "Destroy nearby dot and its bridges",
         },
-        {"name": "Cannon", "cost": 8, "description": "Shoot energy at nodes"},
     ]
     return jsonify({"abilities": abilities, "options": 5})
 

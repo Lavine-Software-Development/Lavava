@@ -8,31 +8,31 @@ import { Colors, KeyCodes, EventCodes } from "./constants";
 import { ClickType } from "./enums";
 
 // Create instances of AbilityVisual using the factory function
-const SPAWN_V = createAbilityVisual("Spawn");
-const BRIDGE_V = createAbilityVisual("Bridge", Colors.YELLOW, "A");
-const D_BRIDGE_V = createAbilityVisual("D-Bridge", Colors.YELLOW);
-const NUKE_V = createAbilityVisual("Nuke", Colors.GREY);
-const POISON_V = createAbilityVisual("Poison", Colors.PURPLE);
-const FREEZE_V = createAbilityVisual("Freeze", Colors.LIGHT_BLUE);
-const CAPITAL_V = createAbilityVisual("Capital", Colors.PINK);
-const ZOMBIE_V = createAbilityVisual("Zombie", Colors.DARK_GRAY);
-const BURN_V = createAbilityVisual("Burn", Colors.DARK_ORANGE);
-const RAGE_V = createAbilityVisual("Rage", Colors.DARK_RED);
-const CANNON_V = createAbilityVisual("Cannon", Colors.GREY, "E");
-const PUMP_V = createAbilityVisual("Pump", Colors.DARK_PURPLE, "U");
-const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", Colors.YELLOW, "M");
-const OVER_GROW_V = createAbilityVisual("Over-Grow", Colors.DARK_GREEN);
-const WALL_V = createAbilityVisual("Wall", Colors.LIGHT_BROWN, "V");
-const WORMHOLE_V = createAbilityVisual("Wormhole", Colors.DARK_PINK, "W");
+const SPAWN_V = createAbilityVisual("Spawn", "an unclaimed dot");
+const BRIDGE_V = createAbilityVisual("Bridge", "to a non-walled dot. It also cannot cross other bridges", Colors.YELLOW, "A");
+const D_BRIDGE_V = createAbilityVisual("D-Bridge", "to a non-walled dot. It also cannot cross other bridges", Colors.YELLOW);
+const NUKE_V = createAbilityVisual("Nuke", "a neighboring dot (So long as it is not currently attacking you)", Colors.GREY);
+const POISON_V = createAbilityVisual("Poison", "a neighboring dot (So long as it is not currently attacking you)", Colors.PURPLE);
+const FREEZE_V = createAbilityVisual("Freeze", "a two-way bridge", Colors.LIGHT_BLUE);
+const CAPITAL_V = createAbilityVisual("Capital", "a full dot you own (So long as it is not beside another capital)", Colors.PINK);
+const ZOMBIE_V = createAbilityVisual("Zombie", "a neighboring dot (So long as it is not currently attacking you)", Colors.DARK_GRAY);
+const BURN_V = createAbilityVisual("Burn", "a dot with ports", Colors.DARK_ORANGE);
+const RAGE_V = createAbilityVisual("Rage", "", Colors.DARK_RED);
+const CANNON_V = createAbilityVisual("Cannon", "a dot you own", Colors.GREY, "E");
+const PUMP_V = createAbilityVisual("Pump", "a dot you own", Colors.DARK_PURPLE, "U");
+const MINI_BRIDGE_V = createAbilityVisual("Mini-Bridge", "to a non-walled dot. It also cannot cross other bridges", Colors.YELLOW, "M");
+const OVER_GROW_V = createAbilityVisual("Over-Grow", "", Colors.DARK_GREEN);
+const WALL_V = createAbilityVisual("Wall", "a non-walled dot", Colors.LIGHT_BROWN, "V");
+const WORMHOLE_V = createAbilityVisual("Wormhole", "a structured dot, to an unstructured dot",Colors.DARK_PINK, "W");
 
 // Create instances of EventVisual using the factory function
-const CANNON_SHOT_V = createEventVisual("Cannon Shot", Colors.PINK);
-const PUMP_DRAIN_V = createEventVisual("Pump Drain", Colors.DARK_PURPLE);
-const STANDARD_LEFT_CLICK_V = createEventVisual("Switch", Colors.GREY);
-const STANDARD_RIGHT_CLICK_V = createEventVisual("Swap", Colors.GREY);
-const CREDIT_USAGE_V = createEventVisual("Credit Usage", Colors.DARK_PURPLE);
-const NODE_LEFT_CLICK_V = createEventVisual("Node Left Click", Colors.GREY);
-const NODE_RIGHT_CLICK_V = createEventVisual("Node Right Click", Colors.YELLOW);
+const CANNON_SHOT_V = createEventVisual("Cannon Shot", "Shot cannot cross other bridges", Colors.PINK);
+const PUMP_DRAIN_V = createEventVisual("Pump Drain", "", Colors.DARK_PURPLE);
+const STANDARD_LEFT_CLICK_V = createEventVisual("Switch", "Can only switch bridges extending OUTWARDS from a dot you OWN", Colors.GREY);
+const STANDARD_RIGHT_CLICK_V = createEventVisual("Swap", "Can only swap two-way (dotted) bridges that you own BOTH sides of", Colors.GREY);
+const CREDIT_USAGE_V = createEventVisual("Credit Usage", "", Colors.DARK_PURPLE);
+const NODE_LEFT_CLICK_V = createEventVisual("Node Left Click", "Only click your own dots or their neighbors, (Unless using abilities)");
+const NODE_RIGHT_CLICK_V = createEventVisual("Node Right Click", "", Colors.GREY);
 
 interface EventVisualParameters {
     [index: string]: EventVisual | AbilityVisual;

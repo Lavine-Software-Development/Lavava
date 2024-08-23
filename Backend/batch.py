@@ -27,7 +27,8 @@ class Batch:
         self.competitive = competitive
         self.mode = mode
         self.gs = GameState()
-        self.settings = self.getSettings() 
+        self.settings = self.getSettings()
+        self.player_settings = {}
         self.game = ServerGame(self.player_count, self.gs, self.settings)
         self.token_disname = {} #just the display names to be displayed on the front end
         self.not_responsive_count = {}
@@ -97,6 +98,7 @@ class Batch:
 
         data = response.json()
         player = self.token_ids[token]
+        self.player_settings[player] = data
         self.game.set_player_settings(player, data)
         
     def add_player(self, token, websocket, ability_data):
@@ -166,6 +168,7 @@ class Batch:
         start_dict['isFirst'] = True
         start_dict["mode"] = self.mode
         start_dict["settings"] = self.settings
+        start_dict["player_settings"] = self.player_settings[player_id]
         start_dict["display_names_list"] = list(self.token_disname.values())
         start_dict["isRefresh"] = False
         start_json = plain_json(start_dict)
