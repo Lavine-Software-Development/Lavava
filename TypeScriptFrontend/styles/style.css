@@ -1494,3 +1494,26 @@ input:checked + .slider:before {
 .setting-toggle input[type="checkbox"] {
     margin-left: 10px;
 }
+
+.arrow-box {
+    position: absolute;
+    left: 8px; /* Adjust to move the box to the far left */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+  }
+
+.arrow-box i {
+    transform: translateY(-60%);
+    left: 4px;
+}
+
+.button-text {
+    flex-grow: 1;
+    text-align: center;
+  }

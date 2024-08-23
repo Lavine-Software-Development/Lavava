@@ -2,6 +2,7 @@ from player import DefaultPlayer, BasicPlayer, CreditPlayer
 from playerStateEnums import PlayerStateEnum as PSE
 from abc import abstractmethod, ABC
 from node import Node
+import random
 from constants import (
     SPAWN_CODE,
     BOT_START_DELAY,
@@ -105,6 +106,7 @@ class AI(ABC):
         self.ticks += 1
         if self.ticks % AI_REGULAR_WAIT_TIME == 0:
             self.make_regular_decisions()
+
             self.consider_forfeit()
             if self.elixir >= 8 or overtime:
                 self.make_wealthy_decisions()
@@ -150,15 +152,33 @@ class AI(ABC):
             and (dynamic is None or edge.dynamic == dynamic)
         }
 
-    def freeze_dangerous_edges(self, direction="edges"):
-        if self.can_afford_ability(FREEZE_CODE):
+    # def freeze_dangerous_edges(self, direction="edges"):
+    #     if self.can_afford_ability(FREEZE_CODE):
+    #         for edge in self.specific_enemy_edges(direction, False, True):
+    #             self.effect(FREEZE_CODE, [edge.id])
+    #             if not self.can_afford_ability(FREEZE_CODE):
+    #                 break
+
+
+    def freeze_dangerous_edges(self, direction="edges", probability=0):
+    # Add a probability check to skip some freezes
+
+        if self.can_afford_ability(FREEZE_CODE) and random.random() > probability:
             for edge in self.specific_enemy_edges(direction, False, True):
                 self.effect(FREEZE_CODE, [edge.id])
                 if not self.can_afford_ability(FREEZE_CODE):
                     break
 
-    def nuke_dangerous_nodes(self):
-        if self.can_afford_ability(NUKE_CODE):
+    # def nuke_dangerous_nodes(self):
+    #     if self.can_afford_ability(NUKE_CODE):
+    #         for edge in self.specific_enemy_edges("incoming", False, False):
+    #             self.effect(NUKE_CODE, [edge.from_node.id])
+    #             if not self.can_afford_ability(NUKE_CODE):
+    #                 break
+
+    def nuke_dangerous_nodes(self, probability=0):
+
+        if self.can_afford_ability(NUKE_CODE) and random.random() > probability:
             for edge in self.specific_enemy_edges("incoming", False, False):
                 self.effect(NUKE_CODE, [edge.from_node.id])
                 if not self.can_afford_ability(NUKE_CODE):
@@ -178,6 +198,19 @@ class AI(ABC):
                         self.get_backup(self.board.id_dict[my_node])
                         break
 
+
+    # def bridge(self, unclaimed=False, probability=0):
+    #     if self.can_afford_ability(BRIDGE_CODE):
+    #         bridgable_nodes = self.bridgable_nodes(unclaimed)
+    #         random.shuffle(bridgable_nodes)  
+    #         for my_node, new_node in bridgable_nodes:
+    #             if random.random() > probability: 
+    #                 continue
+    #             if self.effect(BRIDGE_CODE, [my_node, new_node]):
+    #                 self.already_bridged.add(my_node)
+    #                 break
+
+
     def get_backup(self, node, count=5, history=set()):
         to_recurse = set()
         new_history = set()
@@ -196,13 +229,24 @@ class AI(ABC):
             for node in to_recurse:
                 self.get_backup(node, count - 1, new_history)
 
-    def switch_offense_edges(self, recursions=5):
-        for edge in self.enemy_edges("outgoing"):
-            if not edge.on and edge.to_node.value <= edge.from_node.value:
-                if self.event(STANDARD_LEFT_CLICK, [edge.id]):
-                    self.get_backup(edge.from_node, recursions)
-            if edge.on and edge.to_node.value * 0.8 > edge.from_node.value:
-                self.event(STANDARD_LEFT_CLICK, [edge.id])
+    # def switch_offense_edges(self, recursions=5):
+    #     for edge in self.enemy_edges("outgoing"):
+    #         if not edge.on and edge.to_node.value <= edge.from_node.value:
+    #             if self.event(STANDARD_LEFT_CLICK, [edge.id]):
+    #                 self.get_backup(edge.from_node, recursions)
+    #         if edge.on and edge.to_node.value * 0.8 > edge.from_node.value:
+    #             self.event(STANDARD_LEFT_CLICK, [edge.id])
+
+    def switch_offense_edges(self, recursions=5, probability=0):
+        if random.random() > probability: 
+            for edge in self.enemy_edges("outgoing"):
+                if not edge.on and edge.to_node.value <= edge.from_node.value:
+                    if self.event(STANDARD_LEFT_CLICK, [edge.id]):
+                        self.get_backup(edge.from_node, recursions)
+                if edge.on and edge.to_node.value * 0.8 > edge.from_node.value:
+                    self.event(STANDARD_LEFT_CLICK, [edge.id])
+
+
 
     @abstractmethod
     def get_start_options(self) -> list[Node]:
@@ -295,6 +339,7 @@ def create_ai(
             self.nuke_dangerous_nodes()
             self.freeze_dangerous_edges("incoming")
             self.switch_offense_edges()
+           
 
         def make_wealthy_decisions(self):
             self.bridge(True)
@@ -315,4 +360,43 @@ def create_ai(
                 ability_process,
             )
 
-    return IanAI()
+    # return IanAI()
+
+
+    class YGAI(AI, class_type):
+        def get_start_options(self):
+            return self.largest_reachable_lonely_nodes()
+
+        def choose_abilities(self):
+            return {
+                str(FREEZE_CODE): 1,
+                str(NUKE_CODE): 1,
+                str(BRIDGE_CODE): 1,
+                str(D_BRIDGE_CODE): 1,
+            }
+
+        def make_regular_decisions(self):
+            self.nuke_dangerous_nodes(probability=0.1)
+            self.freeze_dangerous_edges("incoming",probability=0.1)
+            self.switch_offense_edges(probability=0.1)
+
+        def make_wealthy_decisions(self):
+            self.bridge(True)
+            self.bridge(False)
+
+        def trainer_name(self):
+            return "YG"
+
+        def __init__(self):
+            class_type.__init__(self, id, settings)
+            AI.__init__(
+                self,
+                board,
+                effect_method,
+                event_method,
+                get_counts_method,
+                eliminate_method,
+                ability_process,
+            )
+
+    return YGAI()
