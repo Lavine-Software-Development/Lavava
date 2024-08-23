@@ -24,6 +24,7 @@ import ChangePassword from "./user-flow/change_password";
 import Lobby from "./user-flow/lobby";
 import MatchHistory from "./user-flow/MatchHistory";
 import { NetworkProvider } from "./game/NetworkContext";
+import Chatbot from "./chatbot";
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -52,6 +53,7 @@ function MainLayout() {
     const location = useLocation();
     const hideNavBar =
         location.pathname === "/play" || location.pathname === "/lobby";
+    const hideChatbot = location.pathname === "/play";
     if (hideNavBar) {
         return <Outlet />;
     } else {
@@ -59,6 +61,7 @@ function MainLayout() {
             <div id="app">
                 <NavBar />
                 <Outlet />
+                <Chatbot />
             </div>
         );
     }
