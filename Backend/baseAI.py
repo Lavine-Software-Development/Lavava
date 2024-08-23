@@ -184,31 +184,31 @@ class AI(ABC):
                 if not self.can_afford_ability(NUKE_CODE):
                     break
 
-    # def bridge(self, unclaimed=False):
-    #     if self.can_afford_ability(BRIDGE_CODE):
-    #         for my_node, new_node in self.bridgable_nodes(unclaimed):
-    #             if unclaimed and D_BRIDGE_CODE in self.abilities:
-    #                 if self.effect(D_BRIDGE_CODE, [my_node, new_node]):
-    #                     # edge = self.board.find_edge(my_node, new_node)
-    #                     # self.event(STANDARD_LEFT_CLICK, [edge.id])
-    #                     self.already_bridged.add(my_node)
-    #                     break
-    #             else:
-    #                 if self.effect(BRIDGE_CODE, [my_node, new_node]) and not unclaimed:
-    #                     self.get_backup(self.board.id_dict[my_node])
-    #                     break
-
-
-    def bridge(self, unclaimed=False, probability=0):
+    def bridge(self, unclaimed=False):
         if self.can_afford_ability(BRIDGE_CODE):
-            bridgable_nodes = self.bridgable_nodes(unclaimed)
-            random.shuffle(bridgable_nodes)  
-            for my_node, new_node in bridgable_nodes:
-                if random.random() > probability: 
-                    continue
-                if self.effect(BRIDGE_CODE, [my_node, new_node]):
-                    self.already_bridged.add(my_node)
-                    break
+            for my_node, new_node in self.bridgable_nodes(unclaimed):
+                if unclaimed and D_BRIDGE_CODE in self.abilities:
+                    if self.effect(D_BRIDGE_CODE, [my_node, new_node]):
+                        # edge = self.board.find_edge(my_node, new_node)
+                        # self.event(STANDARD_LEFT_CLICK, [edge.id])
+                        self.already_bridged.add(my_node)
+                        break
+                else:
+                    if self.effect(BRIDGE_CODE, [my_node, new_node]) and not unclaimed:
+                        self.get_backup(self.board.id_dict[my_node])
+                        break
+
+
+    # def bridge(self, unclaimed=False, probability=0):
+    #     if self.can_afford_ability(BRIDGE_CODE):
+    #         bridgable_nodes = self.bridgable_nodes(unclaimed)
+    #         random.shuffle(bridgable_nodes)  
+    #         for my_node, new_node in bridgable_nodes:
+    #             if random.random() > probability: 
+    #                 continue
+    #             if self.effect(BRIDGE_CODE, [my_node, new_node]):
+    #                 self.already_bridged.add(my_node)
+    #                 break
 
 
     def get_backup(self, node, count=5, history=set()):
@@ -381,8 +381,8 @@ def create_ai(
             self.switch_offense_edges(probability=0.1)
 
         def make_wealthy_decisions(self):
-            self.bridge(True, probability=0.1)
-            self.bridge(probability=0.1)
+            self.bridge(True)
+            self.bridge(False)
 
         def trainer_name(self):
             return "YG"
