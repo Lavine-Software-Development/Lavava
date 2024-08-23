@@ -6,14 +6,17 @@ const slides = {
     basics: [
         [
             { type: "text", content: "Welcome to Durb.<br/>See all those dots on the screen?<br/>Your goal is to capture as many dots as you can." },
-            { type: "image", content: "../assets/HowToPlay/start_nodes.png", style: { width: "80%" } }
+            // { type: "image", content: "../assets/HowToPlay/start_nodes.png", style: { width: "80%" } }
+            { type: "image", content: "../assets/HowToPlay/start_nodes.gif", style: { width: "80%" } }
         ],
         [
             { type: "text", content: "To begin the game, choose a starting dot." },
-            { type: "image", content: "../assets/HowToPlay/cursor_on_node.png", style: { width: "30%" } },
+            // { type: "image", content: "../assets/HowToPlay/cursor_on_node.png", style: { width: "30%" } },
             { type: "text", content: "Click on a dot to claim it as your own." },
-            { type: "image", content: "../assets/HowToPlay/claim_node.png", style: { width: "30%" } },
+            // { type: "image", content: "../assets/HowToPlay/claim_node.png", style: { width: "30%" } },
+            { type: "image", content: "../assets/HowToPlay/claim_node.gif", style: { width: "30%" } },
             { type: "text", content: "Note: This is the only dot that you'll own just by clicking it." }
+            
         ],
         [
             { type: "text", content: "Watch as this dot's energy grows." },
@@ -36,8 +39,8 @@ const slides = {
         ],
         [
             { type: "text", content: "There are two kinds of bridges: Standard bridges, made up of triangles,<br/>and Dynamic Bridges (D-Bridge) made up of mostly circles, and one green triangle." },
-            { type: "image", content: "../assets/HowToPlay/standard_bridge.png", text: "Standard Bridge", sideBySide: true },
-            { type: "image", content: "../assets/HowToPlay/dynamic_bridge.png", text: "Dynamic Bridge", sideBySide: true }
+            { type: "image", content: "../assets/HowToPlay/standard_bridge.png", text: "Standard Bridge", sideBySide: true, style: { width: "auto", height: "150px" } },
+            { type: "image", content: "../assets/HowToPlay/dynamic_bridge.png", text: "Dynamic Bridge", sideBySide: true, style: { width: "auto", height: "150px" } }
         ],
         [
             { type: "text", content: "If you own both dots, you can switch the direction of a Dynamic Bridge by right clicking on it." },
@@ -160,6 +163,11 @@ const slides = {
         // [
         //     { type: "text", content: "Good luck!" },
         // ]
+    ],
+    abilitiesCatalogue: [
+        [
+            { type: "text", content: "test"},
+        ]   
     ]
 };
 
@@ -298,6 +306,13 @@ const HowToPlay: React.FC = () => {
                     disabled={activeButton === "extraInfo"}
                 >
                     Extra Info
+                </button>
+                <button
+                    onClick={() => handleSectionChange("abilitiesCatalogue")}
+                    className="abilities-catalogue-button"
+                    disabled={activeButton === "abilitiesCatalogue"}
+                >
+                    Abilities Catalogue
                 </button>
             </div>
             <div className="slide-container">
