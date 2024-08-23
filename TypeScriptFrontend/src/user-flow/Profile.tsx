@@ -53,7 +53,7 @@ const Profile: React.FC = () => {
     const [newDisplayName, setNewDisplayName] = useState(profileData.displayName);
     const [popupMessage, setPopupMessage] = useState('');
     const [showPopup, setShowPopup] = useState(false);
-    const [deckMode, setDeckMode] = useState("Experimental");
+    const [deckMode, setDeckMode] = useState("Basic");
     const [deckIndex, setDeckIndex] = useState<number>(0);
     const [usersDecks, setUsersDecks] = useState<any[][]>([]);
     const [decks, setDecks] = useState<any[][]>([]);
@@ -295,16 +295,16 @@ const Profile: React.FC = () => {
                 <div className="info-card linear-gradient">
                     <div className="tab-container" style={{ marginBottom: '10px'}}>
                         <button
-                            className={`tab-blue-background-button ${deckMode === "Experimental" ? "active" : ""}`}
-                            onClick={() => setDeckMode("Experimental")}
-                        >
-                            Experimental
-                        </button>
-                        <button
                             className={`tab-blue-background-button ${deckMode === "Basic" ? "active" : ""}`}
                             onClick={() => setDeckMode("Basic")}
                         >
                             Basic
+                        </button>
+                        <button
+                            className={`tab-blue-background-button ${deckMode === "Experimental" ? "active" : ""}`}
+                            onClick={() => setDeckMode("Experimental")}
+                        >
+                            Experimental
                         </button>
                     </div>
                     <h2 className="text-shadow default-deck-text">{deckMode} Deck</h2>
