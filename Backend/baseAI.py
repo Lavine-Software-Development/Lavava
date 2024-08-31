@@ -376,8 +376,8 @@ def create_ai(
             }
 
         def make_regular_decisions(self):
-            self.nuke_dangerous_nodes(probability=0.1)
-            self.freeze_dangerous_edges("incoming",probability=0.1)
+            self.nuke_dangerous_nodes(probability=0.3)
+            self.freeze_dangerous_edges("incoming",probability=0.7)
             self.switch_offense_edges(probability=0.1)
 
         def make_wealthy_decisions(self):
@@ -385,7 +385,7 @@ def create_ai(
             self.bridge(False)
 
         def trainer_name(self):
-            return "YG"
+            return "Ian"
 
         def __init__(self):
             class_type.__init__(self, id, settings)

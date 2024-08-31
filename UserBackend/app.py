@@ -468,6 +468,7 @@ def send_confirmation_email(user_email, link):
         return "Confirmation email sent successfully!"
     else:
         print(f"Failed to send confirmation email: {response}")
+        print("Cheese")
         return "Error sending confirmation email."
 
 
