@@ -22,6 +22,8 @@ import boto3
 from botocore.exceptions import ClientError
 from flask import render_template
 
+from chat.api import chat_bp
+
 load_dotenv()
 
 app = Flask(__name__, static_url_path="/static", static_folder="static")
@@ -1537,6 +1539,9 @@ def create_default_deck(user_id, mode):
         db.session.add(card)
 
     db.session.commit()
+    
+
+app.register_blueprint(chat_bp)
 
 
 if __name__ == "__main__":

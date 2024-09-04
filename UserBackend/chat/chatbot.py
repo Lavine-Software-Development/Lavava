@@ -1,13 +1,16 @@
 from ..config import config
 from openai import OpenAI
 
-client = OpenAI()
+_client = OpenAI()
 
-SYSTEM_PROMPT_BASIC = "You are an expert at the video game Durb. Your job is to assist users with any questions they have about the game. The game's rules are as follows in markdown format: "
+SYSTEM_PROMPT_BASIC = """You are an expert at the video game Durb. 
+Your job is to assist users with any questions they have about the game. 
+Do not answer any questions or engage in conversation that is not about the game. 
+The game's rules are as follows in markdown format: """
 
 class Chatbot:
     def __init__(self) -> None:
-        self._api_client = OpenAI()
+        self._api_client = _client
         self._model = config.OPENAI_MODEL
         
         self._system_prompt = SYSTEM_PROMPT_BASIC
