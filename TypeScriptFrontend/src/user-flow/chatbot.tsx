@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import '../styles/chatbot.css'; // Ensure the path is correct
+import '../../styles/chatbot.css'; // Ensure the path is correct
+import config from '../env-config';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -26,29 +27,34 @@ const Chatbot: React.FC = () => {
         setInputText('');
         setLoading(true);
 
-        // Define a list of responses
-        const responses = [
-            "Don't ask me, I don't know.",
-            "You don't deserve to know that secret.",
-            "Play more games and I'll tell you."
-        ];
-    
-        // Randomly pick one response from the list
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    
-        const botMessage: Message = {
-            role: 'assistant',
-            content: randomResponse
-        };
-    
-        // Set the message after a delay to simulate typing or processing time
-        setTimeout(() => {
-            setMessages(msgs => [...msgs, botMessage]);
-            setLoading(false);
-        }, 1000);
+        try {
+            const token = localStorage.getItem('userToken');
+            const response = await fetch(`${config.userBackend}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: newMessage.content
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error('Failed to connect to the server.');
+            }
 
+            const botResponse: Message = data;
+            setMessages(msgs => [...msgs, botResponse]);
+        } catch (error) {
+            console.error('Failed to connect to the server:', error);
+            const errorResponse: Message = {
+                role: 'assistant',
+                content: 'Sorry, I am unable to process your request at the moment.'
+            };
+            setMessages(msgs => [...msgs, errorResponse]);
+        } finally {
+            setLoading(false);
+        }
     };
-    
 
     // Scroll to the bottom of the messages container whenever messages update
     useEffect(() => {

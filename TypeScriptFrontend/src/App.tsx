@@ -24,7 +24,7 @@ import ChangePassword from "./user-flow/change_password";
 import Lobby from "./user-flow/lobby";
 import MatchHistory from "./user-flow/MatchHistory";
 import { NetworkProvider } from "./game/NetworkContext";
-import Chatbot from "./chatbot";
+import Chatbot from "./user-flow/chatbot";
 
 const router = createBrowserRouter(
     createRoutesFromElements(
