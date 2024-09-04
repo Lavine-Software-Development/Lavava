@@ -14,5 +14,7 @@ class Config:
     MJ_APIKEY_PUBLIC = os.getenv('MJ_APIKEY_PUBLIC', "None")
     EMAIL_FROM = os.getenv('EMAIL_FROM', "durb.comms@gmail.com")
     # Add more configuration variables as needed
+    OPENAI_KEY = os.getenv('OPENAI_KEY', "None")
+    OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'None')
 
 config = Config()
