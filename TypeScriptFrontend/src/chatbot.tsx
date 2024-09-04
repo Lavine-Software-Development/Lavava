@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import '../styles/chatbot.css'; // Ensure the path is correct
 
 interface Message {
-    sender: 'user' | 'bot';
+    role: 'user' | 'assistant';
     content: string;
 }
 
@@ -10,6 +10,7 @@ const Chatbot: React.FC = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const toggleChat = () => setIsOpen(!isOpen);
@@ -18,15 +19,13 @@ const Chatbot: React.FC = () => {
         setInputText(event.target.value);
     };
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
         if (!inputText.trim()) return;
-        const newMessage: Message = { sender: 'user', content: inputText };
+        const newMessage: Message = { role: 'user', content: inputText };
         setMessages([...messages, newMessage]);
-        handleResponse();
         setInputText('');
-    };
+        setLoading(true);
 
-    const handleResponse = () => {
         // Define a list of responses
         const responses = [
             "Don't ask me, I don't know.",
@@ -38,14 +37,16 @@ const Chatbot: React.FC = () => {
         const randomResponse = responses[Math.floor(Math.random() * responses.length)];
     
         const botMessage: Message = {
-            sender: 'bot',
+            role: 'assistant',
             content: randomResponse
         };
     
         // Set the message after a delay to simulate typing or processing time
         setTimeout(() => {
             setMessages(msgs => [...msgs, botMessage]);
+            setLoading(false);
         }, 1000);
+
     };
     
 
@@ -64,10 +65,11 @@ const Chatbot: React.FC = () => {
                     </div>
                     <div className="messages">
                         {messages.map((msg, index) => (
-                            <div key={index} className={`message ${msg.sender}`}>
+                            <div key={index} className={`message ${msg.role}`}>
                                 {msg.content}
                             </div>
                         ))}
+                        {loading && <div className="message assistant">...</div>}
                         <div ref={messagesEndRef} />
                     </div>
                     <div className="input-area">
