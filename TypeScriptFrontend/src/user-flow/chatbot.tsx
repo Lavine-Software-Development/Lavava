@@ -5,6 +5,7 @@ import config from '../env-config';
 interface Message {
     role: 'user' | 'assistant';
     content: string;
+    refusal?: string;
 }
 
 const Chatbot: React.FC = () => {
@@ -29,7 +30,7 @@ const Chatbot: React.FC = () => {
 
         try {
             const token = localStorage.getItem('userToken');
-            const response = await fetch(`${config.userBackend}/chat`, {
+            const response = await fetch(`${config.userBackend}chat/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -42,7 +43,7 @@ const Chatbot: React.FC = () => {
                 throw new Error('Failed to connect to the server.');
             }
 
-            const botResponse: Message = data;
+            const botResponse: Message = data.response;
             setMessages(msgs => [...msgs, botResponse]);
         } catch (error) {
             console.error('Failed to connect to the server:', error);

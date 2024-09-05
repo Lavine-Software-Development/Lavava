@@ -53,7 +53,8 @@ function MainLayout() {
     const location = useLocation();
     const hideNavBar =
         location.pathname === "/play" || location.pathname === "/lobby";
-    const hideChatbot = location.pathname === "/play";
+    const token = localStorage.getItem('userToken');
+    const hideChatbot = location.pathname === "/play" || !token;
     if (hideNavBar) {
         return <Outlet />;
     } else {
@@ -61,7 +62,7 @@ function MainLayout() {
             <div id="app">
                 <NavBar />
                 <Outlet />
-                <Chatbot />
+                {!hideChatbot && <Chatbot />}
             </div>
         );
     }
