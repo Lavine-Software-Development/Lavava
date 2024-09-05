@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import '../../styles/chatbot.css'; // Ensure the path is correct
 import config from '../env-config';
 
+import Markdown from 'react-markdown';
+
 interface Message {
     role: 'user' | 'assistant';
     content: string;
@@ -72,9 +74,9 @@ const Chatbot: React.FC = () => {
                     </div>
                     <div className="messages">
                         {messages.map((msg, index) => (
-                            <div key={index} className={`message ${msg.role}`}>
+                            <Markdown key={index} className={`message ${msg.role}`}>
                                 {msg.content}
-                            </div>
+                            </Markdown>
                         ))}
                         {loading && <div className="message assistant">...</div>}
                         <div ref={messagesEndRef} />
