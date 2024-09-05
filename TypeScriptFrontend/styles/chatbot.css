@@ -71,9 +71,8 @@
     align-self: flex-end;
 }
 
-.message.bot {
-    background-color: #e2e2e2; /* Light gray for bot messages */
-    align-self: flex-start;
+.message.assistant > ol {
+    padding-left: 2rem;
 }
 
 .input-area {
