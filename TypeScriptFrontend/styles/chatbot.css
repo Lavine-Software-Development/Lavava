@@ -94,10 +94,20 @@
     padding-left: 2rem;
 }
 
-.message.assistant > th, td {
+.message.assistant > table {
+    border-collapse: collapse;
+}
+
+.message.assistant th,td {
     border: 1px solid grey;
     border-collapse: collapse;
     border-spacing: 0;
+    padding-left: .5rem;
+    padding-right: .5rem;
+}
+
+.message.assistant th {
+    background-color: #9696968b;
 }
 
 .input-area {
