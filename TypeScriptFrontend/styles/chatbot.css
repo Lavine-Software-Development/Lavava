@@ -36,19 +36,35 @@
     color: #333; /* Dark color for text */
 }
 
-.close-btn {
+.btn-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+.btn {
     padding: 5px 10px;
-    background-color: #ff4444; /* Bright red for visibility */
-    color: white;
     border: none;
-    border-radius: 10px; /* Rounded corners */
+    border-radius: 10px;
     cursor: pointer;
+    color: white;
+    
+    width: min-content;
+    margin-bottom: 0;
+}
+
+.close-btn {
+    background-color: #ff4444; /* Bright red for visibility */
+}
+
+.reset-btn {
+    background-color: #ff8944; /* Bright red for visibility */
 }
 
 .messages {
     overflow-y: auto;
     min-width: 100%;
-    min-height: 100%;
+    min-height: 75%;
     padding: 10px;
     display: flex;
     flex-direction: column;

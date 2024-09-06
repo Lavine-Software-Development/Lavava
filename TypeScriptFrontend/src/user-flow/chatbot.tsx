@@ -60,6 +60,23 @@ const Chatbot: React.FC = () => {
         }
     };
 
+    const resetChat = async () => {
+        setMessages([]);
+
+        try {
+            const token = localStorage.getItem('userToken');
+            fetch(`${config.userBackend}chat/reset`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        } catch (error) {
+            console.error('Failed to connect to the server:', error);
+        }
+    }
+
     // Scroll to the bottom of the messages container whenever messages update
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -108,7 +125,10 @@ const Chatbot: React.FC = () => {
                 <div className="chat-window">
                     <div className="header">
                         <span className="header-title">Ask me anything</span>
-                        <button onClick={toggleChat} className="close-btn">Close</button>
+                        <div className="btn-container">
+                            <button onClick={resetChat} className="btn reset-btn">Reset</button>
+                            <button onClick={toggleChat} className="btn close-btn">Close</button>
+                        </div>
                     </div>
                     <div className="messages">
                         {messages.map((msg, index) => (
