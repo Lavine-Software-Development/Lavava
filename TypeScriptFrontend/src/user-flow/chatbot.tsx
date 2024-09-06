@@ -3,6 +3,7 @@ import '../../styles/chatbot.css'; // Ensure the path is correct
 import config from '../env-config';
 
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -74,7 +75,7 @@ const Chatbot: React.FC = () => {
                     </div>
                     <div className="messages">
                         {messages.map((msg, index) => (
-                            <Markdown key={index} className={`message ${msg.role}`}>
+                            <Markdown key={index} className={`message ${msg.role}`} remarkPlugins={[remarkGfm]}>
                                 {msg.content}
                             </Markdown>
                         ))}

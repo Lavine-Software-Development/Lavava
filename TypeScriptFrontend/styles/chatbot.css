@@ -14,15 +14,18 @@
     background-color: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border-radius: 10px;
-    overflow: hidden;
-    width: 100%;
-    max-width: 450px;
+    overflow: scroll;
+    /* width: 100%; */
+    /* max-width: 450px; */
     height: 500px; /* Fixed height */
-    display: flex;
-    flex-direction: column;
+    /* display: flex; */
+    /* flex-direction: column; */
 }
 
 .header {
+    position: sticky;
+    top: 0;
+    left: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -47,9 +50,14 @@
 }
 
 .messages {
-    flex-grow: 1;
+    /* flex-grow: 1; */
     overflow-y: auto;
+    /* overflow-x: scroll; */
+    width: fit-content;
+    min-width: 100%;
+    min-height: 100%;
     padding: 10px;
+    /* padding-right: 20px; */
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -59,23 +67,44 @@
     padding: 12px 20px; /* Increased padding for better readability */
     margin: 5px;
     border-radius: 18px; /* More rounded corners for a softer look */
-    background-color: #f1f1f1; /* Default color for bot messages */
-    align-self: flex-start;
-    max-width: 80%; /* Ensures bubbles don't stretch too wide */
+    /* align-self: flex-start; */
+    /* max-width: 80%; Ensures bubbles don't stretch too wide */
     word-wrap: break-word; /* Ensures text breaks into new line properly */
+    max-width: fit-content;
+    
 }
 
 .message.user {
     background-color: #007bff; /* Blue color for user messages */
     color: white;
+    /* justify-self: end; */
     align-self: flex-end;
+    /* margin-left: auto; */
+    /* margin-left: 20%; */
+}
+
+.message.assistant {
+    /* margin-right: 20% */
+    align-self: flex-start;
+    background-color: #e2e2e2;
+
 }
 
 .message.assistant > ol {
     padding-left: 2rem;
 }
 
+.message.assistant > th, td {
+    border: 1px solid grey;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
 .input-area {
+    position: sticky;
+    width: 100%;
+    bottom: 0;
+    left: 0;
     padding: 10px;
     display: flex;
     align-items: center;
