@@ -6,7 +6,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 interface Message {
-    role: 'user' | 'assistant';
+    role: 'user' | 'assistant' | 'system';
     content: string;
     refusal?: string;
 }
@@ -64,6 +64,43 @@ const Chatbot: React.FC = () => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    useEffect(() => {
+
+        async function loadChat() {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('userToken');
+                const response = await fetch(`${config.userBackend}chat/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error('Failed to connect to the server.');
+                }
+
+                let chat: Message[] = data;
+                chat = chat.filter((msg: Message) => msg.role != 'system');
+                setMessages(chat);
+            } catch (error) {
+                console.error('Failed to connect to the server:', error);
+                const errorResponse: Message = {
+                    role: 'assistant',
+                    content: 'Sorry, I am unable to process your request at the moment.'
+                };
+                setMessages(msgs => [...msgs, errorResponse]);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadChat();
+    }, []);
+
 
     return (
         <div className={`chatbot ${isOpen ? 'open' : 'closed'}`}>
