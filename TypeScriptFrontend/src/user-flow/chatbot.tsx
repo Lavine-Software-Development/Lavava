@@ -75,9 +75,11 @@ const Chatbot: React.FC = () => {
                     </div>
                     <div className="messages">
                         {messages.map((msg, index) => (
-                            <Markdown key={index} className={`message ${msg.role}`} remarkPlugins={[remarkGfm]}>
-                                {msg.content}
-                            </Markdown>
+                            <div key={index} className={`message-ctr ${msg.role}`}>
+                                <Markdown key={index} className={`message ${msg.role}`} remarkPlugins={[remarkGfm]}>
+                                    {msg.content}
+                                </Markdown>
+                            </div>
                         ))}
                         {loading && <div className="message assistant">...</div>}
                         <div ref={messagesEndRef} />
