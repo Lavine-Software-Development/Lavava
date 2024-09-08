@@ -159,9 +159,8 @@ class AI(ABC):
     #             if not self.can_afford_ability(FREEZE_CODE):
     #                 break
 
-
     def freeze_dangerous_edges(self, direction="edges", probability=0):
-    # Add a probability check to skip some freezes
+        # Add a probability check to skip some freezes
 
         if self.can_afford_ability(FREEZE_CODE) and random.random() > probability:
             for edge in self.specific_enemy_edges(direction, False, True):
@@ -177,7 +176,6 @@ class AI(ABC):
     #                 break
 
     def nuke_dangerous_nodes(self, probability=0):
-
         if self.can_afford_ability(NUKE_CODE) and random.random() > probability:
             for edge in self.specific_enemy_edges("incoming", False, False):
                 self.effect(NUKE_CODE, [edge.from_node.id])
@@ -198,18 +196,16 @@ class AI(ABC):
                         self.get_backup(self.board.id_dict[my_node])
                         break
 
-
     # def bridge(self, unclaimed=False, probability=0):
     #     if self.can_afford_ability(BRIDGE_CODE):
     #         bridgable_nodes = self.bridgable_nodes(unclaimed)
-    #         random.shuffle(bridgable_nodes)  
+    #         random.shuffle(bridgable_nodes)
     #         for my_node, new_node in bridgable_nodes:
-    #             if random.random() > probability: 
+    #             if random.random() > probability:
     #                 continue
     #             if self.effect(BRIDGE_CODE, [my_node, new_node]):
     #                 self.already_bridged.add(my_node)
     #                 break
-
 
     def get_backup(self, node, count=5, history=set()):
         to_recurse = set()
@@ -238,15 +234,13 @@ class AI(ABC):
     #             self.event(STANDARD_LEFT_CLICK, [edge.id])
 
     def switch_offense_edges(self, recursions=5, probability=0):
-        if random.random() > probability: 
+        if random.random() > probability:
             for edge in self.enemy_edges("outgoing"):
                 if not edge.on and edge.to_node.value <= edge.from_node.value:
                     if self.event(STANDARD_LEFT_CLICK, [edge.id]):
                         self.get_backup(edge.from_node, recursions)
                 if edge.on and edge.to_node.value * 0.8 > edge.from_node.value:
                     self.event(STANDARD_LEFT_CLICK, [edge.id])
-
-
 
     @abstractmethod
     def get_start_options(self) -> list[Node]:
@@ -339,7 +333,6 @@ def create_ai(
             self.nuke_dangerous_nodes()
             self.freeze_dangerous_edges("incoming")
             self.switch_offense_edges()
-           
 
         def make_wealthy_decisions(self):
             self.bridge(True)
@@ -362,7 +355,6 @@ def create_ai(
 
     # return IanAI()
 
-
     class YGAI(AI, class_type):
         def get_start_options(self):
             return self.largest_reachable_lonely_nodes()
@@ -377,7 +369,7 @@ def create_ai(
 
         def make_regular_decisions(self):
             self.nuke_dangerous_nodes(probability=0.3)
-            self.freeze_dangerous_edges("incoming",probability=0.7)
+            self.freeze_dangerous_edges("incoming", probability=0.8)
             self.switch_offense_edges(probability=0.1)
 
         def make_wealthy_decisions(self):
