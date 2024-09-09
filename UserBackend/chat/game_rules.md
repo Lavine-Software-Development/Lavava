@@ -15,20 +15,34 @@ If still no player has won after the timer for overtime phase completes, then th
 # **Other tidbits of information**
 
 * The board is randomly generated, and has approximately 60 nodes and 80 edges.  
-* Nodes can be *full*. At this point they no longer naturally gain energy. This means you shouldn't let nodes be full unless neccessary.  
+* The purpose of walls is to limit bridge creation. It has nothing to do with energy flow/transferring/attacking.  
+* The color of objects associates to the player using them (with exceptions to certain color affecting abilities)  
+  * So blue edges are stemming from and thus controllable by the blue player etc (Note that uncolored items, like black turned-off edges, may still be owned and controllable)  
+* Nodes can be *full*. At this point they no longer naturally gain energy. This means you shouldn't let nodes be full unless necessary.  
 * Many of the edges are in fact dynamic, meaning they can change the direction they point in. When between teammate nodes, the owner can swap their direction. When between opponent nodes they automatically point in favor of (away from) the larger node. However if both nodes are full, both players can turn it on and it will swap in their favor.  
 * There are 3 different colors for currently unowned nodes. Black nodes become black walls, gray nodes become gray walls, and brown nodes do not have walls.  
-* Difference between lightly colored hollow edges versus darkly colored filled in edges? Lightly colored just means it's on but can't flow for 1 of 2 reasons:  
-* The from\_node is too small  
-* The to\_node is full (full nodes have a black outer ring. They cannot grow or intake energy) Clicking an edge turns it on or off. Flow can only happen when on  
-* 
+* Edges can be in three states, each with a different visual cue  
+  * Off: Hollow and Black  
+  * On, not Flowing: Hollow and lightly colored (of the from\_node color). This occurs for 1 of 2 reasons:  
+    * The from\_node is too small  
+    * The to\_node is full (full nodes have a black outer ring. They cannot grow or intake energy) Clicking an edge turns it on or off. Flow can only happen when on  
+  * On, Flowing: Filled and darkly colored (of the from\_node)
+
+# **Terminology**
+
+* Attacking: Energy flowing from your node into an opponents node  
+* Transferring: Energy flowing from your node into another node of yours  
+  * Whether attacking or transferring is determined by the ownership of the receiving node. But the action of sending flow is the same for the owner of the from\_node regardless of attacking or transferring. It also looks identical along the edge.  
+* Flow: Energy going from one node to another along an edge/bridge  
+* Energy: The stuff that grows over time on a node. Each players energy displays as that players color.  
+* Ownership: When a node has your colored energy on it, you OWN that node. You can control the flow of edges stemming from a node you own.
 
 **Ability Catalogue**   
 Bridge allows you to bridge to another node. You can only bridge to unwalled nodes. Bridge is uni-directional. Bridges cannot cross other existing bridges.
 
 D-Bridge, like bridge, can connect to other unwalled nodes as long as it doesn't overlap existing bridges. However, it creates a bi-directional connection, working identically to already existing d-bridges on the map. Be careful with this, if you D-bridge to a larger opponents node the 
 
-Wall lets you create a gray wall on an unwalled node of yours. This will stop opponents from bridging to it. However note that it will come down at the 5 minute, walls down mark.
+Wall lets you create a gray wall on an unwalled node of yours. This will stop opponents from bridging to it. However note that it will come down at the 5 minute, walls down mark. Remember walls do not affect flow. Walls affect 
 
 Nuke allows you to remove a node (and all the bridges attached to it)l, as long as it's a neighbor to your node AND isn't currently attacking you.
 
