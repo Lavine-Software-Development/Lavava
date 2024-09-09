@@ -16,5 +16,6 @@ class Config:
     # Add more configuration variables as needed
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', "None")
     OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'None')
+    SECRET_KEY = "secret_phrase_durb"
 
 config = Config()

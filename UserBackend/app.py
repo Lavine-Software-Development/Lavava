@@ -7,7 +7,7 @@ import datetime
 import json
 from flask import Flask, jsonify, request, url_for
 from flask_cors import CORS
-from functools import wraps
+
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from itsdangerous import SignatureExpired, URLSafeTimedSerializer
@@ -15,12 +15,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, desc, func, text
-from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+
 from sqlalchemy.types import Text
 from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import ClientError
 from flask import render_template
+
+from util import token_required
 
 from chat.api import chat_bp
 
@@ -35,7 +37,7 @@ CORS(
     supports_credentials=True,
 )
 
-app.config["SECRET_KEY"] = "secret_phrase_durb"
+app.config["SECRET_KEY"] = config.SECRET_KEY
 
 EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
@@ -156,36 +158,6 @@ app.config["MAIL_PASSWORD"] = "enwueidxiwivjvxn"  # Use the app password you gen
 mail = Mail(app)
 
 s = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-
-
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        if "Authorization" in request.headers:
-            auth_header = request.headers["Authorization"]
-            try:
-                token = auth_header.split(" ")[1]  # Assuming bearer token is used
-            except IndexError:
-                return jsonify({"message": "Invalid Authorization header format!"}), 401
-
-        if not token:
-            return jsonify({"message": "Token is missing!"}), 401
-
-        try:
-            data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-            current_user = data["user"]
-        except ExpiredSignatureError:
-            return jsonify({"message": "Login Token has expired!"}), 401
-        except InvalidTokenError:
-            return jsonify({"message": "Invalid token!"}), 401
-        except Exception as e:
-            return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
-
-        return f(current_user, *args, **kwargs)
-
-    return decorated
-
 
 @app.after_request
 def after_request(response):
@@ -1540,7 +1512,6 @@ def create_default_deck(user_id, mode):
 
     db.session.commit()
     
-
 app.register_blueprint(chat_bp)
 
 
@@ -1553,4 +1524,5 @@ if __name__ == "__main__":
             debug=False, host="0.0.0.0", port=port_num, ssl_context=(certfile, keyfile)
         )
     else:
-        app.run(debug=False, host="0.0.0.0", port=port_num)
+        app.run(debug=True, host="0.0.0.0", port=port_num)
+        
