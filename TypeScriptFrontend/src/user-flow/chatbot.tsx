@@ -11,9 +11,11 @@ interface Message {
     refusal?: string;
 }
 
+const INTRO_CHAT: Message = {role: "assistant", content: "Hi, I'm here to help you with any questions about Durb! Ask me anything..."}
+
 const Chatbot: React.FC = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>([INTRO_CHAT]);
     const [inputText, setInputText] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -61,7 +63,7 @@ const Chatbot: React.FC = () => {
     };
 
     const resetChat = async () => {
-        setMessages([]);
+        setMessages([INTRO_CHAT]);
 
         try {
             const token = localStorage.getItem('userToken');
