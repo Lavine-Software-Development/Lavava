@@ -7,13 +7,16 @@ const slides = {
         [
             { type: "text", content: "Welcome to Durb.<br/>See all those dots on the screen?<br/>Your goal is to capture as many dots as you can." },
             { type: "image", content: "../assets/HowToPlay/start_nodes.png", style: { width: "80%" } }
+            // { type: "image", content: "../assets/HowToPlay/start_nodes.gif", style: { width: "80%" } }
         ],
         [
             { type: "text", content: "To begin the game, choose a starting dot." },
-            { type: "image", content: "../assets/HowToPlay/cursor_on_node.png", style: { width: "30%" } },
+            // { type: "image", content: "../assets/HowToPlay/cursor_on_node.png", style: { width: "30%" } },
             { type: "text", content: "Click on a dot to claim it as your own." },
-            { type: "image", content: "../assets/HowToPlay/claim_node.png", style: { width: "30%" } },
+            // { type: "image", content: "../assets/HowToPlay/claim_node.png", style: { width: "30%" } },
+            { type: "image", content: "../assets/HowToPlay/claim_node.gif", style: { width: "30%" } },
             { type: "text", content: "Note: This is the only dot that you'll own just by clicking it." }
+            
         ],
         [
             { type: "text", content: "Watch as this dot's energy grows." },
@@ -36,8 +39,8 @@ const slides = {
         ],
         [
             { type: "text", content: "There are two kinds of bridges: Standard bridges, made up of triangles,<br/>and Dynamic Bridges (D-Bridge) made up of mostly circles, and one green triangle." },
-            { type: "image", content: "../assets/HowToPlay/standard_bridge.png", text: "Standard Bridge", sideBySide: true },
-            { type: "image", content: "../assets/HowToPlay/dynamic_bridge.png", text: "Dynamic Bridge", sideBySide: true }
+            { type: "image", content: "../assets/HowToPlay/standard_bridge.png", text: "Standard Bridge", sideBySide: true, style: { width: "auto", height: "150px" } },
+            { type: "image", content: "../assets/HowToPlay/dynamic_bridge.png", text: "Dynamic Bridge", sideBySide: true, style: { width: "auto", height: "150px" } }
         ],
         [
             { type: "text", content: "If you own both dots, you can switch the direction of a Dynamic Bridge by right clicking on it." },
@@ -160,6 +163,111 @@ const slides = {
         // [
         //     { type: "text", content: "Good luck!" },
         // ]
+    ],
+    abilitiesCatalogue: [
+        [
+            { type: "text", content: "Bridge" },
+            { type: "text", content: "Bridge allows you to bridge to another dot.<br>You can only bridge to unwalled dots. Bridge is uni-directional. Bridges cannot cross other existing bridges." },
+            { type: "image", content: "../assets/HowToPlay/bridge_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/bridge_ability.gif"},
+        ],
+        [
+            { type: "text", content: "D-Bridge"},
+            { type: "text", content: "D-Bridge, like bridge, can connect to other unwalled dots as long as it doesn't overlap existing bridges.<br>However, if both dots belong to you, the direction can be switched by right-clicking the bridge." },
+            { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/d_bridge_ability.gif"},           
+        ],
+        [
+            { type: "text", content: "Wall" },
+            { type: "text", content: "A player can wall their dots to prevent opponents bridging to that dot." },
+            { type: "image", content: "../assets/HowToPlay/wall_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/wall_ability.gif"},
+        ],
+        // [
+        //     { type: "text", content: "Wallbreaker" },
+        //     { type: "text", content: "Wallbreaker can help remove walls from opponents' dots." },
+        //     { type: "image", content: "../assets/abilityIcons/Wallbreaker.png"},
+        // ],
+        // [
+        //     { type: "text", content: "Spawn" },
+        //     { type: "text", content: "With spawn, you can buy a new, unowned dot anywhere on the map. Capital dots cannot be bought." },
+        //     { type: "image", content: "../assets/abilityIcons/Spawn.png"},
+        // ],
+        // [
+        //     { type: "text", content: "Capital" },
+        //     { type: "text", content: "Capitals are special dots. A player acquires them by flowing into them (they cannot be bought). They are a winning condition - the more capitals a player owns, higher the probability of them winning." },
+        //     { type: "image", content: "../assets/abilityIcons/Capital.png"},
+        // ],
+        [
+            { type: "text", content: "Nuke" },
+            { type: "text", content: "Nuke allows you to remove a dot, as long as its a neighbour to your dot AND isn't currenlty attacking you. In case of multiple bridges from the same opponent dot, at least one should be off." },
+            { type: "image", content: "../assets/HowToPlay/nuke_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/nuke_ability.gif"},
+        ],
+        [
+            { type: "text", content: "Freeze" },
+            { type: "text", content: "With freeze, the direction of a D-Bridge can be permanently set. Be mindful of switching the direction to your advantage before freezing." },
+            { type: "image", content: "../assets/HowToPlay/freeze_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/freeze_ability.gif"},
+        ],
+        [
+            { type: "text", content: "Rage" },
+            { type: "text", content: "Rage temporarily increases the flow of player's energy. It can be useful while attacking for making a swift work of opponents' dots." },
+            { type: "image", content: "../assets/HowToPlay/rage_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/rage_ability.gif"},
+        ],
+        [
+            { type: "text", content: "Poison" },
+            { type: "text", content: "Poison can be used on an opponent's dot to temporarily shrink it. The poison will spread with active bridges." },
+            // can poison be transfered among players?
+            { type: "image", content: "../assets/HowToPlay/poison_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/poison_ability.gif"},
+        ],
+        // [
+        //     { type: "text", content: "Burn" },
+        //     { type: "text", content: "Burnnnnnn " },
+        //     { type: "image", content: "../assets/abilityIcons/Burn.png"},
+        // ],
+        [
+            { type: "text", content: "Cannon" },
+            { type: "text", content: "The player chooses a dot to fix the cannon on. Once deployed, it can be used to inflict damage on opponents' dots.<br>It is similar to bridges, but with cannons, you can shoot walled dots." },
+            { type: "image", content: "../assets/HowToPlay/cannon_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/cannon_ability.gif"},
+            { type: "text", content: "<br><br>Cannon can either shoot energy, poison or nukes." },
+            { type: "text", content: "To shoot energy - select cannon, and click target." },
+            { type: "image", content: "../assets/HowToPlay/cannon_ability_energy.gif"},
+            { type: "text", content: "<br><br>To shoot abilities - select cannon, select ability (or press the respective key), and click target." },
+            { type: "text", content: "<br>Cannon shooting nuke" },
+            { type: "image", content: "../assets/HowToPlay/cannon_ability_nuke.gif"},
+            { type: "text", content: "Cannon shooting poison" },
+            { type: "image", content: "../assets/HowToPlay/cannon_ability_poison.gif"},
+        ],
+        // [
+        //     { type: "text", content: "Catapult" },
+        //     { type: "text", content: "Catapult " },
+        //     { type: "image", content: "../assets/abilityIcons/Catapult.png"},
+        // ],
+        // [
+        //     { type: "text", content: "Wormhole" },
+        //     { type: "text", content: "Wormhole allows the player to transport their dot to another location on the map." },
+        //     { type: "image", content: "../assets/abilityIcons/Wormhole.png"},
+        // ],
+        // [
+        //     { type: "text", content: "Zombie" },
+        //     { type: "text", content: "Zombie " },
+        //     { type: "image", content: "../assets/abilityIcons/Zombie.png"},
+        // ],
+        [
+            { type: "text", content: "Over-Grow" },
+            { type: "text", content: "Each dot has a capacity. With over-grow, the cap for all of player's dots is removed temporarily, allowing dots to exceed their max during the timeframe.<br>" },
+            { type: "image", content: "../assets/HowToPlay/overgrow_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/overgrow_ability.gif"},
+        ],
+        // [
+        //     { type: "text", content: "Pump" },
+        //     { type: "text", content: "Pump " },
+        //     { type: "image", content: "../assets/abilityIcons/Pump.png"},
+        // ],
     ]
 };
 
@@ -298,6 +406,13 @@ const HowToPlay: React.FC = () => {
                     disabled={activeButton === "extraInfo"}
                 >
                     Extra Info
+                </button>
+                <button
+                    onClick={() => handleSectionChange("abilitiesCatalogue")}
+                    className="abilities-catalogue-button"
+                    disabled={activeButton === "abilitiesCatalogue"}
+                >
+                    Abilities Catalogue
                 </button>
             </div>
             <div className="slide-container">
