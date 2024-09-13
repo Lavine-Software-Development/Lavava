@@ -167,40 +167,42 @@ const slides = {
     abilitiesCatalogue: [
         [
             { type: "text", content: "Bridge" },
-            { type: "text", content: "Bridge allows you to bridge to another node.<br>You can only bridge to unwalled nodes. Bridge is uni-directional. Bridges cannot cross other existing bridges." },
+            { type: "text", content: "Bridge allows you to bridge to another dot.<br>You can only bridge to unwalled dots. Bridge is uni-directional. Bridges cannot cross other existing bridges." },
             { type: "image", content: "../assets/HowToPlay/bridge_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/bridge_ability.gif"},
         ],
         [
             { type: "text", content: "D-Bridge"},
-            { type: "text", content: "D-Bridge, like bridge, can connect to other unwalled nodes as long as it doesn't overlap existing bridges.<br>However, if both nodes belong to you, the direction can be switched by right-clicking the bridge." },
+            { type: "text", content: "D-Bridge, like bridge, can connect to other unwalled dots as long as it doesn't overlap existing bridges.<br>However, if both dots belong to you, the direction can be switched by right-clicking the bridge." },
             { type: "image", content: "../assets/HowToPlay/d_bridge_ability.png"},
             { type: "image", content: "../assets/HowToPlay/d_bridge_ability.gif"},           
         ],
         [
             { type: "text", content: "Wall" },
-            { type: "text", content: "A player can wall their nodes to prevent opponents bridging to that node." },
+            { type: "text", content: "A player can wall their dots to prevent opponents bridging to that dot." },
             { type: "image", content: "../assets/HowToPlay/wall_ability.png"},
             { type: "image", content: "../assets/HowToPlay/wall_ability.gif"},
         ],
         // [
         //     { type: "text", content: "Wallbreaker" },
-        //     { type: "text", content: "Wallbreaker can help remove walls from opponents' nodes." },
+        //     { type: "text", content: "Wallbreaker can help remove walls from opponents' dots." },
         //     { type: "image", content: "../assets/abilityIcons/Wallbreaker.png"},
         // ],
         // [
         //     { type: "text", content: "Spawn" },
-        //     { type: "text", content: "With spawn, you can buy a new, unowned node anywhere on the map. Capital nodes cannot be bought." },
+        //     { type: "text", content: "With spawn, you can buy a new, unowned dot anywhere on the map. Capital dots cannot be bought." },
         //     { type: "image", content: "../assets/abilityIcons/Spawn.png"},
         // ],
         // [
         //     { type: "text", content: "Capital" },
-        //     { type: "text", content: "Capitals are special nodes. A player acquires them by flowing into them (they cannot be bought). They are a winning condition - the more capitals a player owns, higher the probability of them winning." },
+        //     { type: "text", content: "Capitals are special dots. A player acquires them by flowing into them (they cannot be bought). They are a winning condition - the more capitals a player owns, higher the probability of them winning." },
         //     { type: "image", content: "../assets/abilityIcons/Capital.png"},
         // ],
         [
             { type: "text", content: "Nuke" },
-            { type: "text", content: "Nuke allows you to remove a node, as long as its a neighbour to your node AND isn't currenlty attacking you." },
+            { type: "text", content: "Nuke allows you to remove a dot, as long as its a neighbour to your dot AND isn't currenlty attacking you. In case of multiple bridges from the same opponent dot, at least one should be off." },
             { type: "image", content: "../assets/HowToPlay/nuke_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/nuke_ability.gif"},
         ],
         [
             { type: "text", content: "Freeze" },
@@ -210,12 +212,13 @@ const slides = {
         ],
         [
             { type: "text", content: "Rage" },
-            { type: "text", content: "Rage temporarily increases the flow of player's energy. It can be useful while attacking for making a swift work of opponents' nodes." },
+            { type: "text", content: "Rage temporarily increases the flow of player's energy. It can be useful while attacking for making a swift work of opponents' dots." },
             { type: "image", content: "../assets/HowToPlay/rage_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/rage_ability.gif"},
         ],
         [
             { type: "text", content: "Poison" },
-            { type: "text", content: "Poison can be used on an opponent's node to temporarily slow the flow of their energy. The poison will spread with active bridges." },
+            { type: "text", content: "Poison can be used on an opponent's dot to temporarily shrink it. The poison will spread with active bridges." },
             // can poison be transfered among players?
             { type: "image", content: "../assets/HowToPlay/poison_ability.png"},
             { type: "image", content: "../assets/HowToPlay/poison_ability.gif"},
@@ -227,8 +230,17 @@ const slides = {
         // ],
         [
             { type: "text", content: "Cannon" },
-            { type: "text", content: "The player chooses a node to fix the cannon on. Once deployed, it can be used to inflict damage on opponents' nodes.<br>It is similar to bridges, but you needn't worry about overlaps." },
+            { type: "text", content: "The player chooses a dot to fix the cannon on. Once deployed, it can be used to inflict damage on opponents' dots.<br>It is similar to bridges, but with cannons, you can shoot walled dots." },
             { type: "image", content: "../assets/HowToPlay/cannon_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/cannon_ability.gif"},
+            { type: "text", content: "<br><br>Cannon can either shoot energy, poison or nukes." },
+            { type: "text", content: "To shoot energy - select cannon, and click target." },
+            { type: "image", content: "../assets/HowToPlay/cannon_ability_energy.gif"},
+            { type: "text", content: "<br><br>To shoot abilities - select cannon, select ability (or press the respective key), and click target." },
+            { type: "text", content: "<br>Cannon shooting nuke" },
+            { type: "image", content: "../assets/HowToPlay/cannon_ability_nuke.gif"},
+            { type: "text", content: "Cannon shooting poison" },
+            { type: "image", content: "../assets/HowToPlay/cannon_ability_poison.gif"},
         ],
         // [
         //     { type: "text", content: "Catapult" },
@@ -237,7 +249,7 @@ const slides = {
         // ],
         // [
         //     { type: "text", content: "Wormhole" },
-        //     { type: "text", content: "Wormhole allows the player to transport their node to another location on the map." },
+        //     { type: "text", content: "Wormhole allows the player to transport their dot to another location on the map." },
         //     { type: "image", content: "../assets/abilityIcons/Wormhole.png"},
         // ],
         // [
@@ -247,8 +259,9 @@ const slides = {
         // ],
         [
             { type: "text", content: "Over-Grow" },
-            { type: "text", content: "Each node has a capacity. With over-grow, the player can increase the capacity of a certain node." },
+            { type: "text", content: "Each dot has a capacity. With over-grow, the cap for all of player's dots is removed temporarily, allowing dots to exceed their max during the timeframe.<br>" },
             { type: "image", content: "../assets/HowToPlay/overgrow_ability.png"},
+            { type: "image", content: "../assets/HowToPlay/overgrow_ability.gif"},
         ],
         // [
         //     { type: "text", content: "Pump" },
