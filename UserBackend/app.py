@@ -8,7 +8,6 @@ import json
 from flask import Flask, jsonify, request, url_for
 from flask_cors import CORS
 from functools import wraps
-from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from itsdangerous import SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -33,7 +32,9 @@ CORS(
     supports_credentials=True,
 )
 
-app.config["SECRET_KEY"] = "secret_phrase_durb"
+if not config.SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set when ENV is not DEV")
+app.config["SECRET_KEY"] = config.SECRET_KEY
 
 EMAIL_REGEX = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
@@ -144,14 +145,6 @@ if config.DB_CONNECTED:
         # def create_tables():
         # Deck.__table__.drop(db.engine)
         db.create_all()
-
-# for the email register
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = "lavavaacc@gmail.com"
-app.config["MAIL_PASSWORD"] = "enwueidxiwivjvxn"  # Use the app password you generated
-mail = Mail(app)
 
 s = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 

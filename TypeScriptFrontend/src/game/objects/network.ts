@@ -1,4 +1,3 @@
-import { json } from "react-router-dom";
 import { NameToCode } from "./constants";
 
 export class Network {
